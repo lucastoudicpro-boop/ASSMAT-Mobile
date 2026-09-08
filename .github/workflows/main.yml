@@ -1,0 +1,75 @@
+name: Construire l'APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Localiser le projet
+        id: projet
+        run: |
+          FICHIER=$(find . -name package.json -not -path '*/node_modules/*' | head -1)
+          if [ -z "$FICHIER" ]; then
+            echo "Aucun package.json trouvé dans le dépôt."
+            exit 1
+          fi
+          DOSSIER=$(dirname "$FICHIER")
+          echo "dossier=$DOSSIER" >> "$GITHUB_OUTPUT"
+          echo "Projet trouvé dans : $DOSSIER"
+
+      - name: Installer Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Installer les dépendances
+        working-directory: ${{ steps.projet.outputs.dossier }}
+        run: npm install
+
+      - name: Générer le projet Android
+        working-directory: ${{ steps.projet.outputs.dossier }}
+        run: npx cap add android
+
+      - name: Ajouter le module d'impression
+        working-directory: ${{ steps.projet.outputs.dossier }}
+        run: |
+          APP=android/app/src/main/java/fr/lucas/assmat
+          PRINT=android/app/src/main/java/android/print
+          mkdir -p "$APP" "$PRINT"
+          cp android-extra/AssMatPrint.java "$APP/"
+          cp android-extra/MainActivity.java "$APP/"
+          cp android-extra/PdfPrint.java "$PRINT/"
+          cp -r android-extra/res/. android/app/src/main/res/
+          ls -1 "$APP" "$PRINT"
+
+      - name: Synchroniser les fichiers web
+        working-directory: ${{ steps.projet.outputs.dossier }}
+        run: npx cap sync android
+
+      - name: Compiler l'APK
+        working-directory: ${{ steps.projet.outputs.dossier }}
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Publier l'APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AssMat-plus
+          path: ${{ steps.projet.outputs.dossier }}/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
