@@ -1,75 +1,53 @@
-name: Construire l'APK
+name: Créer la clé de signature
 
+# À lancer une seule fois. Produit la clé qui signera toutes les versions.
+# Perdre cette clé oblige à désinstaller l'application avant toute mise à jour.
 on:
-  push:
-    branches: [main, master]
   workflow_dispatch:
+    inputs:
+      nom:
+        description: Nom du propriétaire de la clé
+        required: true
+        default: Lucas
 
 jobs:
-  apk:
+  cle:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Récupérer le dépôt
-        uses: actions/checkout@v4
-
-      - name: Localiser le projet
-        id: projet
-        run: |
-          FICHIER=$(find . -name package.json -not -path '*/node_modules/*' | head -1)
-          if [ -z "$FICHIER" ]; then
-            echo "Aucun package.json trouvé dans le dépôt."
-            exit 1
-          fi
-          DOSSIER=$(dirname "$FICHIER")
-          echo "dossier=$DOSSIER" >> "$GITHUB_OUTPUT"
-          echo "Projet trouvé dans : $DOSSIER"
-
-      - name: Installer Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Installer Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: Installer les dépendances
-        working-directory: ${{ steps.projet.outputs.dossier }}
-        run: npm install
-
-      - name: Générer le projet Android
-        working-directory: ${{ steps.projet.outputs.dossier }}
-        run: npx cap add android
-
-      - name: Ajouter le module d'impression
-        working-directory: ${{ steps.projet.outputs.dossier }}
+      - name: Générer la clé
         run: |
-          APP=android/app/src/main/java/fr/lucas/assmat
-          PRINT=android/app/src/main/java/android/print
-          mkdir -p "$APP" "$PRINT"
-          cp android-extra/AssMatPrint.java "$APP/"
-          cp android-extra/MainActivity.java "$APP/"
-          cp android-extra/PdfPrint.java "$PRINT/"
-          cp -r android-extra/res/. android/app/src/main/res/
-          ls -1 "$APP" "$PRINT"
+          MDP=$(head -c 24 /dev/urandom | base64 | tr -d '/+=' | head -c 24)
+          keytool -genkeypair -v \
+            -keystore assmat.jks \
+            -alias assmat \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$MDP" -keypass "$MDP" \
+            -dname "CN=${{ inputs.nom }}, OU=AssMat+, O=AssMat+, C=FR"
+          base64 -w0 assmat.jks > assmat.jks.base64
+          {
+            echo "Copier ces quatre valeurs dans Settings > Secrets and variables > Actions."
+            echo
+            echo "ANDROID_KEYSTORE        = le contenu du fichier assmat.jks.base64"
+            echo "ANDROID_KEYSTORE_PASSWORD = $MDP"
+            echo "ANDROID_KEY_ALIAS       = assmat"
+            echo "ANDROID_KEY_PASSWORD    = $MDP"
+            echo
+            echo "Conserve aussi assmat.jks hors de GitHub : sans lui, plus aucune"
+            echo "mise a jour n'est installable par-dessus la version precedente."
+          } > a-faire.txt
 
-      - name: Synchroniser les fichiers web
-        working-directory: ${{ steps.projet.outputs.dossier }}
-        run: npx cap sync android
-
-      - name: Compiler l'APK
-        working-directory: ${{ steps.projet.outputs.dossier }}
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Publier l'APK
+      - name: Publier la clé
         uses: actions/upload-artifact@v4
         with:
-          name: AssMat-plus
-          path: ${{ steps.projet.outputs.dossier }}/android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          name: cle-de-signature
+          path: |
+            assmat.jks
+            assmat.jks.base64
+            a-faire.txt
+          retention-days: 1
