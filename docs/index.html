@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17403c">
+<title>AssMat+</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --bg:#eef4f2; --card:#fff; --line:#dce8e4; --txt:#17322e; --mut:#5f7a75;
+  --acc:#2f7d73; --acc-d:#1f5b53; --ok:#2f7d73; --danger:#c2554e;
+  --miel:#c07f22;
+  --side:#17403c; --side2:#215a53;
+  --champ:#fff; --bord:#c3d6d1; --zebre:#f2f8f6; --ombre:rgba(23,50,46,.07);
+  --radius:12px;
+  --safeT:env(safe-area-inset-top,0px);
+  --safeB:env(safe-area-inset-bottom,0px);
+  --hdr:52px; --bar:60px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--txt);min-height:100vh;min-height:100dvh;
+  font:15px/1.45 system-ui,"Segoe UI",Roboto,sans-serif;
+  display:flex;flex-direction:column;
+}
+
+/* ---------- Barre du haut ---------- */
+#hdr{
+  position:sticky;top:0;z-index:30;flex:0 0 auto;
+  height:calc(var(--hdr) + var(--safeT));padding:var(--safeT) 6px 0;
+  background:var(--side);color:#fff;display:flex;align-items:center;gap:4px;
+}
+#hdr h1{
+  margin:0;font-size:16px;font-weight:600;
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.iconbtn{
+  border:0;background:transparent;color:#d9e8e4;font-size:20px;
+  width:44px;height:44px;border-radius:10px;cursor:pointer;flex:0 0 auto;
+}
+.iconbtn:active{background:var(--side2)}
+#saveDot{font-size:11px;color:#8aa8a2;padding-right:4px;white-space:nowrap}
+#saveDot.saving{color:#f0c14b}
+#saveDot.ok{color:#6fd39a}
+
+/* ---------- Onglets ---------- */
+#tabs{
+  position:sticky;z-index:29;top:calc(var(--hdr) + var(--safeT));flex:0 0 auto;
+  display:flex;background:var(--card);border-bottom:1px solid var(--line);
+}
+.tab{
+  flex:1;border:0;background:transparent;padding:11px 4px 9px;cursor:pointer;
+  font:600 13.5px system-ui;color:var(--mut);border-bottom:2.5px solid transparent;
+}
+.tab.active{color:var(--acc);border-bottom-color:var(--acc)}
+.tab:active{background:var(--zebre)}
+
+/* ---------- Contenu ---------- */
+#content{
+  flex:1 0 auto;padding:12px 12px 16px;
+}
+
+/* ---------- Cartes repliables ---------- */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  margin-bottom:10px;overflow:hidden;box-shadow:0 1px 2px var(--ombre);
+}
+.card>summary{
+  list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:center;gap:9px;
+  font-weight:600;font-size:14px;
+}
+.card>summary::-webkit-details-marker{display:none}
+.card>summary::after{
+  content:"";margin-left:10px;width:8px;height:8px;flex:0 0 auto;
+  border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);
+  transform:rotate(45deg) translateY(-2px);transition:transform .18s;
+}
+.card[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+.card>summary .ico{font-size:17px}
+.card>summary .ttl{flex:1;min-width:0}
+.card>summary .tot{
+  font-size:13px;font-weight:700;color:var(--acc);flex:0 0 auto;
+  font-variant-numeric:tabular-nums;
+}
+.body{padding:0 14px 14px;border-top:1px solid var(--line);padding-top:12px}
+
+/* ---------- Champs ---------- */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;min-width:0}
+.field>span{font-size:12px;color:var(--mut)}
+input,textarea,select{
+  font:16px/1.3 system-ui;color:var(--txt);background:var(--champ);
+  border:1px solid var(--bord);border-radius:9px;padding:10px 11px;width:100%;
+  min-height:44px;
+}
+textarea{min-height:90px;resize:vertical}
+input:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--acc)}
+input:disabled{background:#f2f4f8;color:var(--mut)}
+input[inputmode="decimal"],input[inputmode="numeric"]{text-align:right;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+fieldset{
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px 2px;margin:0 0 10px;
+}
+legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
+.check{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:14px}
+.check input{width:22px;height:22px;min-height:0;flex:0 0 auto;accent-color:var(--acc)}
+.hint{font-size:12px;line-height:1.4;color:var(--mut);margin:8px 0 0}
+.hint a{color:var(--acc)}
+
+/* ---------- Lignes de calcul ---------- */
+.rrow{
+  display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--line);
+}
+.rrow:last-child{border-bottom:0}
+.rlab{font-size:13.5px;grid-column:1/-1}
+.rin{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut)}
+.rin input{width:88px;padding:7px 9px;min-height:38px}
+.rin input.mini{width:64px}
+.ramt{font-size:14px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rauto{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
+.rrow.total{background:var(--zebre);margin:6px -14px -14px;padding:12px 14px;border:0}
+.rrow.total .rlab{font-weight:700;font-size:13px;grid-column:1}
+.rrow.total .ramt{color:var(--miel);font-size:16px}
+.rrow.sub{padding-top:4px}
+.btn-mini{
+  border:0;background:var(--acc);color:#fff;border-radius:7px;
+  padding:6px 11px;font:600 12.5px system-ui;cursor:pointer;min-height:34px;
+}
+
+/* ---------- Calendrier ---------- */
+.caltools{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;margin-bottom:6px}
+.calbtns{display:flex;gap:8px;margin-bottom:12px}
+.calbtns .btn{flex:1;white-space:nowrap;font-size:13.5px;padding:11px 8px}
+.calhead,.calrow{
+  display:grid;grid-template-columns:52px 1fr 1fr 1fr;gap:6px;align-items:center;
+}
+.calhead{
+  font-size:10.5px;color:var(--mut);line-height:1.15;padding:6px 0;
+  position:sticky;top:calc(var(--hdr) + var(--safeT) + 41px);background:var(--card);z-index:2;text-align:center;
+}
+.calhead span:first-child{text-align:left}
+.calrow{padding:3px 0;border-radius:8px}
+.calrow.we{background:var(--zebre)}
+.calrow.ferie{background:#fdf3e7;padding:6px 6px 8px;margin:2px -6px}
+.calrow.ferie .d b{color:#b4690e}
+.calrow .f{
+  grid-column:1/-1;font-size:11px;color:#b4690e;font-weight:600;
+  display:none;padding-bottom:2px;
+}
+.calrow.ferie .f{display:block}
+.calrow.abs-e{background:#e8f3f0}
+.calrow.abs-s{background:#fbeeed}
+.calrow.abs-e .f,.calrow.abs-s .f{display:block}
+.calrow.abs-e .f{color:#256f66}
+.calrow.abs-s .f{color:#a8453e}
+.calrow .d{
+  border:0;background:transparent;font:inherit;text-align:left;cursor:pointer;
+  padding:4px 2px;border-radius:7px;min-height:40px;
+}
+.calrow .d:active{background:rgba(47,125,115,.12)}
+.legende{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 0;font-size:11.5px;color:var(--mut)}
+.legende i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.abs-liste{margin:0 0 12px;font-size:13.5px}
+.abs-liste li{margin-bottom:3px}
+.calrow.off{display:none}
+.calrow .d{font-size:12.5px;color:var(--mut);display:flex;gap:5px;align-items:baseline}
+.calrow .d b{font-size:14px;color:var(--txt);font-variant-numeric:tabular-nums}
+.calrow input{padding:8px 6px;min-height:40px;text-align:center;font-size:15px}
+.caltot{
+  display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--line);font-size:12.5px;color:var(--mut);text-align:center;
+}
+.caltot b{display:block;font-size:15px;color:var(--txt);font-variant-numeric:tabular-nums}
+
+/* ---------- Barre du bas ---------- */
+#bar{
+  position:sticky;bottom:0;z-index:28;flex:0 0 auto;
+  height:calc(var(--bar) + var(--safeB));padding:0 10px var(--safeB);
+  background:var(--card);border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;
+}
+#bar .solde{flex:1;min-width:0;line-height:1.15}
+#bar .solde span{font-size:11px;color:var(--mut);display:block}
+#bar .solde b{font-size:19px;font-variant-numeric:tabular-nums}
+.btn{
+  border:1px solid transparent;border-radius:10px;padding:11px 15px;cursor:pointer;
+  font:600 14px system-ui;min-height:44px;
+}
+.btn:active{filter:brightness(.94)}
+.btn-primary{background:var(--acc);color:#fff}
+.btn-ghost{background:var(--card);color:var(--txt);border-color:var(--bord)}
+.btn-danger{background:var(--card);color:var(--danger);border-color:var(--bord)}
+.btn-block{width:100%;display:block;margin-bottom:8px}
+
+/* ---------- Tiroir ---------- */
+#scrim{
+  position:fixed;inset:0;z-index:40;background:rgba(11,17,36,.5);
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+#scrim.on{opacity:1;pointer-events:auto}
+#drawer{
+  position:fixed;z-index:41;top:0;bottom:0;left:0;width:min(84vw,320px);
+  background:var(--side);color:#d9e8e4;display:flex;flex-direction:column;
+  padding:calc(var(--safeT) + 14px) 12px calc(var(--safeB) + 12px);gap:12px;
+  transform:translateX(-101%);transition:transform .22s ease;
+}
+#drawer.on{transform:none}
+.brand{display:flex;align-items:center;gap:10px;padding:0 0 0 4px}
+.brand>div:nth-child(2){flex:1;min-width:0}
+#btnFermer{font-size:17px;margin-right:-6px}
+.brand-ico{width:34px;height:34px;border-radius:9px;flex:0 0 auto}
+.brand b{display:block;font-size:16px;color:#fff}
+.brand span{font-size:11.5px;color:#8aa8a2}
+.sidelabel{font-size:10.5px;letter-spacing:.8px;color:#8aa8a2;padding:0 4px;text-transform:uppercase}
+#ficheList{list-style:none;margin:0;padding:0;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.fiche-item{padding:11px 10px;border-radius:9px;border-left:3px solid transparent;cursor:pointer}
+.fiche-item.active{background:var(--side2);border-left-color:var(--acc)}
+.fi-mois{font-weight:600;font-size:14px;color:#fff;text-transform:capitalize}
+.fi-sub{font-size:12px;color:#8aa8a2}
+#drawer .btn-ghost{background:transparent!important;color:#cfe3de;border-color:#2e5b54}
+#drawer .btn-ghost:active{background:var(--side2)!important}
+.sidefoot{display:flex;flex-direction:column;gap:8px}
+.sidefoot .btn-block{margin:0}
+
+/* ---------- Feuille d'actions ---------- */
+#sheet{
+  position:fixed;z-index:41;left:0;right:0;bottom:0;background:var(--card);
+  border-radius:16px 16px 0 0;padding:8px 12px calc(var(--safeB) + 12px);
+  transform:translateY(101%);transition:transform .22s ease;
+}
+#sheet.on{transform:none}
+#sheet .grab{width:38px;height:4px;border-radius:2px;background:#d3d9e6;margin:6px auto 12px}
+#sheet button{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  border:0;background:transparent;padding:14px 8px;font:15px system-ui;color:var(--txt);
+  border-radius:10px;cursor:pointer;
+}
+#sheet button:active{background:var(--bg)}
+#sheet button.danger{color:var(--danger)}
+#sheet button .ico{font-size:19px;width:24px;text-align:center}
+
+/* ---------- Modale ---------- */
+.modal{position:fixed;inset:0;z-index:70;background:rgba(11,17,36,.5);display:flex;align-items:flex-end}
+.modal-box{
+  background:var(--card);width:100%;border-radius:16px 16px 0 0;
+  padding:18px 16px calc(var(--safeB) + 16px);max-height:92vh;overflow-y:auto;
+}
+.modal-box h3{margin:0 0 14px;font-size:16px}
+.modal-actions{display:flex;gap:8px;margin-top:14px}
+.modal-actions .btn{flex:1}
+
+/* ---------- Aperçu A4 ---------- */
+#apercu{padding-bottom:8px}
+.apercu-bar{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.apercu-bar .btn{flex:0 0 auto}
+#previewScroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#previewBox{
+  width:794px;height:1123px;transform-origin:top left;background:#fff;
+  box-shadow:0 4px 16px rgba(23,32,58,.16);
+}
+#previewFrame{width:794px;height:1123px;border:0;display:block}
+#previewSpacer{margin:0 auto}
+
+/* ---------- Planning type ---------- */
+.plan{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.plan label{display:flex;flex-direction:column;gap:3px;min-width:0}
+.plan span{font-size:11px;color:var(--mut);text-align:center}
+.plan input{padding:9px 4px;text-align:center;min-height:42px}
+
+/* ---------- Récapitulatif annuel ---------- */
+.an-annee{display:flex;align-items:baseline;gap:10px;margin:0 0 10px;font-size:15px;font-weight:600}
+.an-annee small{font-weight:400;color:var(--mut);font-size:12px}
+.an-tab{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.an-tab th,.an-tab td{padding:8px 4px;font-size:12.5px;text-align:right;border-bottom:1px solid var(--line)}
+.an-tab th{font-size:11px;color:var(--mut);font-weight:500}
+.an-tab th:first-child,.an-tab td:first-child{text-align:left;text-transform:capitalize}
+.an-tab tr.tot td{font-weight:700;border-bottom:0;border-top:2px solid var(--line);padding-top:10px}
+.an-tab tr.tot td:not(:first-child){color:var(--miel)}
+.an-vide{color:var(--mut);font-size:13.5px;text-align:center;padding:24px 0}
+
+/* ---------- Dossier ---------- */
+.ds{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ds:last-child{border-bottom:0}
+.ds span{color:var(--mut);flex:0 0 auto}
+.ds b{text-align:right;min-width:0;word-break:break-word}
+
+/* ---------- Toast ---------- */
+#toast{
+  position:fixed;z-index:60;left:12px;right:12px;bottom:calc(var(--bar) + var(--safeB) + 12px);
+  max-width:560px;margin:0 auto;
+  background:#101a35;color:#fff;padding:13px 15px;border-radius:11px;font-size:13.5px;
+  display:flex;align-items:center;gap:10px;
+  opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;
+}
+#toast.show{opacity:1;transform:none}
+#toast button{border:0;background:#2f3f70;color:#fff;border-radius:7px;padding:6px 11px;font:600 12.5px system-ui;margin-left:auto}
+
+/* ---------- Thème sombre ---------- */
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0f1917; --card:#16211f; --line:#283833; --txt:#e6efec; --mut:#8fa8a2;
+    --acc:#5fb8ab; --acc-d:#3e8a80; --ok:#5fb8ab; --danger:#e88b83;
+    --miel:#e0a94d;
+    --side:#0a1412; --side2:#17332e;
+    --champ:#111c19; --bord:#334742; --zebre:#1c2926; --ombre:rgba(0,0,0,.4);
+  }
+  .calrow.ferie{background:#3a2c15}
+  .calrow.ferie .d b,.calrow.ferie .f{color:#e8b464}
+  .calrow.abs-e{background:#153630}.calrow.abs-e .f{color:#7fd0c2}
+  .calrow.abs-s{background:#3a2024}.calrow.abs-s .f{color:#f0a49d}
+  #toast{background:#20302c}
+  #toast button{background:#33514a}
+}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (min-width:620px){
+  #content{padding-left:24px;padding-right:24px}
+  .two{grid-template-columns:1fr 1fr 1fr}
+  .plan{grid-template-columns:repeat(7,1fr)}
+  .rrow{grid-template-columns:1fr auto auto;column-gap:14px}
+  .rlab{grid-column:auto}
+  .modal{align-items:center;padding:24px}
+  .modal-box{max-width:560px;border-radius:16px}
+  #sheet{left:auto;right:16px;bottom:16px;width:340px;border-radius:16px}
+}
+@media (min-width:900px){
+  #saisie{max-width:1180px;margin:0 auto;column-count:2;column-gap:16px}
+  #saisie>.card{break-inside:avoid;display:inline-block;width:100%}
+  #dossier,#annuel{max-width:760px;margin:0 auto}
+  #bar{padding-left:24px;padding-right:24px}
+}
+</style>
+</head>
+<body>
+<header id="hdr">
+  <button id="btnMenu" class="iconbtn" aria-label="Fiches">☰</button>
+  <h1 id="titleMois">—</h1>
+  <span id="saveDot" class="ok">Enregistré</span>
+  <button id="btnMore" class="iconbtn" aria-label="Actions">⋮</button>
+</header>
+
+<nav id="tabs">
+  <button id="tabSaisie" class="tab active">Saisie</button>
+  <button id="tabApercu" class="tab">Aperçu A4</button>
+</nav>
+
+<div id="content">
+
+<section id="saisie">
+
+  <details class="card" open>
+    <summary><span class="ico">📅</span><span class="ttl">Période</span></summary>
+    <div class="body">
+      <label class="field"><span>Mois de la fiche</span><input type="month" id="mois"></label>
+      <div class="two">
+        <label class="field"><span>Du</span><input data-bind="periodeDu"></label>
+        <label class="field"><span>Au</span><input data-bind="periodeAu"></label>
+      </div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">👥</span><span class="ttl">Salariée · Employeur · Enfant</span></summary>
+    <div class="body">
+      <fieldset>
+        <legend>Salariée</legend>
+        <label class="field"><span>NOM / Prénom</span><input data-bind="salarie.nom"></label>
+        <label class="field"><span>Adresse</span><input data-bind="salarie.adresse"></label>
+        <label class="field"><span>CP / Ville</span><input data-bind="salarie.cpVille"></label>
+        <label class="field"><span>N° sécurité sociale</span><input data-bind="salarie.secu" inputmode="numeric"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Employeur</legend>
+        <label class="field"><span>NOM / Prénom</span><input data-bind="employeur.nom"></label>
+        <label class="field"><span>Adresse</span><input data-bind="employeur.adresse"></label>
+        <label class="field"><span>CP / Ville</span><input data-bind="employeur.cpVille"></label>
+        <label class="field"><span>N° PAJEMPLOI</span><input data-bind="employeur.pajemploi"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Enfant accueilli</legend>
+        <label class="field"><span>Nom</span><input data-bind="enfant.nom"></label>
+        <label class="field"><span>Prénom</span><input data-bind="enfant.prenom"></label>
+        <label class="field"><span>Date de naissance</span><input data-bind="enfant.naissance" placeholder="jj/mm/aaaa"></label>
+      </fieldset>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">📄</span><span class="ttl">Contrat</span></summary>
+    <div class="body">
+      <label class="check"><input type="checkbox" data-bind="contrat.anneeComplete"><span>Année complète — 52 semaines / 12 mois</span></label>
+      <div class="two">
+        <label class="field"><span>H. normales / semaine</span><input data-bind="contrat.hnH" inputmode="decimal"></label>
+        <label class="field"><span>Semaines / an</span><input data-bind="contrat.hnS" inputmode="decimal"></label>
+        <label class="field"><span>H. majorées / semaine</span><input data-bind="contrat.hmH" inputmode="decimal"></label>
+        <label class="field"><span>Semaines / an</span><input data-bind="contrat.hmS" inputmode="decimal"></label>
+      </div>
+      <div class="rrow"><span class="rlab">H. normales mensualisées</span><span class="rauto" id="o_hnM">0,00 h</span></div>
+      <div class="rrow"><span class="rlab">H. majorées mensualisées</span><span class="rauto" id="o_hmM">0,00 h</span></div>
+      <div class="two" style="margin-top:12px">
+        <label class="field"><span>Tarif h. normales (€/h)</span><input data-bind="contrat.tHn" inputmode="decimal"></label>
+        <label class="field"><span>Tarif h. majorées (€/h)</span><input data-bind="contrat.tHm" inputmode="decimal"></label>
+        <label class="field"><span>Tarif h. complémentaires (€/h)</span><input data-bind="contrat.tHc" inputmode="decimal"></label>
+      </div>
+      <p class="hint">Mensualisation = heures/semaine × semaines ÷ 12. Année incomplète : décocher et indiquer les semaines programmées.<br>
+      Pajemploi se déclare en heures entières (10,83 → 11) ; le salaire reste calculé sans arrondi.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">⏱</span><span class="ttl">Heures du mois</span><b class="tot" id="t_brut">0,00 €</b></summary>
+    <div class="body">
+      <div class="rrow"><span class="rlab">H. normales mensualisées</span><span class="rauto" id="o_hnAuto"></span><b class="ramt" id="o_rHn">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">H. majorées mensualisées</span><span class="rauto" id="o_hmAuto"></span><b class="ramt" id="o_rHm">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">H. complémentaires contractuelles</span><span class="rin"><input data-bind="activite.hc1" inputmode="decimal"> h</span><b class="ramt" id="o_rHc1">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">H. complémentaires non contractuelles</span><span class="rin"><input data-bind="activite.hc2" inputmode="decimal"> h</span><b class="ramt" id="o_rHc2">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">H. majorées (au-delà de 45 h/sem)</span><span class="rin"><input data-bind="activite.hMaj" inputmode="decimal"> h</span><b class="ramt" id="o_rMaj">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">Accueil occasionnel</span><span class="rin"><input data-bind="activite.occH" inputmode="decimal"> h × <input data-bind="activite.occT" inputmode="decimal"> €</span><b class="ramt" id="o_rOcc">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">Déduction des absences</span><span class="rin"><input data-bind="activite.deduction" inputmode="decimal"> €</span><b class="ramt">−</b></div>
+      <div class="rrow sub">
+        <span class="rlab" style="font-size:12px;color:var(--mut)">Aide : heures d'absence ÷ heures prévues dans le mois</span>
+        <span class="rin"><input data-bind="aideAbs.hAbs" inputmode="decimal" class="mini"> ÷ <input data-bind="aideAbs.hMois" inputmode="decimal" class="mini"></span>
+        <span class="rauto" id="dedSug" hidden><b id="dedSugVal"></b> <button id="dedApply" class="btn-mini">Appliquer</button></span>
+      </div>
+      <div class="rrow"><span class="rlab">Divers</span><span class="rin"><input data-bind="activite.divers" inputmode="decimal"> €</span><b class="ramt">+</b></div>
+      <div class="rrow"><span class="rlab">Congés payés</span><span class="rin"><input data-bind="activite.cp" inputmode="decimal"> €</span><b class="ramt">+</b></div>
+      <div class="rrow total"><span class="rlab">Salaire brut total</span><b class="ramt" id="o_brut">0,00 €</b></div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">💶</span><span class="ttl">Salaire net</span><b class="tot" id="t_net">0,00 €</b></summary>
+    <div class="body">
+      <label class="field"><span>Net à déclarer à Pajemploi (€)</span><input data-bind="net.netPaje" inputmode="decimal"></label>
+      <label class="field"><span>Exonération h. compl. / majorées (€)</span><input data-bind="net.exo" inputmode="decimal"></label>
+      <div class="rrow total"><span class="rlab">Net après exonération</span><b class="ramt" id="o_net">0,00 €</b></div>
+      <p class="hint">Le net s'obtient avec le <a href="#" data-lien="https://www.pajemploi.urssaf.fr/pajeweb/simubrut1.jsp">simulateur Pajemploi</a> à partir du brut ci-dessus.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">🍽</span><span class="ttl">Indemnités</span><b class="tot" id="t_ti">0,00 €</b></summary>
+    <div class="body">
+      <div class="rrow"><span class="rlab">Indemnité d'entretien</span><span class="rin"><input data-bind="indemnites.e1q" inputmode="decimal"> j × <input data-bind="indemnites.e1t" inputmode="decimal"> €</span><b class="ramt" id="o_e1">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">Indemnité d'entretien (2ᵉ taux)</span><span class="rin"><input data-bind="indemnites.e2q" inputmode="decimal"> j × <input data-bind="indemnites.e2t" inputmode="decimal"> €</span><b class="ramt" id="o_e2">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">Indemnité repas</span><span class="rin"><input data-bind="indemnites.rq" inputmode="decimal"> j × <input data-bind="indemnites.rt" inputmode="decimal"> €</span><b class="ramt" id="o_rep">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">Indemnité goûter</span><span class="rin"><input data-bind="indemnites.gq" inputmode="decimal"> j × <input data-bind="indemnites.gt" inputmode="decimal"> €</span><b class="ramt" id="o_gou">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">Indemnité kilométrique</span><span class="rin"><input data-bind="indemnites.kq" inputmode="decimal"> km × <input data-bind="indemnites.kt" inputmode="decimal"> €</span><b class="ramt" id="o_km">0,00 €</b></div>
+      <div class="rrow"><span class="rlab">Indemnité de rupture</span><span class="rin"><input data-bind="indemnites.rupture" inputmode="decimal"> €</span><b class="ramt">+</b></div>
+      <div class="rrow sub">
+        <span class="rlab" style="font-size:12px;color:var(--mut)">Jours d'accueil comptés dans le calendrier</span>
+        <span class="rauto"><b id="o_jours">0</b> j <button id="joursApply" class="btn-mini">Reprendre</button></span>
+      </div>
+      <div class="rrow total"><span class="rlab">Total des indemnités</span><b class="ramt" id="o_ti">0,00 €</b></div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">🗓</span><span class="ttl">Calendrier de présence</span><b class="tot" id="t_cal">0,00 h</b></summary>
+    <div class="body">
+      <div class="caltools">
+        <label class="field"><span>Heures d'accueil / jour</span><input data-bind="calAide.hJour" inputmode="decimal"></label>
+        <label class="field"><span>Max h. normales / jour</span><input data-bind="calAide.seuil" inputmode="decimal"></label>
+      </div>
+      <div class="calbtns">
+        <button id="calFill" class="btn btn-primary">Remplir le mois</button>
+        <button id="calClear" class="btn btn-ghost">Vider</button>
+      </div>
+      <div class="calhead"><span>Jour</span><span>Présence</span><span>H. compl.</span><span>H. major.</span></div>
+      <div id="calendrier"></div>
+      <div class="caltot">
+        <div>Présence<b id="o_totP">0,00</b></div>
+        <div>H. compl.<b id="o_totC">0,00</b></div>
+        <div>H. majorées<b id="o_totM">0,00</b></div>
+      </div>
+      <div class="legende">
+        <span><i style="background:#fdf3e7;border:1px solid #e8cba0"></i>jour férié</span>
+        <span><i style="background:#eef4fd;border:1px solid #b9cdf0"></i>enfant absent</span>
+        <span><i style="background:#fdeeee;border:1px solid #eebcbc"></i>salariée absente</span>
+      </div>
+      <p class="hint">Appuie sur le numéro d'un jour pour signaler une absence. Ces marques servent au planning et au message d'absence : elles ne modifient aucun calcul, les heures restent celles que tu saisis.</p>
+      <p class="hint">Le remplissage suit le planning type du Dossier salariée s'il est renseigné, sinon les heures ci-dessus du lundi au vendredi. Les jours fériés sont laissés vides.<br>
+      Les heures majorées prévues au contrat sont déjà payées par la mensualisation : ne reporter dans « H. majorées » que celles faites en plus.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">🏖</span><span class="ttl">Congés &amp; paiement</span></summary>
+    <div class="body">
+      <div class="two">
+        <label class="field"><span>Congés du</span><input data-bind="conges.du" placeholder="jj/mm/aaaa"></label>
+        <label class="field"><span>au</span><input data-bind="conges.au" placeholder="jj/mm/aaaa"></label>
+        <label class="field"><span>Jours travaillés</span><input data-bind="conges.joursTravailles" inputmode="decimal"></label>
+        <label class="field"><span>Acomptes / PAS (€)</span><input data-bind="acomptes" inputmode="decimal"></label>
+      </div>
+      <div class="rrow"><span class="rlab">Net à payer</span><b class="ramt" id="o_nap">0,00 €</b></div>
+      <div class="rrow total"><span class="rlab">Solde à verser</span><b class="ramt" id="o_solde">0,00 €</b></div>
+    </div>
+  </details>
+
+</section>
+
+<section id="apercu" hidden>
+  <div class="apercu-bar">
+    <button id="btnZoom" class="btn btn-ghost">Agrandir</button>
+    <span class="hint" style="margin:0">Aperçu de la fiche telle qu'elle sera imprimée</span>
+  </div>
+  <div id="previewScroll"><div id="previewSpacer"><div id="previewBox"><iframe id="previewFrame" title="Aperçu A4"></iframe></div></div></div>
+</section>
+
+<section id="annuel" hidden></section>
+
+<section id="dossier" hidden>
+  <details class="card" open>
+    <summary><span class="ico">👤</span><span class="ttl">Salariée</span></summary>
+    <div class="body">
+      <div id="dosIdent"></div>
+      <div style="margin-top:12px">
+        <label class="field"><span>Téléphone</span><input data-profil="salarie.tel" inputmode="tel"></label>
+        <label class="field"><span>E-mail (envoi des fiches)</span><input data-profil="salarie.email" inputmode="email" placeholder="prenom.nom@exemple.fr"></label>
+        <label class="field"><span>Date d'embauche</span><input data-profil="salarie.dateEmbauche" placeholder="jj/mm/aaaa"></label>
+        <label class="field"><span>N° d'agrément</span><input data-profil="salarie.agrement"></label>
+        <label class="field"><span>IBAN (virement du salaire)</span><input data-profil="salarie.iban"></label>
+      </div>
+      <p class="hint">Nom, adresse et n° de sécurité sociale se modifient dans la fiche (repris chaque mois).</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">📆</span><span class="ttl">Planning type</span></summary>
+    <div class="body">
+      <div class="plan">
+        <label><span>lun</span><input data-profil="planning.d1" inputmode="decimal"></label>
+        <label><span>mar</span><input data-profil="planning.d2" inputmode="decimal"></label>
+        <label><span>mer</span><input data-profil="planning.d3" inputmode="decimal"></label>
+        <label><span>jeu</span><input data-profil="planning.d4" inputmode="decimal"></label>
+        <label><span>ven</span><input data-profil="planning.d5" inputmode="decimal"></label>
+        <label><span>sam</span><input data-profil="planning.d6" inputmode="decimal"></label>
+        <label><span>dim</span><input data-profil="planning.d0" inputmode="decimal"></label>
+      </div>
+      <p class="hint">Heures d'accueil habituelles par jour. Laisser vide les jours sans accueil. « Remplir le mois » s'appuie dessus et saute les jours fériés.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">📄</span><span class="ttl">Contrat en cours</span></summary>
+    <div class="body"><div id="dosContrat"></div></div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">📝</span><span class="ttl">Notes</span></summary>
+    <div class="body">
+      <textarea data-profil="notes" rows="5" placeholder="Jours d'accueil, horaires habituels, particularités du contrat, congés prévus…"></textarea>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">📧</span><span class="ttl">Modèle d'e-mail</span></summary>
+    <div class="body">
+      <label class="field"><span>Objet</span><input data-profil="mailTpl.subject" placeholder="Fiche de salaire — {mois}"></label>
+      <label class="field"><span>Message</span><textarea data-profil="mailTpl.body" rows="6" placeholder="Bonjour,&#10;&#10;Veuillez trouver ci-joint la fiche de calcul du salaire pour l'accueil de {enfant} — {mois}.&#10;&#10;Cordialement,&#10;{employeur}"></textarea></label>
+      <p class="hint">Variables remplacées automatiquement : <b>{mois}</b>, <b>{enfant}</b>, <b>{salariee}</b>, <b>{employeur}</b>.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">🔗</span><span class="ttl">Pajemploi</span></summary>
+    <div class="body">
+      <button class="btn btn-ghost btn-block" data-lien="https://www.pajemploi.urssaf.fr/pajeweb/simubrut1.jsp">Simulateur brut → net</button>
+      <button class="btn btn-ghost btn-block" data-lien="https://www.pajemploi.urssaf.fr">Déclarer le salaire du mois</button>
+      <p class="hint">Le simulateur convertit le salaire brut calculé par l'application en net à déclarer. Reporte ensuite ce net dans la carte « Salaire net ».</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">🔔</span><span class="ttl">Rappel mensuel</span></summary>
+    <div class="body">
+      <label class="check"><input type="checkbox" data-profil="rappel.actif"><span>Me rappeler d'établir la fiche</span></label>
+      <div class="two">
+        <label class="field"><span>Jour du mois</span><input data-profil="rappel.jour" inputmode="numeric" placeholder="25"></label>
+        <label class="field"><span>Heure</span><input data-profil="rappel.heure" inputmode="numeric" placeholder="18"></label>
+      </div>
+      <p class="hint" id="rappelEtat">Une notification le jour choisi, et une relance trois jours plus tard si la fiche du mois n'a pas encore été envoyée.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">🗓</span><span class="ttl">Agenda</span></summary>
+    <div class="body">
+      <button id="btnIcs" class="btn btn-ghost btn-block">Exporter les plages du mois</button>
+      <label class="field"><span>Heure d'arrivée habituelle</span><input data-profil="planning.debut" placeholder="08:00"></label>
+      <p class="hint">Produit un fichier .ics contenant une plage par jour d'accueil. Choisis Google Agenda dans le partage pour les importer. Les jours fériés et les absences sont exclus.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><span class="ico">💾</span><span class="ttl">Sauvegarde des données</span></summary>
+    <div class="body">
+      <button id="btnExportJson" class="btn btn-ghost btn-block">Exporter toutes les fiches (.json)</button>
+      <button id="btnImportJson" class="btn btn-ghost btn-block">Importer un fichier .json</button>
+      <input type="file" id="fileJson" accept="application/json,.json" hidden>
+      <p class="hint">L'export sert aussi à reprendre les fiches déjà saisies sur le PC : exporte-les depuis l'ordinateur, puis importe le fichier ici.</p>
+    </div>
+  </details>
+</section>
+
+</div>
+
+<footer id="bar">
+  <div class="solde"><span>Solde à verser</span><b id="s_solde">0,00 €</b></div>
+  <button id="btnPdf" class="btn btn-primary">Fiche PDF</button>
+</footer>
+
+<div id="scrim"></div>
+
+<aside id="drawer">
+  <div class="brand">
+    <img class="brand-ico" src="icones/icone-192.png" alt="" width="34" height="34">
+    <div><b>AssMat+</b><span>Salaire assistante maternelle</span></div>
+    <button id="btnFermer" class="iconbtn" aria-label="Fermer">✕</button>
+  </div>
+  <button id="btnNouveau" class="btn btn-primary btn-block">＋ Nouveau mois</button>
+  <div class="sidelabel">Fiches enregistrées</div>
+  <ul id="ficheList"></ul>
+  <div class="sidefoot">
+    <button id="btnAnnuel" class="btn btn-ghost btn-block">📊 Récapitulatif annuel</button>
+    <button id="btnDossierSal" class="btn btn-ghost btn-block">👤 Dossier salariée</button>
+  </div>
+</aside>
+
+<div id="sheet">
+  <div class="grab"></div>
+  <button id="actPdf"><span class="ico">📄</span>Enregistrer le PDF</button>
+  <button id="actPrint"><span class="ico">🖨</span>Imprimer</button>
+  <button id="actMail"><span class="ico">✉️</span>Envoyer la fiche par e-mail</button>
+  <button id="actPlanning"><span class="ico">📆</span>Partager le planning du mois</button>
+  <button id="actAbsence"><span class="ico">🚫</span>Signaler une absence</button>
+  <button id="actAnnuel"><span class="ico">📊</span>Récapitulatif annuel</button>
+  <button id="actDossier"><span class="ico">👤</span>Dossier salariée</button>
+  <button id="actSuppr" class="danger"><span class="ico">🗑</span>Supprimer cette fiche</button>
+</div>
+
+<div id="mailModal" class="modal" hidden>
+  <div class="modal-box">
+    <h3>Envoyer la fiche</h3>
+    <label class="field"><span>À</span><input id="mailTo" inputmode="email"></label>
+    <label class="field"><span>Objet</span><input id="mailSubject"></label>
+    <label class="field"><span>Message</span><textarea id="mailBody" rows="6"></textarea></label>
+    <p class="hint" id="mailAttach"></p>
+    <div class="modal-actions">
+      <button id="btnMailCancel" class="btn btn-ghost">Annuler</button>
+      <button id="btnMailSend" class="btn btn-primary">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<div id="absModal" class="modal" hidden>
+  <div class="modal-box">
+    <h3>Signaler une absence</h3>
+    <div id="absVide" class="hint" hidden>Aucune absence marquée dans le calendrier. Appuie sur le numéro d'un jour pour en marquer une.</div>
+    <ul id="absListe" class="abs-liste"></ul>
+    <label class="field"><span>À</span><input id="absTo" inputmode="email"></label>
+    <label class="field"><span>Message</span><textarea id="absBody" rows="6"></textarea></label>
+    <div class="modal-actions">
+      <button id="btnAbsCancel" class="btn btn-ghost">Annuler</button>
+      <button id="btnAbsSend" class="btn btn-primary">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script>
+/* ============================================================
+   Moteur de calcul + gabarit A4 — repris tel quel de la version PC
+   (renderer/template.js). Aucune regle de calcul modifiee.
+   ============================================================ */
+/* Fiche AssMat — modèle de données, règles de calcul et gabarit A4.
+   Chargé par le renderer (aperçu) ET par le main process (export PDF). */
+(function (root, factory) {
+  if (typeof module !== 'undefined' && module.exports) module.exports = factory();
+  else root.Fiche = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+
+  const MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+  const num = v => {
+    if (typeof v === 'number') return isFinite(v) ? v : 0;
+    const n = parseFloat(String(v ?? '').replace(/\s/g, '').replace(',', '.'));
+    return isFinite(n) ? n : 0;
+  };
+  const f2 = n => (Math.round(num(n) * 100) / 100).toFixed(2).replace('.', ',');
+  const eur = n => f2(n) + ' €';
+  // quantité saisie : affichage sans zéros superflus (8 → "8", 8.5 → "8,5")
+  const qn = v => String(Math.round(num(v) * 100) / 100).replace('.', ',');
+  const esc = s => String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  function emptyFiche(mois) {
+    return {
+      version: 1,
+      mois,
+      periodeDu: '', periodeAu: '',
+      salarie: { nom: '', adresse: '', cpVille: '', secu: '' },
+      employeur: { nom: '', adresse: '', cpVille: '', pajemploi: '' },
+      enfant: { nom: '', prenom: '', naissance: '' },
+      contrat: { anneeComplete: true, hnH: '', hnS: 52, hmH: '', hmS: 52, tHn: '', tHc: '', tHm: '' },
+      activite: { hc1: '', hc2: '', hMaj: '', occH: '', occT: '', deduction: '', divers: '', cp: '' },
+      aideAbs: { hAbs: '', hMois: '' },
+      calAide: { hJour: '', seuil: '9' },
+      net: { netPaje: '', exo: '' },
+      indemnites: { e1q: '', e1t: '', e2q: '', e2t: '', rq: '', rt: '', gq: '', gt: '', kq: '', kt: '', rupture: '' },
+      acomptes: '',
+      calendrier: Array.from({ length: 31 }, () => ({ p: '', c: '', m: '' })),
+      conges: { du: '', au: '', joursTravailles: '' }
+    };
+  }
+
+  /* Complète une fiche existante avec les champs ajoutés depuis sa création. */
+  function normalizeFiche(d) {
+    const e = emptyFiche(d.mois || '');
+    for (const k of Object.keys(e)) {
+      if (d[k] == null) d[k] = e[k];
+      else if (typeof e[k] === 'object' && !Array.isArray(e[k])) d[k] = { ...e[k], ...d[k] };
+    }
+    if (!Array.isArray(d.calendrier) || d.calendrier.length !== 31) d.calendrier = e.calendrier;
+    return d;
+  }
+
+  function periodeFromMois(mois) { // 'AAAA-MM'
+    const [y, m] = mois.split('-').map(Number);
+    const jours = new Date(y, m, 0).getDate();
+    const mm = String(m).padStart(2, '0');
+    return { du: `01/${mm}/${y}`, au: `${String(jours).padStart(2, '0')}/${mm}/${y}`, jours };
+  }
+
+  function labelMois(mois) {
+    const [y, m] = mois.split('-').map(Number);
+    return MOIS_FR[m - 1] + ' ' + y;
+  }
+
+  function nextMois(mois) {
+    let [y, m] = mois.split('-').map(Number);
+    m++; if (m > 12) { m = 1; y++; }
+    return `${y}-${String(m).padStart(2, '0')}`;
+  }
+
+  /* ---- Règles de calcul (identiques au modèle papier) ----
+     Mensualisation : heures/semaine x semaines / 12 (52 semaines = année complète).
+     Brut = h.norm.mens x tarif + h.maj.mens x tarif maj + h.compl x tarif compl
+            + h.maj du mois x tarif maj + occasionnel - déduction absences + divers + congés payés.
+     Net après exonération = net Pajemploi - exonération h. compl/majorées.
+     Net à payer = net après exo + total indemnités. Solde = net à payer - acomptes/PAS. */
+  function compute(d) {
+    const c = d.contrat, a = d.activite, i = d.indemnites;
+    const hnM = num(c.hnH) * num(c.hnS) / 12;
+    const hmM = num(c.hmH) * num(c.hmS) / 12;
+    const rHn = hnM * num(c.tHn);
+    const rHm = hmM * num(c.tHm);
+    const rHc1 = num(a.hc1) * num(c.tHc);
+    const rHc2 = num(a.hc2) * num(c.tHc);
+    const rMaj = num(a.hMaj) * num(c.tHm);
+    const rOcc = num(a.occH) * num(a.occT);
+    const brut = rHn + rHm + rHc1 + rHc2 + rMaj + rOcc - num(a.deduction) + num(a.divers) + num(a.cp);
+    const netE = num(d.net.netPaje) - num(d.net.exo);
+    const e1 = num(i.e1q) * num(i.e1t), e2 = num(i.e2q) * num(i.e2t);
+    const rep = num(i.rq) * num(i.rt), gou = num(i.gq) * num(i.gt), km = num(i.kq) * num(i.kt);
+    const ti = e1 + e2 + rep + gou + km + num(i.rupture);
+    const nap = netE + ti;
+    const solde = nap - num(d.acomptes);
+    const totP = d.calendrier.reduce((s, r) => s + num(r.p), 0);
+    const totC = d.calendrier.reduce((s, r) => s + num(r.c), 0);
+    const totM = d.calendrier.reduce((s, r) => s + num(r.m), 0);
+    const mensualise = rHn + rHm;
+    // Déclaration Pajemploi : heures entières, arrondi à l'entier le plus proche
+    // (le salaire reste calculé sur la valeur exacte, l'arrondi ne sert qu'à la déclaration)
+    const hnDecl = Math.round(hnM), hmDecl = Math.round(hmM);
+    // Aide : déduction absence = salaire mensualisé x h. non travaillées / h. qui auraient été travaillées
+    const dedSug = num(d.aideAbs.hMois) > 0 ? mensualise * num(d.aideAbs.hAbs) / num(d.aideAbs.hMois) : null;
+    return { hnM, hmM, hnDecl, hmDecl, rHn, rHm, rHc1, rHc2, rMaj, rOcc, brut, netE, e1, e2, rep, gou, km, ti,
+      te: e1 + e2, tn: rep + gou, tk: km, nap, solde, totP, totC, totM, dedSug, mensualise };
+  }
+
+  /* ---- Gabarit A4 (reprend fidèlement la mise en page du modèle) ---- */
+  function buildSheetHTML(d) {
+    const c = compute(d);
+    const ct = d.contrat, a = d.activite, ind = d.indemnites;
+    const inp = (v, style) => `<input readonly${style ? ` style="${style}"` : ''} value="${esc(v)}">`;
+    const ro = (v, style) => `<input readonly class="ro"${style ? ` style="${style}"` : ''} value="${esc(v)}">`;
+    const calRows = d.calendrier.map((r, i) =>
+      `<tr><td class="center">${i + 1}</td><td>${inp(r.p)}</td><td>${inp(r.c)}</td><td>${inp(r.m)}</td></tr>`).join('\n');
+
+    return `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<title>Fiche de calcul du salaire — ${esc(labelMois(d.mois))}</title>
+<style>
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:A4;margin:0}
+html,body{margin:0;padding:0;background:#d9dde2;font-family:Arial,Helvetica,sans-serif;color:#111}
+body{padding:10px}
+.page{width:210mm;height:297mm;margin:0 auto;background:#fff;box-shadow:0 8px 20px rgba(0,0,0,.14);padding:5mm;overflow:hidden}
+.wrap{width:100%;height:100%;overflow:hidden}
+.titlebar{display:grid;grid-template-columns:1fr 55mm 55mm;column-gap:3mm;align-items:end}
+.h1{font-size:13px;font-weight:700;text-transform:uppercase;line-height:1.1}
+.sub{font-size:8.5px;margin-top:1px}
+.inline{display:flex;align-items:center;gap:2mm;font-size:8.5px;min-width:0}
+input{width:100%;min-width:0;border:1px solid #444;padding:1px 2px;font-size:8px;line-height:1.1;background:#fff}
+input.ro{background:#f8f8f8}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+td,th{border:1px solid #444;padding:1px 2px;font-size:8px;vertical-align:middle;overflow:hidden}
+.thin td,.thin th{padding:1px}
+.center{text-align:center}.right{text-align:right}
+.mt{margin-top:3px}
+.twocol{display:grid;grid-template-columns:1fr 1fr;column-gap:3mm}
+.main{display:grid;grid-template-columns:1fr 47mm;column-gap:3mm;margin-top:3px}
+.v{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;font-weight:700;letter-spacing:.2px;white-space:nowrap;font-size:7.5px;padding:0 1px!important}
+.note{font-size:6.8px;line-height:1.2;border:1px solid #444;padding:3px;margin-top:3px}
+.small{font-size:7px;line-height:1.15}
+@media print{body{background:#fff;padding:0}.page{box-shadow:none;margin:0}}
+</style>
+</head>
+<body>
+<div class="page"><div class="wrap">
+  <div class="titlebar">
+    <div>
+      <div class="h1">FICHE DE CALCUL DU SALAIRE</div>
+      <div class="sub">Accueil de l'enfant ${esc(qn(ct.hnS) || '52')} semaines par période de 12 mois</div>
+    </div>
+    <div class="inline"><span>Du</span>${inp(d.periodeDu)}</div>
+    <div class="inline"><span>au</span>${inp(d.periodeAu)}</div>
+  </div>
+
+  <div class="twocol mt">
+    <table class="thin">
+      <colgroup><col style="width:38%"><col></colgroup>
+      <tbody><tr><td>NOM / Prénom du salarié :</td><td>${inp(d.salarie.nom)}</td></tr>
+      <tr><td>Adresse :</td><td>${inp(d.salarie.adresse)}</td></tr>
+      <tr><td>CP / Ville :</td><td>${inp(d.salarie.cpVille)}</td></tr>
+      <tr><td>N° sécurité sociale :</td><td>${inp(d.salarie.secu)}</td></tr>
+    </tbody></table>
+    <table class="thin">
+      <colgroup><col style="width:38%"><col></colgroup>
+      <tbody><tr><td>NOM / Prénom de l'employeur :</td><td>${inp(d.employeur.nom)}</td></tr>
+      <tr><td>Adresse :</td><td>${inp(d.employeur.adresse)}</td></tr>
+      <tr><td>CP / Ville :</td><td>${inp(d.employeur.cpVille)}</td></tr>
+      <tr><td>N° PAJEMPLOI :</td><td>${inp(d.employeur.pajemploi)}</td></tr>
+    </tbody></table>
+  </div>
+
+  <table class="thin mt">
+    <colgroup>
+      <col style="width:19%"><col style="width:6%"><col style="width:24%"><col style="width:9%"><col style="width:18%"><col style="width:14%"><col style="width:10%">
+    </colgroup>
+    <tbody><tr>
+      <td>Pour l'accueil de l'enfant :</td><td>Nom :</td><td>${inp(d.enfant.nom)}</td><td>Prénom :</td><td>${inp(d.enfant.prenom)}</td><td>date de naissance :</td><td>${inp(d.enfant.naissance)}</td>
+    </tr>
+  </tbody></table>
+
+  <div class="main">
+    <div>
+      <table class="thin">
+        <colgroup>
+          <col style="width:14px"><col style="width:58px"><col style="width:144px"><col style="width:76px"><col>
+        </colgroup>
+        <tbody><tr><td class="v" rowspan="6">Contrat</td><td colspan="4"><b>Base de mensualisation :</b></td></tr>
+        <tr><td>${inp(qn(ct.hnH))}</td><td>heures x ${inp(qn(ct.hnS), 'width:30px;display:inline-block')} semaines / 12 mois =</td><td>${ro(f2(c.hnM))}</td><td>h. normales mensualisées</td></tr>
+        <tr><td>${inp(qn(ct.hmH))}</td><td>heures x ${inp(qn(ct.hmS), 'width:30px;display:inline-block')} semaines / 12 mois =</td><td>${ro(f2(c.hmM))}</td><td>h. majorées mensualisées</td></tr>
+        <tr><td colspan="2">Tarif horaire brut des heures normales</td><td>${inp(f2(ct.tHn))}</td><td>€/h</td></tr>
+        <tr><td colspan="2">Tarif horaire brut des heures complémentaires</td><td>${inp(f2(ct.tHc))}</td><td>€/h</td></tr>
+        <tr><td colspan="2">Tarif horaire brut des heures majorées</td><td>${inp(f2(ct.tHm))}</td><td>€/h</td></tr>
+      </tbody></table>
+
+      <table class="thin mt">
+        <colgroup>
+          <col style="width:14px"><col style="width:132px"><col style="width:86px"><col style="width:16px"><col style="width:50px"><col style="width:20px"><col>
+        </colgroup>
+        <tbody><tr><td class="v" rowspan="11">Rémunération brute</td><td colspan="6"><b>SALAIRE MENSUEL BRUT</b></td></tr>
+        <tr><td>H. normales mensualisées</td><td>${ro(f2(c.hnM) + ' h. normales')}</td><td class="center">x</td><td>${ro(f2(ct.tHn))}</td><td class="center">€=</td><td>${ro(eur(c.rHn))}</td></tr>
+        <tr><td>H. majorées mensualisées</td><td>${ro(f2(c.hmM) + ' h. majorées')}</td><td class="center">x</td><td>${ro(f2(ct.tHm))}</td><td class="center">€=</td><td>${ro(eur(c.rHm))}</td></tr>
+        <tr><td>H. compl. contractuelles*</td><td>${inp(qn(a.hc1))}</td><td class="center">x</td><td>${ro(f2(ct.tHc))}</td><td class="center">€=</td><td>${ro(eur(c.rHc1))}</td></tr>
+        <tr><td>H. compl. non contractuelles</td><td>${inp(qn(a.hc2))}</td><td class="center">x</td><td>${ro(f2(ct.tHc))}</td><td class="center">€=</td><td>${ro(eur(c.rHc2))}</td></tr>
+        <tr><td>H. majorées</td><td>${inp(qn(a.hMaj))}</td><td class="center">x</td><td>${ro(f2(ct.tHm))}</td><td class="center">€=</td><td>${ro(eur(c.rMaj))}</td></tr>
+        <tr><td>Accueil occasionnel</td><td>${inp(qn(a.occH))}</td><td class="center">x</td><td>${inp(f2(a.occT))}</td><td class="center">€=</td><td>${ro(eur(c.rOcc))}</td></tr>
+        <tr><td colspan="5">Montant de la déduction des périodes d'absence**</td><td>${inp(f2(a.deduction))}</td></tr>
+        <tr><td colspan="5">Divers</td><td>${inp(f2(a.divers))}</td></tr>
+        <tr><td colspan="5">Congés payés</td><td>${inp(f2(a.cp))}</td></tr>
+        <tr><td colspan="5" class="right"><b>SALAIRE BRUT TOTAL</b></td><td>${ro(eur(c.brut))}</td></tr>
+      </tbody></table>
+
+      <div class="small mt">Pour connaître le montant du salaire net, se référer au simulateur de Pajemploi en cliquant sur le lien<br><u>https://www.pajemploi.urssaf.fr/pajeweb/simubrut1.jsp</u><br>et reporter le salaire net ci-dessous :</div>
+
+      <table class="thin mt">
+        <colgroup><col style="width:78%"><col></colgroup>
+        <tbody><tr><td><b>SALAIRE NET A DECLARER A PAJEMPLOI</b></td><td>${inp(f2(d.net.netPaje))}</td></tr>
+        <tr><td>Report du montant de l'exonération au titre des heures complémentaires et / ou majorées</td><td>${inp(f2(d.net.exo))}</td></tr>
+        <tr><td><b>SALAIRE NET en tenant compte de l'exonération</b></td><td>${ro(eur(c.netE))}</td></tr>
+      </tbody></table>
+
+      <table class="thin mt">
+        <colgroup>
+          <col style="width:14px"><col style="width:116px"><col style="width:34px"><col style="width:26px"><col style="width:14px"><col style="width:34px"><col style="width:26px"><col>
+        </colgroup>
+        <tbody><tr><td class="v" rowspan="7">Indemnités</td><td>Indemnités d'entretien</td><td>${inp(qn(ind.e1q))}</td><td>jours</td><td class="center">x</td><td>${inp(f2(ind.e1t))}</td><td>€=</td><td>${ro(eur(c.e1))}</td></tr>
+        <tr><td>Indemnités d'entretien</td><td>${inp(qn(ind.e2q))}</td><td>jours</td><td class="center">x</td><td>${inp(f2(ind.e2t))}</td><td>€=</td><td>${ro(eur(c.e2))}</td></tr>
+        <tr><td>Indemnités repas</td><td>${inp(qn(ind.rq))}</td><td>jours</td><td class="center">x</td><td>${inp(f2(ind.rt))}</td><td>€=</td><td>${ro(eur(c.rep))}</td></tr>
+        <tr><td>Indemnités goûter</td><td>${inp(qn(ind.gq))}</td><td>jours</td><td class="center">x</td><td>${inp(f2(ind.gt))}</td><td>€=</td><td>${ro(eur(c.gou))}</td></tr>
+        <tr><td>Indemnités kilométriques</td><td>${inp(qn(ind.kq))}</td><td>km</td><td class="center">x</td><td>${inp(f2(ind.kt))}</td><td>€=</td><td>${ro(eur(c.km))}</td></tr>
+        <tr><td colspan="6">Indemnité de rupture</td><td>${inp(f2(ind.rupture))}</td></tr>
+        <tr><td colspan="6" class="right"><b>Total des indemnités</b></td><td>${ro(eur(c.ti))}</td></tr>
+      </tbody></table>
+
+      <table class="thin mt">
+        <colgroup><col style="width:26%"><col style="width:12%"><col style="width:37%"><col></colgroup>
+        <tbody><tr><td>Total ind. Entretien :</td><td>${ro(f2(c.te))}</td><td class="center"><b>Net à payer</b></td><td>${ro(eur(c.nap))}</td></tr>
+        <tr><td>Total ind. Nourriture :</td><td>${ro(f2(c.tn))}</td><td>Acomptes versés ou Prélèvement à la source indiqué par pajemploi</td><td>${inp(f2(d.acomptes))}</td></tr>
+        <tr><td>Total ind. KM :</td><td>${ro(f2(c.tk))}</td><td class="center"><b>SOLDE A VERSER ***</b></td><td>${ro(eur(c.solde))}</td></tr>
+      </tbody></table>
+    </div>
+
+    <div>
+      <table class="thin">
+        <colgroup><col style="width:10mm"><col style="width:12mm"><col style="width:12mm"><col style="width:12mm"></colgroup>
+        <tbody><tr><th colspan="4" class="center">Calendrier de présence</th></tr>
+        <tr><th></th><th>Jrs/heures présence</th><th>Heures complém.</th><th>Heures majorées</th></tr>
+        </tbody><tbody>
+${calRows}
+        </tbody>
+        <tbody><tr><td><b>Total</b></td><td>${ro(f2(c.totP))}</td><td>${ro(f2(c.totC))}</td><td>${ro(f2(c.totM))}</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <table class="thin mt">
+    <colgroup><col style="width:14%"><col style="width:5%"><col style="width:20%"><col style="width:5%"><col style="width:20%"><col style="width:26%"><col></colgroup>
+    <tbody><tr><td>Congés :</td><td>du</td><td>${inp(d.conges.du)}</td><td>au</td><td>${inp(d.conges.au)}</td><td>Nb de jours travaillés dans le mois :</td><td>${inp(d.conges.joursTravailles)}</td></tr>
+  </tbody></table>
+
+  <div class="note">
+    Différence entre les heures complémentaires contractuelles et non contractuelles :<br>
+    * Les heures complémentaires correspondent aux heures effectuées au-delà des heures prévues au contrat de travail, et en deçà de 45h par semaine.<br>
+    * Si les heures complémentaires sont prévues au contrat, elles sont dites « contractuelles » et sont non soumises à l'exonération : elles seront à indiquer dans la case des heures normales sur la déclaration pajemploi.<br><br>
+    ** Montant des déductions des périodes d'absence = salaire mensualisé x nombre d'heures non travaillées dans le mois / nombre d'heures qui auraient été réellement travaillées dans le mois considéré.<br><br>
+    *** Attention, déduire du salaire NET A PAYER le montant du prélèvement à la source indiqué lors de l'enregistrement du salaire sur Pajemploi. Pour toute information sur le prélèvement à la source, consulter le site de Pajemploi.
+  </div>
+</div></div>
+</body></html>`;
+  }
+
+  /* Fiche d'exemple (autotest PDF) */
+  function sampleFiche(mois) {
+    const d = emptyFiche(mois);
+    const per = periodeFromMois(mois);
+    d.periodeDu = per.du; d.periodeAu = per.au;
+    d.salarie = { nom: 'DUPONT Marie', adresse: '12 rue des Lilas', cpVille: '35000 Rennes', secu: '2 85 03 35 238 111 42' };
+    d.employeur = { nom: 'TOUDIC Lucas', adresse: '8 allée des Chênes', cpVille: '35000 Rennes', pajemploi: 'N 1234567 X' };
+    d.enfant = { nom: 'TOUDIC', prenom: 'Léo', naissance: '12/03/2024' };
+    d.contrat = { anneeComplete: true, hnH: '40', hnS: 52, hmH: '2', hmS: 52, tHn: '4,60', tHc: '4,80', tHm: '5,75' };
+    d.activite = { hc1: '', hc2: '3', hMaj: '1', occH: '', occT: '', deduction: '', divers: '', cp: '' };
+    d.net = { netPaje: '700', exo: '8' };
+    d.indemnites = { e1q: '18', e1t: '3,50', e2q: '', e2t: '', rq: '15', rt: '4', gq: '15', gt: '1,20', kq: '120', kt: '0,35', rupture: '' };
+    d.acomptes = '12,50';
+    const [y, m] = mois.split('-').map(Number);
+    for (let i = 0; i < per.jours; i++) {
+      const wd = new Date(y, m - 1, i + 1).getDay();
+      if (wd >= 1 && wd <= 5) d.calendrier[i].p = '8';
+    }
+    d.calendrier[1].c = '1'; d.calendrier[8].m = '1';
+    d.conges = { du: '', au: '', joursTravailles: '22' };
+    return d;
+  }
+
+  return { num, f2, eur, qn, esc, emptyFiche, normalizeFiche, periodeFromMois, labelMois, nextMois, compute, buildSheetHTML, sampleFiche };
+});
+</script>
+<script>
+'use strict';
+const F = window.Fiche;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = F.esc;
+const eur = n => F.f2(n) + ' €';
+
+/* ============================================================
+   Stockage — une seule clé, adaptée au support disponible.
+   Ordre : Capacitor (APK) → stockage hôte → localStorage → mémoire.
+   ============================================================ */
+const Store = (() => {
+  const KEY = 'assmat-data';
+  const cap = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences;
+  const host = window.storage;
+  let ls = null;
+  try {
+    const w = window['local' + 'Storage'];
+    w.setItem('__t', '1'); w.removeItem('__t'); ls = w;
+  } catch (e) {}
+  const mem = { v: null };
+
+  const kind = cap ? 'capacitor' : host ? 'hôte' : ls ? 'navigateur' : 'mémoire';
+
+  const delai = (promesse, ms) => Promise.race([
+    promesse,
+    new Promise(r => setTimeout(() => r(null), ms))
+  ]);
+
+  async function readRaw() {
+    try {
+      if (cap) { const r = await delai(cap.get({ key: KEY }), 3000); return r ? r.value : mem.v; }
+      if (host) { const r = await delai(host.get(KEY), 3000); return r ? r.value : null; }
+      if (ls) return ls.getItem(KEY);
+    } catch (e) {}
+    return mem.v;
+  }
+  async function writeRaw(s) {
+    mem.v = s;
+    try {
+      if (cap) return void await cap.set({ key: KEY, value: s });
+      if (host) return void await host.set(KEY, s);
+      if (ls) return void ls.setItem(KEY, s);
+    } catch (e) { console.warn('écriture impossible', e); }
+  }
+
+  let cache = null;
+  return {
+    kind,
+    async all() {
+      if (cache) return cache;
+      let d = null;
+      try { d = JSON.parse(await readRaw() || 'null'); } catch (e) {}
+      cache = (d && typeof d === 'object') ? d : {};
+      if (!cache.fiches) cache.fiches = {};
+      if (!cache.profil) cache.profil = {};
+      return cache;
+    },
+    async flush() { if (cache) await writeRaw(JSON.stringify(cache)); },
+    async replaceAll(d) { cache = d; await writeRaw(JSON.stringify(cache)); }
+  };
+})();
+
+/* API : mêmes noms de méthodes que la version PC (preload.js). */
+const API = {
+  async listFiches() {
+    const o = (await Store.all()).fiches;
+    return Object.keys(o).sort().reverse().map(m => {
+      let solde = 0, enfant = '';
+      try { solde = F.compute(F.normalizeFiche(o[m])).solde; enfant = (o[m].enfant || {}).prenom || ''; } catch (e) {}
+      return { mois: m, enfant, solde };
+    });
+  },
+  async loadFiche(m) { return (await Store.all()).fiches[m] || null; },
+  async saveFiche(m, d) { (await Store.all()).fiches[m] = d; await Store.flush(); return true; },
+  async deleteFiche(m) { delete (await Store.all()).fiches[m]; await Store.flush(); return true; },
+  async existsFiche(m) { return !!(await Store.all()).fiches[m]; },
+  async renameFiche(o0, n, d) {
+    const f = (await Store.all()).fiches;
+    f[n] = d; if (o0 && o0 !== n) delete f[o0];
+    await Store.flush(); return true;
+  },
+  async loadProfil() { return (await Store.all()).profil || {}; },
+  async saveProfil(p) { const a = await Store.all(); a.profil = { ...a.profil, ...p }; await Store.flush(); return true; }
+};
+
+let cur = null, moisOnDisk = null;
+let saveTimer = null, previewTimer = null, profilTimer = null;
+let profil = {};
+let vue = 'saisie';
+let rappelTimer = null;
+
+function getPath(o, p) { return p.split('.').reduce((a, k) => a == null ? a : a[k], o); }
+function setPath(o, p, v) {
+  const ks = p.split('.'); const l = ks.pop();
+  let a = o;
+  for (const k of ks) { if (a[k] == null) a[k] = {}; a = a[k]; }
+  a[l] = v;
+}
+
+/* ---------------- Jours fériés ----------------
+   Dates fixes + les trois dates mobiles calculées depuis Pâques
+   (algorithme de Butcher). Résultat mis en cache par année. */
+function paques(a) {
+  const n = a % 19, c = Math.floor(a / 100), u = a % 100;
+  const s = Math.floor(c / 4), t = c % 4;
+  const pp = Math.floor((c + 8) / 25), q = Math.floor((c - pp + 1) / 3);
+  const e = (19 * n + c - s - q + 15) % 30;
+  const i = Math.floor(u / 4), k = u % 4;
+  const l = (32 + 2 * t + 2 * i - e - k) % 7;
+  const m = Math.floor((n + 11 * e + 22 * l) / 451);
+  const mois = Math.floor((e + l - 7 * m + 114) / 31);
+  const jour = ((e + l - 7 * m + 114) % 31) + 1;
+  return new Date(a, mois - 1, jour);
+}
+
+const cacheFeries = {};
+function feries(annee) {
+  if (cacheFeries[annee]) return cacheFeries[annee];
+  const f = {
+    '01-01': 'Jour de l\u2019an', '05-01': 'Fête du travail', '05-08': 'Victoire 1945',
+    '07-14': 'Fête nationale', '08-15': 'Assomption', '11-01': 'Toussaint',
+    '11-11': 'Armistice', '12-25': 'Noël'
+  };
+  const P = paques(annee);
+  const cle = d => {
+    const x = new Date(P); x.setDate(P.getDate() + d);
+    return String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+  };
+  f[cle(1)] = 'Lundi de Pâques';
+  f[cle(39)] = 'Ascension';
+  f[cle(50)] = 'Lundi de Pentecôte';
+  return (cacheFeries[annee] = f);
+}
+
+function ferieDu(mois, jour) {
+  const [y, m] = mois.split('-').map(Number);
+  return feries(y)[String(m).padStart(2, '0') + '-' + String(jour).padStart(2, '0')] || null;
+}
+
+/* ---------------- Calendrier ---------------- */
+const WD = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+
+function buildCalendrier() {
+  const box = $('#calendrier');
+  let h = '';
+  for (let i = 0; i < 31; i++) {
+    h += `<div class="calrow" data-day="${i}">
+      <div class="f"></div>
+      <button type="button" class="d" data-abs="${i}"><b>${i + 1}</b> <span class="wd"></span></button>
+      <input data-cal="${i}:p" inputmode="decimal">
+      <input data-cal="${i}:c" inputmode="decimal">
+      <input data-cal="${i}:m" inputmode="decimal"></div>`;
+  }
+  box.innerHTML = h;
+}
+
+function syncCalInputs() {
+  $$('[data-cal]').forEach(el => {
+    const [i, k] = el.dataset.cal.split(':');
+    el.value = cur.calendrier[+i][k] || '';
+  });
+}
+
+function hJourContrat() { return (F.num(cur.contrat.hnH) + F.num(cur.contrat.hmH)) / 5; }
+
+/* Heures prévues un jour donné : planning type du dossier, sinon repli
+   sur les heures par jour du contrat, du lundi au vendredi. */
+function heuresDuJour(wd) {
+  const pl = profil.planning || {};
+  // seules les clés d0 à d6 sont des jours : planning.debut est l'heure d'arrivée
+  const defini = Object.keys(pl).some(k => /^d[0-6]$/.test(k) && String(pl[k]).trim() !== '');
+  if (defini) return F.num(pl['d' + wd]);
+  if (wd < 1 || wd > 5) return 0;
+  return cur.calAide.hJour !== '' ? F.num(cur.calAide.hJour) : hJourContrat();
+}
+
+function remplirSemaine() {
+  const per = F.periodeFromMois(cur.mois);
+  const [y, mo] = cur.mois.split('-').map(Number);
+
+  let prevu = 0;
+  for (let i = 0; i < per.jours; i++) prevu += heuresDuJour(new Date(y, mo - 1, i + 1).getDay());
+  if (prevu <= 0) {
+    toast('Renseigne le planning type dans le Dossier, ou les heures par jour ci-dessus');
+    return;
+  }
+  if (cur.calendrier.some(r => r.p || r.c || r.m) &&
+      !confirm('Remplacer les valeurs déjà saisies ?')) return;
+
+  const sv = F.num(cur.calAide.seuil);
+  const seuil = sv > 0 ? sv : Infinity;
+  let jours = 0, sautes = 0, maj = 0;
+
+  for (let i = 0; i < per.jours; i++) {
+    const h = heuresDuJour(new Date(y, mo - 1, i + 1).getDay());
+    if (h <= 0) { cur.calendrier[i] = { p: '', c: '', m: '' }; continue; }
+    if (ferieDu(cur.mois, i + 1)) { cur.calendrier[i] = { p: '', c: '', m: '' }; sautes++; continue; }
+    const p = Math.min(h, seuil), m = h - p;
+    cur.calendrier[i] = { p: F.qn(p), c: '', m: m > 0.0001 ? F.qn(m) : '' };
+    jours++; maj += m;
+  }
+
+  syncCalInputs(); recalc(); scheduleSave();
+  toast(jours + ' jours remplis' +
+    (maj > 0.0001 ? ', dont ' + F.qn(maj) + ' h majorées' : '') +
+    (sautes ? ' — ' + sautes + (sautes > 1 ? ' jours fériés laissés vides' : ' jour férié laissé vide') : ''));
+}
+
+function viderCalendrier() {
+  if (!confirm('Vider tout le calendrier de présence ?')) return;
+  cur.calendrier = Array.from({ length: 31 }, () => ({ p: '', c: '', m: '' }));
+  syncCalInputs(); recalc(); scheduleSave();
+}
+
+function refreshCalendrierMeta() {
+  const per = F.periodeFromMois(cur.mois);
+  const [y, m] = cur.mois.split('-').map(Number);
+  $$('#calendrier .calrow').forEach(tr => {
+    const i = +tr.dataset.day;
+    const inMonth = i < per.jours;
+    tr.classList.toggle('off', !inMonth);
+    let wd = '', fer = null;
+    if (inMonth) {
+      const day = new Date(y, m - 1, i + 1).getDay();
+      wd = WD[day];
+      fer = ferieDu(cur.mois, i + 1);
+      tr.classList.toggle('we', day === 0 || day === 6);
+    } else tr.classList.remove('we');
+    const abs = inMonth ? (cur.calendrier[i].abs || '') : '';
+    tr.classList.toggle('ferie', !!fer && !abs);
+    tr.classList.toggle('abs-e', abs === 'e');
+    tr.classList.toggle('abs-s', abs === 's');
+    tr.querySelector('.wd').textContent = wd;
+    tr.querySelector('.f').textContent =
+      abs ? ABS_LIB[abs] : fer ? 'Férié — ' + fer : '';
+    tr.querySelectorAll('input').forEach(inp => inp.disabled = !inMonth);
+  });
+}
+
+/* ---------------- Absences ----------------
+   Marque purement descriptive : le calcul du salaire reste piloté par les
+   heures saisies. Elle sert au planning partagé et au message d'absence. */
+const ABS_LIB = { e: "Enfant absent", s: "Salariée absente" };
+
+function basculerAbsence(i) {
+  const r = cur.calendrier[i];
+  r.abs = r.abs === 'e' ? 's' : r.abs === 's' ? '' : 'e';
+  refreshCalendrierMeta();
+  scheduleSave();
+  const j = i + 1;
+  toast(r.abs ? 'Jour ' + j + ' : ' + ABS_LIB[r.abs].toLowerCase() : 'Jour ' + j + ' : absence retirée');
+}
+
+/* Jours marqués d'un type donné, avec leur date et les heures prévues. */
+function absencesDu(type) {
+  const per = F.periodeFromMois(cur.mois);
+  const out = [];
+  for (let i = 0; i < per.jours; i++) {
+    if (cur.calendrier[i].abs !== type) continue;
+    const [y, m] = cur.mois.split('-').map(Number);
+    out.push({ jour: i + 1, wd: WD[new Date(y, m - 1, i + 1).getDay()] });
+  }
+  return out;
+}
+
+/* « 12, 13 et 14 » plutôt qu'une énumération brute. */
+function listeJours(jours) {
+  if (!jours.length) return '';
+  const n = jours.map(j => j.jour);
+  const blocs = [];
+  let debut = n[0], prec = n[0];
+  for (let k = 1; k <= n.length; k++) {
+    if (n[k] === prec + 1) { prec = n[k]; continue; }
+    blocs.push(debut === prec ? String(debut) : (prec === debut + 1 ? debut + ' et ' + prec : 'du ' + debut + ' au ' + prec));
+    debut = prec = n[k];
+  }
+  const [y, m] = cur.mois.split('-').map(Number);
+  const nomMois = F.labelMois(cur.mois).split(' ')[0];
+  if (blocs.length === 1) return (blocs[0].startsWith('du') ? '' : 'le ') + blocs[0] + ' ' + nomMois + ' ' + y;
+  return 'les ' + blocs.join(', ').replace(/, ([^,]*)$/, ' et $1') + ' ' + nomMois + ' ' + y;
+}
+
+/* ---------------- Formulaire ---------------- */
+function applyAnneeComplete() {
+  const on = !!cur.contrat.anneeComplete;
+  const a = $('[data-bind="contrat.hnS"]'), b = $('[data-bind="contrat.hmS"]');
+  if (on) { cur.contrat.hnS = 52; cur.contrat.hmS = 52; a.value = '52'; b.value = '52'; }
+  a.disabled = on; b.disabled = on;
+}
+
+function fillForm() {
+  $('#mois').value = cur.mois;
+  $$('[data-bind]').forEach(el => {
+    const v = getPath(cur, el.dataset.bind);
+    if (el.type === 'checkbox') el.checked = !!v;
+    else el.value = v == null ? '' : v;
+  });
+  syncCalInputs();
+  applyAnneeComplete();
+  refreshCalendrierMeta();
+  renderTitle();
+  recalc();
+}
+
+function deMois(m) {
+  const l = F.labelMois(m);
+  return (/^[aeiouâéèêîôu]/i.test(l) ? "d'" : 'de ') + l;
+}
+
+function renderTitle() {
+  if (vue === 'dossier') { $('#titleMois').textContent = 'Dossier salariée'; return; }
+  if (vue === 'annuel') { $('#titleMois').textContent = 'Récapitulatif annuel'; return; }
+  const l = F.labelMois(cur.mois);
+  $('#titleMois').textContent = l.charAt(0).toUpperCase() + l.slice(1);
+}
+
+function recalc() {
+  const c = F.compute(cur);
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  set('o_hnM', F.f2(c.hnM) + ' h — déclarer ' + c.hnDecl + ' h');
+  set('o_hmM', F.f2(c.hmM) + ' h — déclarer ' + c.hmDecl + ' h');
+  set('o_hnAuto', F.f2(c.hnM) + ' h × ' + F.f2(cur.contrat.tHn) + ' €');
+  set('o_hmAuto', F.f2(c.hmM) + ' h × ' + F.f2(cur.contrat.tHm) + ' €');
+  set('o_rHn', eur(c.rHn)); set('o_rHm', eur(c.rHm));
+  set('o_rHc1', eur(c.rHc1)); set('o_rHc2', eur(c.rHc2));
+  set('o_rMaj', eur(c.rMaj)); set('o_rOcc', eur(c.rOcc));
+  set('o_brut', eur(c.brut)); set('o_net', eur(c.netE));
+  set('o_e1', eur(c.e1)); set('o_e2', eur(c.e2)); set('o_rep', eur(c.rep));
+  set('o_gou', eur(c.gou)); set('o_km', eur(c.km)); set('o_ti', eur(c.ti));
+  set('o_nap', eur(c.nap)); set('o_solde', eur(c.solde));
+  set('o_totP', F.f2(c.totP)); set('o_totC', F.f2(c.totC)); set('o_totM', F.f2(c.totM));
+  set('t_brut', eur(c.brut)); set('t_net', eur(c.netE)); set('t_ti', eur(c.ti));
+  set('t_cal', F.f2(c.totP) + ' h');
+  set('s_solde', eur(c.solde));
+  const sug = $('#dedSug');
+  if (c.dedSug != null) { sug.hidden = false; $('#dedSugVal').textContent = eur(c.dedSug); }
+  else sug.hidden = true;
+  set('o_jours', String(joursAccueil()));
+  const hj = hJourContrat();
+  $('[data-bind="calAide.hJour"]').placeholder = hj > 0 ? F.qn(hj) + ' (contrat)' : '';
+  schedulePreview();
+}
+
+/* Nombre de jours du mois où une présence est saisie. */
+function joursAccueil() {
+  const per = F.periodeFromMois(cur.mois);
+  let n = 0;
+  for (let i = 0; i < per.jours; i++) if (F.num(cur.calendrier[i].p) > 0) n++;
+  return n;
+}
+
+/* Reporte ce nombre sur les indemnités dont le tarif est renseigné :
+   inutile de remplir une ligne goûter si aucun goûter n'est facturé. */
+function reprendreJours() {
+  const n = joursAccueil();
+  if (!n) { toast('Le calendrier de présence est vide'); return; }
+  const i = cur.indemnites;
+  const lignes = [['e1t', 'e1q', 'entretien'], ['rt', 'rq', 'repas'], ['gt', 'gq', 'goûter']];
+  const remplies = [];
+  for (const [tarif, quantite, nom] of lignes) {
+    if (F.num(i[tarif]) <= 0) continue;
+    i[quantite] = String(n);
+    const el = $('[data-bind="indemnites.' + quantite + '"]');
+    if (el) el.value = i[quantite];
+    remplies.push(nom);
+  }
+  if (!remplies.length) {
+    toast('Renseigne d\u2019abord les tarifs des indemnités');
+    return;
+  }
+  recalc(); scheduleSave();
+  toast(n + ' jours reportés sur : ' + remplies.join(', '));
+}
+
+/* ---------------- Enregistrement ---------------- */
+function setStatus(s) {
+  const el = $('#saveDot');
+  el.textContent = s === 'saving' ? 'Enregistrement…' : 'Enregistré';
+  el.className = s;
+}
+function scheduleSave() { setStatus('saving'); clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 500); }
+async function doSave() {
+  clearTimeout(saveTimer); saveTimer = null;
+  if (!cur) return;
+  await API.saveFiche(cur.mois, cur);
+  moisOnDisk = cur.mois;
+  setStatus('ok');
+  refreshList();
+}
+
+/* ---------------- Liste des fiches ---------------- */
+async function refreshList() {
+  const list = await API.listFiches();
+  const ul = $('#ficheList');
+  ul.innerHTML = '';
+  for (const it of list) {
+    const li = document.createElement('li');
+    li.className = 'fiche-item' + (cur && it.mois === cur.mois ? ' active' : '');
+    li.innerHTML = `<div class="fi-mois">${esc(F.labelMois(it.mois))}</div>
+      <div class="fi-sub">${esc(it.enfant || '')}${it.enfant ? ' · ' : ''}${F.f2(it.solde)} €</div>`;
+    li.onclick = () => { openFiche(it.mois); closeDrawer(); };
+    ul.appendChild(li);
+  }
+}
+
+async function openFiche(m) {
+  if (cur && saveTimer) await doSave();
+  const d = await API.loadFiche(m);
+  if (!d) return;
+  cur = F.normalizeFiche(d); moisOnDisk = m;
+  showView('saisie');
+  fillForm();
+  window.scrollTo(0, 0);
+  await refreshList();
+}
+
+async function nouveauMois() {
+  if (cur && saveTimer) await doSave();
+  const list = await API.listFiches();
+  let nf;
+  if (list.length) {
+    const base = F.normalizeFiche(await API.loadFiche(list[0].mois));
+    let m = F.nextMois(base.mois);
+    while (await API.existsFiche(m)) m = F.nextMois(m);
+    nf = F.emptyFiche(m);
+    nf.salarie = { ...base.salarie };
+    nf.employeur = { ...base.employeur };
+    nf.enfant = { ...base.enfant };
+    nf.contrat = { ...base.contrat };
+    if (base.calAide) nf.calAide = { ...nf.calAide, ...base.calAide };
+    for (const k of ['e1t', 'e2t', 'rt', 'gt', 'kt']) nf.indemnites[k] = base.indemnites[k];
+  } else {
+    const now = new Date();
+    nf = F.emptyFiche(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+  }
+  const per = F.periodeFromMois(nf.mois);
+  nf.periodeDu = per.du; nf.periodeAu = per.au;
+  cur = nf; moisOnDisk = nf.mois;
+  await API.saveFiche(nf.mois, nf);
+  showView('saisie');
+  fillForm();
+  window.scrollTo(0, 0);
+  await refreshList();
+  toast('Fiche ' + deMois(nf.mois) + ' créée');
+}
+
+async function supprimer() {
+  if (!cur) return;
+  if (!confirm('Supprimer la fiche ' + deMois(cur.mois) + ' ?')) return;
+  clearTimeout(saveTimer); saveTimer = null;
+  await API.deleteFiche(cur.mois);
+  cur = null; moisOnDisk = null;
+  const list = await API.listFiches();
+  if (list.length) await openFiche(list[0].mois);
+  else await nouveauMois();
+}
+
+/* ---------------- PDF / impression ----------------
+   Android : l'impression du système propose « Enregistrer au format PDF ».
+   Dans l'APK, un plugin natif prendra le relais via window.AssMatNative. */
+function pdfName() {
+  const who = (cur.enfant.prenom || cur.salarie.nom || 'assmat').trim().replace(/[\\/:*?"<>|]+/g, '');
+  return `Fiche salaire - ${who} - ${F.labelMois(cur.mois)}.pdf`;
+}
+const natif = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AssMatPrint;
+
+/* Enregistre la fiche en PDF dans le dossier Téléchargements. */
+async function exporterPdf() {
+  await doSave();
+  const html = F.buildSheetHTML(cur);
+  const P = natif();
+  if (P && P.exportPdf) {
+    try {
+      const r = await P.exportPdf({ html, name: pdfName() });
+      toast('PDF enregistré dans Téléchargements : ' + (r && r.name ? r.name : pdfName()));
+      return;
+    } catch (e) {
+      toast('Enregistrement impossible, passage par l\u2019impression');
+    }
+  }
+  return imprimer();
+}
+
+/* Boîte de dialogue d'impression du système. */
+async function imprimer() {
+  await doSave();
+  return imprimerHTML(F.buildSheetHTML(cur), pdfName());
+}
+
+async function imprimerHTML(html, nom) {
+  const P = natif();
+  if (P && P.printHTML) {
+    try { await P.printHTML({ html, name: nom || 'Document.pdf' }); return; }
+    catch (e) { toast('Impression indisponible : ' + (e.message || e)); return; }
+  }
+  const f = document.createElement('iframe');
+  f.setAttribute('aria-hidden', 'true');
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
+  f.srcdoc = html;
+  f.onload = () => {
+    setTimeout(() => {
+      try { f.contentWindow.focus(); f.contentWindow.print(); }
+      catch (e) { ouvrirDansOnglet(html); }
+      setTimeout(() => f.remove(), 60000);
+    }, 250);
+  };
+  document.body.appendChild(f);
+  toast('Choisis « Enregistrer au format PDF » dans le menu d\u2019impression');
+}
+function ouvrirDansOnglet(html) {
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  const w = window.open(url, '_blank');
+  if (!w) toast('Autorise les fenêtres pop-up pour afficher la fiche');
+}
+
+function ouvrirLien(url) {
+  const B = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
+  if (B) { B.open({ url }); return; }
+  window.open(url, '_blank', 'noopener');
+}
+
+/* ---------------- Aperçu A4 ---------------- */
+function schedulePreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => { if (vue === 'apercu') renderPreview(); }, 600);
+}
+function renderPreview() { $('#previewFrame').srcdoc = F.buildSheetHTML(cur); }
+let zoom1 = false;
+function fitPreview() {
+  const w = $('#content').clientWidth - 24;
+  if (w <= 0) return;
+  const s = zoom1 ? 1 : Math.min(1, w / 794);
+  $('#previewBox').style.transform = `scale(${s})`;
+  const sp = $('#previewSpacer');
+  sp.style.width = 794 * s + 'px';
+  sp.style.height = 1123 * s + 'px';
+}
+
+function showView(v) {
+  vue = v;
+  $('#saisie').hidden = v !== 'saisie';
+  $('#apercu').hidden = v !== 'apercu';
+  $('#dossier').hidden = v !== 'dossier';
+  $('#annuel').hidden = v !== 'annuel';
+  $('#tabSaisie').classList.toggle('active', v === 'saisie');
+  $('#tabApercu').classList.toggle('active', v === 'apercu');
+  if (v === 'apercu') { renderPreview(); fitPreview(); }
+  if (v === 'dossier') renderDossier();
+  if (v === 'annuel') renderAnnuel();
+  renderTitle();
+}
+
+/* ---------------- Planning du mois ----------------
+   Feuille A4 autonome, pensée pour être envoyée à la salariée. */
+function buildPlanningHTML() {
+  const per = F.periodeFromMois(cur.mois);
+  const [y, m] = cur.mois.split('-').map(Number);
+  let total = 0, lignes = '';
+
+  for (let i = 0; i < per.jours; i++) {
+    const r = cur.calendrier[i];
+    const wd = WD[new Date(y, m - 1, i + 1).getDay()];
+    const fer = ferieDu(cur.mois, i + 1);
+    const h = F.num(r.p) + F.num(r.c) + F.num(r.m);
+    total += h;
+    let note = '', classe = '';
+    if (r.abs === 'e') { note = ABS_LIB.e; classe = ' class="ab"'; }
+    else if (r.abs === 's') { note = ABS_LIB.s; classe = ' class="as"'; }
+    else if (fer) { note = fer; classe = ' class="fe"'; }
+    else if (wd === 'sam' || wd === 'dim') classe = ' class="we"';
+    lignes += `<tr${classe}><td class="j">${i + 1}</td><td>${wd}</td>
+      <td class="h">${h > 0 ? F.qn(h) + ' h' : ''}</td><td class="n">${esc(note)}</td></tr>`;
+  }
+
+  const titre = F.labelMois(cur.mois);
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<title>Planning ${esc(titre)}</title>
+<style>
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:A4;margin:0}
+html,body{margin:0;padding:0;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#17322e}
+.page{width:210mm;min-height:297mm;padding:14mm 16mm}
+h1{font-size:19px;margin:0 0 2px}
+.sous{font-size:12px;color:#5f7a75;margin:0 0 16px}
+.qui{font-size:12px;margin:0 0 14px;line-height:1.6}
+.qui b{color:#17322e}
+table{width:100%;border-collapse:collapse}
+td{border-bottom:1px solid #dce8e4;padding:5px 6px;font-size:11.5px}
+.j{width:26px;font-weight:700;text-align:right}
+.h{width:64px;text-align:right;font-weight:700}
+.n{color:#5f7a75;font-size:10.5px}
+tr.we{color:#9db3ae}
+tr.fe{background:#fdf3e7}tr.fe .n{color:#b4690e}
+tr.ab{background:#e8f3f0}tr.ab .n{color:#256f66}
+tr.as{background:#fdeeee}tr.as .n{color:#b03a3a}
+tr.ab .h,tr.as .h{text-decoration:line-through;color:#9db3ae;font-weight:400}
+.tot{margin-top:14px;padding-top:10px;border-top:2px solid #17322e;display:flex;justify-content:space-between;font-size:13px;font-weight:700}
+.pied{margin-top:22px;font-size:10px;color:#9db3ae}
+</style></head><body><div class="page">
+<h1>Planning d'accueil — ${esc(titre)}</h1>
+<p class="sous">Document indicatif, établi le ${new Date().toLocaleDateString('fr-FR')}</p>
+<p class="qui">
+  Enfant accueilli : <b>${esc([cur.enfant.prenom, cur.enfant.nom].filter(Boolean).join(' ') || '—')}</b><br>
+  Assistante maternelle : <b>${esc(cur.salarie.nom || '—')}</b><br>
+  Employeur : <b>${esc(cur.employeur.nom || '—')}</b>
+</p>
+<table><tbody>${lignes}</tbody></table>
+<div class="tot"><span>Total des heures d'accueil</span><span>${F.f2(total)} h</span></div>
+<p class="pied">Établi avec AssMat+. Les heures indiquées sont celles saisies dans la fiche du mois.</p>
+</div></body></html>`;
+}
+
+async function partagerPlanning() {
+  await doSave();
+  const html = buildPlanningHTML();
+  const nom = 'Planning - ' + F.labelMois(cur.mois) + '.pdf';
+  const P = natif();
+  if (P && P.sharePdf) {
+    try { await P.sharePdf({ html, name: nom }); return; }
+    catch (e) { toast('Partage impossible, ouverture de l\u2019impression'); }
+  }
+  imprimerHTML(html);
+}
+
+/* ---------------- Export vers l'agenda ----------------
+   Fichier .ics standard : Google Agenda, Outlook et l'agenda d'Android
+   savent tous l'importer, sans compte ni autorisation à accorder. */
+function horodatage(y, m, j, minutes) {
+  const p2 = n => String(n).padStart(2, '0');
+  const h = Math.floor(minutes / 60), mn = minutes % 60;
+  return `${y}${p2(m)}${p2(j)}T${p2(h)}${p2(mn)}00`;
+}
+
+function buildICS() {
+  const per = F.periodeFromMois(cur.mois);
+  const [y, m] = cur.mois.split('-').map(Number);
+  const debut = String((profil.planning && profil.planning.debut) || '08:00').trim();
+  const [dh, dm] = debut.split(':').map(n => parseInt(n, 10) || 0);
+  const depart = dh * 60 + (dm || 0);
+  const enfant = cur.enfant.prenom || 'Accueil';
+  const lieu = cur.salarie.nom || '';
+  const estampille = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+  let n = 0, ev = '';
+  for (let i = 0; i < per.jours; i++) {
+    const r = cur.calendrier[i];
+    if (r.abs) continue;
+    if (ferieDu(cur.mois, i + 1)) continue;
+    const h = F.num(r.p) + F.num(r.c) + F.num(r.m);
+    if (h <= 0) continue;
+    n++;
+    ev += ['BEGIN:VEVENT',
+      'UID:' + cur.mois + '-' + (i + 1) + '@assmat-plus',
+      'DTSTAMP:' + estampille,
+      'DTSTART:' + horodatage(y, m, i + 1, depart),
+      'DTEND:' + horodatage(y, m, i + 1, depart + Math.round(h * 60)),
+      'SUMMARY:' + enfant + ' — accueil (' + F.qn(h) + ' h)',
+      lieu ? 'LOCATION:' + lieu : '',
+      'END:VEVENT'].filter(Boolean).join('\r\n') + '\r\n';
+  }
+
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AssMat+//FR', 'CALSCALE:GREGORIAN',
+    ev.trim(), 'END:VCALENDAR'].join('\r\n');
+  return { ics, n };
+}
+
+async function exporterIcs() {
+  await doSave();
+  const { ics, n } = buildICS();
+  if (!n) { toast('Aucune plage à exporter : le calendrier du mois est vide'); return; }
+  const nom = 'Accueil - ' + F.labelMois(cur.mois) + '.ics';
+
+  const P = natif();
+  if (P && P.shareTextFile) {
+    try {
+      await P.shareTextFile({ name: nom, mime: 'text/calendar', text: ics });
+      toast(n + ' plages exportées');
+      return;
+    } catch (e) { toast('Partage impossible : ' + (e.message || e)); return; }
+  }
+  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nom; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast(n + ' plages exportées');
+}
+
+/* ---------------- Rappel mensuel ----------------
+   Deux notifications par mois : le jour choisi, puis une relance trois jours
+   plus tard. Reprogrammées à chaque ouverture pour les six mois à venir,
+   en sautant les mois dont la fiche est déjà partie. */
+async function programmerRappels() {
+  const N = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
+  if (!N) return;
+  const r = profil.rappel || {};
+
+  try {
+    await N.cancel({ notifications: (await N.getPending()).notifications || [] });
+    if (!r.actif) { majEtatRappel('Rappels désactivés.'); return; }
+
+    const perm = await N.checkPermissions();
+    if (perm.display !== 'granted') {
+      const dem = await N.requestPermissions();
+      if (dem.display !== 'granted') { majEtatRappel('Notifications refusées dans les réglages du téléphone.'); return; }
+    }
+
+    const jour = Math.min(28, Math.max(1, parseInt(r.jour, 10) || 25));
+    const heure = Math.min(23, Math.max(0, parseInt(r.heure, 10) || 18));
+    const fiches = (await Store.all()).fiches;
+    const maintenant = new Date();
+    const liste = [];
+    let id = 1000;
+
+    for (let k = 0; k < 6; k++) {
+      const d = new Date(maintenant.getFullYear(), maintenant.getMonth() + k, jour, heure, 0, 0);
+      if (d <= maintenant) continue;
+      const mois = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      const f = fiches[mois];
+      if (f && f.envoyee) continue;
+      const nom = F.labelMois(mois);
+      liste.push({
+        id: id++, title: 'Fiche de salaire', body: 'La fiche de ' + nom + ' est à établir.',
+        schedule: { at: d.toISOString() }
+      });
+      const relance = new Date(d.getTime() + 3 * 86400000);
+      liste.push({
+        id: id++, title: 'Fiche de salaire — rappel', body: nom + ' n\u2019est toujours pas envoyée.',
+        schedule: { at: relance.toISOString() }
+      });
+    }
+
+    if (liste.length) await N.schedule({ notifications: liste });
+    majEtatRappel(liste.length
+      ? Math.round(liste.length / 2) + ' mois programmés, le ' + jour + ' à ' + heure + ' h, relance trois jours après.'
+      : 'Rien à programmer : les fiches à venir sont déjà envoyées.');
+  } catch (e) {
+    majEtatRappel('Programmation impossible : ' + (e.message || e));
+  }
+}
+
+function majEtatRappel(txt) {
+  const el = $('#rappelEtat');
+  if (el) el.textContent = txt;
+}
+
+/* Marque la fiche comme partie : la relance de ce mois ne sera plus programmée. */
+async function marquerEnvoyee() {
+  if (!cur || cur.envoyee) return;
+  cur.envoyee = true;
+  await doSave();
+  programmerRappels();
+}
+
+/* ---------------- Message d'absence ---------------- */
+function openAbsModal() {
+  const enfant = absencesDu('e'), salariee = absencesDu('s');
+  const aucune = !enfant.length && !salariee.length;
+
+  $('#absVide').hidden = !aucune;
+  $('#absListe').innerHTML = aucune ? '' :
+    [enfant.length ? '<li>' + ABS_LIB.e + ' : ' + esc(listeJours(enfant)) + '</li>' : '',
+     salariee.length ? '<li>' + ABS_LIB.s + ' : ' + esc(listeJours(salariee)) + '</li>' : ''].join('');
+
+  $('#absTo').value = (profil.salarie && profil.salarie.email) || '';
+
+  const prenom = cur.enfant.prenom || 'l\u2019enfant';
+  let corps = 'Bonjour,\n\n';
+  if (enfant.length) corps += prenom + ' sera absent ' + listeJours(enfant) + '.\n';
+  if (salariee.length) corps += 'Absence de votre côté notée ' + listeJours(salariee) + '.\n';
+  if (aucune) corps += prenom + ' sera absent le … .\n';
+  corps += '\nCordialement,\n' + (cur.employeur.nom || '');
+  $('#absBody').value = corps;
+
+  $('#absModal').hidden = false;
+}
+
+async function envoyerAbsence() {
+  const to = $('#absTo').value.trim();
+  const texte = $('#absBody').value;
+  const sujet = 'Absence — ' + (cur.enfant.prenom || 'accueil') + ' — ' + F.labelMois(cur.mois);
+  $('#absModal').hidden = true;
+
+  const P = natif();
+  if (P && P.shareText) {
+    try { await P.shareText({ text: texte, subject: sujet, to }); return; }
+    catch (e) { /* repli sur mailto */ }
+  }
+  location.href = 'mailto:' + encodeURIComponent(to) +
+    '?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(texte);
+}
+
+/* ---------------- Récapitulatif annuel ---------------- */
+async function renderAnnuel() {
+  const toutes = (await Store.all()).fiches;
+  const mois = Object.keys(toutes).sort();
+  const box = $('#annuel');
+
+  if (!mois.length) {
+    box.innerHTML = '<div class="card"><div class="body"><p class="an-vide">Aucune fiche enregistrée pour le moment.</p></div></div>';
+    return;
+  }
+
+  const annees = {};
+  for (const m of mois) {
+    const an = m.slice(0, 4);
+    (annees[an] = annees[an] || []).push(m);
+  }
+
+  let html = '';
+  for (const an of Object.keys(annees).sort().reverse()) {
+    const t = { brut: 0, net: 0, ti: 0, solde: 0, jours: 0 };
+    let lignes = '';
+    for (const m of annees[an]) {
+      const c = F.compute(F.normalizeFiche(toutes[m]));
+      t.brut += c.brut; t.net += c.netE; t.ti += c.ti; t.solde += c.solde;
+      t.jours += F.num(toutes[m].conges && toutes[m].conges.joursTravailles);
+      lignes += `<tr><td>${esc(F.labelMois(m).replace(' ' + an, ''))}</td>
+        <td>${F.f2(c.brut)}</td><td>${F.f2(c.netE)}</td><td>${F.f2(c.ti)}</td><td>${F.f2(c.solde)}</td></tr>`;
+    }
+    html += `<div class="card"><div class="body" style="border-top:0;padding-top:14px">
+      <div class="an-annee">${an}<small>${annees[an].length} fiche${annees[an].length > 1 ? 's' : ''}</small></div>
+      <table class="an-tab">
+        <thead><tr><th>Mois</th><th>Brut</th><th>Net</th><th>Indemn.</th><th>Versé</th></tr></thead>
+        <tbody>${lignes}
+          <tr class="tot"><td>Total</td><td>${F.f2(t.brut)}</td><td>${F.f2(t.net)}</td><td>${F.f2(t.ti)}</td><td>${F.f2(t.solde)}</td></tr>
+        </tbody>
+      </table>
+      <p class="hint">Montants en euros. Le total « Versé » correspond aux soldes effectivement payés sur l'année, indemnités comprises${t.jours > 0 ? ' — ' + F.qn(t.jours) + ' jours travaillés déclarés' : ''}.</p>
+    </div></div>`;
+  }
+  box.innerHTML = html;
+}
+
+/* ---------------- Dossier salariée ---------------- */
+function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, ...p }; }
+
+const MAIL_SUBJECT_DEFAUT = 'Fiche de salaire — {mois}';
+const MAIL_BODY_DEFAUT = "Bonjour,\n\nVeuillez trouver ci-joint la fiche de calcul du salaire pour l'accueil de {enfant} — {mois}.\n\nCordialement,\n{employeur}";
+
+function tplRender(t) {
+  return t
+    .split('{mois}').join(F.labelMois(cur.mois))
+    .split('{enfant}').join(cur.enfant.prenom || '')
+    .split('{salariee}').join(cur.salarie.nom || '')
+    .split('{employeur}').join(cur.employeur.nom || '');
+}
+
+function fillProfilForm() {
+  $$('[data-profil]').forEach(el => {
+    const v = getPath(profil, el.dataset.profil);
+    if (el.type === 'checkbox') el.checked = !!v;
+    else el.value = v == null ? '' : v;
+  });
+}
+function scheduleProfilSave() { setStatus('saving'); clearTimeout(profilTimer); profilTimer = setTimeout(doProfilSave, 600); }
+async function doProfilSave() {
+  clearTimeout(profilTimer); profilTimer = null;
+  await API.saveProfil(JSON.parse(JSON.stringify(profil)));
+  setStatus('ok');
+}
+
+function renderDossier() {
+  const ds = (label, val) => `<div class="ds"><span>${esc(label)}</span><b>${esc(val || '—')}</b></div>`;
+  const s = cur.salarie, e = cur.employeur, en = cur.enfant;
+  $('#dosIdent').innerHTML =
+    ds('Nom', s.nom) + ds('Adresse', [s.adresse, s.cpVille].filter(Boolean).join(', ')) +
+    ds('N° sécurité sociale', s.secu) + ds('Enfant accueilli', [en.prenom, en.nom].filter(Boolean).join(' ')) +
+    ds('Employeur', e.nom) + ds('N° Pajemploi', e.pajemploi);
+  const ct = cur.contrat, c = F.compute(cur), i = cur.indemnites;
+  $('#dosContrat').innerHTML =
+    ds('Type', ct.anneeComplete ? 'Année complète (52 semaines)' : 'Année incomplète (' + F.qn(ct.hnS) + ' semaines)') +
+    ds('H. normales', F.qn(ct.hnH) + ' h/sem → ' + F.f2(c.hnM) + ' h/mois') +
+    ds('H. majorées', F.qn(ct.hmH) + ' h/sem → ' + F.f2(c.hmM) + ' h/mois') +
+    ds('Tarifs bruts', [F.f2(ct.tHn), F.f2(ct.tHc), F.f2(ct.tHm)].join(' / ') + ' €/h') +
+    ds('Salaire mensualisé brut', F.f2(c.mensualise) + ' €') +
+    ds('Indemnités habituelles', 'entretien ' + F.f2(i.e1t) + ' € · repas ' + F.f2(i.rt) + ' € · goûter ' + F.f2(i.gt) + ' €');
+}
+
+/* ---------------- Envoi ---------------- */
+function openMailModal() {
+  const P = natif();
+  $('#mailTo').value = (profil.salarie && profil.salarie.email) || '';
+  $('#mailSubject').value = tplRender((profil.mailTpl && profil.mailTpl.subject) || MAIL_SUBJECT_DEFAUT);
+  $('#mailBody').value = tplRender((profil.mailTpl && profil.mailTpl.body) || MAIL_BODY_DEFAUT);
+  $('#mailAttach').textContent = (P && P.sharePdf)
+    ? 'Pièce jointe : ' + pdfName()
+    : 'Enregistre d\u2019abord la fiche en PDF, puis joins-la depuis ton application e-mail.';
+  $('#mailModal').hidden = false;
+  $('#mailTo').focus();
+}
+
+async function envoyerMail() {
+  const to = $('#mailTo').value.trim();
+  const subject = $('#mailSubject').value, body = $('#mailBody').value;
+  if (!to.includes('@')) { toast('Adresse e-mail invalide'); return; }
+
+  const btn = $('#btnMailSend');
+  btn.disabled = true; btn.textContent = 'Préparation…';
+  await doSave();
+
+  const P = natif();
+  if (P && P.sharePdf) {
+    try {
+      await P.sharePdf({ html: F.buildSheetHTML(cur), name: pdfName(), to, subject, body });
+      btn.disabled = false; btn.textContent = 'Envoyer';
+      $('#mailModal').hidden = true;
+      marquerEnvoyee();
+      return;
+    } catch (e) {
+      toast('Pièce jointe impossible, ouverture sans le PDF');
+    }
+  }
+
+  btn.disabled = false; btn.textContent = 'Envoyer';
+  $('#mailModal').hidden = true;
+  marquerEnvoyee();
+  location.href = 'mailto:' + encodeURIComponent(to) +
+    '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+
+/* ---------------- Sauvegarde / reprise des données ---------------- */
+async function exportJson() {
+  const data = await Store.all();
+  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'assmat-sauvegarde-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast('Sauvegarde exportée');
+}
+async function importJson(file) {
+  let d;
+  try { d = JSON.parse(await file.text()); }
+  catch (e) { toast('Fichier illisible : ce n\u2019est pas du JSON'); return; }
+  const cible = await Store.all();
+  let n = 0;
+  const ajoute = f => {
+    if (f && typeof f === 'object' && /^\d{4}-\d{2}$/.test(f.mois || '')) { cible.fiches[f.mois] = f; n++; }
+  };
+  if (d.fiches) { Object.values(d.fiches).forEach(ajoute); if (d.profil) cible.profil = { ...cible.profil, ...d.profil }; }
+  else if (Array.isArray(d)) d.forEach(ajoute);
+  else ajoute(d);
+  if (!n) { toast('Aucune fiche reconnue dans ce fichier'); return; }
+  await Store.flush();
+  profil = normalizeProfil(await API.loadProfil());
+  fillProfilForm();
+  const list = await API.listFiches();
+  await openFiche(list[0].mois);
+  toast(n + (n > 1 ? ' fiches importées' : ' fiche importée'));
+}
+
+/* ---------------- Tiroir, feuille d'actions, toast ---------------- */
+function openDrawer() { $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); }
+function closeDrawer() { $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
+function openSheet() { $('#sheet').classList.add('on'); $('#scrim').classList.add('on'); }
+function closeSheet() { $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
+
+let toastTimer;
+function toast(msg, action) {
+  const t = $('#toast');
+  t.innerHTML = esc(msg) + (action ? `<button id="toastBtn">${esc(action.label)}</button>` : '');
+  if (action) $('#toastBtn').onclick = action.fn;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+/* ---------------- Événements ---------------- */
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.bind) {
+    if (el.type === 'checkbox') {
+      setPath(cur, el.dataset.bind, el.checked);
+      if (el.dataset.bind === 'contrat.anneeComplete') applyAnneeComplete();
+    } else setPath(cur, el.dataset.bind, el.value);
+  } else if (el.dataset.cal) {
+    const [i, k] = el.dataset.cal.split(':');
+    cur.calendrier[+i][k] = el.value;
+  } else if (el.dataset.profil) {
+    setPath(profil, el.dataset.profil, el.type === 'checkbox' ? el.checked : el.value);
+    scheduleProfilSave();
+    if (el.dataset.profil.startsWith('rappel.')) {
+      clearTimeout(rappelTimer);
+      rappelTimer = setTimeout(programmerRappels, 900);
+    }
+    return;
+  } else return;
+  recalc();
+  scheduleSave();
+});
+
+/* Au-delà du seuil quotidien, l'excédent bascule en heures majorées. */
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (!el.dataset || !el.dataset.cal) return;
+  const [i, k] = el.dataset.cal.split(':');
+  if (k !== 'p') return;
+  const seuil = F.num(cur.calAide.seuil);
+  if (seuil <= 0) return;
+  const v = F.num(el.value);
+  if (v <= seuil) return;
+  const excedent = v - seuil;
+  cur.calendrier[+i].p = F.qn(seuil);
+  cur.calendrier[+i].m = F.qn(F.num(cur.calendrier[+i].m) + excedent);
+  syncCalInputs();
+  toast('Jour ' + (+i + 1) + ' : ' + F.qn(excedent) + ' h au-delà de ' + F.qn(seuil) + ' h → heures majorées');
+  recalc(); scheduleSave();
+});
+
+$('#mois').addEventListener('change', async () => {
+  const m = $('#mois').value;
+  if (!/^\d{4}-\d{2}$/.test(m)) { $('#mois').value = cur.mois; return; }
+  if (m === cur.mois) return;
+  if (await API.existsFiche(m)) {
+    toast('Une fiche existe déjà pour ' + F.labelMois(m));
+    $('#mois').value = cur.mois;
+    return;
+  }
+  const old = moisOnDisk;
+  cur.mois = m;
+  const per = F.periodeFromMois(m);
+  cur.periodeDu = per.du; cur.periodeAu = per.au;
+  await API.renameFiche(old, m, cur);
+  moisOnDisk = m;
+  fillForm();
+  await refreshList();
+  setStatus('ok');
+});
+
+$('#calendrier').addEventListener('click', e => {
+  const b = e.target.closest('[data-abs]');
+  if (b) basculerAbsence(+b.dataset.abs);
+});
+
+$('#dedApply').addEventListener('click', () => {
+  const c = F.compute(cur);
+  if (c.dedSug == null) return;
+  cur.activite.deduction = F.f2(c.dedSug);
+  $('[data-bind="activite.deduction"]').value = cur.activite.deduction;
+  recalc(); scheduleSave();
+});
+
+$('#btnMenu').onclick = openDrawer;
+$('#btnFermer').onclick = closeDrawer;
+$('#btnMore').onclick = openSheet;
+$('#scrim').onclick = () => { closeDrawer(); closeSheet(); };
+$('#calFill').onclick = remplirSemaine;
+$('#calClear').onclick = viderCalendrier;
+$('#btnNouveau').onclick = () => { closeDrawer(); nouveauMois(); };
+$('#btnDossierSal').onclick = () => { closeDrawer(); showView('dossier'); };
+$('#tabSaisie').onclick = () => showView('saisie');
+$('#tabApercu').onclick = () => showView('apercu');
+$('#btnZoom').onclick = () => {
+  zoom1 = !zoom1;
+  $('#btnZoom').textContent = zoom1 ? 'Ajuster à l\u2019écran' : 'Agrandir';
+  fitPreview();
+};
+$('#btnPdf').onclick = exporterPdf;
+$('#joursApply').onclick = reprendreJours;
+$('#btnAnnuel').onclick = () => { closeDrawer(); showView('annuel'); };
+$('#actPdf').onclick = () => { closeSheet(); exporterPdf(); };
+$('#actPrint').onclick = () => { closeSheet(); imprimer(); };
+$('#actMail').onclick = () => { closeSheet(); openMailModal(); };
+$('#actPlanning').onclick = () => { closeSheet(); partagerPlanning(); };
+$('#actAbsence').onclick = () => { closeSheet(); openAbsModal(); };
+$('#btnAbsCancel').onclick = () => { $('#absModal').hidden = true; };
+$('#btnAbsSend').onclick = envoyerAbsence;
+$('#absModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#absModal').hidden = true; });
+$('#actAnnuel').onclick = () => { closeSheet(); showView('annuel'); };
+$('#actDossier').onclick = () => { closeSheet(); showView('dossier'); };
+$('#actSuppr').onclick = () => { closeSheet(); supprimer(); };
+$('#btnMailCancel').onclick = () => { $('#mailModal').hidden = true; };
+$('#btnMailSend').onclick = envoyerMail;
+$('#mailModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#mailModal').hidden = true; });
+$$('[data-lien]').forEach(a => { a.onclick = e => { e.preventDefault(); ouvrirLien(a.dataset.lien); }; });
+$('#btnIcs').onclick = exporterIcs;
+$('#btnExportJson').onclick = exportJson;
+$('#btnImportJson').onclick = () => $('#fileJson').click();
+$('#fileJson').onchange = e => { if (e.target.files[0]) importJson(e.target.files[0]); e.target.value = ''; };
+
+window.addEventListener('resize', () => { if (vue === 'apercu') fitPreview(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'hidden') return;
+  if (saveTimer) doSave();
+  if (profilTimer) doProfilSave();
+});
+window.addEventListener('pagehide', () => { if (saveTimer) doSave(); if (profilTimer) doProfilSave(); });
+
+/* ---------------- Intégration Android ----------------
+   Bouton retour : referme ce qui est ouvert plutôt que de quitter l'application,
+   ce que fait le comportement par défaut d'une WebView. */
+function integrerAndroid() {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (!C) return;
+
+  if (C.App && C.App.addListener) {
+    C.App.addListener('backButton', () => {
+      if (!$('#absModal').hidden) { $('#absModal').hidden = true; return; }
+      if (!$('#mailModal').hidden) { $('#mailModal').hidden = true; return; }
+      if ($('#sheet').classList.contains('on')) { closeSheet(); return; }
+      if ($('#drawer').classList.contains('on')) { closeDrawer(); return; }
+      if (vue !== 'saisie') { showView('saisie'); return; }
+      C.App.exitApp();
+    });
+    C.App.addListener('resume', () => { if (saveTimer) doSave(); });
+  }
+
+  if (C.StatusBar) {
+    const sombre = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    try {
+      C.StatusBar.setBackgroundColor({ color: sombre ? '#0a1412' : '#17403c' });
+      C.StatusBar.setStyle({ style: 'DARK' });
+    } catch (e) { /* barre d'état non pilotable sur cet appareil */ }
+  }
+}
+
+/* ---------------- Démarrage ---------------- */
+if ('serviceWorker' in navigator && !window.Capacitor && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+buildCalendrier();
+(async () => {
+  profil = normalizeProfil(await API.loadProfil());
+  fillProfilForm();
+  const list = await API.listFiches();
+  if (list.length) await openFiche(list[0].mois);
+  else await nouveauMois();
+  integrerAndroid();
+  programmerRappels();
+  console.log('AssMat+ mobile — stockage : ' + Store.kind);
+})();
+</script>
+</body>
+</html>
