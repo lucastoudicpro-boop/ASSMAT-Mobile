@@ -1,0 +1,71 @@
+name: Créer la clé de signature
+
+# À lancer une seule fois. Produit la clé qui signera toutes les versions.
+# Perdre cette clé oblige à désinstaller l'application avant toute mise à jour.
+on:
+  workflow_dispatch:
+    inputs:
+      nom:
+        description: Nom du propriétaire de la clé
+        required: true
+        default: Lucas
+
+jobs:
+  cle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Générer la clé
+        env:
+          NOM_BRUT: ${{ inputs.nom }}
+        run: |
+          set -e
+
+          # Un nom X.500 réserve , + = < > # ; et l'antislash. On les retire
+          # plutôt que de les échapper : ces champs ne servent qu'à identifier
+          # la clé, leur contenu exact est sans importance.
+          NOM=$(printf '%s' "$NOM_BRUT" | tr -d ',+=<>#;\\"' | cut -c1-60)
+          [ -n "$NOM" ] || NOM="AssMat"
+
+          MDP=$(head -c 48 /dev/urandom | base64 | tr -d '/+=' | head -c 24)
+
+          keytool -genkeypair -v \
+            -keystore assmat.jks \
+            -alias assmat \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$MDP" -keypass "$MDP" \
+            -dname "CN=$NOM, OU=AssMat, O=AssMat, C=FR"
+
+          base64 -w0 assmat.jks > assmat.jks.base64
+
+          {
+            echo "Copier ces quatre valeurs dans Settings > Secrets and variables > Actions."
+            echo
+            echo "ANDROID_KEYSTORE          = le contenu du fichier assmat.jks.base64"
+            echo "ANDROID_KEYSTORE_PASSWORD = $MDP"
+            echo "ANDROID_KEY_ALIAS         = assmat"
+            echo "ANDROID_KEY_PASSWORD      = $MDP"
+            echo
+            echo "Conserve aussi assmat.jks hors de GitHub : sans lui, plus aucune"
+            echo "mise a jour n'est installable par-dessus la version precedente."
+          } > a-faire.txt
+
+          echo "Clé créée pour : CN=$NOM"
+
+      - name: Vérifier la clé
+        run: keytool -list -v -keystore assmat.jks -storepass "$(grep 'KEYSTORE_PASSWORD' a-faire.txt | sed 's/.*= //')" | head -20
+
+      - name: Publier la clé
+        uses: actions/upload-artifact@v4
+        with:
+          name: cle-de-signature
+          path: |
+            assmat.jks
+            assmat.jks.base64
+            a-faire.txt
+          retention-days: 1

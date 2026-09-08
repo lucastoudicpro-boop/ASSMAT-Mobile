@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Cocon Nounou</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{
+  --bg:#f7f4f5; --card:#fff; --line:#eee3e6; --txt:#21161a; --mut:#84686f;
+  --acc:#b8556e; --acc-d:#8f3f52; --ok:#b8556e; --danger:#c2554e;
+  --miel:#b8791f; --acc-doux:#fbeef1;
+  --side:#4a1f2b; --side2:#6b2f3f;
+  --champ:#fff; --bord:#e2ced4; --zebre:#faf3f5; --ombre:rgba(60,25,35,.06);
+  --radius:18px;
+  --halo:#fbeef1;
+  --safeT:env(safe-area-inset-top,0px); --safeB:env(safe-area-inset-bottom,0px);
+  --hdr:54px;
+}
+html[data-theme="sombre"]{
+  --halo:rgba(255,255,255,.03);
+  --bg:#171113; --card:#20171b; --line:#352930; --txt:#f0e6ea; --mut:#a8929a;
+  --acc:#e79ab0; --acc-d:#d4738a; --ok:#e79ab0; --danger:#e88b83;
+  --miel:#e0a94d; --acc-doux:#3a2129;
+  --champ:#1a1316; --bord:#453640; --zebre:#261c21; --ombre:rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--txt);min-height:100vh;min-height:100dvh;
+  font:15px/1.45 system-ui,"Segoe UI",Roboto,sans-serif;
+  display:flex;flex-direction:column;
+}
+
+#hdr{
+  position:sticky;top:0;z-index:30;flex:0 0 auto;
+  height:calc(var(--hdr) + var(--safeT));padding:var(--safeT) 6px 0;
+  background:var(--card);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:4px;
+}
+#hdr h1{margin:0 0 0 10px;font-size:17px;font-weight:650;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{border:0;background:transparent;color:var(--mut);width:44px;height:44px;
+  border-radius:22px;cursor:pointer;flex:0 0 auto;font-size:19px}
+.iconbtn:active{background:var(--zebre)}
+.iconbtn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+
+#contenu{flex:1 0 auto;padding:12px 12px 16px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  margin-bottom:10px;overflow:hidden;box-shadow:0 1px 2px var(--ombre)}
+.card>.tete{padding:13px 14px;display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px}
+.card>.tete svg{width:21px;height:21px;flex:0 0 auto;fill:none;stroke:var(--acc);
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.card>.corps{padding:0 14px 14px}
+.card>.tete+.corps{border-top:1px solid var(--line);padding-top:12px}
+
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.field>span{font-size:12px;color:var(--mut)}
+input,textarea{font:16px/1.3 system-ui;color:var(--txt);background:var(--champ);
+  border:1px solid var(--bord);border-radius:9px;padding:10px 11px;width:100%;min-height:44px}
+input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--acc)}
+.btn{border:1px solid transparent;border-radius:10px;padding:11px 15px;cursor:pointer;
+  font:600 14px system-ui;min-height:44px}
+.btn:active{filter:brightness(.94)}
+.btn-primary{background:var(--acc);color:#fff}
+.btn-ghost{background:var(--card);color:var(--txt);border-color:var(--bord)}
+.btn-block{width:100%;display:block;margin-bottom:8px}
+.hint{font-size:12px;line-height:1.45;color:var(--mut);margin:8px 0 0}
+
+#hero{background:linear-gradient(150deg,#b8556e,#8f3f52);color:#fff;
+  border-radius:20px;padding:18px;margin-bottom:12px}
+#hero .haut{font-size:13px;opacity:.82}
+#hero .gros{font-size:30px;font-weight:700;line-height:1.15;margin:2px 0 4px}
+#hero .bas{font-size:12.5px;opacity:.85}
+
+.ds{display:flex;justify-content:space-between;gap:12px;padding:9px 0;
+  border-bottom:1px solid var(--line);font-size:13.5px}
+.ds:last-child{border-bottom:0}
+.ds span{color:var(--mut);flex:1 1 auto;min-width:0}
+.ds b{text-align:right;flex:0 0 auto;white-space:nowrap}
+
+.famille{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  border:0;background:transparent;padding:13px 0;cursor:pointer;color:var(--txt);
+  font:inherit;border-bottom:1px solid var(--line)}
+.famille:last-child{border-bottom:0}
+.famille .pastille{width:38px;height:38px;border-radius:19px;flex:0 0 auto;
+  background:var(--acc-doux);color:var(--acc);display:flex;align-items:center;
+  justify-content:center;font:700 15px system-ui}
+.famille span{flex:1;min-width:0;line-height:1.3}
+.famille b{display:block;font-size:14px}
+.famille small{font-size:12px;color:var(--mut)}
+
+.gr-tete,.gr-corps{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.gr-tete span{font-size:10.5px;color:var(--mut);text-align:center;padding-bottom:5px}
+.gr-jour{border:1px solid var(--line);background:var(--card);border-radius:10px;
+  min-height:54px;padding:5px 3px;display:flex;flex-direction:column;
+  align-items:center;gap:2px;font:inherit;color:var(--txt)}
+.gr-jour .n{font-size:11.5px;color:var(--mut)}
+.gr-jour .h{font-size:13.5px;font-weight:700;color:var(--acc)}
+.gr-jour.vide{background:transparent;border-color:transparent}
+.gr-jour.we{background:var(--zebre)}
+
+#nav{display:flex;border-top:1px solid var(--line);background:var(--card);
+  position:sticky;bottom:0;z-index:28;padding-bottom:var(--safeB)}
+.nav-item{flex:1;min-width:0;border:0;background:transparent;cursor:pointer;
+  padding:7px 1px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--mut);font:500 11px system-ui}
+.nav-item svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;padding:3px 14px;border-radius:13px;
+  box-sizing:content-box;transition:background .15s}
+.nav-item.active{color:var(--acc)}
+.nav-item.active svg{background:var(--acc-doux)}
+
+#verrou{
+  position:fixed;inset:0;z-index:110;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 24px calc(var(--safeB) + 24px);
+}
+#verrou[hidden]{display:none}
+#verrou .cadenas{width:34px;height:34px;fill:none;stroke:var(--acc);
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-bottom:14px}
+#verrouTitre{font:600 17px system-ui;color:var(--txt)}
+#verrouMsg{font-size:13px;color:var(--danger);height:20px;margin-top:8px;text-align:center}
+#verrouPoints{display:flex;gap:14px;margin-top:20px;height:16px}
+#verrouPoints i{width:13px;height:13px;border-radius:7px;border:2px solid var(--bord);
+  transition:background .12s,border-color .12s}
+#verrouPoints i.plein{background:var(--acc);border-color:var(--acc)}
+#clavier{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin-top:26px;width:100%;max-width:280px}
+#clavier button{height:64px;border-radius:32px;background:var(--card);
+  font:400 24px system-ui;color:var(--txt);cursor:pointer;border:1px solid var(--line)}
+#clavier button:active{background:var(--acc-doux)}
+#clavier button svg{width:24px;height:24px;fill:none;stroke:var(--acc);
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#toucheBio{grid-column:1}
+#clavier button[data-touche="0"]{grid-column:2}
+#clavier button[data-touche="eff"]{grid-column:3}
+
+#splash{position:fixed;inset:0;z-index:100;
+  background:linear-gradient(160deg,#e8a0ae,#d4738a 45%,#8f3f52);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .38s ease}
+#splash.parti{opacity:0;pointer-events:none}
+#splash img{width:120px;height:120px;border-radius:26px;
+  filter:drop-shadow(0 14px 22px rgba(50,15,25,.35))}
+#splash .mot{color:#fff;font:700 25px/1 system-ui;margin-top:18px}
+#splash .sous{color:#f6dde3;font:400 13px/1 system-ui;margin-top:6px}
+
+#toast{position:fixed;z-index:60;left:12px;right:12px;bottom:78px;max-width:560px;
+  margin:0 auto;background:#2b1a20;color:#fff;padding:13px 15px;border-radius:11px;
+  font-size:13.5px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s}
+#toast.show{opacity:1;transform:none}
+.modal{position:fixed;inset:0;z-index:70;background:rgba(35,15,22,.5);display:flex;align-items:flex-end}
+.modal-box{background:var(--card);width:100%;border-radius:16px 16px 0 0;
+  padding:18px 16px calc(var(--safeB) + 16px);max-height:92vh;overflow-y:auto}
+.modal-box h3{margin:0 0 14px;font-size:16px}
+.modal-actions{display:flex;gap:8px;margin-top:14px}
+.modal-actions .btn{flex:1}
+.deux{display:flex;gap:8px}
+.deux input{flex:1}
+.card.urgence{border-color:#e6b9c3}
+.card.urgence .tete svg{stroke:#b8556e}
+.urg-l{display:flex;justify-content:space-between;gap:12px;padding:9px 0;
+  border-bottom:1px solid var(--line);font-size:13.5px}
+.urg-l:last-child{border-bottom:0}
+.urg-l span{color:var(--mut);flex:0 0 40%}
+.urg-l b{text-align:right;flex:1;min-width:0;word-break:break-word}
+.urg-l a{color:var(--acc);font-weight:700;text-decoration:none}
+.urg-alerte{background:#fdeeee;border-radius:12px;padding:11px 13px;margin-bottom:10px;
+  font-size:13px;line-height:1.45;color:#8a3a34}
+.urg-oui{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.urg-oui i{font-style:normal;font-size:11.5px;background:var(--zebre);
+  border-radius:12px;padding:4px 9px}
+.gal{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;background:var(--zebre)}
+.avance{margin-bottom:12px}
+.avance>summary{font-size:12.5px;color:var(--mut);cursor:pointer;padding:6px 0;list-style:none}
+.avance>summary::-webkit-details-marker{display:none}
+.avance>summary::before{content:'⚙ ';opacity:.6}
+.rub{font-size:12px;color:var(--mut);margin:14px 0 7px;font-weight:600}
+.rub:first-child{margin-top:0}
+.choix{display:flex;gap:7px;flex-wrap:wrap}
+.choix button{
+  border:1px solid var(--bord);background:var(--card);border-radius:20px;
+  padding:9px 13px;font:600 13px system-ui;color:var(--txt);cursor:pointer;min-height:42px;
+}
+.choix button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.compteur{display:flex;align-items:center;gap:12px}
+.compteur .btn{width:52px;padding:9px 0;text-align:center}
+.compteur b{font-size:20px;min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
+textarea{font:16px/1.4 system-ui;color:var(--txt);background:var(--champ);
+  border:1px solid var(--bord);border-radius:9px;padding:10px 11px;width:100%;resize:vertical}
+.besoins{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.besoin-b{display:flex;align-items:center;gap:9px;border:1px solid var(--bord);
+  background:var(--card);border-radius:12px;padding:12px 10px;cursor:pointer;
+  font:600 13px system-ui;color:var(--txt);min-height:48px;text-align:left}
+.besoin-b:active{background:var(--acc-doux);border-color:var(--acc)}
+.besoin-b .em{font-size:17px}
+.hor-l{display:flex;justify-content:space-between;padding:8px 0;
+  border-bottom:1px solid var(--line);font-size:13.5px}
+.hor-l:last-child{border-bottom:0}
+.hor-l b{font-variant-numeric:tabular-nums}
+.hor-l.off{color:var(--mut)}
+.msg{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.msg:last-child{border-bottom:0}
+.msg .txt{flex:1;min-width:0;line-height:1.4}
+.msg .txt b{display:block;font-size:13.5px}
+.msg .txt small{font-size:11.5px;color:var(--mut)}
+.msg .txt.mien b{color:var(--mut);font-weight:500}
+.msg img{max-width:100%;border-radius:10px;margin-top:8px;display:block}
+.consentement{font-size:13px;line-height:1.6;max-height:38vh;overflow-y:auto;
+  background:var(--zebre);border-radius:12px;padding:14px;margin-bottom:14px}
+.consentement b{display:block;margin:10px 0 4px}
+
+/* ---------- Finition : chaleur et fluidite ---------- */
+body{background-image:radial-gradient(120% 60% at 50% 0%, var(--halo) 0%, transparent 60%)}
+.card{transition:box-shadow .18s ease, transform .12s ease}
+.btn,.nav-item,.tuile,.puce-act,.famille,.etape,.ligne-lien,.besoin-b,.choix button{
+  transition:background .16s ease, transform .1s ease, border-color .16s ease}
+.btn:active,.besoin-b:active,.puce-act:active{transform:scale(.975)}
+.famille:active,.etape:active,.ligne-lien:active{transform:scale(.995)}
+section[id^="vue"],#saisie,#accueil,#dossier,#parametres,#annuel,#apercu{
+  animation:apparait .26s cubic-bezier(.2,.7,.3,1) both}
+@keyframes apparait{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#toast{box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.card>summary,.card>.tete{user-select:none}
+input,textarea{transition:border-color .16s ease, box-shadow .16s ease}
+input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
+@media (prefers-reduced-motion:reduce){
+  section[id^="vue"],#saisie,#accueil,#dossier,#parametres,#annuel,#apercu{animation:none}
+  .btn:active,.besoin-b:active,.puce-act:active,.famille:active{transform:none}
+}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (min-width:620px){#contenu,#hdr>*{max-width:640px;margin-left:auto;margin-right:auto}}
+</style>
+</head>
+<body>
+
+<svg id="sprite" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+<symbol id="i-accueil" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7M5.5 9.2V19a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9.2"/><path d="M9.5 20.5v-6h5v6"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M3.5 9h17M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V7A1.5 1.5 0 0 1 5 5.5z"/></symbol>
+<symbol id="i-gens" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 5.6a3.2 3.2 0 0 1 0 6.3M17.5 15.4c1.9.7 3.2 2.4 3.2 4.6"/></symbol>
+<symbol id="i-reglages" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.3l2.6 2.6 5-5.4"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4 7l8 5.5L20 7"/></symbol>
+<symbol id="i-alerte" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 16.5v-5M12 8h.01"/></symbol>
+<symbol id="i-journal" viewBox="0 0 24 24"><path d="M5.5 4.5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-12a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z"/><path d="M8.5 3v4M8 10.5h8M8 14h5"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l4.5-4.5 3.5 3.5 3-3L20 17"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5"/></symbol>
+</svg>
+
+<div id="verrou" hidden>
+  <svg class="cadenas" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="4.5" y="10.5" width="15" height="10" rx="2.4"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>
+  </svg>
+  <div id="verrouTitre">Code de l'application</div>
+  <div id="verrouPoints"></div>
+  <div id="verrouMsg"></div>
+  <div id="clavier">
+    <button data-touche="1">1</button><button data-touche="2">2</button><button data-touche="3">3</button>
+    <button data-touche="4">4</button><button data-touche="5">5</button><button data-touche="6">6</button>
+    <button data-touche="7">7</button><button data-touche="8">8</button><button data-touche="9">9</button>
+    <button id="toucheBio" data-touche="bio" hidden><svg viewBox="0 0 24 24"><path d="M12 3.5c-3 0-5.5 1.4-7 3.4M19 6.9c-.8-1-1.8-1.9-3-2.5M4.6 11.5A8 8 0 0 1 12 7.5a8 8 0 0 1 7.4 4M6.5 16.5c.7-1.3 1-2.7 1-4A4.5 4.5 0 0 1 12 8a4.5 4.5 0 0 1 4.5 4.5c0 1.4-.2 2.7-.6 3.9M12 11v2.5c0 2-.4 4-1.2 5.7M14.6 19.6c.5-1.5.8-3 .9-4.6"/></svg></button>
+    <button data-touche="0">0</button>
+    <button data-touche="eff"><svg viewBox="0 0 24 24"><path d="M9 5.5h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9L3 12z"/><path d="M11.5 9.5l5 5M16.5 9.5l-5 5"/></svg></button>
+  </div>
+</div>
+
+<div id="splash">
+  <img src="icones/icone-192.png" alt="">
+  <div class="mot">Cocon Nounou</div>
+  <div class="sous">Vos accueils, au même endroit</div>
+</div>
+
+<header id="hdr">
+  <h1 id="titre">Cocon</h1>
+  <button id="btnParams" class="iconbtn" aria-label="Paramètres"><svg><use href="#i-reglages"/></svg></button>
+</header>
+
+<div id="contenu">
+
+  <section id="vueAccueil">
+    <div id="hero">
+      <div class="haut" id="heroHaut">Cette semaine</div>
+      <div class="gros" id="heroHeures">— h</div>
+      <div class="bas" id="heroBas">Connecte-toi pour voir tes accueils</div>
+    </div>
+    <div class="card">
+      <div class="tete"><svg><use href="#i-cal"/></svg>Aujourd'hui</div>
+      <div class="corps" id="aujourdhui"></div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-gens"/></svg>Mes familles</div>
+      <div class="corps" id="listeFamilles"></div>
+    </div>
+  </section>
+
+  <section id="vuePlanning" hidden>
+    <div class="card">
+      <div class="tete"><svg><use href="#i-cal"/></svg><span id="planningTitre">Planning</span></div>
+      <div class="corps">
+        <div id="horairesBase"></div>
+        <p class="hint" style="margin-bottom:12px">Horaires convenus au contrat. Les exceptions du mois apparaissent dans le calendrier ci-dessous.</p>
+        <div class="gr-tete"><span>lun</span><span>mar</span><span>mer</span><span>jeu</span><span>ven</span><span>sam</span><span>dim</span></div>
+        <div class="gr-corps" id="grille"></div>
+        <div class="ds" style="margin-top:12px"><span>Total du mois</span><b id="totalMois">0 h</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-info"/></svg>L'enfant</div>
+      <div class="corps" id="infoEnfant"></div>
+    </div>
+
+    <div class="card urgence">
+      <div class="tete"><svg><use href="#i-alerte"/></svg>Fiche d'urgence</div>
+      <div class="corps" id="ficheUrgence"></div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-image"/></svg>Galerie</div>
+      <div class="corps">
+        <div class="gal" id="galerie"></div>
+        <label class="btn btn-ghost btn-block" style="margin-top:10px;text-align:center;display:block">
+          Ajouter une photo
+          <input id="fichierGalerie" type="file" accept="image/*" capture="environment" hidden>
+        </label>
+        <div id="galerieEtat"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="vueJournal" hidden>
+    <div class="card">
+      <div class="tete"><svg><use href="#i-journal"/></svg><span id="journalTitre">Journal</span></div>
+      <div class="corps">
+        <div class="deux" style="margin-bottom:12px">
+          <button id="jourPrec" class="btn btn-ghost">◀</button>
+          <b id="jourLabel" style="flex:1;text-align:center;align-self:center;font-size:14px"></b>
+          <button id="jourSuiv" class="btn btn-ghost">▶</button>
+        </div>
+
+        <div class="rub">Repas</div>
+        <div class="choix" id="chRepas"></div>
+
+        <div class="rub">Humeur</div>
+        <div class="choix" id="chHumeur"></div>
+
+        <div class="rub">Sieste</div>
+        <div class="deux">
+          <input id="siesteDebut" placeholder="13:00">
+          <input id="siesteFin" placeholder="15:00">
+        </div>
+
+        <div class="rub">Changes</div>
+        <div class="compteur">
+          <button id="coucheMoins" class="btn btn-ghost">−</button>
+          <b id="coucheN">0</b>
+          <button id="couchePlus" class="btn btn-ghost">+</button>
+        </div>
+
+        <div class="rub">Un mot aux parents</div>
+        <textarea id="motJournal" rows="4" placeholder="Une phrase sur la journée"></textarea>
+
+        <button id="btnJournal" class="btn btn-primary btn-block" style="margin-top:12px">Enregistrer et prévenir</button>
+        <p class="hint" id="journalEtat"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="vueMessages" hidden>
+    <div class="card">
+      <div class="tete"><svg><use href="#i-alerte"/></svg>Il manque quelque chose</div>
+      <div class="corps">
+        <div class="besoins" id="besoins"></div>
+        <p class="hint">Un appui envoie la demande au parent. Tu peux en signaler plusieurs.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-mail"/></svg>Échanges</div>
+      <div class="corps">
+        <div class="deux">
+          <input id="texteMsg" placeholder="Un mot au parent">
+          <button id="btnEnvoyer" class="btn btn-primary">Envoyer</button>
+        </div>
+        <label class="btn btn-ghost btn-block" style="margin-top:8px;text-align:center;display:block">
+          Ajouter une photo
+          <input id="fichierPhoto" type="file" accept="image/*" capture="environment" hidden>
+        </label>
+        <div id="fluxMessages" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="vueFamilles" hidden>
+    <div class="card">
+      <div class="tete"><svg><use href="#i-plus"/></svg>Rejoindre une famille</div>
+      <div class="corps">
+        <label class="field"><span>Code d'invitation</span><input id="codeInvit" placeholder="XXXXXX" autocapitalize="characters" maxlength="8"></label>
+        <button id="btnRejoindre" class="btn btn-primary btn-block">Rejoindre</button>
+        <p class="hint">Le code est fourni par le parent employeur depuis son application. Il est valable sept jours.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tete"><svg><use href="#i-gens"/></svg>Mes contrats</div>
+      <div class="corps" id="listeContrats"></div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-cal"/></svg>Mes fermetures</div>
+      <div class="corps">
+        <div id="listeFermetures"></div>
+        <div class="deux" style="margin-top:12px">
+          <input id="fermDu" placeholder="du jj/mm/aaaa">
+          <input id="fermAu" placeholder="au jj/mm/aaaa">
+        </div>
+        <input id="fermMotif" placeholder="Motif, facultatif" style="margin-top:8px">
+        <button id="btnFermeture" class="btn btn-primary btn-block" style="margin-top:8px">Ajouter</button>
+        <p class="hint">Congés, formation, jour férié pris. Toutes tes familles les voient et sont prévenues.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="vueParams" hidden>
+    <div class="card">
+      <div class="tete"><svg><use href="#i-reglages"/></svg>Compte</div>
+      <div class="corps">
+        <div class="ds"><span>État</span><b id="etatCompte">Hors ligne</b></div>
+        <div id="blocConnexion" style="margin-top:12px">
+          <details id="reglageProjet" class="avance">
+            <summary>Projet Supabase</summary>
+            <label class="field"><span>Adresse du projet</span><input id="url" placeholder="https://xxxx.supabase.co" inputmode="url"></label>
+            <label class="field"><span>Clé publique</span><input id="cle" placeholder="eyJhbG..."></label>
+          </details>
+          <label class="field"><span>Adresse e-mail</span><input id="email" inputmode="email"></label>
+          <label class="field"><span>Mot de passe</span><input id="mdp" type="password"></label>
+          <button id="btnConnexion" class="btn btn-primary btn-block">Se connecter</button>
+          <button id="btnInscription" class="btn btn-ghost btn-block">Créer mon compte</button>
+          <button id="btnMdpOublie" class="btn btn-ghost btn-block">Mot de passe oublié</button>
+        </div>
+        <div id="blocConnecte" hidden style="margin-top:12px">
+          <button id="btnDeconnexion" class="btn btn-ghost btn-block">Se déconnecter</button>
+        </div>
+        <div id="messageCompte"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tete"><svg><use href="#i-alerte"/></svg>Sécurité</div>
+      <div class="corps">
+        <label class="check"><input type="checkbox" id="secActif"><span>Demander un code à l'ouverture</span></label>
+        <label class="check"><input type="checkbox" id="secBio"><span>Proposer l'empreinte</span></label>
+        <button id="btnChangerCode" class="btn btn-ghost btn-block">Changer le code</button>
+        <p class="hint" id="secEtat"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
+      <div class="corps">
+        <div class="ds"><span>Version</span><b>0.9.8</b></div>
+        <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<nav id="nav">
+  <button class="nav-item active" data-vue="accueil"><svg><use href="#i-accueil"/></svg><span>Accueil</span></button>
+  <button class="nav-item" data-vue="planning"><svg><use href="#i-cal"/></svg><span>Planning</span></button>
+  <button class="nav-item" data-vue="journal"><svg><use href="#i-journal"/></svg><span>Journal</span></button>
+  <button class="nav-item" data-vue="messages"><svg><use href="#i-mail"/></svg><span>Messages</span></button>
+  <button class="nav-item" data-vue="familles"><svg><use href="#i-gens"/></svg><span>Familles</span></button>
+  <button class="nav-item" data-vue="params"><svg><use href="#i-reglages"/></svg><span>Réglages</span></button>
+</nav>
+
+<div id="consentModal" class="modal" hidden>
+  <div class="modal-box">
+    <h3>Accord de partage</h3>
+    <div class="consentement" id="texteConsentement"></div>
+    <label class="field"><span>Écris ton nom pour signer</span><input id="nomSignature" placeholder="Prénom NOM"></label>
+    <div class="modal-actions">
+      <button id="btnRefus" class="btn btn-ghost">Refuser</button>
+      <button id="btnSigner" class="btn btn-primary">Signer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* Client Supabase minimal, partagé par Cocon Parent et Cocon Nounou.
+   Aucune dépendance : les deux applications restent utilisables hors ligne. */
+/* ---------------- Accès à la base partagée ----------------
+   Client écrit à la main plutôt que la bibliothèque officielle : l'application
+   ne charge aucun script externe, ce qui la garde utilisable hors connexion.
+   Supabase expose de l'HTTP simple, une centaine de lignes suffisent. */
+/* Adresse du projet Supabase, partagée par les deux applications.
+   À remplir une seule fois ici, avant de compiler.
+
+   La clé « anon » est publique par conception : elle ne donne accès à rien
+   par elle-même. Ce sont les règles de la base qui protègent les données.
+   Laisser ces deux champs vides fait réapparaître la saisie manuelle dans les
+   réglages, utile pour essayer un autre projet. */
+const PROJET = {
+  url: '',
+  cle: ''
+};
+
+const Supa = (() => {
+  let base = '', cle = '', session = null;
+
+  /* Le stockage de la session est fourni par l'application hôte : chacune a le
+     sien. À défaut, on retombe sur celui du navigateur. */
+  let lireSession = async () => {
+    try { return JSON.parse(localStorage.getItem('cocon-session') || 'null'); }
+    catch (e) { return null; }
+  };
+  let ecrireSession = async (o) => {
+    try {
+      if (o) localStorage.setItem('cocon-session', JSON.stringify(o));
+      else localStorage.removeItem('cocon-session');
+    } catch (e) {}
+  };
+  function brancherStockage(lire, ecrire) { lireSession = lire; ecrireSession = ecrire; }
+
+  function configurer(u, c) {
+    base = String(u || '').trim().replace(/\/+$/, '');
+    cle = String(c || '').trim();
+  }
+  const configure = () => !!(base && cle);
+  const connecte = () => !!(session && session.access_token);
+  const moi = () => (session && session.user) || null;
+
+  async function appel(chemin, opts = {}, avecJeton = true) {
+    if (!configure()) throw new Error('Adresse et clé du projet manquantes');
+    const entetes = { apikey: cle, 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    if (avecJeton && connecte()) entetes.Authorization = 'Bearer ' + session.access_token;
+
+    let r;
+    try {
+      r = await fetch(base + chemin, { ...opts, headers: entetes });
+    } catch (e) {
+      throw new Error('Serveur injoignable — vérifie la connexion et l\u2019adresse du projet');
+    }
+    const brut = await r.text();
+    let data = null;
+    try { data = brut ? JSON.parse(brut) : null; } catch (e) { data = brut; }
+
+    if (!r.ok) {
+      const m = (data && (data.msg || data.message || data.error_description || data.error || data.hint)) || null;
+      throw new Error(m || ('Erreur ' + r.status));
+    }
+    return data;
+  }
+
+  async function memoriser(s) {
+    session = s;
+    try {
+      await ecrireSession(s ? { ...s, expire_a: Date.now() + (s.expires_in || 3600) * 1000 } : null);
+    } catch (e) { /* la session vaut au moins pour cette ouverture */ }
+  }
+
+  async function reprendre() {
+    const s = await lireSession();
+    if (!s || !s.refresh_token) return false;
+    session = s;
+    if (s.expire_a && s.expire_a - Date.now() > 60000) return true;
+    return rafraichir();
+  }
+
+  async function rafraichir() {
+    const s = await lireSession();
+    if (!s || !s.refresh_token) return false;
+    try {
+      const r = await appel('/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST', body: JSON.stringify({ refresh_token: s.refresh_token })
+      }, false);
+      await memoriser(r);
+      return true;
+    } catch (e) {
+      await memoriser(null);
+      return false;
+    }
+  }
+
+  async function inscrire(email, mdp) {
+    const r = await appel('/auth/v1/signup', {
+      method: 'POST', body: JSON.stringify({ email, password: mdp })
+    }, false);
+    if (r && r.access_token) await memoriser(r);
+    return r;
+  }
+
+  async function connecter(email, mdp) {
+    const r = await appel('/auth/v1/token?grant_type=password', {
+      method: 'POST', body: JSON.stringify({ email, password: mdp })
+    }, false);
+    await memoriser(r);
+    return r;
+  }
+
+  /* Envoie le lien de reinitialisation. La reponse est volontairement la meme
+     que l'adresse existe ou non : sinon on donnerait le moyen de savoir qui a
+     un compte. */
+  async function recuperer(email) {
+    await appel('/auth/v1/recover', {
+      method: 'POST', body: JSON.stringify({ email })
+    }, false);
+  }
+
+  async function deconnecter() {
+    try { await appel('/auth/v1/logout', { method: 'POST' }); } catch (e) {}
+    await memoriser(null);
+  }
+
+  /* Une requête sur une table, avec une reprise si le jeton vient d'expirer. */
+  async function table(nom, opts = {}, requete = '') {
+    const faire = () => appel('/rest/v1/' + nom + (requete ? '?' + requete : ''), opts);
+    try { return await faire(); }
+    catch (e) {
+      if (!/401|JWT|expired/i.test(e.message)) throw e;
+      if (!(await rafraichir())) throw new Error('Session expirée, reconnecte-toi');
+      return faire();
+    }
+  }
+
+  const lire = (nom, requete) => table(nom, { method: 'GET' }, requete);
+
+  const ecrire = (nom, lignes, options = '') =>
+    table(nom, {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' + (options ? ',' + options : '') },
+      body: JSON.stringify(lignes)
+    });
+
+  const modifier = (nom, valeurs, requete) =>
+    table(nom, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify(valeurs)
+    }, requete);
+
+  const supprimer = (nom, requete) =>
+    table(nom, { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, requete);
+
+  const fonction = (nom, args) =>
+    appel('/rest/v1/rpc/' + nom, { method: 'POST', body: JSON.stringify(args || {}) });
+
+  /* En-têtes prêtes à l'emploi, pour le stockage de fichiers qui n'est pas
+     du JSON et ne passe donc pas par les fonctions ci-dessus. */
+  function entetes() {
+    const h = { apikey: cle };
+    if (connecte()) h.Authorization = 'Bearer ' + session.access_token;
+    return h;
+  }
+  const adresse = () => base;
+
+  /* Notifications : le jeton de l'appareil est déposé en base, et l'envoi
+     passe par la fonction serveur, seule à détenir la clé Firebase. */
+  async function enregistrerJeton(jeton, application) {
+    if (!connecte() || !jeton) return;
+    await table('jetons_push', {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal,resolution=merge-duplicates' },
+      body: JSON.stringify({
+        jeton, personne_id: session.user.id, application, maj_le: new Date().toISOString()
+      })
+    });
+  }
+
+  async function notifier(contratId, titre, corps) {
+    if (!connecte()) return;
+    try {
+      await fetch(base + '/functions/v1/notifier', {
+        method: 'POST',
+        headers: { ...entetes(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contrat_id: contratId, titre, corps })
+      });
+    } catch (e) { /* le message est déjà enregistré : la notification n'est qu'un plus */ }
+  }
+
+  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse,
+           enregistrerJeton, notifier, supprimer, reprendre, rafraichir,
+           inscrire, connecter, recuperer, deconnecter, lire, ecrire, modifier, fonction };
+})();
+</script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+const MOIS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août',
+                 'septembre','octobre','novembre','décembre'];
+const labelMois = m => { const [y, n] = m.split('-').map(Number); return MOIS_FR[n-1] + ' ' + y; };
+const f1 = n => (Math.round(Number(n||0)*100)/100).toString().replace('.', ',');
+
+let vue = 'accueil', contrats = [], contratActif = null, jours = [], enAttenteConsentement = null;
+
+/* ---------------- Réglages locaux ---------------- */
+const Reglages = {
+  lire() { try { return JSON.parse(localStorage.getItem('cocon-nounou') || '{}'); } catch (e) { return {}; } },
+  ecrire(o) { try { localStorage.setItem('cocon-nounou', JSON.stringify(o)); } catch (e) {} }
+};
+
+/* ---------------- Toast ---------------- */
+let toastTimer;
+function toast(m) {
+  const t = $('#toast'); t.textContent = m; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+/* ---------------- Navigation ---------------- */
+function montrer(v) {
+  vue = v;
+  for (const nom of ['accueil', 'planning', 'journal', 'messages', 'familles', 'params'])
+    $('#vue' + nom[0].toUpperCase() + nom.slice(1)).hidden = v !== nom;
+  $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.vue === v));
+  const c = contrats.find(x => x.id === contratActif);
+  const titres = { accueil: 'Cocon', planning: c ? c.enfant_prenom : 'Planning',
+                   journal: 'Journal', messages: 'Messages',
+                   familles: 'Mes familles', params: 'Réglages' };
+  $('#titre').textContent = titres[v];
+  if (v === 'planning') renderPlanning();
+  if (v === 'journal') chargerJournal();
+  if (v === 'messages') { renderBesoins(); chargerMessages().then(renderMessages); }
+  if (v === 'familles') { renderContrats(); chargerFermetures().then(renderFermetures); }
+  if (v === 'params') majCompte();
+}
+
+/* ---------------- Compte ---------------- */
+function majCompte() {
+  const r = Reglages.lire();
+  $('#url').value = r.url || ''; $('#cle').value = r.cle || '';
+  Supa.configurer(r.url || PROJET.url, r.cle || PROJET.cle);
+  const rp = $('#reglageProjet');
+  if (rp) rp.hidden = !!(PROJET.url && PROJET.cle) && !r.url;
+  const b = $('#etatCompte');
+  b.textContent = !Supa.configure() ? 'Non configuré'
+    : Supa.connecte() ? ((Supa.moi() || {}).email || 'Connectée') : 'Déconnectée';
+  $('#blocConnexion').hidden = Supa.connecte();
+  $('#blocConnecte').hidden = !Supa.connecte();
+}
+
+function direCompte(t, mal) {
+  $('#messageCompte').innerHTML = '<p class="hint"' + (mal ? ' style="color:var(--danger)"' : '') + '>' + esc(t) + '</p>';
+}
+
+async function seConnecter(creer) {
+  const r = Reglages.lire();
+  r.url = $('#url').value.trim(); r.cle = $('#cle').value.trim();
+  Reglages.ecrire(r);
+  Supa.configurer(r.url || PROJET.url, r.cle || PROJET.cle);
+
+  const email = $('#email').value.trim(), mdp = $('#mdp').value;
+  if (!email.includes('@') || mdp.length < 6) {
+    direCompte('Adresse valide et mot de passe d\u2019au moins six caractères.', true); return;
+  }
+  direCompte(creer ? 'Création…' : 'Connexion…');
+  try {
+    if (creer) {
+      await Supa.inscrire(email, mdp);
+      if (!Supa.connecte()) { direCompte('Compte créé. Confirme ton adresse par e-mail, puis connecte-toi.'); majCompte(); return; }
+      await assurerProfil();
+      direCompte('Compte créé.');
+    } else {
+      await Supa.connecter(email, mdp);
+      await assurerProfil();
+      direCompte('Connectée.');
+    }
+    activerPush();
+    $('#mdp').value = '';
+    await charger();
+  } catch (e) { direCompte(e.message || String(e), true); }
+  majCompte();
+}
+
+async function assurerProfil() {
+  const m = Supa.moi(); if (!m) return;
+  try {
+    const d = await Supa.lire('profils', 'id=eq.' + m.id + '&select=id');
+    if (!d || !d.length) await Supa.ecrire('profils', { id: m.id, role: 'salariee' });
+  } catch (e) {}
+}
+
+/* ---------------- Contrats ---------------- */
+async function charger() {
+  if (!Supa.connecte()) return;
+  try {
+    contrats = await Supa.lire('contrats',
+      'select=id,enfant_prenom,enfant_naissance,statut,employeur_id,planning,lieu&statut=neq.termine&order=cree_le');
+    if (!contratActif && contrats.length) contratActif = contrats[0].id;
+    await chargerJours();
+  } catch (e) { toast('Chargement impossible : ' + (e.message || e)); }
+  renderAccueil(); renderContrats(); renderAujourdhui();
+}
+
+async function chargerJours() {
+  if (!contratActif) { jours = []; return; }
+  const d = new Date();
+  const debut = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-01';
+  const fin = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  const finTxt = fin.getFullYear() + '-' + String(fin.getMonth() + 1).padStart(2, '0') + '-' + String(fin.getDate()).padStart(2, '0');
+  jours = await Supa.lire('jours',
+    'contrat_id=eq.' + contratActif + '&jour=gte.' + debut + '&jour=lte.' + finTxt + '&select=jour,heures_prevues,heures_reelles,absence_enfant,absence_salariee&order=jour');
+}
+
+async function rejoindre() {
+  const code = $('#codeInvit').value.trim().toUpperCase();
+  if (code.length < 4) { toast('Saisis le code fourni par la famille'); return; }
+  if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord dans Réglages'); montrer('params'); return; }
+  try {
+    const id = await Supa.fonction('rejoindre', { p_code: code });
+    enAttenteConsentement = id;
+    ouvrirConsentement();
+  } catch (e) { toast(e.message || String(e)); }
+}
+
+/* ---------------- Consentement ---------------- */
+const VERSION_CONSENTEMENT = 'cocon-2026-09';
+const TEXTE_CONSENTEMENT = `
+<b>Ce qui est partagé</b>
+Ton prénom et ton nom, tes coordonnées de contact, l'adresse d'accueil, le planning
+convenu, les heures effectuées et les absences.
+
+<b>Ce qui ne l'est jamais</b>
+Aucun montant de salaire, aucun IBAN, aucun numéro de sécurité sociale ne transite
+par cette application. Ces informations restent sur le téléphone du parent employeur.
+
+<b>Qui y a accès</b>
+Uniquement toi et le parent employeur de ce contrat. Les autres familles chez qui
+tu travailles ne voient rien de celle-ci.
+
+<b>Combien de temps</b>
+Jusqu'à la fin du contrat. Le parent peut retirer l'accès à tout moment, et tu peux
+demander l'effacement de tes données à tout moment.
+
+<b>Ton refus est sans conséquence</b>
+Si tu refuses, le partage ne se fait pas. Rien d'autre ne change.
+`;
+
+function ouvrirConsentement() {
+  $('#texteConsentement').innerHTML = TEXTE_CONSENTEMENT;
+  $('#nomSignature').value = '';
+  $('#consentModal').hidden = false;
+}
+
+async function signer() {
+  const nom = $('#nomSignature').value.trim();
+  if (nom.length < 3) { toast('Écris ton nom pour signer'); return; }
+  try {
+    await Supa.ecrire('consentements', {
+      contrat_id: enAttenteConsentement,
+      personne_id: Supa.moi().id,
+      version_texte: VERSION_CONSENTEMENT,
+      nom_saisi: nom
+    });
+    $('#consentModal').hidden = true;
+    $('#codeInvit').value = '';
+    contratActif = enAttenteConsentement;
+    enAttenteConsentement = null;
+    await charger();
+    montrer('accueil');
+    toast('Famille ajoutée');
+  } catch (e) { toast(e.message || String(e)); }
+}
+
+/* ---------------- Fiche d'urgence ----------------
+   Gardée en local : le jour où il faut appeler le médecin, le réseau peut
+   manquer. Le parent seul peut la modifier. */
+const LIBELLES_AUTOR = {
+  sortie: 'Sorties', transport: 'Voiture', photo: 'Photos',
+  photo_groupe: 'Photos de groupe', creme: 'Crème', medicament: 'Médicament'
+};
+
+async function chargerUrgence() {
+  if (!contratActif) return;
+  let u = null;
+  if (Supa.connecte()) {
+    try {
+      const r = await Supa.lire('fiche_urgence', 'contrat_id=eq.' + contratActif + '&select=*');
+      if (r && r.length) {
+        u = r[0];
+        const cache = Reglages.lire();
+        cache.urgences = { ...(cache.urgences || {}), [contratActif]: u };
+        Reglages.ecrire(cache);
+      }
+    } catch (e) { /* on retombe sur la copie locale */ }
+  }
+  if (!u) u = (Reglages.lire().urgences || {})[contratActif] || null;
+  renderUrgence(u);
+}
+
+function renderUrgence(u) {
+  const box = $('#ficheUrgence');
+  if (!box) return;
+  if (!u) {
+    box.innerHTML = '<p class="hint" style="margin:0">Le parent n\u2019a pas encore rempli la fiche.</p>';
+    return;
+  }
+  const l = (t, v) => v ? `<div class="urg-l"><span>${esc(t)}</span><b>${esc(v)}</b></div>` : '';
+  const tel = v => v ? `<div class="urg-l"><span>Appeler</span><b><a href="tel:${esc(v.replace(/\s/g,''))}">${esc(v)}</a></b></div>` : '';
+  const autor = Object.entries(u.autorisations || {}).filter(([, v]) => v)
+    .map(([k]) => `<i>${esc(LIBELLES_AUTOR[k] || k)}</i>`).join('');
+  const pers = (u.personnes || []).map(p =>
+    `<div class="urg-l"><span>${esc(p.nom || '')}</span><b>${p.tel ? `<a href="tel:${esc(String(p.tel).replace(/\s/g,''))}">${esc(p.tel)}</a>` : '—'}</b></div>`).join('');
+
+  box.innerHTML =
+    (u.allergies ? `<div class="urg-alerte"><b>Allergies</b><br>${esc(u.allergies)}</div>` : '') +
+    (u.traitements ? `<div class="urg-alerte"><b>Traitements</b><br>${esc(u.traitements)}</div>` : '') +
+    l('Médecin', u.medecin_nom) + tel(u.medecin_tel) +
+    l('À savoir', u.particularites) +
+    (pers ? '<div class="rub">Peuvent venir le chercher</div>' + pers : '') +
+    (autor ? '<div class="rub">Autorisé par le parent</div><div class="urg-oui">' + autor + '</div>' : '') +
+    `<p class="hint">Signée le ${u.signe_le ? new Date(u.signe_le).toLocaleDateString('fr-FR') : '—'}. Conservée sur cet appareil, consultable sans réseau.</p>`;
+}
+
+/* ---------------- Galerie ----------------
+   Une photo peut concerner plusieurs enfants. Seules les familles ayant
+   autorisé les photos de groupe sont proposées, et la base le revérifie. */
+let galerie = [];
+
+async function chargerGalerie() {
+  galerie = [];
+  if (!contratActif || !Supa.connecte()) { renderGalerie(); return; }
+  try {
+    const liens = await Supa.lire('photos_contrats',
+      'contrat_id=eq.' + contratActif + '&select=photo_id');
+    if (!liens.length) { renderGalerie(); return; }
+    galerie = await Supa.lire('photos',
+      'id=in.(' + liens.map(x => x.photo_id).join(',') + ')&select=id,chemin,legende,groupe,prise_le&order=prise_le.desc&limit=60');
+  } catch (e) { galerie = []; }
+  renderGalerie();
+}
+
+function renderGalerie() {
+  const box = $('#galerie');
+  if (!box) return;
+  if (!galerie.length) {
+    box.innerHTML = '<p class="hint" style="grid-column:1/-1;margin:0">Aucune photo pour le moment.</p>';
+    return;
+  }
+  box.innerHTML = galerie.map(p => `<img data-photo="${esc(p.chemin)}" alt="${esc(p.legende || '')}">`).join('');
+  $$('#galerie [data-photo]').forEach(async img => {
+    const d = await telechargerPhoto(img.dataset.photo);
+    if (d) img.src = d; else img.remove();
+  });
+}
+
+/* Envoi : on crée d'abord la fiche photo pour obtenir son dossier, puis le
+   fichier, puis les liens vers les enfants concernés. */
+async function envoyerGalerie(fichier) {
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  if (fichier.size > 8 * 1024 * 1024) { toast('Photo trop lourde, 8 Mo maximum'); return; }
+
+  const autres = await famillesAutorisantLeGroupe();
+  let concernes = [contratActif];
+  let groupe = false;
+  if (autres.length) {
+    const noms = autres.map(c => c.enfant_prenom).join(', ');
+    if (confirm('Photo de groupe ?\n\nAjouter aussi : ' + noms +
+                '\n\nCes familles ont autorisé les photos de groupe.')) {
+      concernes = concernes.concat(autres.map(c => c.id));
+      groupe = true;
+    }
+  }
+
+  $('#galerieEtat').innerHTML = '<p class="hint">Envoi…</p>';
+  try {
+    const p = await Supa.ecrire('photos', {
+      auteur_id: Supa.moi().id, chemin: 'temporaire', groupe });
+    const id = p[0].id;
+    const chemin = id + '/' + Date.now() + '.jpg';
+
+    const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin, {
+      method: 'POST',
+      headers: { ...Supa.entetes(), 'Content-Type': fichier.type || 'image/jpeg' },
+      body: fichier });
+    if (!r.ok) throw new Error('Envoi refusé (' + r.status + ')');
+
+    await Supa.modifier('photos', { chemin }, 'id=eq.' + id);
+    for (const c of concernes) {
+      try { await Supa.ecrire('photos_contrats', { photo_id: id, contrat_id: c }); }
+      catch (e) { toast('Une famille n\u2019a pas autorisé cette photo'); }
+    }
+    for (const c of concernes) Supa.notifier(c, 'Nouvelle photo', '');
+    $('#galerieEtat').innerHTML = '';
+    toast(groupe ? 'Photo partagée avec ' + concernes.length + ' familles' : 'Photo envoyée');
+    await chargerGalerie();
+  } catch (e) {
+    $('#galerieEtat').innerHTML = '<p class="hint" style="color:var(--danger)">' + esc(e.message || e) + '</p>';
+  }
+}
+
+async function famillesAutorisantLeGroupe() {
+  const autres = contrats.filter(c => c.id !== contratActif);
+  if (!autres.length || !Supa.connecte()) return [];
+  try {
+    const f = await Supa.lire('fiche_urgence',
+      'contrat_id=in.(' + autres.map(c => c.id).join(',') + ')&select=contrat_id,autorisations');
+    const ok = new Set(f.filter(x => (x.autorisations || {}).photo_groupe).map(x => x.contrat_id));
+    return autres.filter(c => ok.has(c.id));
+  } catch (e) { return []; }
+}
+
+/* ---------------- Journal de la journée ----------------
+   Elle remplit, les parents lisent. La base leur interdit d'écrire ici :
+   une transmission qui pourrait être réécrite ne vaudrait rien. */
+const REPAS = [['bien','A bien mangé'],['moyen','Correct'],['peu','Peu mangé'],['refus','A refusé']];
+const HUMEURS = [['joyeux','Joyeux'],['calme','Calme'],['fatigue','Fatigué'],['grognon','Grognon'],['souffrant','Patraque']];
+
+let jourJournal = null, entree = {};
+
+function isoDuJour(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
+         String(d.getDate()).padStart(2, '0');
+}
+
+function labelJour(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  const auj = isoDuJour(new Date());
+  const hier = isoDuJour(new Date(Date.now() - 86400000));
+  if (iso === auj) return "Aujourd'hui";
+  if (iso === hier) return 'Hier';
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function boutonsChoix(zone, liste, valeur) {
+  $(zone).innerHTML = liste.map(([v, t]) =>
+    `<button data-val="${v}" class="${v === valeur ? 'on' : ''}">${esc(t)}</button>`).join('');
+}
+
+async function chargerJournal() {
+  if (!jourJournal) jourJournal = isoDuJour(new Date());
+  entree = {};
+  if (contratActif && Supa.connecte()) {
+    try {
+      const r = await Supa.lire('journal',
+        'contrat_id=eq.' + contratActif + '&jour=eq.' + jourJournal +
+        '&select=repas,sieste_debut,sieste_fin,humeur,couches,mot,maj_le');
+      if (r && r.length) entree = r[0];
+    } catch (e) { /* la vue le dira */ }
+  }
+  renderJournal();
+}
+
+function renderJournal() {
+  const c = contrats.find(x => x.id === contratActif);
+  $('#journalTitre').textContent = c ? 'Journal de ' + c.enfant_prenom : 'Journal';
+  $('#jourLabel').textContent = labelJour(jourJournal);
+  boutonsChoix('#chRepas', REPAS, entree.repas);
+  boutonsChoix('#chHumeur', HUMEURS, entree.humeur);
+  $('#siesteDebut').value = (entree.sieste_debut || '').slice(0, 5);
+  $('#siesteFin').value = (entree.sieste_fin || '').slice(0, 5);
+  $('#coucheN').textContent = String(entree.couches || 0);
+  $('#motJournal').value = entree.mot || '';
+  $('#journalEtat').textContent = entree.maj_le
+    ? 'Enregistré le ' + new Date(entree.maj_le).toLocaleString('fr-FR')
+    : 'Pas encore rempli pour ce jour.';
+}
+
+function heureValide(t) {
+  const v = String(t || '').trim();
+  return v === '' ? null : (/^\d{1,2}:\d{2}$/.test(v) ? v : undefined);
+}
+
+async function enregistrerJournal() {
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  const debut = heureValide($('#siesteDebut').value), fin = heureValide($('#siesteFin').value);
+  if (debut === undefined || fin === undefined) { toast('Heures attendues au format 13:00'); return; }
+
+  const ligne = {
+    contrat_id: contratActif, jour: jourJournal,
+    repas: entree.repas || null, humeur: entree.humeur || null,
+    sieste_debut: debut, sieste_fin: fin,
+    couches: Number($('#coucheN').textContent) || 0,
+    mot: $('#motJournal').value.trim() || null
+  };
+  try {
+    await Supa.ecrire('journal', [ligne], 'resolution=merge-duplicates');
+    const c = contrats.find(x => x.id === contratActif);
+    const resume = [
+      ligne.repas ? (REPAS.find(r => r[0] === ligne.repas) || [])[1] : '',
+      ligne.humeur ? (HUMEURS.find(h => h[0] === ligne.humeur) || [])[1] : ''
+    ].filter(Boolean).join(' · ');
+    Supa.notifier(contratActif,
+      'Journal de ' + ((c && c.enfant_prenom) || 'l\u2019enfant'),
+      resume || 'La journée est notée');
+    toast('Journal enregistré, parent prévenu');
+    await chargerJournal();
+  } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
+}
+
+function decalerJour(n) {
+  const d = new Date(jourJournal + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  if (d > new Date()) { toast('Pas de journal pour un jour à venir'); return; }
+  jourJournal = isoDuJour(d);
+  chargerJournal();
+}
+
+/* ---------------- Aujourd'hui ----------------
+   Ce qui compte le matin : qui vient, de quelle heure à quelle heure. */
+const CLES_JOURS = ['d0','d1','d2','d3','d4','d5','d6'];
+
+function renderAujourdhui() {
+  const box = $('#aujourdhui');
+  if (!box) return;
+  if (!Supa.connecte() || !contrats.length) {
+    box.innerHTML = '<p class="hint" style="margin:0">Rien de prévu pour le moment.</p>';
+    return;
+  }
+  const d = new Date();
+  const cle = CLES_JOURS[d.getDay()];
+  const lignes = contrats.map(c => {
+    const h = ((c.planning || {})[cle]) || {};
+    return { prenom: c.enfant_prenom || 'Enfant', debut: h.debut, fin: h.fin, id: c.id };
+  }).filter(x => x.debut && x.fin).sort((a, b) => a.debut.localeCompare(b.debut));
+
+  if (!lignes.length) {
+    box.innerHTML = '<p class="hint" style="margin:0">Aucun accueil prévu aujourd\u2019hui.</p>';
+    return;
+  }
+  box.innerHTML = lignes.map(l =>
+    `<button class="famille" data-jour-contrat="${esc(l.id)}">
+       <span class="pastille">${esc(l.prenom[0].toUpperCase())}</span>
+       <span><b>${esc(l.prenom)}</b><small>${esc(l.debut)} → ${esc(l.fin)}</small></span>
+     </button>`).join('');
+  $$('#aujourdhui [data-jour-contrat]').forEach(b => {
+    b.onclick = async () => {
+      contratActif = b.dataset.jourContrat;
+      await chargerJours(); await chargerMessages();
+      montrer('planning');
+    };
+  });
+}
+
+/* ---------------- Fermetures ----------------
+   Ses congés, visibles de toutes ses familles. */
+let fermetures = [];
+
+function versISO(txt) {
+  const m = String(txt || '').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  return m ? m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0') : null;
+}
+const versFR = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '';
+
+async function chargerFermetures() {
+  if (!Supa.connecte()) { fermetures = []; return; }
+  try {
+    fermetures = await Supa.lire('fermetures',
+      'salariee_id=eq.' + Supa.moi().id + '&select=id,du,au,motif&order=du.desc&limit=30');
+  } catch (e) { fermetures = []; }
+}
+
+function renderFermetures() {
+  const box = $('#listeFermetures');
+  if (!box) return;
+  box.innerHTML = fermetures.length ? fermetures.map(f =>
+    `<div class="ds"><span>${esc(versFR(f.du))} → ${esc(versFR(f.au))}${f.motif ? ' · ' + esc(f.motif) : ''}</span>
+      <button class="besoin-b" style="min-height:32px;padding:5px 10px" data-ferm="${esc(f.id)}">Retirer</button></div>`).join('')
+    : '<p class="hint" style="margin:0">Aucune fermeture enregistrée.</p>';
+  $$('#listeFermetures [data-ferm]').forEach(b => { b.onclick = () => retirerFermeture(b.dataset.ferm); });
+}
+
+async function ajouterFermeture() {
+  const du = versISO($('#fermDu').value), au = versISO($('#fermAu').value);
+  if (!du || !au) { toast('Dates attendues au format jj/mm/aaaa'); return; }
+  if (au < du) { toast('La fin doit suivre le début'); return; }
+  if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord'); return; }
+  try {
+    await Supa.ecrire('fermetures', {
+      salariee_id: Supa.moi().id, du, au, motif: $('#fermMotif').value.trim() || null });
+    // chaque famille est prévenue une fois
+    const texte = 'Fermeture du ' + versFR(du) + ' au ' + versFR(au);
+    for (const c of contrats) {
+      await Supa.ecrire('messages', {
+        contrat_id: c.id, auteur_id: Supa.moi().id, texte, categorie: 'info' });
+      Supa.notifier(c.id, 'Fermeture annoncée', texte);
+    }
+    $('#fermDu').value = ''; $('#fermAu').value = ''; $('#fermMotif').value = '';
+    await chargerFermetures(); renderFermetures();
+    toast('Fermeture enregistrée, familles prévenues');
+  } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
+}
+
+async function retirerFermeture(id) {
+  if (!confirm('Retirer cette fermeture ?')) return;
+  try {
+    await Supa.supprimer('fermetures', 'id=eq.' + id);
+    await chargerFermetures(); renderFermetures();
+  } catch (e) { toast('Suppression impossible : ' + (e.message || e)); }
+}
+
+/* ---------------- Besoins ----------------
+   Un appui, un message. Rien à rédiger quand on a les mains prises. */
+const BESOINS = [
+  ['🧷', 'Couches'], ['🍼', 'Lait'], ['💧', 'Eau'], ['👕', 'Tenue de rechange'],
+  ['🧴', 'Crème'], ['🥣', 'Repas'], ['🧦', 'Chaussons'], ['🧸', 'Doudou']
+];
+
+function renderBesoins() {
+  const box = $('#besoins');
+  if (!box) return;
+  box.innerHTML = BESOINS.map(([e, t], i) =>
+    `<button class="besoin-b" data-besoin="${i}"><span class="em">${e}</span>${esc(t)}</button>`).join('');
+  $$('#besoins [data-besoin]').forEach(b => {
+    b.onclick = () => envoyerBesoin(BESOINS[+b.dataset.besoin][1]);
+  });
+}
+
+async function envoyerBesoin(quoi) {
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  try {
+    await Supa.ecrire('messages', {
+      contrat_id: contratActif, auteur_id: Supa.moi().id,
+      texte: 'Il manque : ' + quoi.toLowerCase(), categorie: 'besoin'
+    });
+    Supa.notifier(contratActif, 'Il manque ' + quoi.toLowerCase(), nomEnfantActif());
+    toast(quoi + ' — le parent est prévenu');
+    await chargerMessages(); renderMessages();
+  } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
+}
+
+/* ---------------- Messages et photos ---------------- */
+let messages = [];
+
+function nomEnfantActif() {
+  const c = contrats.find(x => x.id === contratActif);
+  return (c && c.enfant_prenom) || 'Cocon';
+}
+
+async function chargerMessages() {
+  if (!contratActif || !Supa.connecte()) { messages = []; return; }
+  try {
+    messages = await Supa.lire('messages',
+      'contrat_id=eq.' + contratActif + '&select=id,auteur_id,texte,categorie,piece,cree_le&order=cree_le.desc&limit=40');
+  } catch (e) { messages = []; }
+}
+
+function renderMessages() {
+  const box = $('#fluxMessages');
+  if (!box) return;
+  const moi = (Supa.moi() || {}).id;
+  box.innerHTML = messages.length ? messages.map(m => {
+    const mien = m.auteur_id === moi;
+    const q = new Date(m.cree_le).toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return `<div class="msg"><span class="txt${mien ? ' mien' : ''}">
+      <b>${esc(m.texte || 'Photo')}</b><small>${mien ? 'moi' : 'le parent'} · ${esc(q)}</small>
+      ${m.piece ? `<img data-photo="${esc(m.piece)}" alt="">` : ''}</span></div>`;
+  }).join('') : '<p class="hint">Aucun échange pour le moment.</p>';
+
+  $$('#fluxMessages [data-photo]').forEach(async img => {
+    const d = await telechargerPhoto(img.dataset.photo);
+    if (d) img.src = d; else img.remove();
+  });
+}
+
+async function telechargerPhoto(chemin) {
+  try {
+    const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin,
+      { headers: Supa.entetes() });
+    if (!r.ok) return null;
+    return URL.createObjectURL(await r.blob());
+  } catch (e) { return null; }
+}
+
+async function envoyerTexte() {
+  const t = $('#texteMsg').value.trim();
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  if (!t) return;
+  try {
+    await Supa.ecrire('messages', {
+      contrat_id: contratActif, auteur_id: Supa.moi().id, texte: t, categorie: 'info' });
+    Supa.notifier(contratActif, nomEnfantActif() + ' — message', t);
+    $('#texteMsg').value = '';
+    await chargerMessages(); renderMessages();
+  } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
+}
+
+/* La photo part dans un dossier nommé d'après le contrat : les règles du
+   stockage s'appuient dessus pour qu'une famille ne voie que les siennes. */
+async function envoyerPhoto(fichier) {
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  if (fichier.size > 8 * 1024 * 1024) { toast('Photo trop lourde, 8 Mo maximum'); return; }
+  toast('Envoi de la photo…');
+  const nom = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+  const chemin = contratActif + '/' + nom;
+  try {
+    const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin, {
+      method: 'POST',
+      headers: { ...Supa.entetes(), 'Content-Type': fichier.type || 'image/jpeg' },
+      body: fichier
+    });
+    if (!r.ok) throw new Error('Envoi refusé (' + r.status + ')');
+    await Supa.ecrire('messages', {
+      contrat_id: contratActif, auteur_id: Supa.moi().id,
+      texte: null, categorie: 'photo', piece: chemin });
+    Supa.notifier(contratActif, nomEnfantActif() + ' — nouvelle photo', '');
+    toast('Photo envoyée');
+    await chargerMessages(); renderMessages();
+  } catch (e) { toast('Photo non envoyée : ' + (e.message || e)); }
+}
+
+/* ---------------- Rendus ---------------- */
+function heuresSemaine() {
+  const d = new Date();
+  const lundi = new Date(d); lundi.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  const dim = new Date(lundi); dim.setDate(lundi.getDate() + 6);
+  let total = 0;
+  for (const j of jours) {
+    const jd = new Date(j.jour + 'T00:00:00');
+    if (jd >= lundi && jd <= dim) total += Number(j.heures_prevues || 0);
+  }
+  return total;
+}
+
+function renderAccueil() {
+  if (!Supa.connecte()) {
+    $('#heroHeures').textContent = '— h';
+    $('#heroBas').textContent = 'Connecte-toi dans Réglages pour voir tes accueils';
+    $('#listeFamilles').innerHTML = '<p class="hint">Aucune famille pour le moment.</p>';
+    return;
+  }
+  $('#heroHeures').textContent = f1(heuresSemaine()) + ' h';
+  $('#heroBas').textContent = contrats.length
+    ? contrats.length + (contrats.length > 1 ? ' enfants accueillis' : ' enfant accueilli')
+    : 'Rejoins une famille avec son code d\u2019invitation';
+
+  $('#listeFamilles').innerHTML = contrats.length ? contrats.map(c =>
+    `<button class="famille" data-contrat="${esc(c.id)}">
+       <span class="pastille">${esc((c.enfant_prenom || '?')[0].toUpperCase())}</span>
+       <span><b>${esc(c.enfant_prenom || 'Enfant')}</b><small>${c.id === contratActif ? 'affiché' : 'voir le planning'}</small></span>
+     </button>`).join('')
+    : '<p class="hint">Aucune famille. Onglet Familles pour saisir un code d\u2019invitation.</p>';
+
+  $$('#listeFamilles [data-contrat]').forEach(b => {
+    b.onclick = async () => {
+      contratActif = b.dataset.contrat;
+      await chargerJours(); await chargerMessages();
+      montrer('planning');
+    };
+  });
+}
+
+function renderContrats() {
+  $('#listeContrats').innerHTML = contrats.length ? contrats.map(c =>
+    `<div class="ds"><span>${esc(c.enfant_prenom || 'Enfant')}</span><b>${esc(c.statut)}</b></div>`).join('')
+    : '<p class="hint">Aucun contrat pour le moment.</p>';
+}
+
+const JOURS_NOMS = { d1:'lundi', d2:'mardi', d3:'mercredi', d4:'jeudi', d5:'vendredi', d6:'samedi', d0:'dimanche' };
+
+function renderHorairesBase(c) {
+  const box = $('#horairesBase');
+  const pl = (c && c.planning) || {};
+  const lignes = ['d1','d2','d3','d4','d5','d6','d0'].map(d => {
+    const h = pl[d];
+    return h && h.debut && h.fin
+      ? `<div class="hor-l"><span>${JOURS_NOMS[d]}</span><b>${esc(h.debut)} → ${esc(h.fin)}</b></div>`
+      : `<div class="hor-l off"><span>${JOURS_NOMS[d]}</span><b>—</b></div>`;
+  }).join('');
+  box.innerHTML = Object.keys(pl).length ? lignes
+    : '<p class="hint" style="margin:0">Le parent n\u2019a pas encore renseigné les horaires du contrat.</p>';
+}
+
+function renderInfoEnfant(c) {
+  const box = $('#infoEnfant');
+  if (!c) { box.innerHTML = '<p class="hint">Aucun enfant sélectionné.</p>'; return; }
+  const ds = (l, v) => `<div class="ds"><span>${esc(l)}</span><b>${esc(v || '—')}</b></div>`;
+  const naiss = c.enfant_naissance
+    ? new Date(c.enfant_naissance + 'T00:00:00').toLocaleDateString('fr-FR') : '';
+  let age = '';
+  if (c.enfant_naissance) {
+    const mois = Math.floor((Date.now() - new Date(c.enfant_naissance).getTime()) / 2629800000);
+    age = mois < 24 ? mois + ' mois' : Math.floor(mois / 12) + ' ans';
+  }
+  box.innerHTML = ds('Prénom', c.enfant_prenom) + ds('Naissance', naiss) +
+    ds('Âge', age) + ds('Lieu d\u2019accueil', c.lieu) + ds('Contrat', c.statut);
+}
+
+function renderPlanning() {
+  const c = contrats.find(x => x.id === contratActif);
+  $('#planningTitre').textContent = c ? c.enfant_prenom : 'Planning';
+  renderHorairesBase(c);
+  renderInfoEnfant(c);
+  chargerUrgence();
+  chargerGalerie();
+  const d = new Date(), y = d.getFullYear(), m = d.getMonth();
+  const nb = new Date(y, m + 1, 0).getDate();
+  const decalage = (new Date(y, m, 1).getDay() + 6) % 7;
+  const parJour = {};
+  for (const j of jours) parJour[Number(j.jour.slice(8, 10))] = j;
+
+  let html = '';
+  for (let i = 0; i < decalage; i++) html += '<div class="gr-jour vide"></div>';
+  let total = 0;
+  for (let n = 1; n <= nb; n++) {
+    const j = parJour[n] || {};
+    const h = Number(j.heures_prevues || 0);
+    total += h;
+    const wd = new Date(y, m, n).getDay();
+    html += `<div class="gr-jour${wd === 0 || wd === 6 ? ' we' : ''}">
+      <span class="n">${n}</span><span class="h">${h > 0 ? f1(h) : ''}</span></div>`;
+  }
+  $('#grille').innerHTML = html;
+  $('#totalMois').textContent = f1(total) + ' h';
+}
+
+/* ---------------- Branchements ---------------- */
+$$('.nav-item').forEach(b => { b.onclick = () => montrer(b.dataset.vue); });
+$('#btnParams').onclick = () => montrer('params');
+$('#btnConnexion').onclick = () => seConnecter(false);
+$('#btnInscription').onclick = () => seConnecter(true);
+$('#btnDeconnexion').onclick = async () => { await Supa.deconnecter(); contrats = []; jours = []; majCompte(); renderAccueil(); };
+$('#btnRejoindre').onclick = rejoindre;
+$('#btnEnvoyer').onclick = envoyerTexte;
+$('#btnFermeture').onclick = ajouterFermeture;
+$('#clavier').addEventListener('click', e => {
+  const b = e.target.closest('[data-touche]');
+  if (b) toucheVerrou(b.dataset.touche);
+});
+$('#secActif').onchange = e => {
+  if (e.target.checked) afficherVerrou('creer');
+  else { ecrireSecurite({ actif: false }); majSecurite(); }
+};
+$('#secBio').onchange = e => { ecrireSecurite({ ...securite(), biometrie: e.target.checked }); majSecurite(); };
+$('#btnChangerCode').onclick = () => {
+  if (!securite().actif) { toast('Active d\u2019abord le code'); return; }
+  afficherVerrou('creer');
+};
+$('#btnMdpOublie').onclick = async () => {
+  // le projet peut venir d'etre saisi : on le prend en compte avant d'appeler
+  const r = Reglages.lire();
+  r.url = $('#url').value.trim() || r.url;
+  r.cle = $('#cle').value.trim() || r.cle;
+  Reglages.ecrire(r);
+  Supa.configurer(r.url || PROJET.url, r.cle || PROJET.cle);
+
+  const email = $('#email').value.trim();
+  if (!email.includes('@')) { direCompte('Saisis ton adresse e-mail d\u2019abord.', true); return; }
+  try {
+    await Supa.recuperer(email);
+    direCompte('Si un compte existe pour cette adresse, un lien de réinitialisation vient d\u2019y être envoyé.');
+  } catch (e) { direCompte(e.message || String(e), true); }
+};
+$('#btnJournal').onclick = enregistrerJournal;
+$('#jourPrec').onclick = () => decalerJour(-1);
+$('#jourSuiv').onclick = () => decalerJour(1);
+$('#chRepas').addEventListener('click', e => {
+  const b = e.target.closest('[data-val]');
+  if (!b) return;
+  entree.repas = entree.repas === b.dataset.val ? null : b.dataset.val;
+  boutonsChoix('#chRepas', REPAS, entree.repas);
+});
+$('#chHumeur').addEventListener('click', e => {
+  const b = e.target.closest('[data-val]');
+  if (!b) return;
+  entree.humeur = entree.humeur === b.dataset.val ? null : b.dataset.val;
+  boutonsChoix('#chHumeur', HUMEURS, entree.humeur);
+});
+$('#couchePlus').onclick = () => {
+  const n = Math.min(20, Number($('#coucheN').textContent) + 1);
+  $('#coucheN').textContent = String(n);
+};
+$('#coucheMoins').onclick = () => {
+  const n = Math.max(0, Number($('#coucheN').textContent) - 1);
+  $('#coucheN').textContent = String(n);
+};
+$('#fichierGalerie').onchange = e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) envoyerGalerie(f);
+  e.target.value = '';
+};
+$('#fichierPhoto').onchange = e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) envoyerPhoto(f);
+  e.target.value = '';
+};
+$('#btnSigner').onclick = signer;
+$('#btnRefus').onclick = () => {
+  $('#consentModal').hidden = true;
+  enAttenteConsentement = null;
+  toast('Partage refusé. Rien n\u2019a été enregistré.');
+};
+
+if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+  window.Capacitor.Plugins.App.addListener('pause', () => { VERROU.quitteA = Date.now(); });
+  window.Capacitor.Plugins.App.addListener('resume', verrouillerSiBesoin);
+  window.Capacitor.Plugins.App.addListener('backButton', () => {
+    if (!$('#verrou').hidden) return;
+    if (!$('#consentModal').hidden) { $('#consentModal').hidden = true; return; }
+    if (vue !== 'accueil') { montrer('accueil'); return; }
+    window.Capacitor.Plugins.App.exitApp();
+  });
+}
+
+
+/* ---------------- Verrouillage ----------------
+   Le code protège l'ouverture de l'application. Il n'a rien à voir avec le
+   compte en ligne : celui-ci prouve qui tu es au serveur, celui-là empêche
+   d'ouvrir l'application sur ce téléphone. */
+const VERROU = { saisie: '', mode: 'ouvrir', premier: '', longueur: 4, ferme: false, quitteA: 0 };
+
+function octetsHex(buf) {
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function empreinteCode(code, selHex) {
+  const enc = new TextEncoder();
+  if (!(window.crypto && crypto.subtle)) {
+    let h = 0;
+    for (const ch of selHex + code) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return 'simple:' + h.toString(16);
+  }
+  const sel = Uint8Array.from(selHex.match(/../g).map(o => parseInt(o, 16)));
+  const cle = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: sel, iterations: 120000, hash: 'SHA-256' }, cle, 256);
+  return octetsHex(bits);
+}
+
+function nouveauSel() {
+  const t = new Uint8Array(16);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(t);
+  else for (let i = 0; i < t.length; i++) t[i] = Math.random() * 256 | 0;
+  return octetsHex(t.buffer);
+}
+
+const bioPlugin = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AssMatBio;
+async function bioDisponible() {
+  const B = bioPlugin();
+  if (!B) return false;
+  try { return !!(await B.disponible()).disponible; } catch (e) { return false; }
+}
+
+function majPoints() {
+  $('#verrouPoints').innerHTML = Array.from({ length: VERROU.longueur },
+    (_, i) => `<i class="${i < VERROU.saisie.length ? 'plein' : ''}"></i>`).join('');
+}
+
+function securite() { return Reglages.lire().securite || {}; }
+function ecrireSecurite(o) { const r = Reglages.lire(); r.securite = o; Reglages.ecrire(r); }
+
+function afficherVerrou(mode) {
+  VERROU.mode = mode; VERROU.saisie = ''; VERROU.premier = '';
+  const titres = { ouvrir: 'Code de l\u2019application', creer: 'Choisis un code à 4 chiffres', confirmer: 'Saisis-le à nouveau' };
+  $('#verrouTitre').textContent = titres[mode];
+  $('#verrouMsg').textContent = '';
+  $('#verrou').hidden = false;
+  VERROU.ferme = true;
+  majPoints();
+  if (mode === 'ouvrir') proposerBio();
+}
+
+function fermerVerrou() { $('#verrou').hidden = true; VERROU.ferme = false; VERROU.saisie = ''; }
+
+async function proposerBio() {
+  const dispo = securite().biometrie && await bioDisponible();
+  $('#toucheBio').hidden = !dispo;
+  if (!dispo) return;
+  try { const r = await bioPlugin().verifier(); if (r && r.ok) fermerVerrou(); } catch (e) {}
+}
+
+async function toucheVerrou(t) {
+  if (t === 'bio') { proposerBio(); return; }
+  if (t === 'eff') { VERROU.saisie = VERROU.saisie.slice(0, -1); majPoints(); return; }
+  if (VERROU.saisie.length >= VERROU.longueur) return;
+  VERROU.saisie += t; majPoints();
+  if (VERROU.saisie.length < VERROU.longueur) return;
+
+  const code = VERROU.saisie;
+  setTimeout(async () => {
+    if (VERROU.mode === 'creer') { afficherVerrou('confirmer'); VERROU.premier = code; return; }
+    if (VERROU.mode === 'confirmer') {
+      if (code !== VERROU.premier) {
+        $('#verrouMsg').textContent = 'Les deux codes diffèrent';
+        VERROU.saisie = ''; majPoints(); VERROU.mode = 'creer';
+        $('#verrouTitre').textContent = 'Choisis un code à 4 chiffres';
+        return;
+      }
+      const sel = nouveauSel();
+      ecrireSecurite({ actif: true, sel, hash: await empreinteCode(code, sel), biometrie: !!securite().biometrie });
+      fermerVerrou(); majSecurite(); toast('Code enregistré');
+      return;
+    }
+    const s = securite();
+    if (await empreinteCode(code, s.sel || '') === s.hash) { fermerVerrou(); return; }
+    $('#verrouMsg').textContent = 'Code incorrect';
+    VERROU.saisie = ''; majPoints();
+  }, 90);
+}
+
+async function majSecurite() {
+  const s = securite();
+  const c = $('#secActif'); if (c) c.checked = !!s.actif;
+  const b = $('#secBio'); if (b) { b.checked = !!s.biometrie; b.disabled = !s.actif; }
+  const e = $('#secEtat');
+  if (!e) return;
+  if (!s.actif) { e.textContent = 'Le code protège l\u2019ouverture de l\u2019application. Il est distinct du compte en ligne.'; return; }
+  e.textContent = (await bioDisponible())
+    ? 'Code actif. L\u2019empreinte est proposée à l\u2019ouverture, le code reste le recours.'
+    : 'Code actif. Aucune empreinte n\u2019est enregistrée sur ce téléphone.';
+}
+
+function verrouillerSiBesoin() {
+  const s = securite();
+  if (!s.actif || VERROU.ferme) return;
+  if (VERROU.quitteA && Date.now() - VERROU.quitteA < 120000) return;
+  afficherVerrou('ouvrir');
+}
+
+/* ---------------- Notifications système ----------------
+   Le jeton de l'appareil est renouvelé par Android : on le redépose à chaque
+   fois. Sans autorisation, l'application fonctionne exactement pareil. */
+async function activerPush() {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (!C || !C.PushNotifications || !Supa.connecte()) return;
+  const P = C.PushNotifications;
+  try {
+    let perm = await P.checkPermissions();
+    if (perm.receive !== 'granted') perm = await P.requestPermissions();
+    if (perm.receive !== 'granted') return;
+
+    P.addListener('registration', async (t) => {
+      try { await Supa.enregistrerJeton(t.value, 'nounou'); } catch (e) {}
+    });
+    P.addListener('registrationError', () => {});
+    await P.register();
+  } catch (e) { /* appareil sans services Google : on continue sans push */ }
+}
+
+/* ---------------- Démarrage ---------------- */
+(async () => {
+  const r = Reglages.lire();
+  if (r.theme === 'sombre') document.documentElement.dataset.theme = 'sombre';
+  Supa.configurer(r.url || PROJET.url, r.cle || PROJET.cle);
+  if (securite().actif) afficherVerrou('ouvrir');
+  majSecurite();
+  if (Supa.configure()) { await Supa.reprendre(); activerPush(); }
+  majCompte();
+  await charger();
+  renderAccueil();
+  setTimeout(() => {
+    const s = $('#splash');
+    s.classList.add('parti');
+    setTimeout(() => s.remove(), 420);
+  }, window.Capacitor ? 700 : 1500);
+})();
+</script>
+</body>
+</html>

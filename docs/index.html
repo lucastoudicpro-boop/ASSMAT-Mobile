@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#17403c">
-<title>AssMat+</title>
+<title>Cocon Parent</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icones/icone-192.png">
 <link rel="apple-touch-icon" href="icones/icone-192.png">
@@ -17,7 +17,8 @@
   --miel:#b8791f; --acc-doux:#e9f3f1;
   --side:#17403c; --side2:#215a53;
   --champ:#fff; --bord:#d3dedb; --zebre:#f5f8f7; --ombre:rgba(20,40,36,.06);
-  --radius:16px;
+  --radius:18px;
+  --halo:#e6f0ee;
   --safeT:env(safe-area-inset-top,0px);
   --safeB:env(safe-area-inset-bottom,0px);
   --hdr:54px; --bar:116px;
@@ -389,6 +390,17 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
 @keyframes sp-feuille{from{opacity:0;transform:scale(.2) rotate(-14deg)}to{opacity:1;transform:none}}
 @keyframes sp-monte{to{opacity:1;transform:none}}
 
+/* Android 12 et plus affiche deja l'icone sur fond colore avant que la WebView
+   existe. Rejouer l'animation ferait un second ecran : on reprend donc le
+   logo la ou le systeme l'a laisse, et seul le nom apparait. */
+#splash.natif #sp-carte,
+#splash.natif #sp-anneaux,
+#splash.natif #sp-f1,
+#splash.natif #sp-f2{animation:none;opacity:1;transform:none}
+#splash.natif #sp-tige{animation:none;stroke-dashoffset:0}
+#splash.natif #sp-mot{animation:sp-monte .3s .05s ease-out forwards}
+#splash.natif #sp-sous{animation:sp-monte .3s .14s ease-out forwards}
+
 @media (prefers-reduced-motion:reduce){
   #sp-carte,#sp-anneaux,#sp-f1,#sp-f2,#sp-mot,#sp-sous{animation:none;opacity:1;transform:none}
   #sp-tige{animation:none;stroke-dashoffset:0}
@@ -489,6 +501,11 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
 }
 .ligne-copie.copie b{color:var(--acc)}
 .ligne-copie.copie svg{stroke:var(--acc)}
+.avance{margin-bottom:12px}
+.avance>summary{font-size:12.5px;color:var(--mut);cursor:pointer;padding:6px 0;list-style:none}
+.avance>summary::-webkit-details-marker{display:none}
+.avance>summary::before{content:'⚙ ';opacity:.6}
+.avance[open]>summary{margin-bottom:8px}
 
 .avenants{list-style:none;margin:0 0 12px;padding:0}
 .avenants li{
@@ -529,9 +546,82 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
 }
 html[data-theme="sombre"] .avertissement{background:#33280f;color:#e8c48a}
 
+/* ---------- Planning en grille ---------- */
+.gr-tete,.gr-corps{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.gr-tete{margin-bottom:5px}
+.gr-tete span{font-size:10.5px;color:var(--mut);text-align:center}
+.gr-jour{
+  border:1px solid var(--line);background:var(--card);border-radius:10px;
+  min-height:56px;padding:5px 3px 4px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font:inherit;color:var(--txt);
+}
+.gr-jour:active{background:var(--acc-doux)}
+.gr-jour .n{font-size:11.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+.gr-jour .h{font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.gr-jour .p{font-size:9.5px;line-height:1.1;text-align:center}
+.gr-jour.vide{background:transparent;border-color:transparent;cursor:default}
+.gr-jour.we{background:var(--zebre)}
+.gr-jour.ferie{background:#fdf3e7;border-color:#e8cba0}
+.gr-jour.ferie .n,.gr-jour.ferie .p{color:#b4690e}
+.gr-jour.abs-e{background:#e8f3f0;border-color:#b6d6cf}
+.gr-jour.abs-e .p{color:#256f66}
+.gr-jour.abs-s{background:#fbeeed;border-color:#eec4c1}
+.gr-jour.abs-s .p{color:#a8453e}
+.gr-jour.pleine .h{color:var(--acc)}
+html[data-theme="sombre"] .gr-jour.ferie{background:#3a2c15;border-color:#5a4520}
+html[data-theme="sombre"] .gr-jour.abs-e{background:#153630;border-color:#255248}
+html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338}
+#jourAbs{margin-top:4px}
+
+.qr-bloc{display:flex;gap:14px;align-items:center;margin-top:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.qr-bloc svg{width:104px;height:104px;flex:0 0 auto;border-radius:8px}
+.qr-bloc div{flex:1;min-width:0;line-height:1.4}
+.qr-bloc b{display:block;font-size:13.5px}
+.qr-bloc small{font-size:12px;color:var(--mut)}
+.code-invit{
+  font:700 30px/1 ui-monospace,monospace;letter-spacing:5px;color:var(--acc);
+  text-align:center;padding:16px 0 6px;
+}
+.code-expire{text-align:center;font-size:12px;color:var(--mut);margin-bottom:6px}
+
+.msg{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
+.msg:last-child{border-bottom:0}
+.msg .rond{width:34px;height:34px;border-radius:17px;flex:0 0 auto;display:flex;
+  align-items:center;justify-content:center;background:var(--acc-doux)}
+.msg .rond svg{width:17px;height:17px;fill:none;stroke:var(--acc);stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.msg.besoin .rond{background:#fdf3e7}
+.msg.besoin .rond svg{stroke:#b4690e}
+.msg .txt{flex:1;min-width:0;line-height:1.4}
+.msg .txt b{display:block;font-size:13.5px}
+.msg .txt small{font-size:11.5px;color:var(--mut)}
+.msg .txt.mien b{color:var(--mut);font-weight:500}
+.msg img{max-width:100%;border-radius:10px;margin-top:8px;display:block}
+.msg-vide{font-size:13px;color:var(--mut);padding:10px 0}
+.jour-b{border-bottom:1px solid var(--line);padding:12px 0}
+.jour-b:last-child{border-bottom:0}
+.jour-b .date{font-size:13.5px;font-weight:600;margin-bottom:6px;text-transform:capitalize}
+.jour-b .puces{display:flex;flex-wrap:wrap;gap:6px}
+.jour-b .puces i{
+  font-style:normal;font-size:12px;background:var(--zebre);border-radius:14px;
+  padding:5px 10px;color:var(--txt);
+}
+.jour-b .mot{font-size:13px;color:var(--mut);margin-top:7px;line-height:1.45}
+.rub{font-size:12px;color:var(--mut);margin:16px 0 8px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.4px}
+.pers{display:grid;grid-template-columns:1fr 1fr 40px;gap:7px;margin-bottom:7px;align-items:center}
+.pers input{min-height:42px}
+.pers button{border:0;background:transparent;color:var(--danger);cursor:pointer;
+  padding:8px;border-radius:8px;font-size:17px}
+.gal{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;background:var(--zebre)}
+.gal-mois{font-size:12px;color:var(--mut);margin:14px 0 7px;font-weight:600;text-transform:capitalize}
+
 /* ---------- Notifications ---------- */
 #btnNotif{position:relative}
-#btnNotif .glyph{
+#btnParams .glyph,#btnNotif .glyph{
   width:21px;height:21px;fill:none;stroke:currentColor;
   stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;
 }
@@ -560,10 +650,12 @@ html[data-theme="sombre"] .avertissement{background:#33280f;color:#e8c48a}
 }
 
 /* ---------- Planning type ---------- */
-.plan{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.plan label{display:flex;flex-direction:column;gap:3px;min-width:0}
-.plan span{font-size:11px;color:var(--mut);text-align:center}
-.plan input{padding:9px 4px;text-align:center;min-height:42px}
+.horaires{display:flex;flex-direction:column;gap:6px}
+.hor-tete,.hor-l{display:grid;grid-template-columns:38px 1fr 1fr 52px;gap:8px;align-items:center}
+.hor-tete span{font-size:11px;color:var(--mut);text-align:center}
+.hor-l b{font-size:12.5px;color:var(--mut);font-weight:600}
+.hor-l input{padding:9px 6px;text-align:center;min-height:42px;font-size:15px}
+.hor-l em{font-style:normal;font-size:12.5px;color:var(--acc);text-align:right;font-variant-numeric:tabular-nums}
 
 /* ---------- Récapitulatif annuel ---------- */
 .an-annee{display:flex;align-items:baseline;gap:10px;margin:0 0 10px;font-size:15px;font-weight:600}
@@ -600,6 +692,7 @@ html[data-theme="sombre"] .avertissement{background:#33280f;color:#e8c48a}
    Appliqué sur demande (html[data-theme=sombre]) ou, en mode automatique,
    selon le réglage du téléphone. Le thème clair reste le défaut. */
 html[data-theme="sombre"]{
+  --halo:rgba(255,255,255,.03);
   --bg:#0f1917; --card:#16211f; --line:#283833; --txt:#e6efec; --mut:#8fa8a2;
   --acc:#5fb8ab; --acc-d:#3e8a80; --ok:#5fb8ab; --danger:#e88b83;
   --miel:#e0a94d;
@@ -616,6 +709,26 @@ html[data-theme="sombre"] .calrow.abs-s{background:#3a2024}
 html[data-theme="sombre"] .calrow.abs-s .f{color:#f0a49d}
 html[data-theme="sombre"] #toast{background:#20302c}
 html[data-theme="sombre"] #toast button{background:#33514a}
+
+
+/* ---------- Finition : chaleur et fluidite ---------- */
+body{background-image:radial-gradient(120% 60% at 50% 0%, var(--halo) 0%, transparent 60%)}
+.card{transition:box-shadow .18s ease, transform .12s ease}
+.btn,.nav-item,.tuile,.puce-act,.famille,.etape,.ligne-lien,.besoin-b,.choix button{
+  transition:background .16s ease, transform .1s ease, border-color .16s ease}
+.btn:active,.besoin-b:active,.puce-act:active{transform:scale(.975)}
+.famille:active,.etape:active,.ligne-lien:active{transform:scale(.995)}
+section[id^="vue"],#saisie,#accueil,#dossier,#parametres,#annuel,#apercu{
+  animation:apparait .26s cubic-bezier(.2,.7,.3,1) both}
+@keyframes apparait{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#toast{box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.card>summary,.card>.tete{user-select:none}
+input,textarea{transition:border-color .16s ease, box-shadow .16s ease}
+input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
+@media (prefers-reduced-motion:reduce){
+  section[id^="vue"],#saisie,#accueil,#dossier,#parametres,#annuel,#apercu{animation:none}
+  .btn:active,.besoin-b:active,.puce-act:active,.famille:active{transform:none}
+}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (min-width:620px){
@@ -679,6 +792,9 @@ html[data-theme="sombre"] #toast button{background:#33514a}
 <symbol id="i-alerte" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/></symbol>
 <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.3l2.6 2.6 5-5.4"/></symbol>
 <symbol id="i-envoyer" viewBox="0 0 24 24"><path d="M20.5 3.5 10 14M20.5 3.5l-6.5 17-3.5-6.5L4 10.5z"/></symbol>
+<symbol id="i-reglages" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l4.5-4.5 3.5 3.5 3-3L20 17"/></symbol>
+<symbol id="i-journal" viewBox="0 0 24 24"><path d="M5.5 4.5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-12a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z"/><path d="M8.5 3v4M8 10.5h8M8 14h5"/></symbol>
 <symbol id="i-cercle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/></symbol>
 <symbol id="i-fleche" viewBox="0 0 24 24"><path d="M9 5.5 15.5 12 9 18.5"/></symbol>
 <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -720,7 +836,7 @@ html[data-theme="sombre"] #toast button{background:#33514a}
     <path id="sp-f1" d="M248 262c-10-46-42-68-84-62-4 44 32 74 84 62z" fill="#d99a3c"/>
     <path id="sp-f2" d="M264 292c10-42 40-62 78-56 4 40-30 68-78 56z" fill="#3e8a80"/>
   </svg>
-  <div id="sp-mot">AssMat+</div>
+  <div id="sp-mot">Cocon Parent</div>
   <div id="sp-sous">Fiches de salaire</div>
 </div>
 
@@ -728,6 +844,7 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   <button id="btnMenu" class="iconbtn" aria-label="Fiches">☰</button>
   <h1 id="titleMois">—</h1>
   <span id="saveDot" class="ok">Enregistré</span>
+  <button id="btnParams" class="iconbtn" aria-label="Paramètres"><svg class="glyph"><use href="#i-reglages"/></svg></button>
   <button id="btnNotif" class="iconbtn" aria-label="Notifications"><svg class="glyph"><use href="#i-cloche"/></svg><i id="pastille" hidden></i></button>
   <button id="btnMore" class="iconbtn" aria-label="Actions">⋮</button>
 </header>
@@ -858,6 +975,11 @@ html[data-theme="sombre"] #toast button{background:#33514a}
         <button id="calFill" class="btn btn-primary">Remplir le mois</button>
         <button id="calClear" class="btn btn-ghost">Vider</button>
       </div>
+      <div class="seg" id="segVue" style="margin-bottom:12px">
+        <button data-vuecal="grille" class="on">Grille</button>
+        <button data-vuecal="liste">Liste</button>
+      </div>
+      <div id="grille"></div>
       <div class="calhead"><span>Jour</span><span>Présence</span><span>H. compl.</span><span>H. major.</span></div>
       <div id="calendrier"></div>
       <div class="caltot">
@@ -933,6 +1055,77 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Nom, adresse et n° de sécurité sociale se modifient dans la fiche (repris chaque mois).</p>
     </div>
   </details>
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-alerte"/></svg><span class="ttl">Fiche d'urgence</span><b class="tot" id="badgeUrgence"></b></summary>
+    <div class="body">
+      <div class="two">
+        <label class="field"><span>Médecin traitant</span><input id="uMedecin"></label>
+        <label class="field"><span>Téléphone du médecin</span><input id="uMedecinTel" inputmode="tel"></label>
+      </div>
+      <label class="field"><span>Allergies</span><textarea id="uAllergies" rows="2" placeholder="Aucune connue"></textarea></label>
+      <label class="field"><span>Traitements en cours</span><textarea id="uTraitements" rows="2"></textarea></label>
+      <label class="field"><span>Particularités à connaître</span><textarea id="uParticularites" rows="2" placeholder="Sommeil, alimentation, peurs…"></textarea></label>
+
+      <div class="rub">Personnes autorisées à venir chercher l'enfant</div>
+      <div id="uPersonnes"></div>
+      <button id="btnAjoutPersonne" class="btn btn-ghost btn-block">Ajouter une personne</button>
+
+      <div class="rub">Autorisations</div>
+      <label class="check"><input type="checkbox" data-autor="sortie"><span>Sorties à pied et au parc</span></label>
+      <label class="check"><input type="checkbox" data-autor="transport"><span>Transport en voiture</span></label>
+      <label class="check"><input type="checkbox" data-autor="photo"><span>Photos de mon enfant, transmises à moi seul</span></label>
+      <label class="check"><input type="checkbox" data-autor="photo_groupe"><span>Photos de groupe, visibles des autres familles</span></label>
+      <label class="check"><input type="checkbox" data-autor="creme"><span>Application de crème solaire ou de change</span></label>
+      <label class="check"><input type="checkbox" data-autor="medicament"><span>Médicament sur ordonnance</span></label>
+
+      <button id="btnUrgence" class="btn btn-primary btn-block" style="margin-top:14px">Enregistrer et signer</button>
+      <p class="hint" id="uEtat"></p>
+      <p class="hint">La salariée la consulte depuis son application, y compris sans réseau. Elle ne peut pas la modifier.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-journal"/></svg><span class="ttl">Journal de la journée</span></summary>
+    <div class="body">
+      <div id="listeJournal"></div>
+      <p class="hint">Rempli par la salariée. Tu le lis, tu ne peux pas le modifier : une transmission réécrite ne vaudrait rien.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-image"/></svg><span class="ttl">Galerie</span><b class="tot" id="badgeGalerie"></b></summary>
+    <div class="body">
+      <div class="gal" id="listeGalerie"></div>
+      <p class="hint">Les photos prises par la salariée. Celles de groupe n'apparaissent que si tu as coché l'autorisation correspondante dans la fiche d'urgence.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-conges"/></svg><span class="ttl">Fermetures de la salariée</span></summary>
+    <div class="body">
+      <div id="listeFermetures"></div>
+      <p class="hint">Ses congés et jours de fermeture, tels qu'elle les a déclarés.</p>
+    </div>
+  </details>
+
+  <details class="card" id="carteMessages">
+    <summary><svg class="ico"><use href="#i-mail"/></svg><span class="ttl">Messages de la salariée</span><b class="tot" id="badgeMessages"></b></summary>
+    <div class="body">
+      <div id="listeMessages"></div>
+      <label class="field" style="margin-top:12px"><span>Répondre</span><input id="reponse" placeholder="Votre message"></label>
+      <button id="btnRepondre" class="btn btn-ghost btn-block">Envoyer</button>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-lien"/></svg><span class="ttl">Partage avec la salariée</span></summary>
+    <div class="body">
+      <div id="partageEtat"></div>
+      <div id="partageActions" style="margin-top:12px"></div>
+      <div id="partageQR"></div>
+      <p class="hint">Le planning et les absences sont partagés. Ni montants, ni IBAN, ni numéro de sécurité sociale : ces données ne quittent jamais ce téléphone.</p>
+    </div>
+  </details>
 
   <details class="card">
     <summary><svg class="ico"><use href="#i-gens"/></svg><span class="ttl">Enfants accueillis</span></summary>
@@ -942,28 +1135,27 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Chaque enfant a ses propres fiches mensuelles. Depuis janvier 2026, Pajemploi demande une déclaration distincte par enfant accueilli, même chez la même assistante maternelle.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-planning"/></svg><span class="ttl">Planning type</span></summary>
     <div class="body">
-      <div class="plan">
-        <label><span>lun</span><input data-profil="planning.d1" inputmode="decimal"></label>
-        <label><span>mar</span><input data-profil="planning.d2" inputmode="decimal"></label>
-        <label><span>mer</span><input data-profil="planning.d3" inputmode="decimal"></label>
-        <label><span>jeu</span><input data-profil="planning.d4" inputmode="decimal"></label>
-        <label><span>ven</span><input data-profil="planning.d5" inputmode="decimal"></label>
-        <label><span>sam</span><input data-profil="planning.d6" inputmode="decimal"></label>
-        <label><span>dim</span><input data-profil="planning.d0" inputmode="decimal"></label>
+      <div class="horaires">
+        <div class="hor-tete"><span></span><span>arrivée</span><span>départ</span><span>durée</span></div>
+        <div class="hor-l"><b>lun</b><input data-profil="horaires.d1.debut" placeholder="08:00"><input data-profil="horaires.d1.fin" placeholder="17:00"><em data-duree="d1">—</em></div>
+        <div class="hor-l"><b>mar</b><input data-profil="horaires.d2.debut" placeholder="08:00"><input data-profil="horaires.d2.fin" placeholder="17:00"><em data-duree="d2">—</em></div>
+        <div class="hor-l"><b>mer</b><input data-profil="horaires.d3.debut"><input data-profil="horaires.d3.fin"><em data-duree="d3">—</em></div>
+        <div class="hor-l"><b>jeu</b><input data-profil="horaires.d4.debut"><input data-profil="horaires.d4.fin"><em data-duree="d4">—</em></div>
+        <div class="hor-l"><b>ven</b><input data-profil="horaires.d5.debut"><input data-profil="horaires.d5.fin"><em data-duree="d5">—</em></div>
+        <div class="hor-l"><b>sam</b><input data-profil="horaires.d6.debut"><input data-profil="horaires.d6.fin"><em data-duree="d6">—</em></div>
+        <div class="hor-l"><b>dim</b><input data-profil="horaires.d0.debut"><input data-profil="horaires.d0.fin"><em data-duree="d0">—</em></div>
       </div>
-      <p class="hint">Heures d'accueil habituelles par jour. Laisser vide les jours sans accueil. « Remplir le mois » s'appuie dessus et saute les jours fériés.</p>
+      <div class="ds" style="margin-top:10px"><span>Total par semaine</span><b id="totalSemaine">— h</b></div>
+      <p class="hint">Les horaires convenus au contrat. Laisser vide les jours sans accueil. « Remplir le mois » s'appuie dessus, et ces horaires sont ceux que voit ta salariée dans Cocon Nounou.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-contrat"/></svg><span class="ttl">Contrat en cours</span></summary>
     <div class="body"><div id="dosContrat"></div></div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-doc"/></svg><span class="ttl">Attestations</span></summary>
     <div class="body">
@@ -973,7 +1165,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Documents sur l'honneur, utiles pour un dossier de location ou de crédit. Ce ne sont pas les attestations officielles de fin de contrat destinées à France Travail : celles-là se génèrent depuis Pajemploi.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-interdit"/></svg><span class="ttl">Fin de contrat</span></summary>
     <div class="body">
@@ -985,7 +1176,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <div id="finResultat"></div>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-sauve"/></svg><span class="ttl">Avenants au contrat</span></summary>
     <div class="body">
@@ -998,7 +1188,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Enregistre les tarifs et horaires de la fiche affichée comme version du contrat à partir de cette date. Les nouveaux mois reprennent la version en vigueur. Les fiches déjà établies ne sont jamais modifiées.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-conges"/></svg><span class="ttl">Congés payés</span></summary>
     <div class="body">
@@ -1007,14 +1196,52 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Acquisition de 2,5 jours ouvrables par mois travaillé, du 1er juin au 31 mai, plafonnée à 30 jours. L'indemnité affichée est la règle des 10 % du brut de la période : vérifie-la face au maintien de salaire, la plus favorable des deux s'applique.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-notes"/></svg><span class="ttl">Notes</span></summary>
     <div class="body">
       <textarea data-profil="notes" rows="5" placeholder="Jours d'accueil, horaires habituels, particularités du contrat, congés prévus…"></textarea>
     </div>
   </details>
+</section>
 
+<section id="parametres" hidden>
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-lien"/></svg><span class="ttl">Compte en ligne</span></summary>
+    <div class="body">
+      <div id="compteEtat" class="ds"><span>État</span><b>Hors ligne</b></div>
+
+      <div id="compteReglages" style="margin-top:12px">
+        <details id="reglageProjet" class="avance">
+          <summary>Projet Supabase</summary>
+          <label class="field"><span>Adresse du projet</span><input data-profil="cloud.url" placeholder="https://xxxx.supabase.co" inputmode="url"></label>
+          <label class="field"><span>Clé publique « anon »</span><input data-profil="cloud.cle" placeholder="eyJhbG..."></label>
+        </details>
+        <label class="field"><span>Adresse e-mail</span><input id="compteEmail" inputmode="email" autocomplete="username"></label>
+        <label class="field"><span>Mot de passe</span><input id="compteMdp" type="password" autocomplete="current-password"></label>
+        <div class="two">
+          <button id="btnConnexion" class="btn btn-primary">Se connecter</button>
+          <button id="btnInscription" class="btn btn-ghost">Créer le compte</button>
+        </div>
+        <button id="btnMdpOublie" class="btn btn-ghost btn-block" style="margin-top:8px">Mot de passe oublié</button>
+      </div>
+
+      <div id="compteConnecte" hidden style="margin-top:12px">
+        <button id="btnTestBase" class="btn btn-ghost btn-block">Vérifier l'accès à la base</button>
+        <button id="btnDeconnexion" class="btn btn-danger btn-block">Se déconnecter</button>
+      </div>
+
+      <div id="compteResultat"></div>
+      <p class="hint">La connexion ne sert qu'au planning partagé. Tout le reste — fiches, montants, IBAN, numéro de sécurité sociale — continue de vivre uniquement sur ce téléphone, et n'est jamais envoyé.</p>
+    </div>
+  </details>
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-doc"/></svg><span class="ttl">Bannière des documents</span></summary>
+    <div class="body">
+      <label class="check"><input type="checkbox" data-profil="banniere.actif"><span>Signer les documents produits</span></label>
+      <div id="apercuBanniere"></div>
+      <p class="hint">Apparaît en bas du planning partagé et des attestations. La fiche de calcul A4 n'est jamais modifiée : elle doit rester conforme au modèle papier.</p>
+    </div>
+  </details>
   <details class="card">
     <summary><svg class="ico"><use href="#i-mail"/></svg><span class="ttl">Modèle d'e-mail</span></summary>
     <div class="body">
@@ -1023,7 +1250,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Variables remplacées automatiquement : <b>{mois}</b>, <b>{enfant}</b>, <b>{salariee}</b>, <b>{employeur}</b>.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-lien"/></svg><span class="ttl">Pajemploi</span></summary>
     <div class="body">
@@ -1032,7 +1258,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Le simulateur convertit le salaire brut calculé par l'application en net à déclarer. Reporte ensuite ce net dans la carte « Salaire net ».</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-alerte"/></svg><span class="ttl">Sécurité</span></summary>
     <div class="body">
@@ -1042,7 +1267,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint" id="secEtat"></p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-euro"/></svg><span class="ttl">Seuils légaux</span></summary>
     <div class="body">
@@ -1055,7 +1279,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Ces planchers sont indexés et révisés chaque année, en général au 1er janvier. L'application ne les devine pas : saisis-les toi-même, elle t'alerte si un tarif de la fiche passe dessous, et te rappelle de les vérifier en début d'année.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-theme"/></svg><span class="ttl">Apparence</span></summary>
     <div class="body">
@@ -1067,7 +1290,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">« Automatique » suit le réglage du téléphone.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-cloche"/></svg><span class="ttl">Versement et rappels</span></summary>
     <div class="body">
@@ -1081,7 +1303,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint" id="rappelEtat">Trois notifications par mois : préparer la fiche avant le versement, relance le jour du versement si elle n'est pas partie, et l'ouverture de la déclaration Pajemploi le 1er.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-agenda"/></svg><span class="ttl">Agenda</span></summary>
     <div class="body">
@@ -1090,7 +1311,6 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">Produit un fichier .ics contenant une plage par jour d'accueil. Choisis Google Agenda dans le partage pour les importer. Les jours fériés et les absences sont exclus.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-externe"/></svg><span class="ttl">Mises à jour</span></summary>
     <div class="body">
@@ -1102,16 +1322,14 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <p class="hint">L'application interroge les versions publiées du dépôt. Elle ne télécharge ni n'installe rien toute seule : elle t'ouvre la page de téléchargement.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">0.8.1</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">0.9.8</b></div>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
     </div>
   </details>
-
   <details class="card">
     <summary><svg class="ico"><use href="#i-sauve"/></svg><span class="ttl">Sauvegarde des données</span></summary>
     <div class="body">
@@ -1147,7 +1365,7 @@ html[data-theme="sombre"] #toast button{background:#33514a}
 <aside id="drawer">
   <div class="brand">
     <img class="brand-ico" src="icones/icone-192.png" alt="" width="34" height="34">
-    <div><b>AssMat+</b><span>Salaire assistante maternelle</span></div>
+    <div><b>Cocon Parent</b><span>Salaire assistante maternelle</span></div>
     <button id="btnFermer" class="iconbtn" aria-label="Fermer">✕</button>
   </div>
   <div id="barreEnfants" hidden></div>
@@ -1164,6 +1382,7 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   <div class="grab"></div>
   <button id="actPdf"><svg class="ico"><use href="#i-contrat"/></svg>Enregistrer le PDF</button>
   <button id="actPrint"><svg class="ico"><use href="#i-imprim"/></svg>Imprimer</button>
+  <button id="actDupli"><svg class="ico"><use href="#i-sauve"/></svg>Reprendre un mois précédent</button>
   <button id="actMail"><svg class="ico"><use href="#i-mail"/></svg>Envoyer la fiche par e-mail</button>
   <button id="actPlanning"><svg class="ico"><use href="#i-planning"/></svg>Partager le planning du mois</button>
   <button id="actAbsence"><svg class="ico"><use href="#i-interdit"/></svg>Signaler une absence</button>
@@ -1194,6 +1413,40 @@ html[data-theme="sombre"] #toast button{background:#33514a}
     <div class="modal-actions">
       <button id="btnAbsCancel" class="btn btn-ghost">Annuler</button>
       <button id="btnAbsSend" class="btn btn-primary">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<div id="jourModal" class="modal" hidden>
+  <div class="modal-box">
+    <h3 id="jourTitre">Jour</h3>
+    <div id="jourFerie" class="hint" hidden></div>
+    <div class="two">
+      <label class="field"><span>Présence (h)</span><input id="jourP" inputmode="decimal"></label>
+      <label class="field"><span>H. complémentaires</span><input id="jourC" inputmode="decimal"></label>
+      <label class="field"><span>H. majorées</span><input id="jourM" inputmode="decimal"></label>
+    </div>
+    <div class="seg" id="jourAbs">
+      <button data-abs2="">Accueil</button>
+      <button data-abs2="e">Enfant absent</button>
+      <button data-abs2="s">Salariée absente</button>
+    </div>
+    <div class="modal-actions">
+      <button id="btnJourVider" class="btn btn-ghost">Vider</button>
+      <button id="btnJourOk" class="btn btn-primary">Valider</button>
+    </div>
+  </div>
+</div>
+
+<div id="dupliModal" class="modal" hidden>
+  <div class="modal-box">
+    <h3>Reprendre un mois</h3>
+    <p class="hint" style="margin-top:0">Les données du mois choisi remplacent celles du mois affiché. Tu peux tout modifier ensuite.</p>
+    <label class="check"><input type="checkbox" id="dupliCal"><span>Reprendre aussi le calendrier de présence</span></label>
+    <p class="hint" id="dupliAvis"></p>
+    <ul id="dupliListe" class="avenants"></ul>
+    <div class="modal-actions">
+      <button id="btnDupliCancel" class="btn btn-ghost">Annuler</button>
     </div>
   </div>
 </div>
@@ -1513,6 +1766,335 @@ ${calRows}
 });
 </script>
 <script>
+/* Encodeur QR — mode octet, correction M, versions 1 à 10.
+   Écrit à la main : l'application ne charge aucun script externe et doit
+   rester utilisable hors connexion. */
+const QR = (() => {
+
+  /* ---- Corps de Galois GF(256), polynôme 0x11D ---- */
+  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  (() => {
+    let x = 1;
+    for (let i = 0; i < 255; i++) {
+      EXP[i] = x; LOG[x] = i;
+      x <<= 1; if (x & 0x100) x ^= 0x11d;
+    }
+    for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  })();
+  const mul = (a, b) => (a === 0 || b === 0) ? 0 : EXP[LOG[a] + LOG[b]];
+
+  /* ---- Reed-Solomon ---- */
+  function generateur(n) {
+    let g = [1];
+    for (let i = 0; i < n; i++) {
+      const suivant = new Array(g.length + 1).fill(0);
+      for (let j = 0; j < g.length; j++) {
+        suivant[j] ^= mul(g[j], EXP[i]);
+        suivant[j + 1] ^= g[j];
+      }
+      g = suivant;
+    }
+    // La division qui suit lit les coefficients du plus haut degré au plus bas.
+    return g.reverse();
+  }
+
+  function correction(donnees, n) {
+    const g = generateur(n);
+    const reste = new Array(n).fill(0);
+    for (const octet of donnees) {
+      const facteur = octet ^ reste[0];
+      reste.shift(); reste.push(0);
+      if (facteur !== 0) for (let i = 0; i < n; i++) reste[i] ^= mul(g[i + 1], facteur);
+    }
+    return reste;
+  }
+
+  /* ---- Tables de la norme, niveau M, versions 1 à 10 ----
+     [octets de correction par bloc, blocs groupe 1, données groupe 1,
+      blocs groupe 2, données groupe 2] */
+  const BLOCS = {
+    1:  [10, 1, 16, 0, 0],
+    2:  [16, 1, 28, 0, 0],
+    3:  [26, 1, 44, 0, 0],
+    4:  [18, 2, 32, 0, 0],
+    5:  [24, 2, 43, 0, 0],
+    6:  [16, 4, 27, 0, 0],
+    7:  [18, 4, 31, 0, 0],
+    8:  [22, 2, 38, 2, 39],
+    9:  [22, 3, 36, 2, 37],
+    10: [26, 4, 43, 1, 44]
+  };
+
+  const ALIGNEMENTS = {
+    1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30],
+    6: [6, 34], 7: [6, 22, 38], 8: [6, 24, 42], 9: [6, 26, 46], 10: [6, 28, 50]
+  };
+
+  const donneesTotales = v => {
+    const [, b1, d1, b2, d2] = BLOCS[v];
+    return b1 * d1 + b2 * d2;
+  };
+
+  const bitsCompteur = v => (v <= 9 ? 8 : 16);
+
+  function choisirVersion(n) {
+    for (let v = 1; v <= 10; v++) {
+      const dispo = donneesTotales(v) * 8 - 4 - bitsCompteur(v);
+      if (n * 8 <= dispo) return v;
+    }
+    return null;
+  }
+
+  /* ---- Flux binaire ---- */
+  function fluxBinaire(octets, v) {
+    const bits = [];
+    const pousser = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+
+    pousser(0b0100, 4);                       // mode octet
+    pousser(octets.length, bitsCompteur(v));
+    for (const o of octets) pousser(o, 8);
+
+    const capacite = donneesTotales(v) * 8;
+    for (let i = 0; i < 4 && bits.length < capacite; i++) bits.push(0);   // terminateur
+    while (bits.length % 8) bits.push(0);
+
+    const mots = [];
+    for (let i = 0; i < bits.length; i += 8) {
+      let o = 0;
+      for (let j = 0; j < 8; j++) o = (o << 1) | bits[i + j];
+      mots.push(o);
+    }
+    const remplissage = [0xec, 0x11];
+    let k = 0;
+    while (mots.length < donneesTotales(v)) mots.push(remplissage[k++ % 2]);
+    return mots;
+  }
+
+  /* ---- Découpe en blocs et entrelacement ---- */
+  function motsFinaux(mots, v) {
+    const [nEc, b1, d1, b2, d2] = BLOCS[v];
+    const blocsDonnees = [], blocsEc = [];
+    let pos = 0;
+    for (let i = 0; i < b1; i++) { const b = mots.slice(pos, pos + d1); pos += d1; blocsDonnees.push(b); blocsEc.push(correction(b, nEc)); }
+    for (let i = 0; i < b2; i++) { const b = mots.slice(pos, pos + d2); pos += d2; blocsDonnees.push(b); blocsEc.push(correction(b, nEc)); }
+
+    const sortie = [];
+    const maxD = Math.max(d1, d2);
+    for (let i = 0; i < maxD; i++)
+      for (const b of blocsDonnees) if (i < b.length) sortie.push(b[i]);
+    for (let i = 0; i < nEc; i++)
+      for (const b of blocsEc) sortie.push(b[i]);
+    return sortie;
+  }
+
+  /* ---- Motifs fixes ---- */
+  function grilleVide(v) {
+    const t = v * 4 + 17;
+    const m = Array.from({ length: t }, () => new Array(t).fill(null));
+    const reserve = Array.from({ length: t }, () => new Array(t).fill(false));
+
+    const finder = (l, c) => {
+      for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) {
+        const y = l + i, x = c + j;
+        if (y < 0 || y >= t || x < 0 || x >= t) continue;
+        const dedans = i >= 0 && i <= 6 && j >= 0 && j <= 6;
+        const noir = dedans && (i === 0 || i === 6 || j === 0 || j === 6 ||
+                                (i >= 2 && i <= 4 && j >= 2 && j <= 4));
+        m[y][x] = noir ? 1 : 0; reserve[y][x] = true;
+      }
+    };
+    finder(0, 0); finder(0, t - 7); finder(t - 7, 0);
+
+    for (let i = 8; i < t - 8; i++) {
+      const noir = i % 2 === 0 ? 1 : 0;
+      m[6][i] = noir; reserve[6][i] = true;
+      m[i][6] = noir; reserve[i][6] = true;
+    }
+
+    // Un motif d'alignement est omis uniquement s'il chevauche un motif de
+    // recherche, jamais parce qu'il croise la ligne de synchronisation.
+    const dernier = ALIGNEMENTS[v][ALIGNEMENTS[v].length - 1];
+    for (const cy of ALIGNEMENTS[v]) for (const cx of ALIGNEMENTS[v]) {
+      if ((cy === 6 && cx === 6) || (cy === 6 && cx === dernier) || (cy === dernier && cx === 6)) continue;
+      for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) {
+        const noir = (Math.abs(i) === 2 || Math.abs(j) === 2 || (i === 0 && j === 0)) ? 1 : 0;
+        m[cy + i][cx + j] = noir; reserve[cy + i][cx + j] = true;
+      }
+    }
+
+    m[t - 8][8] = 1; reserve[t - 8][8] = true;               // module toujours noir
+
+    for (let i = 0; i < 9; i++) {                             // zones du format
+      if (!reserve[8][i]) { reserve[8][i] = true; m[8][i] = 0; }
+      if (!reserve[i][8]) { reserve[i][8] = true; m[i][8] = 0; }
+    }
+    for (let i = 0; i < 8; i++) {
+      if (!reserve[8][t - 1 - i]) { reserve[8][t - 1 - i] = true; m[8][t - 1 - i] = 0; }
+      if (!reserve[t - 1 - i][8]) { reserve[t - 1 - i][8] = true; m[t - 1 - i][8] = 0; }
+    }
+
+    if (v >= 7) {                                             // zones de la version
+      for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) {
+        reserve[i][t - 11 + j] = true; m[i][t - 11 + j] = 0;
+        reserve[t - 11 + j][i] = true; m[t - 11 + j][i] = 0;
+      }
+    }
+    return { m, reserve, t };
+  }
+
+  /* ---- Placement en zigzag ---- */
+  function placer(m, reserve, t, mots) {
+    const bits = [];
+    for (const o of mots) for (let i = 7; i >= 0; i--) bits.push((o >> i) & 1);
+
+    let k = 0, montant = true;
+    for (let col = t - 1; col > 0; col -= 2) {
+      if (col === 6) col--;
+      for (let n = 0; n < t; n++) {
+        const ligne = montant ? t - 1 - n : n;
+        for (const c of [col, col - 1]) {
+          if (reserve[ligne][c]) continue;
+          m[ligne][c] = k < bits.length ? bits[k++] : 0;
+        }
+      }
+      montant = !montant;
+    }
+  }
+
+  const MASQUES = [
+    (l, c) => (l + c) % 2 === 0,
+    (l) => l % 2 === 0,
+    (l, c) => c % 3 === 0,
+    (l, c) => (l + c) % 3 === 0,
+    (l, c) => (Math.floor(l / 2) + Math.floor(c / 3)) % 2 === 0,
+    (l, c) => ((l * c) % 2) + ((l * c) % 3) === 0,
+    (l, c) => (((l * c) % 2) + ((l * c) % 3)) % 2 === 0,
+    (l, c) => (((l + c) % 2) + ((l * c) % 3)) % 2 === 0
+  ];
+
+  function formatBits(masque) {
+    const donnees = (0b00 << 3) | masque;          // 00 = niveau M
+    let reste = donnees << 10;
+    for (let i = 4; i >= 0; i--)
+      if (reste & (1 << (i + 10))) reste ^= 0b10100110111 << i;
+    return ((donnees << 10) | reste) ^ 0b101010000010010;
+  }
+
+  function versionBits(v) {
+    let reste = v << 12;
+    for (let i = 5; i >= 0; i--)
+      if (reste & (1 << (i + 12))) reste ^= 0b1111100100101 << i;
+    return (v << 12) | reste;
+  }
+
+  function penalite(m, t) {
+    let p = 0;
+
+    const serie = (lire) => {
+      for (let a = 0; a < t; a++) {
+        let compte = 1;
+        for (let b = 1; b < t; b++) {
+          if (lire(a, b) === lire(a, b - 1)) { compte++; }
+          else { if (compte >= 5) p += 3 + (compte - 5); compte = 1; }
+        }
+        if (compte >= 5) p += 3 + (compte - 5);
+      }
+    };
+    serie((a, b) => m[a][b]);
+    serie((a, b) => m[b][a]);
+
+    for (let l = 0; l < t - 1; l++) for (let c = 0; c < t - 1; c++)
+      if (m[l][c] === m[l][c + 1] && m[l][c] === m[l + 1][c] && m[l][c] === m[l + 1][c + 1]) p += 3;
+
+    const MOTIF = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0];
+    const cherche = (lire) => {
+      for (let a = 0; a < t; a++) for (let b = 0; b <= t - 11; b++) {
+        let ok = true;
+        for (let i = 0; i < 11; i++) if (lire(a, b + i) !== MOTIF[i]) { ok = false; break; }
+        if (ok) p += 40;
+        ok = true;
+        for (let i = 0; i < 11; i++) if (lire(a, b + i) !== MOTIF[10 - i]) { ok = false; break; }
+        if (ok) p += 40;
+      }
+    };
+    cherche((a, b) => m[a][b]);
+    cherche((a, b) => m[b][a]);
+
+    let noirs = 0;
+    for (let l = 0; l < t; l++) for (let c = 0; c < t; c++) noirs += m[l][c];
+    const pourcent = noirs * 100 / (t * t);
+    p += Math.floor(Math.abs(pourcent - 50) / 5) * 10;
+    return p;
+  }
+
+  /* ---- Point d'entrée : renvoie une matrice de 0 et de 1 ---- */
+  function matrice(texte) {
+    const octets = [...new TextEncoder().encode(String(texte))];
+    const v = choisirVersion(octets.length);
+    if (!v) throw new Error('Texte trop long pour un QR de cette taille');
+
+    const mots = motsFinaux(fluxBinaire(octets, v), v);
+    let meilleure = null, meilleurScore = Infinity;
+
+    for (let masque = 0; masque < 8; masque++) {
+      const { m, reserve, t } = grilleVide(v);
+      placer(m, reserve, t, mots);
+
+      for (let l = 0; l < t; l++) for (let c = 0; c < t; c++)
+        if (!reserve[l][c] && MASQUES[masque](l, c)) m[l][c] ^= 1;
+
+      // Les quinze bits du format sont écrits deux fois. L'ordre suit la norme :
+      // bit 0 en haut de la colonne 8 et à droite de la ligne 8.
+      const f = formatBits(masque);
+      for (let i = 0; i < 15; i++) {
+        const bit = (f >> i) & 1;
+
+        if (i < 6) m[i][8] = bit;
+        else if (i < 8) m[i + 1][8] = bit;
+        else m[t - 15 + i][8] = bit;
+
+        if (i < 8) m[8][t - 1 - i] = bit;
+        else if (i === 8) m[8][7] = bit;
+        else m[8][14 - i] = bit;
+      }
+      m[t - 8][8] = 1;
+
+      if (v >= 7) {
+        const vb = versionBits(v);
+        for (let i = 0; i < 18; i++) {
+          const bit = (vb >> i) & 1;
+          const l = Math.floor(i / 3), c = i % 3;
+          m[l][t - 11 + c] = bit;
+          m[t - 11 + c][l] = bit;
+        }
+      }
+
+      const score = penalite(m, t);
+      if (score < meilleurScore) { meilleurScore = score; meilleure = m; }
+    }
+    return meilleure;
+  }
+
+  /* ---- Rendu SVG ---- */
+  function svg(texte, taille, marge) {
+    const m = matrice(texte);
+    const t = m.length;
+    const q = marge === undefined ? 4 : marge;
+    const total = t + q * 2;
+    let chemin = '';
+    for (let l = 0; l < t; l++) for (let c = 0; c < t; c++)
+      if (m[l][c]) chemin += `M${c + q} ${l + q}h1v1h-1z`;
+    return `<svg viewBox="0 0 ${total} ${total}" width="${taille || 200}" height="${taille || 200}" ` +
+           `shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">` +
+           `<rect width="${total}" height="${total}" fill="#fff"/>` +
+           `<path d="${chemin}" fill="#000"/></svg>`;
+  }
+
+  return { matrice, svg };
+})();
+</script>
+
+<script>
 'use strict';
 const F = window.Fiche;
 const $ = s => document.querySelector(s);
@@ -1559,9 +2141,31 @@ const Store = (() => {
     } catch (e) { console.warn('écriture impossible', e); }
   }
 
+  const CLE_SESSION = 'assmat-session';
+  async function lireSession() {
+    try {
+      if (cap) return JSON.parse((await cap.get({ key: CLE_SESSION })).value || 'null');
+      if (host) { const r = await host.get(CLE_SESSION); return r ? JSON.parse(r.value) : null; }
+      if (ls) return JSON.parse(ls.getItem(CLE_SESSION) || 'null');
+    } catch (e) {}
+    return null;
+  }
+  async function ecrireSession(o) {
+    const t = JSON.stringify(o);
+    try {
+      if (cap) return void await cap.set({ key: CLE_SESSION, value: t });
+      if (host) return void await host.set(CLE_SESSION, t);
+      if (ls) return void ls.setItem(CLE_SESSION, t);
+    } catch (e) {}
+  }
+
   let cache = null;
   return {
     kind,
+    // La session vit dans sa propre clé, hors du bloc sauvegardé et exporté :
+    // un jeton de rafraîchissement n'a rien à faire dans un fichier de sauvegarde.
+    session: lireSession,
+    majSession: ecrireSession,
     async all() {
       if (cache) return cache;
       let d = null;
@@ -1716,6 +2320,7 @@ let profil = {};
 let vue = 'saisie';
 let rappelTimer = null;
 let accueilTimer = null;
+let cloudTimer = null;
 
 function getPath(o, p) { return p.split('.').reduce((a, k) => a == null ? a : a[k], o); }
 function setPath(o, p, v) {
@@ -1791,15 +2396,44 @@ function syncCalInputs() {
 
 function hJourContrat() { return (F.num(cur.contrat.hnH) + F.num(cur.contrat.hmH)) / 5; }
 
-/* Heures prévues un jour donné : planning type du dossier, sinon repli
-   sur les heures par jour du contrat, du lundi au vendredi. */
+/* Horaires du contrat : « 08:00 » et « 17:30 » deviennent 9,5 heures. */
+function minutes(txt) {
+  const m = String(txt || '').trim().match(/^(\d{1,2})\s*[:hH.]?\s*(\d{2})?$/);
+  if (!m) return null;
+  const h = +m[1], mn = m[2] ? +m[2] : 0;
+  return (h >= 0 && h <= 23 && mn < 60) ? h * 60 + mn : null;
+}
+
+function dureeJour(wd) {
+  const h = (profil.horaires || {})['d' + wd] || {};
+  const a = minutes(h.debut), b = minutes(h.fin);
+  if (a === null || b === null) return 0;
+  return Math.max(0, (b - a) / 60);
+}
+
+function horairesDefinis() {
+  const h = profil.horaires || {};
+  return [0,1,2,3,4,5,6].some(d => dureeJour(d) > 0);
+}
+
+/* Heures prévues un jour donné : horaires du contrat, sinon repli sur les
+   heures par jour saisies dans la carte du calendrier. */
 function heuresDuJour(wd) {
-  const pl = profil.planning || {};
-  // seules les clés d0 à d6 sont des jours : planning.debut est l'heure d'arrivée
-  const defini = Object.keys(pl).some(k => /^d[0-6]$/.test(k) && String(pl[k]).trim() !== '');
-  if (defini) return F.num(pl['d' + wd]);
+  if (horairesDefinis()) return dureeJour(wd);
   if (wd < 1 || wd > 5) return 0;
   return cur.calAide.hJour !== '' ? F.num(cur.calAide.hJour) : hJourContrat();
+}
+
+function renderHoraires() {
+  let total = 0;
+  for (const d of [0,1,2,3,4,5,6]) {
+    const h = dureeJour(d);
+    total += h;
+    const el = $('[data-duree="d' + d + '"]');
+    if (el) el.textContent = h > 0 ? F.qn(h) + ' h' : '—';
+  }
+  const t = $('#totalSemaine');
+  if (t) t.textContent = total > 0 ? F.f2(total) + ' h' : '— h';
 }
 
 function remplirSemaine() {
@@ -1828,7 +2462,7 @@ function remplirSemaine() {
     jours++; maj += m;
   }
 
-  syncCalInputs(); recalc(); scheduleSave();
+  syncCalInputs(); renderGrille(); recalc(); scheduleSave();
   toast(jours + ' jours remplis' +
     (maj > 0.0001 ? ', dont ' + F.qn(maj) + ' h majorées' : '') +
     (sautes ? ' — ' + sautes + (sautes > 1 ? ' jours fériés laissés vides' : ' jour férié laissé vide') : ''));
@@ -1837,7 +2471,7 @@ function remplirSemaine() {
 function viderCalendrier() {
   if (!confirm('Vider tout le calendrier de présence ?')) return;
   cur.calendrier = Array.from({ length: 31 }, () => ({ p: '', c: '', m: '' }));
-  syncCalInputs(); recalc(); scheduleSave();
+  syncCalInputs(); renderGrille(); recalc(); scheduleSave();
 }
 
 function refreshCalendrierMeta() {
@@ -1865,6 +2499,86 @@ function refreshCalendrierMeta() {
   });
 }
 
+/* ---------------- Planning en grille ----------------
+   Le mois tel qu'on se le représente : sept colonnes, une case par jour.
+   La liste reste disponible pour la saisie au clavier. */
+let vueCal = 'grille';
+let jourEdite = null;
+
+function renderGrille() {
+  const box = $('#grille');
+  if (!box || vueCal !== 'grille' || !cur) return;
+  const per = F.periodeFromMois(cur.mois);
+  const [y, m] = cur.mois.split('-').map(Number);
+  const decalage = (new Date(y, m - 1, 1).getDay() + 6) % 7; // semaine du lundi
+
+  let cases = '';
+  for (let i = 0; i < decalage; i++) cases += '<div class="gr-jour vide"></div>';
+
+  for (let i = 0; i < per.jours; i++) {
+    const r = cur.calendrier[i];
+    const jour = i + 1;
+    const wd = new Date(y, m - 1, jour).getDay();
+    const fer = ferieDu(cur.mois, jour);
+    const h = F.num(r.p) + F.num(r.c) + F.num(r.m);
+    const classes = ['gr-jour'];
+    if (r.abs === 'e') classes.push('abs-e');
+    else if (r.abs === 's') classes.push('abs-s');
+    else if (fer) classes.push('ferie');
+    else if (wd === 0 || wd === 6) classes.push('we');
+    if (h > 0) classes.push('pleine');
+    const note = r.abs === 'e' ? 'enfant' : r.abs === 's' ? 'salariée' : fer ? 'férié' : '';
+    cases += `<button type="button" class="${classes.join(' ')}" data-jour="${i}">
+      <span class="n">${jour}</span><span class="h">${h > 0 ? F.qn(h) : ''}</span>
+      <span class="p">${esc(note)}</span></button>`;
+  }
+
+  box.innerHTML = `<div class="gr-tete">${['lun','mar','mer','jeu','ven','sam','dim']
+    .map(j => '<span>' + j + '</span>').join('')}</div><div class="gr-corps">${cases}</div>`;
+  $$('#grille [data-jour]').forEach(b => { b.onclick = () => ouvrirJour(+b.dataset.jour); });
+}
+
+function basculerVueCal(v) {
+  vueCal = v;
+  $$('#segVue button').forEach(b => b.classList.toggle('on', b.dataset.vuecal === v));
+  $('#grille').hidden = v !== 'grille';
+  $('#calendrier').hidden = v !== 'liste';
+  const tete = document.querySelector('.calhead');
+  if (tete) tete.hidden = v !== 'liste';
+  if (v === 'grille') renderGrille();
+}
+
+function ouvrirJour(i) {
+  jourEdite = i;
+  const r = cur.calendrier[i];
+  const [y, m] = cur.mois.split('-').map(Number);
+  const noms = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+  $('#jourTitre').textContent = noms[new Date(y, m - 1, i + 1).getDay()] + ' ' + (i + 1) +
+    ' ' + F.labelMois(cur.mois).split(' ')[0];
+  const fer = ferieDu(cur.mois, i + 1);
+  $('#jourFerie').hidden = !fer;
+  $('#jourFerie').textContent = fer ? 'Jour férié : ' + fer : '';
+  $('#jourP').value = r.p || '';
+  $('#jourC').value = r.c || '';
+  $('#jourM').value = r.m || '';
+  $$('#jourAbs button').forEach(b => b.classList.toggle('on', (b.dataset.abs2 || '') === (r.abs || '')));
+  $('#jourModal').hidden = false;
+}
+
+function validerJour() {
+  if (jourEdite === null) return;
+  const r = cur.calendrier[jourEdite];
+  r.p = $('#jourP').value.trim();
+  r.c = $('#jourC').value.trim();
+  r.m = $('#jourM').value.trim();
+  const choix = $('#jourAbs button.on');
+  r.abs = choix ? (choix.dataset.abs2 || '') : '';
+  $('#jourModal').hidden = true;
+  jourEdite = null;
+  syncCalInputs(); refreshCalendrierMeta(); renderGrille();
+  recalc(); scheduleSave();
+}
+
 /* ---------------- Absences ----------------
    Marque purement descriptive : le calcul du salaire reste piloté par les
    heures saisies. Elle sert au planning partagé et au message d'absence. */
@@ -1874,6 +2588,7 @@ function basculerAbsence(i) {
   const r = cur.calendrier[i];
   r.abs = r.abs === 'e' ? 's' : r.abs === 's' ? '' : 'e';
   refreshCalendrierMeta();
+  renderGrille();
   scheduleSave();
   const j = i + 1;
   toast(r.abs ? 'Jour ' + j + ' : ' + ABS_LIB[r.abs].toLowerCase() : 'Jour ' + j + ' : absence retirée');
@@ -1926,6 +2641,7 @@ function fillForm() {
   syncCalInputs();
   applyAnneeComplete();
   refreshCalendrierMeta();
+  renderGrille();
   renderTitle();
   recalc();
 }
@@ -1937,8 +2653,9 @@ function deMois(m) {
 
 function renderTitle() {
   majPastille();
-  if (vue === 'accueil') { $('#titleMois').textContent = 'AssMat+'; return; }
+  if (vue === 'accueil') { $('#titleMois').textContent = 'Cocon'; return; }
   if (vue === 'dossier') { $('#titleMois').textContent = 'Dossier salariée'; return; }
+  if (vue === 'parametres') { $('#titleMois').textContent = 'Paramètres'; return; }
   if (vue === 'annuel') { $('#titleMois').textContent = 'Bilan annuel'; return; }
   const l = F.labelMois(cur.mois);
   $('#titleMois').textContent = l.charAt(0).toUpperCase() + l.slice(1);
@@ -2033,7 +2750,10 @@ function setStatus(s) {
   el.textContent = s === 'saving' ? 'Enregistrement…' : 'Enregistré';
   el.className = s;
 }
-function scheduleSave() { setStatus('saving'); clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 500); }
+function scheduleSave() {
+  setStatus('saving'); clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 500);
+  planifierSync();
+}
 async function doSave() {
   clearTimeout(saveTimer); saveTimer = null;
   if (!cur) return;
@@ -2248,6 +2968,7 @@ function showView(v) {
   $('#saisie').hidden = v !== 'saisie';
   $('#apercu').hidden = v !== 'apercu';
   $('#dossier').hidden = v !== 'dossier';
+  $('#parametres').hidden = v !== 'parametres';
   $('#annuel').hidden = v !== 'annuel';
   const ongletDe = { accueil: 'tabAccueil', saisie: 'tabSaisie', apercu: 'tabApercu', annuel: 'tabAnnuel', dossier: 'tabDossier' };
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.id === ongletDe[v]));
@@ -2255,7 +2976,8 @@ function showView(v) {
   if (v === 'accueil') renderAccueil();
   if (v === 'apercu') { renderPreview(); fitPreview(); }
   if (v === 'dossier') renderDossier();
-  if (v === 'annuel') renderAnnuel();
+  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); }
+  if (v === 'annuel') renderAnnuel().then(renderRegularisation);
   renderTitle();
 }
 
@@ -2315,7 +3037,8 @@ tr.ab .h,tr.as .h{text-decoration:line-through;color:#9db3ae;font-weight:400}
 </p>
 <table><tbody>${lignes}</tbody></table>
 <div class="tot"><span>Total des heures d'accueil</span><span>${F.f2(total)} h</span></div>
-<p class="pied">Établi avec AssMat+. Les heures indiquées sont celles saisies dans la fiche du mois.</p>
+<p class="pied">Les heures indiquées sont celles saisies dans la fiche du mois.</p>
+${banniereHTML()}
 </div></body></html>`;
 }
 
@@ -2368,7 +3091,7 @@ function buildICS() {
       'END:VEVENT'].filter(Boolean).join('\r\n') + '\r\n';
   }
 
-  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AssMat+//FR', 'CALSCALE:GREGORIAN',
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cocon//FR', 'CALSCALE:GREGORIAN',
     ev.trim(), 'END:VCALENDAR'].join('\r\n');
   return { ics, n };
 }
@@ -2523,10 +3246,313 @@ async function envoyerAbsence() {
     '?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(texte);
 }
 
+/* Client Supabase minimal, partagé par Cocon Parent et Cocon Nounou.
+   Aucune dépendance : les deux applications restent utilisables hors ligne. */
+/* ---------------- Accès à la base partagée ----------------
+   Client écrit à la main plutôt que la bibliothèque officielle : l'application
+   ne charge aucun script externe, ce qui la garde utilisable hors connexion.
+   Supabase expose de l'HTTP simple, une centaine de lignes suffisent. */
+/* Adresse du projet Supabase, partagée par les deux applications.
+   À remplir une seule fois ici, avant de compiler.
+
+   La clé « anon » est publique par conception : elle ne donne accès à rien
+   par elle-même. Ce sont les règles de la base qui protègent les données.
+   Laisser ces deux champs vides fait réapparaître la saisie manuelle dans les
+   réglages, utile pour essayer un autre projet. */
+const PROJET = {
+  url: '',
+  cle: ''
+};
+
+const Supa = (() => {
+  let base = '', cle = '', session = null;
+
+  /* Le stockage de la session est fourni par l'application hôte : chacune a le
+     sien. À défaut, on retombe sur celui du navigateur. */
+  let lireSession = async () => {
+    try { return JSON.parse(localStorage.getItem('cocon-session') || 'null'); }
+    catch (e) { return null; }
+  };
+  let ecrireSession = async (o) => {
+    try {
+      if (o) localStorage.setItem('cocon-session', JSON.stringify(o));
+      else localStorage.removeItem('cocon-session');
+    } catch (e) {}
+  };
+  function brancherStockage(lire, ecrire) { lireSession = lire; ecrireSession = ecrire; }
+
+  function configurer(u, c) {
+    base = String(u || '').trim().replace(/\/+$/, '');
+    cle = String(c || '').trim();
+  }
+  const configure = () => !!(base && cle);
+  const connecte = () => !!(session && session.access_token);
+  const moi = () => (session && session.user) || null;
+
+  async function appel(chemin, opts = {}, avecJeton = true) {
+    if (!configure()) throw new Error('Adresse et clé du projet manquantes');
+    const entetes = { apikey: cle, 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    if (avecJeton && connecte()) entetes.Authorization = 'Bearer ' + session.access_token;
+
+    let r;
+    try {
+      r = await fetch(base + chemin, { ...opts, headers: entetes });
+    } catch (e) {
+      throw new Error('Serveur injoignable — vérifie la connexion et l\u2019adresse du projet');
+    }
+    const brut = await r.text();
+    let data = null;
+    try { data = brut ? JSON.parse(brut) : null; } catch (e) { data = brut; }
+
+    if (!r.ok) {
+      const m = (data && (data.msg || data.message || data.error_description || data.error || data.hint)) || null;
+      throw new Error(m || ('Erreur ' + r.status));
+    }
+    return data;
+  }
+
+  async function memoriser(s) {
+    session = s;
+    try {
+      await ecrireSession(s ? { ...s, expire_a: Date.now() + (s.expires_in || 3600) * 1000 } : null);
+    } catch (e) { /* la session vaut au moins pour cette ouverture */ }
+  }
+
+  async function reprendre() {
+    const s = await lireSession();
+    if (!s || !s.refresh_token) return false;
+    session = s;
+    if (s.expire_a && s.expire_a - Date.now() > 60000) return true;
+    return rafraichir();
+  }
+
+  async function rafraichir() {
+    const s = await lireSession();
+    if (!s || !s.refresh_token) return false;
+    try {
+      const r = await appel('/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST', body: JSON.stringify({ refresh_token: s.refresh_token })
+      }, false);
+      await memoriser(r);
+      return true;
+    } catch (e) {
+      await memoriser(null);
+      return false;
+    }
+  }
+
+  async function inscrire(email, mdp) {
+    const r = await appel('/auth/v1/signup', {
+      method: 'POST', body: JSON.stringify({ email, password: mdp })
+    }, false);
+    if (r && r.access_token) await memoriser(r);
+    return r;
+  }
+
+  async function connecter(email, mdp) {
+    const r = await appel('/auth/v1/token?grant_type=password', {
+      method: 'POST', body: JSON.stringify({ email, password: mdp })
+    }, false);
+    await memoriser(r);
+    return r;
+  }
+
+  /* Envoie le lien de reinitialisation. La reponse est volontairement la meme
+     que l'adresse existe ou non : sinon on donnerait le moyen de savoir qui a
+     un compte. */
+  async function recuperer(email) {
+    await appel('/auth/v1/recover', {
+      method: 'POST', body: JSON.stringify({ email })
+    }, false);
+  }
+
+  async function deconnecter() {
+    try { await appel('/auth/v1/logout', { method: 'POST' }); } catch (e) {}
+    await memoriser(null);
+  }
+
+  /* Une requête sur une table, avec une reprise si le jeton vient d'expirer. */
+  async function table(nom, opts = {}, requete = '') {
+    const faire = () => appel('/rest/v1/' + nom + (requete ? '?' + requete : ''), opts);
+    try { return await faire(); }
+    catch (e) {
+      if (!/401|JWT|expired/i.test(e.message)) throw e;
+      if (!(await rafraichir())) throw new Error('Session expirée, reconnecte-toi');
+      return faire();
+    }
+  }
+
+  const lire = (nom, requete) => table(nom, { method: 'GET' }, requete);
+
+  const ecrire = (nom, lignes, options = '') =>
+    table(nom, {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' + (options ? ',' + options : '') },
+      body: JSON.stringify(lignes)
+    });
+
+  const modifier = (nom, valeurs, requete) =>
+    table(nom, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify(valeurs)
+    }, requete);
+
+  const supprimer = (nom, requete) =>
+    table(nom, { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, requete);
+
+  const fonction = (nom, args) =>
+    appel('/rest/v1/rpc/' + nom, { method: 'POST', body: JSON.stringify(args || {}) });
+
+  /* En-têtes prêtes à l'emploi, pour le stockage de fichiers qui n'est pas
+     du JSON et ne passe donc pas par les fonctions ci-dessus. */
+  function entetes() {
+    const h = { apikey: cle };
+    if (connecte()) h.Authorization = 'Bearer ' + session.access_token;
+    return h;
+  }
+  const adresse = () => base;
+
+  /* Notifications : le jeton de l'appareil est déposé en base, et l'envoi
+     passe par la fonction serveur, seule à détenir la clé Firebase. */
+  async function enregistrerJeton(jeton, application) {
+    if (!connecte() || !jeton) return;
+    await table('jetons_push', {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal,resolution=merge-duplicates' },
+      body: JSON.stringify({
+        jeton, personne_id: session.user.id, application, maj_le: new Date().toISOString()
+      })
+    });
+  }
+
+  async function notifier(contratId, titre, corps) {
+    if (!connecte()) return;
+    try {
+      await fetch(base + '/functions/v1/notifier', {
+        method: 'POST',
+        headers: { ...entetes(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contrat_id: contratId, titre, corps })
+      });
+    } catch (e) { /* le message est déjà enregistré : la notification n'est qu'un plus */ }
+  }
+
+  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse,
+           enregistrerJeton, notifier, supprimer, reprendre, rafraichir,
+           inscrire, connecter, recuperer, deconnecter, lire, ecrire, modifier, fonction };
+})();
+
+
+/* ---------------- Compte en ligne ---------------- */
+async function majCompte() {
+  const etat = $('#compteEtat');
+  if (!etat) return;
+  const b = etat.querySelector('b');
+  // le projet livré avec l'application prime ; la saisie manuelle reste un recours
+  const u = (profil.cloud || {}).url || PROJET.url;
+  const c = (profil.cloud || {}).cle || PROJET.cle;
+  Supa.configurer(u, c);
+  const r = $('#reglageProjet');
+  if (r) r.hidden = !!(PROJET.url && PROJET.cle) && !(profil.cloud || {}).url;
+
+  if (!Supa.configure()) { b.textContent = 'Non configuré'; }
+  else if (Supa.connecte()) {
+    const m = Supa.moi();
+    b.textContent = m && m.email ? m.email : 'Connecté';
+  } else b.textContent = 'Déconnecté';
+
+  $('#compteReglages').hidden = Supa.connecte();
+  $('#compteConnecte').hidden = !Supa.connecte();
+}
+
+function direCompte(txt, ton) {
+  const z = $('#compteResultat');
+  if (z) z.innerHTML = '<p class="hint"' + (ton === 'mal' ? ' style="color:var(--danger)"' : '') + '>' + esc(txt) + '</p>';
+}
+
+async function actionCompte(quoi) {
+  const email = $('#compteEmail').value.trim();
+  const mdp = $('#compteMdp').value;
+  if (!email.includes('@') || mdp.length < 6) {
+    direCompte('Adresse e-mail valide et mot de passe d\u2019au moins six caractères.', 'mal');
+    return;
+  }
+  direCompte(quoi === 'inscrire' ? 'Création du compte…' : 'Connexion…');
+  try {
+    if (quoi === 'inscrire') {
+      const r = await Supa.inscrire(email, mdp);
+      if (!Supa.connecte()) {
+        direCompte('Compte créé. Confirme l\u2019adresse par e-mail, puis connecte-toi.');
+        await majCompte();
+        return;
+      }
+      await assurerProfil();
+      activerPush();
+      direCompte('Compte créé et connecté.');
+    } else {
+      await Supa.connecter(email, mdp);
+      await assurerProfil();
+      activerPush();
+      direCompte('Connecté.');
+    }
+    $('#compteMdp').value = '';
+  } catch (e) {
+    direCompte(e.message || String(e), 'mal');
+  }
+  await majCompte();
+}
+
+/* Crée la ligne de profil au premier accès, sans écraser une existante. */
+async function assurerProfil() {
+  const m = Supa.moi();
+  if (!m) return;
+  try {
+    const dejala = await Supa.lire('profils', 'id=eq.' + m.id + '&select=id');
+    if (dejala && dejala.length) return;
+    await Supa.ecrire('profils', {
+      id: m.id, role: 'employeur',
+      prenom: (cur && cur.employeur.nom) || '', nom: ''
+    });
+  } catch (e) { /* la vérification d'accès le signalera */ }
+}
+
+/* Contrôle en conditions réelles : ce que la base accepte et ce qu'elle refuse. */
+async function testerBase() {
+  direCompte('Vérification…');
+  const lignes = [];
+  const essai = async (nom, f) => {
+    try { const r = await f(); lignes.push('✓ ' + nom + (r ? ' — ' + r : '')); }
+    catch (e) { lignes.push('✗ ' + nom + ' — ' + (e.message || e)); }
+  };
+
+  await essai('Lecture de mon profil', async () => {
+    const r = await Supa.lire('profils', 'select=id,role');
+    return r.length + (r.length > 1 ? ' profils visibles' : ' profil visible');
+  });
+  await essai('Lecture de mes contrats', async () => {
+    const r = await Supa.lire('contrats', 'select=id');
+    return r.length + ' contrat' + (r.length > 1 ? 's' : '');
+  });
+  // Ici, un refus de la base est le résultat attendu : c'est la lecture qui
+  // serait la faille, pas l'erreur.
+  await essai('Table des invitations bien fermée', async () => {
+    let r;
+    try { r = await Supa.lire('invitations', 'select=code'); }
+    catch (e) { return 'accès refusé, comme prévu'; }
+    if (r && r.length) throw new Error('DANGER, ' + r.length + ' code(s) lisibles');
+    return 'aucun code lisible';
+  });
+
+  const z = $('#compteResultat');
+  z.innerHTML = '<div style="margin-top:10px">' + lignes.map(l =>
+    '<div class="ds"><span>' + esc(l.slice(2)) + '</span><b style="color:' +
+    (l[0] === '✓' ? 'var(--acc)' : 'var(--danger)') + '">' + l[0] + '</b></div>').join('') + '</div>';
+}
+
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '0.8.1';
+const VERSION = '0.9.8';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -2561,7 +3587,7 @@ async function verifierMaj(silencieux) {
       dire(`<div class="ds"><span>Disponible</span><b>${esc(derniereMaj.tag)}</b></div>
         <button class="btn btn-primary btn-block" style="margin-top:10px" data-lien="${esc(derniereMaj.url)}">Télécharger</button>`);
       $$('#majResultat [data-lien]').forEach(b => { b.onclick = () => ouvrirLien(b.dataset.lien); });
-      if (silencieux) toast('AssMat+ ' + derniereMaj.tag + ' est disponible');
+      if (silencieux) toast('Cocon ' + derniereMaj.tag + ' est disponible');
     } else {
       dire('<p class="hint">L\u2019application est à jour.</p>');
     }
@@ -2570,6 +3596,507 @@ async function verifierMaj(silencieux) {
     dire('<p class="hint">Vérification impossible : ' + esc(e.message || String(e)) + '</p>');
     if (!silencieux) toast('Vérification impossible');
   }
+}
+
+/* ---------------- Partage avec la salariée ----------------
+   Ce qui monte : le planning, les absences, l'état de la fiche. Rien d'autre.
+   Chaque enfant a son propre contrat en base, comme l'exige Pajemploi. */
+const RELEASES = 'https://github.com/lucastoudicpro-boop/ASSMAT-Mobile/releases/latest';
+const VERSION_CONSENTEMENT = 'cocon-2026-09';
+const TEXTE_CONSENTEMENT =
+  "Ce qui est partagé : le prénom de l'enfant, le planning convenu, les heures " +
+  "prévues et effectuées, les absences, et l'état d'avancement de la fiche du mois.\n\n" +
+  "Ce qui ne l'est jamais : aucun montant de salaire, aucun IBAN, aucun numéro de " +
+  "sécurité sociale. Ces informations restent sur ce téléphone.\n\n" +
+  "Qui y a accès : uniquement toi et la salariée de ce contrat. Les autres familles " +
+  "chez qui elle travaille ne voient rien de celui-ci.\n\n" +
+  "Durée : jusqu'à la fin du contrat. Tu peux retirer l'accès à tout moment.";
+
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // sans O, 0, I, 1
+function codeAleatoire(n) {
+  const t = new Uint8Array(n);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(t);
+  else for (let i = 0; i < n; i++) t[i] = Math.random() * 256;
+  return [...t].map(o => ALPHABET[o % ALPHABET.length]).join('');
+}
+
+function contratLie() {
+  const e = enfantCourant();
+  return (e && e.contratId) || null;
+}
+
+async function marquerContrat(id) {
+  const l = enfants().map(e => e.id === enfantActif ? { ...e, contratId: id } : e);
+  profil.enfants = l;
+  await doProfilSave();
+}
+
+/* Crée le contrat en base pour l'enfant affiché, après signature de l'accord. */
+async function publierContrat() {
+  if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord, dans Paramètres'); showView('parametres'); return; }
+  const prenom = (cur.enfant.prenom || '').trim();
+  if (!prenom) { toast('Renseigne le prénom de l\u2019enfant avant de publier'); return; }
+  if (!confirm('Accord de partage\n\n' + TEXTE_CONSENTEMENT + '\n\nEn validant, tu signes cet accord.')) return;
+
+  try {
+    await assurerProfil();
+    const naissance = (cur.enfant.naissance || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const r = await Supa.ecrire('contrats', {
+      employeur_id: Supa.moi().id,
+      enfant_prenom: prenom,
+      enfant_naissance: naissance ? naissance[3] + '-' + naissance[2] + '-' + naissance[1] : null,
+      statut: 'invitation'
+    });
+    const id = r && r[0] && r[0].id;
+    if (!id) throw new Error('Contrat non créé');
+
+    await Supa.ecrire('consentements', {
+      contrat_id: id, personne_id: Supa.moi().id,
+      version_texte: VERSION_CONSENTEMENT,
+      nom_saisi: (cur.employeur.nom || 'Employeur').trim()
+    });
+
+    await marquerContrat(id);
+    toast('Contrat publié pour ' + prenom);
+    await syncPlanning(true);
+  } catch (e) { toast('Publication impossible : ' + (e.message || e)); }
+  renderPartage();
+}
+
+async function genererInvitation() {
+  const id = contratLie();
+  if (!id) { toast('Publie d\u2019abord le contrat'); return; }
+  try {
+    const code = codeAleatoire(6);
+    const expire = new Date(Date.now() + 7 * 86400000).toISOString();
+    await Supa.ecrire('invitations', { code, contrat_id: id, expire_le: expire });
+    const e = enfants().map(x => x.id === enfantActif ? { ...x, code, codeExpire: expire } : x);
+    profil.enfants = e;
+    await doProfilSave();
+    toast('Code créé, valable sept jours');
+  } catch (e) { toast('Création impossible : ' + (e.message || e)); }
+  renderPartage();
+}
+
+async function retirerAcces() {
+  const id = contratLie();
+  if (!id) return;
+  if (!confirm('Retirer l\u2019accès de la salariée à ce contrat ?\n\nElle ne verra plus le planning. Tes fiches ne sont pas touchées.')) return;
+  try {
+    await Supa.modifier('contrats', { salariee_id: null, statut: 'termine' }, 'id=eq.' + id);
+    toast('Accès retiré');
+  } catch (e) { toast('Retrait impossible : ' + (e.message || e)); }
+  renderPartage();
+}
+
+/* Pousse le mois affiché. Les colonnes de la salariée sont préservées par le
+   déclencheur de la base : cet envoi ne peut pas écraser ses heures. */
+let syncTimer = null;
+async function syncPlanning(silencieux) {
+  const id = contratLie();
+  if (!id || !Supa.connecte() || !cur) return;
+  const per = F.periodeFromMois(cur.mois);
+  const [y, mo] = cur.mois.split('-').map(Number);
+  const lignes = [];
+  for (let i = 0; i < per.jours; i++) {
+    const r = cur.calendrier[i];
+    lignes.push({
+      contrat_id: id,
+      jour: cur.mois + '-' + String(i + 1).padStart(2, '0'),
+      heures_prevues: F.num(r.p) + F.num(r.c) + F.num(r.m),
+      absence_enfant: r.abs === 'e'
+    });
+  }
+  const c = F.compute(cur);
+  const planning = {};
+  for (const d of [0,1,2,3,4,5,6]) {
+    const h = (profil.horaires || {})['d' + d] || {};
+    if (minutes(h.debut) !== null && minutes(h.fin) !== null)
+      planning['d' + d] = { debut: h.debut.trim(), fin: h.fin.trim() };
+  }
+  try {
+    await Supa.modifier('contrats', { planning }, 'id=eq.' + id);
+    await Supa.ecrire('jours', lignes, 'resolution=merge-duplicates');
+    await chargerMessages();
+    await Supa.ecrire('mois', [{
+      contrat_id: id, mois: cur.mois,
+      heures_total: c.totP + c.totC + c.totM,
+      etat_fiche: (cur.paye && cur.paye.fait) ? 'versee' : cur.envoyee ? 'transmise' : 'brouillon'
+    }], 'resolution=merge-duplicates');
+    const e = enfants().map(x => x.id === enfantActif ? { ...x, syncLe: new Date().toISOString() } : x);
+    profil.enfants = e;
+    scheduleProfilSave();
+    if (!silencieux) toast('Planning synchronisé');
+    if (vue === 'dossier') renderPartage();
+  } catch (e) {
+    if (!silencieux) toast('Synchronisation impossible : ' + (e.message || e));
+  }
+}
+
+function planifierSync() {
+  if (!contratLie() || !Supa.connecte()) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncPlanning(true), 4000);
+}
+
+function renderPartage() {
+  const zoneEtat = $('#partageEtat'), zoneAct = $('#partageActions'), zoneQR = $('#partageQR');
+  if (!zoneEtat) return;
+  const e = enfantCourant() || {};
+  const id = e.contratId;
+  const ds = (l, v) => `<div class="ds"><span>${esc(l)}</span><b>${esc(v)}</b></div>`;
+
+  if (!Supa.connecte()) {
+    zoneEtat.innerHTML = ds('Compte en ligne', 'déconnecté');
+    zoneAct.innerHTML = '<button class="btn btn-ghost btn-block" data-part="compte">Se connecter</button>';
+    zoneQR.innerHTML = '';
+  } else if (!id) {
+    zoneEtat.innerHTML = ds('Enfant', nomEnfant(enfantActif) || '—') + ds('Contrat en ligne', 'non publié');
+    zoneAct.innerHTML = '<button class="btn btn-primary btn-block" data-part="publier">Publier ce contrat</button>';
+    zoneQR.innerHTML = '';
+  } else {
+    const dernier = e.syncLe ? new Date(e.syncLe).toLocaleString('fr-FR') : 'jamais';
+    zoneEtat.innerHTML = ds('Enfant', nomEnfant(enfantActif) || '—') +
+      ds('Contrat en ligne', 'publié') + ds('Dernière synchronisation', dernier);
+    zoneAct.innerHTML =
+      '<button class="btn btn-primary btn-block" data-part="code">Nouveau code d\u2019invitation</button>' +
+      '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>' +
+      '<button class="btn btn-danger btn-block" data-part="retirer">Retirer l\u2019accès</button>';
+
+    const valide = e.code && e.codeExpire && new Date(e.codeExpire) > new Date();
+    zoneQR.innerHTML =
+      `<div class="qr-bloc">${QR.svg(RELEASES, 104, 2)}
+        <div><b>Installer Cocon Nounou</b><small>À scanner par la salariée pour télécharger l'application.</small></div>
+      </div>` +
+      (valide
+        ? `<div class="code-invit">${esc(e.code)}</div>
+           <div class="code-expire">valable jusqu'au ${new Date(e.codeExpire).toLocaleDateString('fr-FR')}</div>
+           <div class="qr-bloc">${QR.svg('cocon:rejoindre:' + e.code, 104, 2)}
+             <div><b>Rejoindre le contrat</b><small>Une fois l'application installée, elle scanne ceci ou saisit le code.</small></div>
+           </div>`
+        : '<p class="hint">Aucun code en cours. Crée-en un quand tu es avec elle : il vaut sept jours.</p>');
+  }
+
+  const actions = {
+    compte: () => showView('parametres'),
+    publier: publierContrat,
+    code: genererInvitation,
+    sync: () => syncPlanning(false),
+    retirer: retirerAcces
+  };
+  $$('#partageActions [data-part]').forEach(b => { b.onclick = () => actions[b.dataset.part](); });
+}
+
+/* ---------------- Reprendre un mois ----------------
+   Le calendrier n'est pas repris par défaut : les jours de la semaine ne
+   tombent pas aux mêmes dates d'un mois à l'autre. « Remplir le mois » fait
+   mieux le travail, en connaissant les fériés. */
+const CHAMPS_REPRIS = ['salarie', 'employeur', 'enfant', 'contrat', 'activite',
+                       'aideAbs', 'calAide', 'net', 'indemnites', 'conges'];
+
+async function ouvrirDuplication() {
+  const list = (await API.listFiches())
+    .filter(f => f.enfantId === enfantActif && f.cle !== cleFiche(cur.mois));
+  const box = $('#dupliListe');
+  box.innerHTML = list.length ? list.map(f =>
+    `<li><span><b>${esc(F.labelMois(f.mois))}</b><small>${F.f2(f.solde)} € versés</small></span>
+      <button class="choisir" data-depuis="${esc(f.cle)}">Reprendre</button></li>`).join('')
+    : '<li class="vide">Aucun autre mois enregistré pour cet enfant.</li>';
+
+  $('#dupliAvis').textContent = 'Le mois affiché est ' + F.labelMois(cur.mois) + '.';
+  $$('#dupliListe [data-depuis]').forEach(b => { b.onclick = () => reprendreMois(b.dataset.depuis); });
+  $('#dupliModal').hidden = false;
+}
+
+async function reprendreMois(cle) {
+  const src = await API.loadFiche(cle);
+  if (!src) { toast('Mois introuvable'); return; }
+  const avecCal = $('#dupliCal').checked;
+  if (!confirm('Remplacer les données de ' + F.labelMois(cur.mois) +
+               ' par celles de ' + F.labelMois(moisDe(cle)) + ' ?')) return;
+
+  const base = F.normalizeFiche(JSON.parse(JSON.stringify(src)));
+  for (const champ of CHAMPS_REPRIS) cur[champ] = base[champ];
+  if (avecCal) cur.calendrier = base.calendrier;
+
+  // ce qui appartient au mois affiché ne se reprend jamais
+  const per = F.periodeFromMois(cur.mois);
+  cur.periodeDu = per.du; cur.periodeAu = per.au;
+  cur.acomptes = '';
+  cur.envoyee = false;
+  cur.paye = { fait: false, date: '', moyen: '' };
+
+  $('#dupliModal').hidden = true;
+  fillForm();
+  await doSave();
+  toast('Données de ' + F.labelMois(moisDe(cle)) + ' reprises' +
+        (avecCal ? ', calendrier compris' : ' — remplis le calendrier'));
+}
+
+/* ---------------- Galerie ----------------
+   Les photos vivent dans leur propre table : une photo de groupe est reliée à
+   plusieurs enfants, et chaque famille ne voit que celles qui la concernent. */
+let galerie = [];
+
+async function chargerGalerie() {
+  const id = contratLie();
+  galerie = [];
+  if (!id || !Supa.connecte()) return;
+  try {
+    const liens = await Supa.lire('photos_contrats', 'contrat_id=eq.' + id + '&select=photo_id');
+    if (!liens.length) return;
+    galerie = await Supa.lire('photos',
+      'id=in.(' + liens.map(x => x.photo_id).join(',') + ')&select=id,chemin,legende,groupe,prise_le&order=prise_le.desc&limit=60');
+  } catch (e) { galerie = []; }
+}
+
+function renderGalerie() {
+  const box = $('#listeGalerie');
+  if (!box) return;
+  const badge = $('#badgeGalerie');
+  if (badge) badge.textContent = galerie.length ? String(galerie.length) : '';
+  if (!galerie.length) {
+    box.innerHTML = '<p class="hint" style="grid-column:1/-1;margin:0">Aucune photo pour le moment.</p>';
+    return;
+  }
+  box.innerHTML = galerie.map(p =>
+    `<img data-photo="${esc(p.chemin)}" alt="${esc(p.legende || 'Photo')}">`).join('');
+  $$('#listeGalerie [data-photo]').forEach(async img => {
+    const d = await telechargerPhoto(img.dataset.photo);
+    if (d) img.src = d; else img.remove();
+  });
+}
+
+/* ---------------- Fermetures de la salariée ---------------- */
+let fermetures = [];
+
+async function chargerFermetures() {
+  fermetures = [];
+  if (!Supa.connecte()) return;
+  try {
+    fermetures = await Supa.lire('fermetures',
+      'select=du,au,motif&order=du.desc&limit=20');
+  } catch (e) { fermetures = []; }
+}
+
+function renderFermetures() {
+  const box = $('#listeFermetures');
+  if (!box) return;
+  const fr = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '';
+  const auj = new Date().toISOString().slice(0, 10);
+  box.innerHTML = fermetures.length ? fermetures.map(f =>
+    `<div class="ds"><span>${esc(fr(f.du))} → ${esc(fr(f.au))}${f.motif ? ' · ' + esc(f.motif) : ''}</span>
+      <b>${f.au < auj ? 'passée' : 'à venir'}</b></div>`).join('')
+    : '<p class="hint" style="margin:0">Aucune fermeture annoncée.</p>';
+}
+
+/* ---------------- Fiche d'urgence ----------------
+   Le parent la remplit et la signe. La salariée la lit, y compris hors réseau :
+   c'est le document qu'on ouvre quand tout va mal. */
+const AUTORISATIONS = ['sortie', 'transport', 'photo', 'photo_groupe', 'creme', 'medicament'];
+let urgence = null, personnes = [];
+
+async function chargerUrgence() {
+  const id = contratLie();
+  urgence = null; personnes = [];
+  if (!id || !Supa.connecte()) return;
+  try {
+    const r = await Supa.lire('fiche_urgence', 'contrat_id=eq.' + id + '&select=*');
+    if (r && r.length) { urgence = r[0]; personnes = urgence.personnes || []; }
+  } catch (e) { /* la vue le dira */ }
+}
+
+function renderPersonnes() {
+  const box = $('#uPersonnes');
+  if (!box) return;
+  box.innerHTML = personnes.map((p, i) =>
+    `<div class="pers">
+      <input data-pers="${i}:nom" placeholder="Nom" value="${esc(p.nom || '')}">
+      <input data-pers="${i}:tel" placeholder="Téléphone" inputmode="tel" value="${esc(p.tel || '')}">
+      <button data-retire="${i}" aria-label="Retirer">✕</button>
+    </div>`).join('') ||
+    '<p class="hint" style="margin:0 0 8px">Personne enregistrée. Sans cette liste, la salariée ne peut confier l\u2019enfant qu\u2019à toi.</p>';
+
+  $$('#uPersonnes [data-pers]').forEach(i => {
+    i.oninput = () => {
+      const [n, champ] = i.dataset.pers.split(':');
+      personnes[+n][champ] = i.value;
+    };
+  });
+  $$('#uPersonnes [data-retire]').forEach(b => {
+    b.onclick = () => { personnes.splice(+b.dataset.retire, 1); renderPersonnes(); };
+  });
+}
+
+function renderUrgence() {
+  if (!$('#uMedecin')) return;
+  const u = urgence || {};
+  $('#uMedecin').value = u.medecin_nom || '';
+  $('#uMedecinTel').value = u.medecin_tel || '';
+  $('#uAllergies').value = u.allergies || '';
+  $('#uTraitements').value = u.traitements || '';
+  $('#uParticularites').value = u.particularites || '';
+  const a = u.autorisations || {};
+  $$('[data-autor]').forEach(c => { c.checked = !!a[c.dataset.autor]; });
+  renderPersonnes();
+
+  const badge = $('#badgeUrgence');
+  const complete = u.signe_le && (u.medecin_tel || u.allergies);
+  if (badge) badge.textContent = complete ? '' : 'à remplir';
+  $('#uEtat').textContent = u.signe_le
+    ? 'Signée le ' + new Date(u.signe_le).toLocaleDateString('fr-FR') + ' par ' + (u.signe_par || '')
+    : 'Pas encore signée.';
+}
+
+async function enregistrerUrgence() {
+  const id = contratLie();
+  if (!id) { toast('Publie d\u2019abord le contrat'); return; }
+  const autorisations = {};
+  $$('[data-autor]').forEach(c => { autorisations[c.dataset.autor] = c.checked; });
+  const ligne = {
+    contrat_id: id,
+    medecin_nom: $('#uMedecin').value.trim() || null,
+    medecin_tel: $('#uMedecinTel').value.trim() || null,
+    allergies: $('#uAllergies').value.trim() || null,
+    traitements: $('#uTraitements').value.trim() || null,
+    particularites: $('#uParticularites').value.trim() || null,
+    personnes: personnes.filter(p => (p.nom || '').trim()),
+    autorisations,
+    signe_par: (cur.employeur.nom || '').trim() || 'Le parent',
+    signe_le: new Date().toISOString()
+  };
+  try {
+    await Supa.ecrire('fiche_urgence', [ligne], 'resolution=merge-duplicates');
+    Supa.notifier(id, 'Fiche d\u2019urgence mise à jour', (cur.enfant.prenom || '') + ' — à relire');
+    toast('Fiche enregistrée et signée');
+    await chargerUrgence(); renderUrgence();
+  } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
+}
+
+/* ---------------- Journal ----------------
+   Lecture seule : la base refuse toute écriture venant de l'employeur. */
+const JOURNAL_REPAS = { bien:'A bien mangé', moyen:'Repas correct', peu:'A peu mangé', refus:'A refusé le repas' };
+const JOURNAL_HUMEUR = { joyeux:'Joyeux', calme:'Calme', fatigue:'Fatigué', grognon:'Grognon', souffrant:'Patraque' };
+
+let journal = [];
+
+async function chargerJournal() {
+  const id = contratLie();
+  if (!id || !Supa.connecte()) { journal = []; return; }
+  try {
+    journal = await Supa.lire('journal',
+      'contrat_id=eq.' + id + '&select=jour,repas,sieste_debut,sieste_fin,humeur,couches,mot,maj_le&order=jour.desc&limit=14');
+  } catch (e) { journal = []; }
+}
+
+function renderJournal() {
+  const box = $('#listeJournal');
+  if (!box) return;
+  if (!journal.length) {
+    box.innerHTML = '<p class="msg-vide">Aucune transmission pour le moment.</p>';
+    return;
+  }
+  box.innerHTML = journal.map(j => {
+    const d = new Date(j.jour + 'T00:00:00');
+    const puces = [];
+    if (j.repas) puces.push(JOURNAL_REPAS[j.repas] || j.repas);
+    if (j.humeur) puces.push(JOURNAL_HUMEUR[j.humeur] || j.humeur);
+    if (j.sieste_debut && j.sieste_fin)
+      puces.push('Sieste ' + j.sieste_debut.slice(0, 5) + ' → ' + j.sieste_fin.slice(0, 5));
+    if (j.couches) puces.push(j.couches + (j.couches > 1 ? ' changes' : ' change'));
+    return `<div class="jour-b">
+      <div class="date">${esc(d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }))}</div>
+      <div class="puces">${puces.map(p => '<i>' + esc(p) + '</i>').join('')}</div>
+      ${j.mot ? '<div class="mot">' + esc(j.mot) + '</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ---------------- Messages ----------------
+   Elle signale un besoin ou envoie une photo, il répond. Les demandes de
+   fourniture arrivent en un geste de son côté, sans texte à rédiger. */
+let messages = [];
+
+async function chargerMessages() {
+  const id = contratLie();
+  if (!id || !Supa.connecte()) { messages = []; return; }
+  try {
+    messages = await Supa.lire('messages',
+      'contrat_id=eq.' + id + '&select=id,auteur_id,texte,categorie,piece,cree_le,lu_le&order=cree_le.desc&limit=40');
+  } catch (e) { messages = []; }
+}
+
+async function urlPhoto(chemin) {
+  try {
+    const r = await Supa.fonction('', {});
+    return null;
+  } catch (e) { return null; }
+}
+
+function renderMessages() {
+  const box = $('#listeMessages');
+  if (!box) return;
+  const moi = (Supa.moi() || {}).id;
+  const badge = $('#badgeMessages');
+  const nonLus = messages.filter(m => m.auteur_id !== moi && !m.lu_le).length;
+  if (badge) badge.textContent = nonLus ? String(nonLus) : '';
+
+  box.innerHTML = messages.length ? messages.map(m => {
+    const mien = m.auteur_id === moi;
+    const quand = new Date(m.cree_le).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const ico = m.categorie === 'besoin' ? 'i-alerte' : m.categorie === 'photo' ? 'i-doc' : 'i-mail';
+    return `<div class="msg ${esc(m.categorie)}">
+      <span class="rond"><svg><use href="#${ico}"/></svg></span>
+      <span class="txt${mien ? ' mien' : ''}">
+        <b>${esc(m.texte || (m.categorie === 'photo' ? 'Photo' : ''))}</b>
+        <small>${mien ? 'vous' : 'la salariée'} · ${esc(quand)}</small>
+        ${m.piece ? `<img data-photo="${esc(m.piece)}" alt="">` : ''}
+      </span></div>`;
+  }).join('') : '<p class="msg-vide">Aucun message pour le moment.</p>';
+
+  // les photos sont privées : on les charge avec le jeton, jamais par URL publique
+  $$('#listeMessages [data-photo]').forEach(async img => {
+    const d = await telechargerPhoto(img.dataset.photo);
+    if (d) img.src = d; else img.remove();
+  });
+
+  marquerMessagesLus();
+}
+
+async function telechargerPhoto(chemin) {
+  try {
+    const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin,
+      { headers: Supa.entetes() });
+    if (!r.ok) return null;
+    const b = await r.blob();
+    return URL.createObjectURL(b);
+  } catch (e) { return null; }
+}
+
+async function marquerMessagesLus() {
+  const moi = (Supa.moi() || {}).id;
+  const aLire = messages.filter(m => m.auteur_id !== moi && !m.lu_le);
+  if (!aLire.length) return;
+  try {
+    await Supa.modifier('messages', { lu_le: new Date().toISOString() },
+      'id=in.(' + aLire.map(m => m.id).join(',') + ')');
+    aLire.forEach(m => m.lu_le = new Date().toISOString());
+    const b = $('#badgeMessages'); if (b) b.textContent = '';
+  } catch (e) { /* sans conséquence */ }
+}
+
+async function repondre() {
+  const id = contratLie();
+  const t = $('#reponse').value.trim();
+  if (!id) { toast('Publie d\u2019abord le contrat'); return; }
+  if (!t) return;
+  try {
+    await Supa.ecrire('messages', { contrat_id: id, auteur_id: Supa.moi().id, texte: t, categorie: 'info' });
+    Supa.notifier(id, (cur.enfant.prenom || 'Cocon') + ' — message du parent', t);
+    $('#reponse').value = '';
+    await chargerMessages();
+    renderMessages();
+  } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
 }
 
 /* ---------------- Contrat et avenants ----------------
@@ -2778,6 +4305,20 @@ function alertes() {
     detail: 'Tu utilises la ' + VERSION + '.',
     action: 'Télécharger', fn: () => ouvrirLien(derniereMaj.url)
   });
+
+  const emb = dateFR((profil.salarie || {}).dateEmbauche);
+  const semaines = F.num(cur.contrat.hnS);
+  if (emb && semaines > 0 && semaines <= 46) {
+    const now = new Date();
+    let anniv = new Date(now.getFullYear(), emb.getMonth(), emb.getDate());
+    if (anniv < now) anniv = new Date(now.getFullYear() + 1, emb.getMonth(), emb.getDate());
+    const jours = Math.round((anniv - now) / 86400000);
+    if (jours <= 30) out.push({
+      ton: 'i', titre: 'Régularisation annuelle dans ' + jours + (jours > 1 ? ' jours' : ' jour'),
+      detail: 'Accueil sur ' + F.qn(semaines) + ' semaines : la convention la prévoit à la date anniversaire.',
+      action: 'Calculer', fn: () => showView('annuel')
+    });
+  }
 
   const seuils = profil.seuils || {};
   const tauxMin = F.num(seuils.taux), entMin = F.num(seuils.entretien);
@@ -3043,7 +4584,8 @@ async function attestationEmploi() {
       <tr><td>Salaire mensualisé brut</td><td>${F.f2(c.mensualise)} €</td></tr>
       <tr><td>Taux horaire brut</td><td>${F.f2(ct.tHn)} €</td></tr>
     </tbody></table>
-    <p>Cette attestation est délivrée à la demande de l'intéressée pour faire valoir ce que de droit.</p>`;
+    <p>Cette attestation est délivrée à la demande de l'intéressée pour faire valoir ce que de droit.</p>`
+    + banniereHTML();
   const html = gabaritAttestation('Attestation d\u2019emploi', corps,
     'Attestation établie sur l\u2019honneur par le particulier employeur. Elle ne remplace pas l\u2019attestation employeur destinée à France Travail, délivrée par Pajemploi en fin de contrat.');
   await diffuserAttestation(html, 'Attestation emploi - ' + (cur.salarie.nom || 'salariee') + '.pdf');
@@ -3075,10 +4617,45 @@ async function attestationSalaire() {
       </tbody>
     </table>
     <p>Soit une moyenne mensuelle de <b>${F.f2((net + ind) / (cles.length || 1))} €</b>.</p>
-    <p>Cette attestation est délivrée à la demande de l'intéressée pour faire valoir ce que de droit.</p>`;
+    <p>Cette attestation est délivrée à la demande de l'intéressée pour faire valoir ce que de droit.</p>`
+    + banniereHTML();
   const html = gabaritAttestation('Attestation de salaire', corps,
     'Montants issus des fiches établies par l\u2019employeur. Les bulletins de salaire officiels sont délivrés par Pajemploi.');
   await diffuserAttestation(html, 'Attestation salaire - ' + (cur.salarie.nom || 'salariee') + '.pdf');
+}
+
+/* Bandeau signé en bas des documents partagés. Jamais sur la fiche A4 :
+   celle-ci doit rester conforme au modèle papier de Pajemploi. */
+function banniereHTML() {
+  if (!((profil.banniere || {}).actif)) return '';
+  const qui = cur.employeur.nom ? ' par ' + esc(cur.employeur.nom) : '';
+  return `<div style="margin-top:26px;border-top:2px solid #3e8a80;padding-top:12px;
+      display:flex;align-items:center;gap:11px;font-family:Arial,Helvetica,sans-serif">
+    <div style="width:34px;height:34px;border-radius:9px;background:#3e8a80;flex:0 0 auto;
+        display:flex;align-items:center;justify-content:center">
+      <svg viewBox="0 0 512 512" width="24" height="24">
+        <rect x="176" y="86" width="26" height="62" rx="13" fill="#bfe3da"/>
+        <rect x="310" y="86" width="26" height="62" rx="13" fill="#bfe3da"/>
+        <rect x="110" y="118" width="292" height="292" rx="52" fill="#ffffff"/>
+        <path d="M256 352V240" stroke="#2f7d73" stroke-width="26" stroke-linecap="round" fill="none"/>
+        <path d="M248 262c-10-46-42-68-84-62-4 44 32 74 84 62z" fill="#d99a3c"/>
+        <path d="M264 292c10-42 40-62 78-56 4 40-30 68-78 56z" fill="#3e8a80"/>
+      </svg>
+    </div>
+    <div style="line-height:1.35">
+      <div style="font-size:11.5px;font-weight:700;color:#17322e">Établi avec Cocon${qui}</div>
+      <div style="font-size:9.5px;color:#7d968f">Document généré le ${new Date().toLocaleDateString('fr-FR')} · version ${VERSION}</div>
+    </div>
+  </div>`;
+}
+
+function renderBanniere() {
+  const box = $('#apercuBanniere');
+  if (!box) return;
+  const b = banniereHTML();
+  box.innerHTML = b
+    ? '<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:10px">' + b + '</div>'
+    : '';
 }
 
 async function diffuserAttestation(html, nom) {
@@ -3183,6 +4760,78 @@ function courbeAnnee(cles, toutes, an) {
 }
 
 /* ---------------- Récapitulatif annuel ---------------- */
+/* ---------------- Régularisation annuelle ----------------
+   Obligatoire en année incomplète : à la date anniversaire du contrat, on
+   compare ce qui a été payé aux heures réellement effectuées. */
+async function calculRegularisation() {
+  const emb = dateFR((profil.salarie || {}).dateEmbauche);
+  if (!emb) return { manque: 'date d\u2019embauche' };
+
+  // Période en cours : du dernier anniversaire à aujourd'hui. C'est celle qu'on
+  // veut suivre, l'écart se creusant au fil des mois plutôt qu'à la fin.
+  const now = new Date();
+  let debut = new Date(now.getFullYear(), emb.getMonth(), emb.getDate());
+  if (debut > now) debut = new Date(now.getFullYear() - 1, emb.getMonth(), emb.getDate());
+  if (debut < emb) debut = new Date(emb);
+  const prochain = new Date(debut.getFullYear() + 1, emb.getMonth(), emb.getDate());
+  const cleMois = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  const dernier = now;
+
+  const fiches = (await Store.all()).fiches;
+  let payees = 0, sup = 0, reelles = 0, tauxSomme = 0, n = 0, semaines = 0;
+  for (const cle of Object.keys(fiches)) {
+    if (enfantDe(cle) !== enfantActif) continue;
+    const m = moisDe(cle);
+    if (m < cleMois(debut) || m > cleMois(dernier)) continue;
+    const f = F.normalizeFiche(fiches[cle]);
+    const c = F.compute(f);
+    payees += c.hnM + c.hmM;
+    sup += F.num(f.activite.hc1) + F.num(f.activite.hc2) + F.num(f.activite.hMaj);
+    reelles += c.totP + c.totC + c.totM;
+    tauxSomme += F.num(f.contrat.tHn); n++;
+    semaines = Math.max(semaines, F.num(f.contrat.hnS));
+  }
+  const taux = n ? tauxSomme / n : 0;
+  const ecart = reelles - (payees + sup);
+  return {
+    debut: cleMois(debut), fin: cleMois(dernier), mois: n,
+    semaines, requise: semaines > 0 && semaines <= 46,
+    payees, sup, reelles, ecart, taux, montant: ecart * taux, prochain
+  };
+}
+
+async function renderRegularisation() {
+  const box = $('#regularisation');
+  if (!box) return;
+  const r = await calculRegularisation();
+  if (r.manque) {
+    box.innerHTML = '<p class="hint" style="margin:0">Renseigne la date d\u2019embauche dans le Dossier pour calculer la régularisation.</p>';
+    return;
+  }
+  if (!r.mois) {
+    box.innerHTML = '<p class="hint" style="margin:0">Aucune fiche depuis le ' +
+      r.prochain.toLocaleDateString('fr-FR').replace(/\d{4}$/, String(r.prochain.getFullYear() - 1)) +
+      ', dernier anniversaire du contrat.</p>';
+    return;
+  }
+  const ds = (l, v) => `<div class="ds"><span>${esc(l)}</span><b>${esc(v)}</b></div>`;
+  const signe = r.ecart > 0 ? '+' : '';
+
+  box.innerHTML =
+    ds('Période en cours', F.labelMois(r.debut) + ' → ' + F.labelMois(r.fin)) +
+    ds('Prochain anniversaire', r.prochain.toLocaleDateString('fr-FR')) +
+    ds('Fiches prises en compte', String(r.mois)) +
+    ds('Semaines par an au contrat', r.semaines ? F.qn(r.semaines) : '—') +
+    ds('Heures payées par la mensualisation', F.f2(r.payees) + ' h') +
+    ds('Heures complémentaires et majorées payées', F.f2(r.sup) + ' h') +
+    ds('Heures relevées au calendrier', F.f2(r.reelles) + ' h') +
+    ds('Écart', signe + F.f2(r.ecart) + ' h') +
+    ds('Valorisé au taux moyen de ' + F.f2(r.taux) + ' €', signe + F.f2(r.montant) + ' €') +
+    (r.requise
+      ? `<div class="avertissement">Ton contrat porte sur ${F.qn(r.semaines)} semaines par an, soit une année incomplète : la convention prévoit une régularisation annuelle à la date anniversaire du contrat, le ${r.prochain.toLocaleDateString('fr-FR')}. ${r.ecart > 0.5 ? 'L\u2019écart ci-dessus est en faveur de la salariée.' : r.ecart < -0.5 ? 'Les heures relevées sont inférieures à celles payées : la mensualisation reste due, ne retire rien sans avis.' : 'L\u2019écart est négligeable.'} Fais confirmer le calcul par ton Relais Petite Enfance, c\u2019est gratuit, avant tout versement.</div>`
+      : '<p class="hint">Accueil sur plus de 46 semaines : la régularisation annuelle de la convention ne s\u2019applique pas. L\u2019écart ci-dessus reste un bon contrôle.</p>');
+}
+
 async function renderAnnuel() {
   const toutes = (await Store.all()).fiches;
   const mois = Object.keys(toutes).sort();
@@ -3230,7 +4879,12 @@ async function renderAnnuel() {
       ${courbeAnnee(annees[an], toutes, an)}
 
       <div class="fiscal">
-        <b>Régularisation</b>
+        <b>Régularisation annuelle</b>
+        <div id="regularisation"></div>
+      </div>
+
+      <div class="fiscal">
+        <b>Écart du calendrier sur l'année civile</b>
         <div class="ds"><span>Heures payées par la mensualisation</span><b>${F.f2(t.hMens)} h</b></div>
         <div class="ds"><span>Heures relevées au calendrier</span><b>${F.f2(t.hReel)} h</b></div>
         <div class="ds"><span>Écart</span><b>${(t.hReel - t.hMens > 0 ? '+' : '') + F.f2(t.hReel - t.hMens)} h</b></div>
@@ -3249,7 +4903,7 @@ async function renderAnnuel() {
 }
 
 /* ---------------- Dossier salariée ---------------- */
-function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, paiement: {}, conges: {}, contrats: [], seuils: {}, securite: {}, maj: {}, enfants: [], sauvegarde: {}, attestation: {}, fin: {}, theme: 'clair', ...p }; }
+function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, paiement: {}, conges: {}, contrats: [], seuils: {}, securite: {}, maj: {}, cloud: {}, enfants: [], sauvegarde: {}, attestation: {}, fin: {}, banniere: { actif: true }, theme: 'clair', ...p }; }
 
 const MAIL_SUBJECT_DEFAUT = 'Fiche de salaire — {mois}';
 const MAIL_BODY_DEFAUT = "Bonjour,\n\nVeuillez trouver ci-joint la fiche de calcul du salaire pour l'accueil de {enfant} — {mois}.\n\nCordialement,\n{employeur}";
@@ -3280,6 +4934,13 @@ async function renderDossier() {
   renderAvenants();
   renderConges();
   majSauvegarde();
+  renderPartage();
+  renderHoraires();
+  renderMessages();
+  chargerJournal().then(renderJournal);
+  chargerUrgence().then(renderUrgence);
+  chargerGalerie().then(renderGalerie);
+  chargerFermetures().then(renderFermetures);
   const ds = (label, val) => `<div class="ds"><span>${esc(label)}</span><b>${esc(val || '—')}</b></div>`;
   const s = cur.salarie, e = cur.employeur, en = cur.enfant;
   $('#dosIdent').innerHTML =
@@ -3344,7 +5005,7 @@ async function envoyerMail() {
    emporte toutes les fiches. */
 async function sauvegarder() {
   const data = await Store.all();
-  const nom = 'AssMat-sauvegarde-' + new Date().toISOString().slice(0, 10) + '.json';
+  const nom = 'Cocon-sauvegarde-' + new Date().toISOString().slice(0, 10) + '.json';
   const contenu = JSON.stringify(data, null, 1);
 
   const P = natif();
@@ -3456,6 +5117,12 @@ document.addEventListener('input', e => {
       if (autre !== el && autre.value !== el.value) autre.value = el.value;
     });
     scheduleProfilSave();
+    if (el.dataset.profil.startsWith('banniere.')) renderBanniere();
+    if (el.dataset.profil.startsWith('horaires.')) { renderHoraires(); planifierSync(); }
+    if (el.dataset.profil.startsWith('cloud.')) {
+      clearTimeout(cloudTimer);
+      cloudTimer = setTimeout(majCompte, 600);
+    }
     if (el.dataset.profil.startsWith('rappel.') || el.dataset.profil.startsWith('paiement.')) {
       clearTimeout(rappelTimer);
       rappelTimer = setTimeout(programmerRappels, 900);
@@ -3504,6 +5171,22 @@ $('#mois').addEventListener('change', async () => {
   setStatus('ok');
 });
 
+$('#segVue').addEventListener('click', e => {
+  const b = e.target.closest('[data-vuecal]');
+  if (b) basculerVueCal(b.dataset.vuecal);
+});
+$('#jourAbs').addEventListener('click', e => {
+  const b = e.target.closest('[data-abs2]');
+  if (b) $$('#jourAbs button').forEach(x => x.classList.toggle('on', x === b));
+});
+$('#btnJourOk').onclick = validerJour;
+$('#btnJourVider').onclick = () => {
+  $('#jourP').value = ''; $('#jourC').value = ''; $('#jourM').value = '';
+  $$('#jourAbs button').forEach(x => x.classList.toggle('on', !x.dataset.abs2));
+  validerJour();
+};
+$('#jourModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#jourModal').hidden = true; });
+
 $('#calendrier').addEventListener('click', e => {
   const b = e.target.closest('[data-abs]');
   if (b) basculerAbsence(+b.dataset.abs);
@@ -3518,6 +5201,7 @@ $('#dedApply').addEventListener('click', () => {
 });
 
 $('#btnMenu').onclick = openDrawer;
+$('#btnParams').onclick = () => showView('parametres');
 $('#btnNotif').onclick = ouvrirNotifs;
 $('#btnNotifClose').onclick = () => { $('#notifModal').hidden = true; };
 $('#notifModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#notifModal').hidden = true; });
@@ -3542,6 +5226,9 @@ $('#joursApply').onclick = reprendreJours;
 $('#heuresApply').onclick = reprendreHeures;
 $('#actPdf').onclick = () => { closeSheet(); exporterPdf(); };
 $('#actPrint').onclick = () => { closeSheet(); imprimer(); };
+$('#actDupli').onclick = () => { closeSheet(); ouvrirDuplication(); };
+$('#btnDupliCancel').onclick = () => { $('#dupliModal').hidden = true; };
+$('#dupliModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#dupliModal').hidden = true; });
 $('#actMail').onclick = () => { closeSheet(); openMailModal(); };
 $('#actPlanning').onclick = () => { closeSheet(); partagerPlanning(); };
 $('#actAbsence').onclick = () => { closeSheet(); openAbsModal(); };
@@ -3578,12 +5265,28 @@ $('#btnChangerCode').onclick = () => {
   if (!(profil.securite || {}).actif) { toast('Active d\u2019abord le code'); return; }
   afficherVerrou('creer');
 };
+$('#btnConnexion').onclick = () => actionCompte('connecter');
+$('#btnInscription').onclick = () => actionCompte('inscrire');
+$('#btnDeconnexion').onclick = async () => { await Supa.deconnecter(); direCompte('Déconnecté.'); majCompte(); };
+$('#btnTestBase').onclick = testerBase;
+$('#btnMdpOublie').onclick = async () => {
+  Supa.configurer((profil.cloud || {}).url || PROJET.url, (profil.cloud || {}).cle || PROJET.cle);
+  const email = $('#compteEmail').value.trim();
+  if (!email.includes('@')) { direCompte('Saisis ton adresse e-mail d\u2019abord.', 'mal'); return; }
+  try {
+    await Supa.recuperer(email);
+    direCompte('Si un compte existe pour cette adresse, un lien de réinitialisation vient d\u2019y être envoyé.');
+  } catch (e) { direCompte(e.message || String(e), 'mal'); }
+};
 $('#btnMaj').onclick = () => verifierMaj(false);
 $('#rechercheFiche').addEventListener('input', () => refreshList());
 $('#btnAttEmploi').onclick = attestationEmploi;
 $('#btnAttSalaire').onclick = attestationSalaire;
 $('#btnFinCalcul').onclick = calculFin;
 $('#btnAjoutEnfant').onclick = ajouterEnfant;
+$('#btnRepondre').onclick = repondre;
+$('#btnUrgence').onclick = enregistrerUrgence;
+$('#btnAjoutPersonne').onclick = () => { personnes.push({ nom: '', lien: '', tel: '' }); renderPersonnes(); };
 $('#btnAvenant').onclick = ajouterAvenant;
 $('#btnIcs').onclick = exporterIcs;
 $('#btnSauvegarde').onclick = sauvegarder;
@@ -3744,18 +5447,27 @@ function verrouillerSiBesoin() {
 
 /* ---------------- Écran de lancement ---------------- */
 const splashOuvertA = Date.now();
+const splashNatif = !!window.Capacitor;
+
+/* Dans l'application installée, l'écran système a déjà tenu l'attente :
+   le nôtre ne fait que le prolonger le temps d'afficher le nom. */
+if (splashNatif) {
+  const el0 = document.getElementById('splash');
+  if (el0) el0.classList.add('natif');
+}
+
 function fermerSplash() {
   const el = $('#splash');
   if (!el || el.dataset.fini) return;
   el.dataset.fini = '1';
-  // laisser l'animation se dérouler, sans jamais retarder l'usage au-delà de 2 s
-  const reste = Math.max(0, 1750 - (Date.now() - splashOuvertA));
+  const tenue = splashNatif ? 620 : 1750;
+  const reste = Math.max(0, tenue - (Date.now() - splashOuvertA));
   setTimeout(() => {
     el.classList.add('parti');
     setTimeout(() => el.remove(), 420);
   }, reste);
 }
-setTimeout(fermerSplash, 2400);
+setTimeout(fermerSplash, splashNatif ? 1200 : 2400);
 document.getElementById('splash').addEventListener('click', () => {
   const el = $('#splash');
   el.classList.add('parti');
@@ -3793,12 +5505,14 @@ function integrerAndroid() {
   if (C.App && C.App.addListener) {
     C.App.addListener('backButton', () => {
       if (!$('#verrou').hidden) return;
+      if (!$('#dupliModal').hidden) { $('#dupliModal').hidden = true; return; }
+      if (!$('#jourModal').hidden) { $('#jourModal').hidden = true; return; }
       if (!$('#notifModal').hidden) { $('#notifModal').hidden = true; return; }
       if (!$('#absModal').hidden) { $('#absModal').hidden = true; return; }
       if (!$('#mailModal').hidden) { $('#mailModal').hidden = true; return; }
       if ($('#sheet').classList.contains('on')) { closeSheet(); return; }
       if ($('#drawer').classList.contains('on')) { closeDrawer(); return; }
-      if (vue !== 'accueil') { showView('accueil'); return; }
+      if (vue !== 'accueil') { showView(vue === 'parametres' ? 'dossier' : 'accueil'); return; }
       C.App.exitApp();
     });
     C.App.addListener('resume', () => { if (saveTimer) doSave(); verrouillerSiBesoin(); });
@@ -3807,12 +5521,34 @@ function integrerAndroid() {
 
 }
 
+
+/* ---------------- Notifications système ----------------
+   Le jeton de l'appareil est renouvelé par Android : on le redépose à chaque
+   fois. Sans autorisation, l'application fonctionne exactement pareil. */
+async function activerPush() {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (!C || !C.PushNotifications || !Supa.connecte()) return;
+  const P = C.PushNotifications;
+  try {
+    let perm = await P.checkPermissions();
+    if (perm.receive !== 'granted') perm = await P.requestPermissions();
+    if (perm.receive !== 'granted') return;
+
+    P.addListener('registration', async (t) => {
+      try { await Supa.enregistrerJeton(t.value, 'parent'); } catch (e) {}
+    });
+    P.addListener('registrationError', () => {});
+    await P.register();
+  } catch (e) { /* appareil sans services Google : on continue sans push */ }
+}
+
 /* ---------------- Démarrage ---------------- */
 if ('serviceWorker' in navigator && !window.Capacitor && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 buildCalendrier();
+basculerVueCal('grille');
 (async () => {
   profil = normalizeProfil(await API.loadProfil());
   appliquerTheme(profil.theme);
@@ -3830,10 +5566,13 @@ buildCalendrier();
   showView('accueil');
   integrerAndroid();
   fermerSplash();
+  Supa.brancherStockage(Store.session, Store.majSession);
+  Supa.configurer((profil.cloud || {}).url || PROJET.url, (profil.cloud || {}).cle || PROJET.cle);
+  if (Supa.configure()) Supa.reprendre().then(() => { majCompte(); syncPlanning(true); activerPush(); });
   const m = $('#majActuelle'); if (m) m.textContent = VERSION;
   if ((profil.maj || {}).auto) setTimeout(() => verifierMaj(true), 2500);
   programmerRappels();
-  console.log('AssMat+ mobile — stockage : ' + Store.kind);
+  console.log('Cocon mobile — stockage : ' + Store.kind);
 })();
 </script>
 </body>

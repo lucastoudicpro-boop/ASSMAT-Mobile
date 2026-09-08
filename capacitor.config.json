@@ -1,6 +1,6 @@
 {
-  "appId": "fr.lucas.assmat",
-  "appName": "AssMat+",
+  "appId": "fr.lucas.cocon.parent",
+  "appName": "Cocon Parent",
   "webDir": "docs",
   "android": {
     "allowMixedContent": false

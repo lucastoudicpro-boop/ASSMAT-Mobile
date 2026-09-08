@@ -1,6 +1,28 @@
-# AssMat+ — version Android
+# Cocon — deux applications Android
 
-Version 0.8.1
+Version 0.9.7
+
+**Cocon Parent** (`fr.lucas.cocon.parent`, vert d'eau) — le parent employeur.
+Fiches de salaire, calculs Pajemploi, PDF, planning, contrat, congés, rappels.
+C'est l'application historique, renommée.
+
+**Cocon Nounou** (`fr.lucas.cocon.nounou`, rose poudré) — l'assistante maternelle.
+Le planning de chaque enfant en horaires, les informations utiles, les demandes de
+fourniture en un geste, les échanges et les photos. Elle rejoint un contrat avec un
+code d'invitation, après avoir signé l'accord de partage.
+
+Elle ne déclare pas d'heures : la saisie du temps de travail reste du côté du
+parent employeur, avec les calculs.
+
+Les deux partagent `commun/` : le client de base de données et l'encodeur QR.
+Un seul dépôt, deux compilations, deux APK.
+
+## Ce qui ne circule pas
+
+L'application de la salariée ne contient tout simplement pas le code qui manipule
+les montants, l'IBAN ou le numéro de sécurité sociale. Une fuite par bug
+d'affichage y est impossible, pas seulement improbable.
+
 
 Fiches de calcul du salaire d'une assistante maternelle (modèle Pajemploi), portage
 de l'application Windows Electron vers Android via Capacitor.
@@ -279,8 +301,12 @@ chaque nouvelle version doit etre desinstallee avant d'installer la suivante.
 Avec une cle, les mises a jour s'installent par-dessus et gardent les donnees.
 
 **Creer la cle, une seule fois.** Onglet Actions -> « Creer la cle de signature »
--> Run workflow. Telecharger l'artefact, lire `a-faire.txt`, puis creer quatre
-secrets dans Settings -> Secrets and variables -> Actions :
+-> Run workflow. Le nom saisi sert uniquement a identifier la cle ; les
+caracteres reserves des noms X.500 (`, + = < > # ;` et l'antislash) sont retires
+automatiquement, car keytool les interprete comme des separateurs.
+
+Telecharger l'artefact, lire `a-faire.txt`, puis creer quatre secrets dans
+Settings -> Secrets and variables -> Actions :
 
 | Secret | Contenu |
 | --- | --- |
@@ -392,3 +418,283 @@ certificat de travail et recu pour solde de tout compte.
 Un champ de recherche filtre la liste des mois dans le tiroir, par nom de mois,
 annee ou prenom. Le bilan annuel affiche douze barres, une par mois, pour lire
 l'allure de l'annee d'un coup d'oeil.
+
+## Planning en grille
+
+Carte Calendrier de presence -> bascule **Grille / Liste**. La grille montre le
+mois en sept colonnes, une case par jour, avec le total d'heures, les week-ends,
+les jours feries et les absences. Un appui sur une case ouvre l'edition du jour :
+presence, heures complementaires, heures majorees, et l'etat d'absence.
+
+La liste reste disponible pour la saisie au clavier ; les deux vues portent sur
+les memes donnees et se mettent a jour ensemble.
+
+## Dossier et parametres
+
+Deux ecrans distincts. Le **Dossier**, dans la barre du bas, contient ce qui
+concerne la relation de travail : salariee, enfants accueillis, planning type,
+contrat et avenants, conges payes, attestations, fin de contrat, notes.
+
+Les **Parametres**, accessibles par l'engrenage en haut a droite, contiennent le
+reglage de l'application : banniere des documents, modele d'e-mail, securite,
+seuils legaux, apparence, versement et rappels, agenda, mises a jour,
+sauvegarde.
+
+## Banniere des documents
+
+Parametres -> Banniere des documents. Ajoute un bandeau signe en bas du planning
+partage et des attestations, avec un apercu en direct.
+
+Elle n'est jamais ajoutee a la fiche de calcul A4 : ce document doit rester
+conforme au modele papier de Pajemploi.
+
+## Compte en ligne
+
+Parametres -> Compte en ligne. Adresse du projet Supabase, cle publique
+« anon », puis creation du compte ou connexion.
+
+Le bouton **Verifier l'acces a la base** interroge reellement le serveur et
+rapporte trois points : la lecture du profil, celle des contrats, et surtout que
+la table des invitations refuse bien la lecture. Ce dernier point est le controle
+de securite : une base qui laisse lire les codes d'invitation laisse rejoindre
+le contrat de n'importe qui.
+
+**Aucune bibliotheque externe.** Le client est ecrit a la main, une centaine de
+lignes sur l'HTTP de Supabase. L'application ne charge donc aucun script depuis
+Internet et reste utilisable hors connexion.
+
+**La session vit dans sa propre cle de stockage**, hors du bloc sauvegarde et
+exporte : un jeton de rafraichissement n'a rien a faire dans un fichier de
+sauvegarde partage par e-mail.
+
+**Ce qui n'est jamais envoye** : fiches, montants, IBAN, numero de securite
+sociale, numero d'agrement. La connexion ne sert qu'au planning partage.
+
+### Avant d'ouvrir a d'autres
+
+La cle « anon » est publique par conception, mais le depot GitHub l'est aussi
+si les Pages sont activees. Elle est saisie dans l'application, pas ecrite dans
+le code, ce qui evite de la publier. Cote Supabase, pense a fermer les
+inscriptions libres tant que l'usage reste prive : Authentication -> Providers ->
+desactiver « Enable email signup », et creer les comptes a la main.
+
+## Partage avec la salariee
+
+Dossier salariee -> Partage avec la salariee. Un contrat par enfant, comme
+l'exige Pajemploi depuis janvier 2026.
+
+**Publier le contrat.** L'accord de partage s'affiche, la validation vaut
+signature. Le contrat est cree en base et le planning du mois part aussitot.
+
+**Code d'invitation.** Six caracteres tires au hasard, sans O ni 0 ni I ni 1,
+valables sept jours. Deux QR l'accompagnent : l'un pointe vers la page de
+telechargement de Cocon Nounou, l'autre porte le code. A montrer quand vous etes
+ensemble : elle installe, puis rejoint.
+
+**Synchronisation.** Automatique, quatre secondes apres chaque modification, et
+au lancement. Un bouton force l'envoi. Ce qui monte : les heures prevues jour par
+jour, les absences de l'enfant, le total du mois et l'etat de la fiche.
+
+**Retirer l'acces.** En fin de contrat. La salariee ne voit plus rien ; les
+fiches locales ne sont pas touchees.
+
+### Pourquoi l'envoi ne peut pas ecraser son travail
+
+L'envoi du parent est un upsert sur la table `jours`. Pour les lignes qui
+existent deja, le declencheur `proprietaire_jour` restaure les colonnes qui
+appartiennent a la salariee : ses heures effectuees et ses propres absences.
+La base protege donc son travail meme si l'application se trompe.
+
+### Le QR
+
+Encodeur ecrit a la main, sans bibliotheque : les applications ne chargent aucun
+script externe. Verifie en relisant les codes produits avec un decodeur
+independant, sur les dix versions et sur les cas reels, et en controlant que les
+600 syndromes Reed-Solomon sont nuls.
+
+## Ce que contient Cocon Nounou
+
+**Accueil.** Le total de la semaine et la liste de ses familles.
+
+**Planning.** Par enfant : les horaires convenus au contrat, jour par jour, sous
+la forme « lundi 08:00 vers 17:30 ». Puis le calendrier du mois avec les
+exceptions et les absences. Enfin les informations de l'enfant : prenom, date de
+naissance, age calcule, lieu d'accueil.
+
+**Messages.** Huit demandes de fourniture en un appui : couches, lait, eau, tenue
+de rechange, creme, repas, chaussons, doudou. Un champ libre pour un mot au
+parent. Et l'envoi de photos.
+
+**Familles.** Rejoindre avec un code, voir ses contrats.
+
+## Les photos
+
+Bucket prive, range par contrat : le premier segment du chemin est l'identifiant
+du contrat, et les regles du stockage s'appuient dessus. Une famille ne peut pas
+voir les photos prises chez une autre, meme en devinant une adresse.
+
+Les photos ne sont jamais servies par une URL publique : les deux applications
+les telechargent avec le jeton de session, puis les affichent depuis la memoire.
+
+L'appareil photo passe par le champ de fichier du navigateur, avec `capture` :
+aucun module natif supplementaire, donc rien de plus a compiler.
+
+## Les horaires
+
+Le planning de base vit sur le contrat, sous forme d'horaires par jour de
+semaine. Le parent les saisit dans Planning type, ils partent avec la
+synchronisation, et la salariee les voit tels quels. La duree quotidienne en est
+deduite pour la mensualisation : 08:00 vers 17:30 donne 9,5 heures.
+
+## Notifications
+
+Vraies notifications systeme, qui arrivent ecran verrouille. La chaine complete :
+Firebase, jeton de l'appareil en base, fonction serveur, plugin dans les APK.
+
+### Ce qu'il faut faire une fois, cote Firebase
+
+1. Creer un projet sur console.firebase.google.com.
+2. Y ajouter deux applications Android : `fr.lucas.cocon.parent` et
+   `fr.lucas.cocon.nounou`. Telecharger les deux `google-services.json`.
+3. Les convertir en base64 : `base64 -w0 google-services.json`
+4. Deux secrets GitHub : `GOOGLE_SERVICES_PARENT` et `GOOGLE_SERVICES_NOUNOU`.
+   Sans eux, la compilation reussit quand meme, simplement sans notifications.
+5. Parametres du projet -> Comptes de service -> generer une cle privee.
+   Le fichier JSON obtenu devient le secret `FCM_COMPTE_SERVICE` cote Supabase.
+
+### Cote Supabase
+
+Executer `005-notifications-fermetures.sql`, puis deployer la fonction
+`supabase/functions/notifier`. Depuis le tableau de bord : Edge Functions ->
+Deploy a new function, coller le contenu de `index.ts`. Ajouter le secret
+`FCM_COMPTE_SERVICE`.
+
+### Comment c'est protege
+
+La fonction verifie l'appelant deux fois. Son jeton doit etre valide, et la
+lecture du contrat se fait **avec ses propres droits** : s'il n'appartient pas au
+contrat, la base ne lui renvoie rien et l'envoi s'arrete. La cle de service ne
+sert qu'a une chose, lire les jetons du destinataire, que personne d'autre ne
+peut lire.
+
+Le destinataire est toujours l'autre partie, jamais l'expediteur. Un jeton refuse
+par Firebase, signe d'une application desinstallee, est retire de la base.
+
+### Ce qui declenche une notification
+
+| Evenement | Qui recoit |
+| --- | --- |
+| Demande de fourniture | le parent |
+| Message de la salariee | le parent |
+| Photo envoyee | le parent |
+| Fermeture annoncee | toutes ses familles |
+| Reponse du parent | la salariee |
+
+## Cocon Nounou, suite
+
+**Aujourd'hui.** Sur l'accueil : qui vient aujourd'hui et de quelle heure a
+quelle heure, toutes familles confondues, dans l'ordre des arrivees. Un appui
+ouvre le planning de l'enfant.
+
+**Mes fermetures.** Ses conges et jours de fermeture. Chaque famille est
+prevenue automatiquement, par message et par notification. Les employeurs les
+lisent aussi depuis leur propre application.
+
+## Le journal de la journee
+
+Elle remplit, les parents lisent. La base leur interdit d'ecrire : les trois
+regles d'ecriture exigent d'etre la salariee du contrat. Une transmission que le
+parent pourrait reecrire ne vaudrait rien.
+
+**Cote Cocon Nounou**, onglet Journal. Un jour a la fois, avec les fleches, sans
+possibilite d'aller sur un jour a venir. Repas et humeur en un appui, horaires de
+sieste, compteur de changes, et un mot libre. L'enregistrement previent le parent
+par notification, avec le resume en corps de message.
+
+**Cote Cocon Parent**, Dossier -> Journal de la journee. Les quatorze derniers
+jours, en lecture seule.
+
+Le fichier `006-journal.sql` se termine par un controle qui verifie precisement
+ce point : les trois regles d'ecriture doivent toutes mentionner `salariee_id`.
+
+## La fiche d'urgence
+
+Cocon Parent, Dossier -> Fiche d'urgence. Medecin et son numero, allergies,
+traitements, particularites, personnes autorisees a venir chercher l'enfant, et
+les autorisations. Un badge « a remplir » reste visible tant qu'elle n'est pas
+signee.
+
+Cote Cocon Nounou, elle apparait dans la fiche de l'enfant, en lecture seule.
+Les allergies et les traitements sont mis en evidence, les numeros sont
+cliquables.
+
+**Elle est conservee sur l'appareil de la salariee.** Le jour ou il faut appeler
+le medecin, il n'y a pas toujours de reseau. La copie locale est rafraichie a
+chaque consultation en ligne.
+
+Cote base, seul le parent ecrit : les deux regles d'ecriture exigent d'etre
+l'employeur du contrat.
+
+## La galerie et les photos de groupe
+
+Une photo peut concerner plusieurs enfants. Quand la salariee en envoie une,
+l'application lui propose les autres familles **qui ont coche l'autorisation des
+photos de groupe**, et elle seules.
+
+Cette regle n'est pas seulement dans l'interface : un declencheur la verifie a
+l'ecriture du lien entre la photo et l'enfant. Une famille qui n'a pas autorise
+les photos de groupe voit le lien refuse par la base, meme si l'application se
+trompe.
+
+Le rangement du stockage a change : le dossier est desormais l'identifiant de la
+photo, ce qui permet a plusieurs familles d'y acceder sans se voir entre elles.
+
+## Finition
+
+Fond legerement irise vers le haut, cartes plus douces, retour au toucher sur
+tous les elements cliquables, et une apparition en fondu a chaque changement de
+vue. Tout est desactive si le telephone est regle sur mouvement reduit.
+
+## Correctifs 0.9.6
+
+Deux manques introduits en 0.9.5, cote parent :
+
+- La galerie remplie par la salariee n'etait lue par personne. Le parent la voit
+  desormais dans Dossier -> Galerie, avec le nombre de photos en badge.
+- Ses fermetures n'arrivaient que sous forme de message. Elles ont maintenant
+  leur carte, avec la mention passee ou a venir. Le README affirmait deja que le
+  parent les voyait : c'etait faux, ca ne l'est plus.
+
+## Reprendre un mois
+
+Menu des trois points -> Reprendre un mois precedent. Les donnees du mois choisi
+remplacent celles du mois affiche : identites, contrat, tarifs, quantites
+d'indemnites, salaire net. Tout reste modifiable ensuite.
+
+Trois choses ne se reprennent jamais, parce qu'elles appartiennent au mois
+affiche : la periode, les acomptes, et l'etat d'envoi ou de versement.
+
+**Le calendrier n'est pas repris par defaut.** Les jours de la semaine ne tombent
+pas aux memes dates d'un mois a l'autre : recopier le calendrier de septembre sur
+octobre decale tous les jours. « Remplir le mois » fait mieux le travail, en
+connaissant les horaires du contrat et les jours feries. Une case permet quand
+meme de le reprendre si tu le veux.
+
+## Regularisation annuelle
+
+Bilan annuel, en bas. Obligatoire en annee incomplete : la convention prevoit une
+regularisation a la date anniversaire du contrat quand l'accueil porte sur 46
+semaines ou moins par periode de douze mois.
+
+L'application suit la **periode en cours**, du dernier anniversaire a
+aujourd'hui, plutot que d'attendre l'echeance : l'ecart se lit au fil des mois.
+Elle compare les heures payees par la mensualisation, augmentees des heures
+complementaires et majorees deja reglees, aux heures relevees au calendrier. La
+difference est valorisee au taux horaire moyen de la periode.
+
+Une alerte remonte dans le centre de notifications quand l'anniversaire approche
+a moins de trente jours.
+
+**L'application ne tranche pas.** Elle affiche l'ecart et son montant indicatif,
+rappelle que la mensualisation reste due meme si les heures relevees sont
+inferieures, et renvoie vers le Relais Petite Enfance avant tout versement.

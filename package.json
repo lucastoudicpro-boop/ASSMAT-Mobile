@@ -1,7 +1,7 @@
 {
-  "name": "assmat-plus",
-  "version": "0.8.1",
-  "description": "Fiches de calcul du salaire - assistante maternelle (Pajemploi)",
+  "name": "cocon",
+  "version": "0.9.8",
+  "description": "Cocon Parent et Cocon Nounou - suivi de l'accueil d'un enfant",
   "author": "Lucas",
   "license": "MIT",
   "private": true,
@@ -16,6 +16,7 @@
     "@capacitor/core": "^6.2.0",
     "@capacitor/local-notifications": "^6.1.2",
     "@capacitor/preferences": "^6.0.3",
+    "@capacitor/push-notifications": "^6.0.4",
     "@capacitor/status-bar": "^6.0.2"
   },
   "devDependencies": {

@@ -1,14 +1,14 @@
 {
-  "name": "Cocon Parent",
+  "name": "Cocon Nounou",
   "short_name": "Cocon",
-  "description": "Fiches de calcul du salaire d'une assistante maternelle (modele Pajemploi)",
   "lang": "fr",
+  "description": "Le planning de vos accueils, toutes familles reunies",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#eef4f2",
-  "theme_color": "#17403c",
+  "background_color": "#f7f4f5",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "icones/icone-192.png",

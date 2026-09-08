@@ -1,4 +1,4 @@
-package fr.lucas.assmat;
+package fr.lucas.cocon.parent;
 
 import android.content.ContentValues;
 import android.content.Context;

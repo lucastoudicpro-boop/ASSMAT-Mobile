@@ -1,0 +1,163 @@
+// Cocon — fonction « notifier »
+//
+// Envoie une notification à l'autre partie d'un contrat.
+// Appelée par l'application juste après l'écriture d'un message.
+//
+// L'appelant est vérifié deux fois : son jeton doit être valide, et la lecture
+// du contrat passe par ses propres droits. S'il n'appartient pas au contrat,
+// la base ne lui renvoie rien et la fonction s'arrête.
+//
+// Secret à définir : FCM_COMPTE_SERVICE, le JSON du compte de service Firebase.
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!;
+const CLE_ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
+const CLE_SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const COMPTE = JSON.parse(Deno.env.get('FCM_COMPTE_SERVICE') ?? '{}');
+
+const entetesCORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+/* ---- Jeton d'accès Google, signé avec la clé du compte de service ---- */
+let cache: { jeton: string; expire: number } | null = null;
+
+function base64url(donnees: Uint8Array | string): string {
+  const octets = typeof donnees === 'string' ? new TextEncoder().encode(donnees) : donnees;
+  return btoa(String.fromCharCode(...octets))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function pemVersBinaire(pem: string): ArrayBuffer {
+  const corps = pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+  const brut = atob(corps);
+  const t = new Uint8Array(brut.length);
+  for (let i = 0; i < brut.length; i++) t[i] = brut.charCodeAt(i);
+  return t.buffer;
+}
+
+async function jetonGoogle(): Promise<string> {
+  if (cache && cache.expire > Date.now() + 60_000) return cache.jeton;
+
+  const maintenant = Math.floor(Date.now() / 1000);
+  const entete = base64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  const charge = base64url(JSON.stringify({
+    iss: COMPTE.client_email,
+    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: maintenant,
+    exp: maintenant + 3600,
+  }));
+
+  const cle = await crypto.subtle.importKey(
+    'pkcs8', pemVersBinaire(COMPTE.private_key),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5', cle, new TextEncoder().encode(entete + '.' + charge));
+
+  const jwt = entete + '.' + charge + '.' + base64url(new Uint8Array(signature));
+
+  const r = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }),
+  });
+  const d = await r.json();
+  if (!d.access_token) throw new Error('Jeton Google refusé : ' + JSON.stringify(d));
+
+  cache = { jeton: d.access_token, expire: Date.now() + (d.expires_in ?? 3600) * 1000 };
+  return cache.jeton;
+}
+
+/* ---- Envoi FCM ---- */
+async function envoyer(jetonAppareil: string, titre: string, corps: string, donnees: Record<string, string>) {
+  const acces = await jetonGoogle();
+  const r = await fetch(
+    `https://fcm.googleapis.com/v1/projects/${COMPTE.project_id}/messages:send`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + acces, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: {
+          token: jetonAppareil,
+          notification: { title: titre, body: corps },
+          data: donnees,
+          android: { priority: 'high', notification: { sound: 'default' } },
+        },
+      }),
+    });
+  return { ok: r.ok, statut: r.status, reponse: await r.text() };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: entetesCORS });
+
+  try {
+    const autorisation = req.headers.get('Authorization') ?? '';
+    if (!autorisation.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ erreur: 'Jeton manquant' }),
+        { status: 401, headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
+    }
+
+    const { contrat_id, titre, corps } = await req.json();
+    if (!contrat_id || !titre) throw new Error('contrat_id et titre sont requis');
+
+    // Première vérification : le contrat est lu avec les droits de l'appelant.
+    // S'il n'y appartient pas, la règle d'accès ne renvoie rien.
+    const commeUtilisateur = createClient(URL_SUPABASE, CLE_ANON, {
+      global: { headers: { Authorization: autorisation } },
+    });
+    const { data: utilisateur } = await commeUtilisateur.auth.getUser();
+    if (!utilisateur?.user) throw new Error('Session invalide');
+
+    const { data: contrat } = await commeUtilisateur
+      .from('contrats')
+      .select('id, employeur_id, salariee_id')
+      .eq('id', contrat_id)
+      .maybeSingle();
+    if (!contrat) throw new Error('Contrat inaccessible');
+
+    // Le destinataire est l'autre partie, jamais l'expéditeur.
+    const moi = utilisateur.user.id;
+    const destinataire = contrat.employeur_id === moi ? contrat.salariee_id : contrat.employeur_id;
+    if (!destinataire) {
+      return new Response(JSON.stringify({ envoyes: 0, raison: 'aucun destinataire' }),
+        { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
+    }
+
+    // Les jetons ne sont lisibles que par leur propriétaire : cette lecture
+    // exige la clé de service, et c'est la seule chose qu'elle sert ici.
+    const commeService = createClient(URL_SUPABASE, CLE_SERVICE);
+    const { data: jetons } = await commeService
+      .from('jetons_push')
+      .select('jeton')
+      .eq('personne_id', destinataire);
+
+    if (!jetons?.length) {
+      return new Response(JSON.stringify({ envoyes: 0, raison: 'aucun appareil enregistré' }),
+        { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
+    }
+
+    let envoyes = 0;
+    const perimes: string[] = [];
+    for (const j of jetons) {
+      const r = await envoyer(j.jeton, titre, corps ?? '', { contrat_id: String(contrat_id) });
+      if (r.ok) envoyes++;
+      else if (r.statut === 404 || r.statut === 400) perimes.push(j.jeton);
+    }
+
+    // Un appareil désinstallé garde un jeton mort : on le retire.
+    if (perimes.length) await commeService.from('jetons_push').delete().in('jeton', perimes);
+
+    return new Response(JSON.stringify({ envoyes, retires: perimes.length }),
+      { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
+
+  } catch (e) {
+    return new Response(JSON.stringify({ erreur: String((e as Error).message ?? e) }),
+      { status: 400, headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
+  }
+});

@@ -1,4 +1,4 @@
-package fr.lucas.cocon.parent;
+package fr.lucas.cocon.nounou;
 
 import android.os.Build;
 
@@ -19,7 +19,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
  * confirmer une identite, il ne detient aucun secret.
  */
 @CapacitorPlugin(name = "AssMatBio")
-public class AssMatBio extends Plugin {
+public class CoconBio extends Plugin {
 
     private int autorises() {
         return BiometricManager.Authenticators.BIOMETRIC_WEAK;
