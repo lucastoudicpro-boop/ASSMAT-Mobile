@@ -698,3 +698,37 @@ a moins de trente jours.
 **L'application ne tranche pas.** Elle affiche l'ecart et son montant indicatif,
 rappelle que la mensualisation reste due meme si les heures relevees sont
 inferieures, et renvoie vers le Relais Petite Enfance avant tout versement.
+
+## Correctif 0.9.10 — l'application tombait a la connexion
+
+Cause : apres la connexion, l'application demandait a Firebase d'enregistrer
+l'appareil. Sans `google-services.json` dans l'APK, Firebase n'est pas
+initialise et cet appel arrete le processus natif. Ce n'est pas une erreur
+JavaScript, rien n'est attrapable depuis le code web : l'application se ferme.
+
+Correction : un drapeau `PROJET.notifications`, faux par defaut. Le workflow ne
+le passe a vrai que dans l'etape qui a effectivement depose
+`google-services.json`. Tant qu'il est faux, l'application ne sollicite jamais
+Firebase.
+
+Verifie au test : connexion reussie, zero appel au module de notifications.
+
+## L'adresse du projet livree avec l'application
+
+Deux secrets facultatifs, `SUPABASE_URL` et `SUPABASE_ANON_KEY`. Quand ils
+existent, le workflow les inscrit dans les deux applications avant la
+compilation : il ne reste alors qu'une adresse e-mail et un mot de passe a
+saisir. Sinon les champs restent disponibles sous « Projet Supabase ».
+
+La cle « anon » est publique par conception. Passer par un secret evite
+simplement de la commiter.
+
+## Premier lancement
+
+**Cocon Nounou** s'ouvre sur l'ecran de connexion tant qu'aucun compte n'est
+actif : toutes ses donnees viennent du serveur, un accueil vide sans explication
+n'aurait aucun sens.
+
+**Cocon Parent** ne demande rien. Fiches, calculs, PDF, sauvegardes : tout
+fonctionne sans compte. La connexion ne sert qu'au partage, et l'imposer
+casserait l'usage principal.

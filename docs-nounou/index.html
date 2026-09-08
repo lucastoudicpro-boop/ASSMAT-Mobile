@@ -507,16 +507,20 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
    Client écrit à la main plutôt que la bibliothèque officielle : l'application
    ne charge aucun script externe, ce qui la garde utilisable hors connexion.
    Supabase expose de l'HTTP simple, une centaine de lignes suffisent. */
-/* Adresse du projet Supabase, partagée par les deux applications.
-   À remplir une seule fois ici, avant de compiler.
+/* Reglages livres avec l'application, communs aux deux versions.
 
-   La clé « anon » est publique par conception : elle ne donne accès à rien
-   par elle-même. Ce sont les règles de la base qui protègent les données.
-   Laisser ces deux champs vides fait réapparaître la saisie manuelle dans les
-   réglages, utile pour essayer un autre projet. */
+   url et cle : adresse du projet Supabase. La cle « anon » est publique par
+   conception, ce sont les regles de la base qui protegent les donnees.
+   Le workflow les remplit depuis les secrets SUPABASE_URL et SUPABASE_ANON_KEY
+   s'ils existent ; sinon on peut les ecrire ici a la main.
+
+   notifications : ne passer a true que si google-services.json est bien present
+   dans l'APK. Sans lui, demander l'enregistrement a Firebase fait tomber
+   l'application, et pas proprement : c'est le processus natif qui s'arrete. */
 const PROJET = {
   url: '',
-  cle: ''
+  cle: '',
+  notifications: false
 };
 
 const Supa = (() => {
@@ -1628,6 +1632,10 @@ function verrouillerSiBesoin() {
    Le jeton de l'appareil est renouvelé par Android : on le redépose à chaque
    fois. Sans autorisation, l'application fonctionne exactement pareil. */
 async function activerPush() {
+  // Sans google-services.json dans l'APK, Firebase n'est pas initialisé et
+  // l'appel à register() arrête l'application. On ne tente donc rien tant que
+  // la compilation n'a pas confirmé sa présence.
+  if (!PROJET.notifications) return;
   const C = window.Capacitor && window.Capacitor.Plugins;
   if (!C || !C.PushNotifications || !Supa.connecte()) return;
   const P = C.PushNotifications;
@@ -1655,6 +1663,15 @@ async function activerPush() {
   majCompte();
   await charger();
   renderAccueil();
+
+  // Toutes ses données viennent du serveur : sans compte, l'accueil serait vide
+  // sans expliquer pourquoi. On ouvre directement sur la connexion.
+  if (!Supa.connecte()) {
+    montrer('params');
+    direCompte(Supa.configure()
+      ? 'Connecte-toi, ou crée ton compte si c\u2019est la première fois.'
+      : 'Renseigne d\u2019abord l\u2019adresse du projet, sous « Projet Supabase ».');
+  }
   setTimeout(() => {
     const s = $('#splash');
     s.classList.add('parti');

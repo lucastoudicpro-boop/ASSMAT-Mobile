@@ -1,6 +1,6 @@
 {
   "name": "cocon",
-  "version": "0.9.8",
+  "version": "0.9.10",
   "description": "Cocon Parent et Cocon Nounou - suivi de l'accueil d'un enfant",
   "author": "Lucas",
   "license": "MIT",
@@ -16,7 +16,6 @@
     "@capacitor/core": "^6.2.0",
     "@capacitor/local-notifications": "^6.1.2",
     "@capacitor/preferences": "^6.0.3",
-    "@capacitor/push-notifications": "^6.0.4",
     "@capacitor/status-bar": "^6.0.2"
   },
   "devDependencies": {
