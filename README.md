@@ -1,6 +1,6 @@
 # AssMat+ — version Android
 
-Version 0.8.0
+Version 0.8.1
 
 Fiches de calcul du salaire d'une assistante maternelle (modèle Pajemploi), portage
 de l'application Windows Electron vers Android via Capacitor.
@@ -315,3 +315,80 @@ elle apparait dans le centre de notifications avec un bouton de telechargement.
 
 L'application ne telecharge ni n'installe rien elle-meme : Android l'interdit a
 une application hors magasin. Elle ouvre la page, le reste est manuel.
+
+## Plusieurs enfants
+
+Dossier salariee -> Enfants accueillis -> Ajouter un enfant. Chaque enfant a ses
+propres fiches mensuelles, son propre contrat et son propre calendrier. Le
+selecteur en haut du tiroir bascule de l'un a l'autre, et le bilan annuel
+ventile chaque ligne par enfant.
+
+Depuis janvier 2026, Pajemploi demande une declaration distincte par enfant
+accueilli, meme chez la meme assistante maternelle : l'application suit
+desormais ce decoupage.
+
+**Compatibilite.** Le premier enfant conserve les cles de fiches existantes
+(`AAAA-MM`), les suivants utilisent `AAAA-MM#e2`. Aucune migration n'a lieu :
+les fiches deja enregistrees restent lisibles telles quelles.
+
+## Aide a la declaration
+
+Onglet Saisie -> Ma declaration Pajemploi. Les valeurs a saisir dans le
+formulaire, dans son ordre : periode, jours d'activite, heures normales
+arrondies a l'entier, heures complementaires, heures majorees, salaire net,
+indemnites d'entretien et de repas. Un appui sur une ligne copie la valeur.
+
+## Heures complementaires automatiques
+
+Carte Heures du mois -> bouton Reprendre. Reporte les heures complementaires
+relevees au calendrier, et les heures majorees qui depassent la mensualisation.
+Les heures majorees prevues au contrat sont deja payees par la mensualisation :
+seules celles effectuees en plus sont reportees.
+
+## Sauvegarde
+
+Dossier salariee -> Sauvegarde des donnees -> Sauvegarder hors du telephone.
+Envoie la sauvegarde complete vers Drive, la boite mail ou toute application de
+partage. La date de la derniere sauvegarde est affichee, une alerte remonte
+apres 45 jours, et un rappel mensuel peut etre programme le lendemain du
+versement.
+
+Les fiches ne vivent que sur l'appareil : sans copie, un telephone perdu ou
+reinitialise emporte tout l'historique.
+
+## Attestations
+
+Dossier salariee -> Attestations. Deux documents A4, partages comme la fiche :
+
+- **Attestation d'emploi** : identites, date d'embauche, enfant accueilli, duree
+  contractuelle et salaire mensualise.
+- **Attestation de salaire** : les N derniers mois declares, mois par mois, avec
+  le total et la moyenne mensuelle.
+
+Ce sont des attestations sur l'honneur, pour un dossier de location ou de
+credit. Elles ne remplacent pas l'attestation employeur destinee a France
+Travail, qui se genere depuis Pajemploi en fin de contrat.
+
+## Fin de contrat
+
+Dossier salariee -> Fin de contrat. L'application additionne ce qu'elle sait de
+facon certaine : anciennete, total des salaires bruts et nets sur toute la duree
+du contrat, indemnites versees, conges acquis non pris et leur indemnite
+compensatrice.
+
+**Elle ne tranche pas sur l'indemnite de rupture.** Les sources se contredisent :
+plusieurs retiennent le 1/80e des salaires bruts issu de l'ancienne convention
+des assistants maternels, une autre le 1/120e des nets depuis la convention des
+particuliers employeurs entree en vigueur en 2022. L'ecart est important.
+L'application affiche les deux montants et renvoie vers le Relais Petite Enfance,
+gratuit, pour confirmer la formule applicable au contrat.
+
+L'ecran rappelle aussi ce qui reste manuel : notification ecrite, preavis,
+regularisation du dernier mois, attestation France Travail via Pajemploi,
+certificat de travail et recu pour solde de tout compte.
+
+## Recherche et graphique
+
+Un champ de recherche filtre la liste des mois dans le tiroir, par nom de mois,
+annee ou prenom. Le bilan annuel affiche douze barres, une par mois, pour lire
+l'allure de l'annee d'un coup d'oeil.

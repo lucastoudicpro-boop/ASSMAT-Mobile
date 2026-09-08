@@ -248,6 +248,19 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
 .brand b{display:block;font-size:16px;color:#fff}
 .brand span{font-size:11.5px;color:#8aa8a2}
 .sidelabel{font-size:10.5px;letter-spacing:.8px;color:#8aa8a2;padding:0 4px;text-transform:uppercase}
+#rechercheFiche{
+  background:transparent;border:1px solid #2e5b54;color:#e6efec;
+  border-radius:10px;padding:9px 12px;font-size:14px;min-height:40px;margin-bottom:6px;
+}
+#rechercheFiche::placeholder{color:#7f9a94}
+#rechercheFiche:focus{outline:2px solid var(--acc);outline-offset:-1px}
+#barreEnfants{display:flex;gap:6px;overflow-x:auto;padding:0 2px 2px;scrollbar-width:none}
+#barreEnfants::-webkit-scrollbar{display:none}
+#barreEnfants button{
+  flex:0 0 auto;border:1px solid #2e5b54;background:transparent;color:#cfe3de;
+  border-radius:18px;padding:8px 14px;font:600 12.5px system-ui;cursor:pointer;min-height:38px;
+}
+#barreEnfants button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 #ficheList{list-style:none;margin:0;padding:0;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
 .fiche-item{padding:11px 10px;border-radius:9px;border-left:3px solid transparent;cursor:pointer}
 .fiche-item.active{background:var(--side2);border-left-color:var(--acc)}
@@ -462,6 +475,21 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
 .resume-l span{color:var(--mut)}
 .resume-l b{font-variant-numeric:tabular-nums;color:var(--miel)}
 
+.ligne-copie{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  border:0;background:transparent;padding:11px 0;cursor:pointer;
+  border-bottom:1px solid var(--line);color:var(--txt);font:inherit;
+}
+.ligne-copie:last-child{border-bottom:0}
+.ligne-copie span{flex:1;font-size:13px;color:var(--mut)}
+.ligne-copie b{font-size:14px;font-variant-numeric:tabular-nums}
+.ligne-copie svg{
+  width:16px;height:16px;flex:0 0 auto;fill:none;stroke:var(--bord);
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+}
+.ligne-copie.copie b{color:var(--acc)}
+.ligne-copie.copie svg{stroke:var(--acc)}
+
 .avenants{list-style:none;margin:0 0 12px;padding:0}
 .avenants li{
   display:flex;align-items:center;gap:10px;padding:11px 2px;
@@ -474,11 +502,32 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
   margin-left:auto;border:0;background:transparent;color:var(--danger);
   cursor:pointer;padding:8px;border-radius:8px;
 }
+.avenants .choisir{
+  margin-left:auto;background:var(--acc-doux);color:var(--acc);
+  border-radius:8px;padding:7px 12px;font:600 12px system-ui;min-height:34px;
+}
+.avenants .retirer{margin-left:6px}
+.avenants em{margin-left:auto;font-style:normal;font-size:12px;color:var(--acc);font-weight:600}
 .avenants button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .avenants .vide{color:var(--mut);font-size:13px;padding:10px 2px}
 
 .jauge{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin:12px 0 6px}
 .jauge i{display:block;height:100%;background:var(--acc);border-radius:4px}
+
+.courbe{width:100%;height:auto;display:block;margin:10px 0 2px}
+.courbe rect{fill:var(--acc);opacity:.85}
+.courbe text{font:9px system-ui;fill:var(--mut)}
+.courbe-legende{display:flex;justify-content:space-between;font-size:11px;color:var(--mut)}
+
+.piste{border-left:3px solid var(--line);padding-left:14px;margin:16px 0 4px}
+.piste h4{margin:0 0 3px;font-size:13.5px}
+.piste p{margin:0 0 14px;font-size:12.5px;color:var(--mut);line-height:1.45}
+.piste b{color:var(--txt)}
+.avertissement{
+  background:#fdf3e7;border-radius:12px;padding:12px 14px;margin:16px 0 0;
+  font-size:12.5px;line-height:1.45;color:#7a4a10;
+}
+html[data-theme="sombre"] .avertissement{background:#33280f;color:#e8c48a}
 
 /* ---------- Notifications ---------- */
 #btnNotif{position:relative}
@@ -533,8 +582,8 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
 /* ---------- Dossier ---------- */
 .ds{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
 .ds:last-child{border-bottom:0}
-.ds span{color:var(--mut);flex:0 0 auto}
-.ds b{text-align:right;min-width:0;word-break:break-word}
+.ds span{color:var(--mut);flex:1 1 auto;min-width:0}
+.ds b{text-align:right;flex:0 0 auto;white-space:nowrap}
 
 /* ---------- Toast ---------- */
 #toast{
@@ -754,6 +803,10 @@ html[data-theme="sombre"] #toast button{background:#33514a}
       <div class="rrow"><span class="rlab">H. complémentaires contractuelles</span><span class="rin"><input data-bind="activite.hc1" inputmode="decimal"> h</span><b class="ramt" id="o_rHc1">0,00 €</b></div>
       <div class="rrow"><span class="rlab">H. complémentaires non contractuelles</span><span class="rin"><input data-bind="activite.hc2" inputmode="decimal"> h</span><b class="ramt" id="o_rHc2">0,00 €</b></div>
       <div class="rrow"><span class="rlab">H. majorées (au-delà de 45 h/sem)</span><span class="rin"><input data-bind="activite.hMaj" inputmode="decimal"> h</span><b class="ramt" id="o_rMaj">0,00 €</b></div>
+      <div class="rrow sub">
+        <span class="rlab" style="font-size:12px;color:var(--mut)">Depuis le calendrier : <b id="o_sugHc">0</b> h complémentaires, <b id="o_sugMaj">0</b> h majorées au-delà de la mensualisation</span>
+        <span class="rauto"><button id="heuresApply" class="btn-mini">Reprendre</button></span>
+      </div>
       <div class="rrow"><span class="rlab">Accueil occasionnel</span><span class="rin"><input data-bind="activite.occH" inputmode="decimal"> h × <input data-bind="activite.occT" inputmode="decimal"> €</span><b class="ramt" id="o_rOcc">0,00 €</b></div>
       <div class="rrow"><span class="rlab">Déduction des absences</span><span class="rin"><input data-bind="activite.deduction" inputmode="decimal"> €</span><b class="ramt">−</b></div>
       <div class="rrow sub">
@@ -824,6 +877,15 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   </details>
 
   <details class="card">
+    <summary><svg class="ico"><use href="#i-lien"/></svg><span class="ttl">Ma déclaration Pajemploi</span></summary>
+    <div class="body">
+      <div id="declaration"></div>
+      <button class="btn btn-primary btn-block" style="margin-top:12px" data-lien="https://www.pajemploi.urssaf.fr/">Ouvrir Pajemploi</button>
+      <p class="hint">Les valeurs à saisir dans le formulaire, dans l'ordre. Appuie sur une ligne pour la copier. La déclaration se fait du 1er au 5 du mois suivant.</p>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-conges"/></svg><span class="ttl">Congés &amp; paiement</span></summary>
     <div class="body">
       <div class="two">
@@ -873,6 +935,15 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   </details>
 
   <details class="card">
+    <summary><svg class="ico"><use href="#i-gens"/></svg><span class="ttl">Enfants accueillis</span></summary>
+    <div class="body">
+      <ul id="listeEnfants" class="avenants"></ul>
+      <button id="btnAjoutEnfant" class="btn btn-ghost btn-block">Ajouter un enfant</button>
+      <p class="hint">Chaque enfant a ses propres fiches mensuelles. Depuis janvier 2026, Pajemploi demande une déclaration distincte par enfant accueilli, même chez la même assistante maternelle.</p>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-planning"/></svg><span class="ttl">Planning type</span></summary>
     <div class="body">
       <div class="plan">
@@ -891,6 +962,28 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   <details class="card">
     <summary><svg class="ico"><use href="#i-contrat"/></svg><span class="ttl">Contrat en cours</span></summary>
     <div class="body"><div id="dosContrat"></div></div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-doc"/></svg><span class="ttl">Attestations</span></summary>
+    <div class="body">
+      <button id="btnAttEmploi" class="btn btn-ghost btn-block">Attestation d'emploi</button>
+      <label class="field"><span>Attestation de salaire sur (mois)</span><input data-profil="attestation.mois" inputmode="numeric" placeholder="3"></label>
+      <button id="btnAttSalaire" class="btn btn-ghost btn-block">Attestation de salaire</button>
+      <p class="hint">Documents sur l'honneur, utiles pour un dossier de location ou de crédit. Ce ne sont pas les attestations officielles de fin de contrat destinées à France Travail : celles-là se génèrent depuis Pajemploi.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-interdit"/></svg><span class="ttl">Fin de contrat</span></summary>
+    <div class="body">
+      <div class="two">
+        <label class="field"><span>Date d'embauche</span><input data-profil="salarie.dateEmbauche" placeholder="jj/mm/aaaa"></label>
+        <label class="field"><span>Date de fin envisagée</span><input data-profil="fin.date" placeholder="jj/mm/aaaa"></label>
+      </div>
+      <button id="btnFinCalcul" class="btn btn-ghost btn-block">Calculer le solde de tout compte</button>
+      <div id="finResultat"></div>
+    </div>
   </details>
 
   <details class="card">
@@ -1013,7 +1106,7 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">0.8.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">0.8.1</b></div>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
     </div>
@@ -1022,6 +1115,9 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   <details class="card">
     <summary><svg class="ico"><use href="#i-sauve"/></svg><span class="ttl">Sauvegarde des données</span></summary>
     <div class="body">
+      <div id="sauvegardeEtat" class="ds"><span>Dernière sauvegarde</span><b>—</b></div>
+      <button id="btnSauvegarde" class="btn btn-primary btn-block" style="margin-top:12px">Sauvegarder hors du téléphone</button>
+      <label class="check"><input type="checkbox" data-profil="sauvegarde.rappel"><span>Me le rappeler chaque mois</span></label>
       <button id="btnExportJson" class="btn btn-ghost btn-block">Exporter toutes les fiches (.json)</button>
       <button id="btnImportJson" class="btn btn-ghost btn-block">Importer un fichier .json</button>
       <input type="file" id="fileJson" accept="application/json,.json" hidden>
@@ -1054,8 +1150,10 @@ html[data-theme="sombre"] #toast button{background:#33514a}
     <div><b>AssMat+</b><span>Salaire assistante maternelle</span></div>
     <button id="btnFermer" class="iconbtn" aria-label="Fermer">✕</button>
   </div>
+  <div id="barreEnfants" hidden></div>
   <button id="btnNouveau" class="btn btn-primary btn-block"><svg class="ico"><use href="#i-plus"/></svg>Nouveau mois</button>
   <div class="sidelabel">Fiches enregistrées</div>
+  <input id="rechercheFiche" placeholder="Rechercher un mois" autocomplete="off">
   <ul id="ficheList"></ul>
   <div class="sidefoot">
     <div class="side-hint">Sauvegarde automatique</div>
@@ -1482,11 +1580,13 @@ const Store = (() => {
 const API = {
   async listFiches() {
     const o = (await Store.all()).fiches;
-    return Object.keys(o).sort().reverse().map(m => {
-      let solde = 0, enfant = '';
-      try { solde = F.compute(F.normalizeFiche(o[m])).solde; enfant = (o[m].enfant || {}).prenom || ''; } catch (e) {}
-      return { mois: m, enfant, solde };
-    });
+    return Object.keys(o)
+      .sort((a, b) => b.localeCompare(a))
+      .map(cle => {
+        let solde = 0, enfant = '';
+        try { solde = F.compute(F.normalizeFiche(o[cle])).solde; enfant = (o[cle].enfant || {}).prenom || ''; } catch (e) {}
+        return { cle, mois: moisDe(cle), enfantId: enfantDe(cle), enfant, solde };
+      });
   },
   async loadFiche(m) { return (await Store.all()).fiches[m] || null; },
   async saveFiche(m, d) { (await Store.all()).fiches[m] = d; await Store.flush(); return true; },
@@ -1502,6 +1602,115 @@ const API = {
 };
 
 let cur = null, moisOnDisk = null;
+let enfantActif = 'e1';
+
+/* Le premier enfant garde la clé « AAAA-MM » : les fiches déjà enregistrées
+   restent lisibles telles quelles, aucune migration n'est nécessaire. */
+function cleFiche(mois, id) {
+  const e = id || enfantActif;
+  return e === 'e1' ? mois : mois + '#' + e;
+}
+function moisDe(cle) { return String(cle).split('#')[0]; }
+function enfantDe(cle) { const p = String(cle).split('#'); return p[1] || 'e1'; }
+
+function enfants() {
+  const l = profil.enfants || [];
+  return l.length ? l : [{ id: 'e1', prenom: '', nom: '' }];
+}
+function enfantCourant() {
+  return enfants().find(e => e.id === enfantActif) || enfants()[0];
+}
+function nomEnfant(id) {
+  const e = enfants().find(x => x.id === id);
+  if (!e) return '';
+  return (e.prenom || e.nom || '').trim();
+}
+
+/* Au premier lancement, l'enfant de la fiche ouverte devient le premier enfant. */
+async function initEnfants() {
+  if ((profil.enfants || []).length) {
+    if (!enfants().some(e => e.id === enfantActif)) enfantActif = enfants()[0].id;
+    return;
+  }
+  const base = cur ? cur.enfant : {};
+  profil.enfants = [{ id: 'e1', prenom: (base && base.prenom) || '', nom: (base && base.nom) || '',
+                      naissance: (base && base.naissance) || '' }];
+  await doProfilSave();
+}
+
+/* Recopie prénom, nom et date de naissance de la fiche vers la liste des
+   enfants : le sélecteur affiche un prénom plutôt qu'un identifiant. */
+function synchroniserEnfant() {
+  const l = enfants().slice();
+  const i = l.findIndex(e => e.id === enfantActif);
+  if (i < 0) return;
+  const avant = l[i].prenom + '|' + l[i].nom;
+  l[i] = { ...l[i], prenom: cur.enfant.prenom || '', nom: cur.enfant.nom || '', naissance: cur.enfant.naissance || '' };
+  if (avant === l[i].prenom + '|' + l[i].nom) return;
+  profil.enfants = l;
+  scheduleProfilSave();
+  clearTimeout(enfantTimer);
+  enfantTimer = setTimeout(renderEnfants, 400);
+}
+let enfantTimer = null;
+
+async function ajouterEnfant() {
+  const l = enfants().slice();
+  let n = 2;
+  while (l.some(e => e.id === 'e' + n)) n++;
+  l.push({ id: 'e' + n, prenom: '', nom: '', naissance: '' });
+  profil.enfants = l;
+  await doProfilSave();
+  renderEnfants();
+  toast('Enfant ajouté : renseigne son prénom, puis crée sa première fiche');
+}
+
+async function retirerEnfant(id) {
+  if (id === 'e1') { toast('Le premier enfant ne peut pas être retiré'); return; }
+  const nom = nomEnfant(id) || 'cet enfant';
+  if (!confirm('Retirer ' + nom + ' ? Ses fiches sont conservées mais ne seront plus accessibles.')) return;
+  profil.enfants = enfants().filter(e => e.id !== id);
+  if (enfantActif === id) enfantActif = 'e1';
+  await doProfilSave();
+  renderEnfants();
+  await changerEnfant('e1');
+}
+
+async function changerEnfant(id) {
+  if (cur && saveTimer) await doSave();
+  enfantActif = id;
+  profil.enfantActif = id;
+  scheduleProfilSave();
+  const list = await API.listFiches();
+  const sien = list.filter(f => f.enfantId === id);
+  if (sien.length) await openFiche(sien[0].cle);
+  else await nouveauMois();
+  await refreshList();
+  renderEnfants();
+}
+
+function renderEnfants() {
+  const box = $('#listeEnfants');
+  if (box) {
+    box.innerHTML = enfants().map(e => `<li>
+      <span><b>${esc(nomEnfant(e.id) || 'Enfant sans prénom')}</b><small>${esc(e.id === 'e1' ? 'Premier enfant' : 'Fiches séparées')}</small></span>
+      ${e.id === enfantActif ? '<em>affiché</em>' : `<button class="choisir" data-enfant="${e.id}">Afficher</button>`}
+      ${e.id !== 'e1' ? `<button class="retirer" data-retirer="${e.id}" aria-label="Retirer"><svg><use href="#i-poubelle"/></svg></button>` : ''}
+    </li>`).join('');
+    $$('#listeEnfants [data-enfant]').forEach(b => { b.onclick = () => changerEnfant(b.dataset.enfant); });
+    $$('#listeEnfants [data-retirer]').forEach(b => { b.onclick = () => retirerEnfant(b.dataset.retirer); });
+  }
+  const bar = $('#barreEnfants');
+  if (bar) {
+    const multi = enfants().length > 1;
+    bar.hidden = !multi;
+    if (multi) {
+      bar.innerHTML = enfants().map(e =>
+        `<button class="${e.id === enfantActif ? 'on' : ''}" data-enfant2="${e.id}">${esc(nomEnfant(e.id) || e.id)}</button>`).join('');
+      $$('#barreEnfants [data-enfant2]').forEach(b => { b.onclick = () => { closeDrawer(); changerEnfant(b.dataset.enfant2); }; });
+    }
+  }
+}
 let saveTimer = null, previewTimer = null, profilTimer = null;
 let profil = {};
 let vue = 'saisie';
@@ -1753,14 +1962,38 @@ function recalc() {
   set('t_brut', eur(c.brut)); set('t_net', eur(c.netE)); set('t_ti', eur(c.ti));
   set('t_cal', F.f2(c.totP) + ' h');
   set('s_solde', eur(c.solde));
+  renderDeclaration();
   if (vue === 'accueil') clearTimeout(accueilTimer), accueilTimer = setTimeout(renderAccueil, 250);
   const sug = $('#dedSug');
   if (c.dedSug != null) { sug.hidden = false; $('#dedSugVal').textContent = eur(c.dedSug); }
   else sug.hidden = true;
   set('o_jours', String(joursAccueil()));
+  const hs = heuresSupplementaires();
+  set('o_sugHc', F.qn(hs.hc)); set('o_sugMaj', F.qn(hs.maj));
   const hj = hJourContrat();
   $('[data-bind="calAide.hJour"]').placeholder = hj > 0 ? F.qn(hj) + ' (contrat)' : '';
   schedulePreview();
+}
+
+/* Heures relevées au calendrier qui dépassent ce que paie la mensualisation.
+   Les heures majorées prévues au contrat sont déjà payées : seules celles
+   effectuées en plus doivent être reportées. */
+function heuresSupplementaires() {
+  const c = F.compute(cur);
+  return { hc: c.totC, maj: Math.max(0, c.totM - c.hmM) };
+}
+
+function reprendreHeures() {
+  const h = heuresSupplementaires();
+  if (h.hc <= 0 && h.maj <= 0) { toast('Rien à reporter : le calendrier ne dépasse pas la mensualisation'); return; }
+  cur.activite.hc2 = h.hc > 0 ? F.qn(h.hc) : '';
+  cur.activite.hMaj = h.maj > 0 ? F.qn(h.maj) : '';
+  for (const k of ['hc2', 'hMaj']) {
+    const el = $('[data-bind="activite.' + k + '"]');
+    if (el) el.value = cur.activite[k];
+  }
+  recalc(); scheduleSave();
+  toast('Reporté : ' + F.qn(h.hc) + ' h complémentaires, ' + F.qn(h.maj) + ' h majorées');
 }
 
 /* Nombre de jours du mois où une présence est saisie. */
@@ -1804,32 +2037,37 @@ function scheduleSave() { setStatus('saving'); clearTimeout(saveTimer); saveTime
 async function doSave() {
   clearTimeout(saveTimer); saveTimer = null;
   if (!cur) return;
-  await API.saveFiche(cur.mois, cur);
-  moisOnDisk = cur.mois;
+  await API.saveFiche(cleFiche(cur.mois), cur);
+  moisOnDisk = cleFiche(cur.mois);
   setStatus('ok');
   refreshList();
 }
 
 /* ---------------- Liste des fiches ---------------- */
 async function refreshList() {
-  const list = await API.listFiches();
+  const q = (($('#rechercheFiche') || {}).value || '').trim().toLowerCase();
+  const list = (await API.listFiches())
+    .filter(f => f.enfantId === enfantActif)
+    .filter(f => !q || (F.labelMois(f.mois) + ' ' + f.mois + ' ' + (f.enfant || '')).toLowerCase().includes(q));
   const ul = $('#ficheList');
   ul.innerHTML = '';
   for (const it of list) {
     const li = document.createElement('li');
-    li.className = 'fiche-item' + (cur && it.mois === cur.mois ? ' active' : '');
+    li.className = 'fiche-item' + (cur && it.cle === cleFiche(cur.mois) ? ' active' : '');
     li.innerHTML = `<div class="fi-mois">${esc(F.labelMois(it.mois))}</div>
       <div class="fi-sub">${esc(it.enfant || '')}${it.enfant ? ' · ' : ''}${F.f2(it.solde)} €</div>`;
-    li.onclick = () => { openFiche(it.mois); closeDrawer(); };
+    li.onclick = () => { openFiche(it.cle); closeDrawer(); };
     ul.appendChild(li);
   }
+  renderEnfants();
 }
 
-async function openFiche(m) {
+async function openFiche(cle) {
   if (cur && saveTimer) await doSave();
-  const d = await API.loadFiche(m);
+  const d = await API.loadFiche(cle);
   if (!d) return;
-  cur = F.normalizeFiche(d); moisOnDisk = m;
+  enfantActif = enfantDe(cle);
+  cur = F.normalizeFiche(d); moisOnDisk = cle;
   showView(vue === 'accueil' ? 'accueil' : 'saisie');
   fillForm();
   window.scrollTo(0, 0);
@@ -1838,12 +2076,12 @@ async function openFiche(m) {
 
 async function nouveauMois() {
   if (cur && saveTimer) await doSave();
-  const list = await API.listFiches();
+  const list = (await API.listFiches()).filter(f => f.enfantId === enfantActif);
   let nf;
   if (list.length) {
-    const base = F.normalizeFiche(await API.loadFiche(list[0].mois));
+    const base = F.normalizeFiche(await API.loadFiche(list[0].cle));
     let m = F.nextMois(base.mois);
-    while (await API.existsFiche(m)) m = F.nextMois(m);
+    while (await API.existsFiche(cleFiche(m))) m = F.nextMois(m);
     nf = F.emptyFiche(m);
     nf.salarie = { ...base.salarie };
     nf.employeur = { ...base.employeur };
@@ -1861,10 +2099,12 @@ async function nouveauMois() {
     const now = new Date();
     nf = F.emptyFiche(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
   }
+  const e = enfantCourant();
+  if (e && (e.prenom || e.nom)) nf.enfant = { nom: e.nom || '', prenom: e.prenom || '', naissance: e.naissance || '' };
   const per = F.periodeFromMois(nf.mois);
   nf.periodeDu = per.du; nf.periodeAu = per.au;
-  cur = nf; moisOnDisk = nf.mois;
-  await API.saveFiche(nf.mois, nf);
+  cur = nf; moisOnDisk = cleFiche(nf.mois);
+  await API.saveFiche(moisOnDisk, nf);
   showView('saisie');
   fillForm();
   window.scrollTo(0, 0);
@@ -1876,10 +2116,10 @@ async function supprimer() {
   if (!cur) return;
   if (!confirm('Supprimer la fiche ' + deMois(cur.mois) + ' ?')) return;
   clearTimeout(saveTimer); saveTimer = null;
-  await API.deleteFiche(cur.mois);
+  await API.deleteFiche(cleFiche(cur.mois));
   cur = null; moisOnDisk = null;
-  const list = await API.listFiches();
-  if (list.length) await openFiche(list[0].mois);
+  const list = (await API.listFiches()).filter(f => f.enfantId === enfantActif);
+  if (list.length) await openFiche(list[0].cle);
   else await nouveauMois();
 }
 
@@ -1945,6 +2185,44 @@ function ouvrirLien(url) {
   const B = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
   if (B) { B.open({ url }); return; }
   window.open(url, '_blank', 'noopener');
+}
+
+/* ---------------- Aide à la déclaration ----------------
+   Reprend les valeurs telles que Pajemploi les attend : heures entières
+   arrondies pour la déclaration, salaire net, indemnités. */
+function renderDeclaration() {
+  const box = $('#declaration');
+  if (!box) return;
+  const c = F.compute(cur);
+  const per = F.periodeFromMois(cur.mois);
+  const lignes = [
+    ['Période du', cur.periodeDu || per.du],
+    ['au', cur.periodeAu || per.au],
+    ['Nombre de jours d\u2019activité', cur.conges.joursTravailles || String(joursAccueil())],
+    ['Nombre d\u2019heures normales', String(c.hnDecl)],
+    ['Nombre d\u2019heures complémentaires', F.qn(F.num(cur.activite.hc1) + F.num(cur.activite.hc2))],
+    ['Nombre d\u2019heures majorées', F.qn(c.hmDecl + F.num(cur.activite.hMaj))],
+    ['Salaire net', F.f2(cur.net.netPaje)],
+    ['Indemnités d\u2019entretien', F.f2(c.te)],
+    ['Indemnités de repas', F.f2(c.tn)]
+  ];
+  box.innerHTML = lignes.map(([l, v]) =>
+    `<button class="ligne-copie" data-copie="${esc(v)}"><span>${esc(l)}</span><b>${esc(v || '—')}</b>
+      <svg><use href="#i-sauve"/></svg></button>`).join('');
+  $$('#declaration [data-copie]').forEach(b => { b.onclick = () => copier(b.dataset.copie, b); });
+}
+
+async function copier(txt, bouton) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(txt);
+    else {
+      const t = document.createElement('textarea');
+      t.value = txt; t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+    }
+    if (bouton) { bouton.classList.add('copie'); setTimeout(() => bouton.classList.remove('copie'), 900); }
+    toast('Copié : ' + txt);
+  } catch (e) { toast('Copie impossible sur cet appareil'); }
 }
 
 /* ---------------- Aperçu A4 ---------------- */
@@ -2146,8 +2424,8 @@ async function programmerRappels() {
     for (let k = 0; k < 6; k++) {
       const ref = new Date(maintenant.getFullYear(), maintenant.getMonth() + k, 1);
       const mois = ref.getFullYear() + '-' + String(ref.getMonth() + 1).padStart(2, '0');
-      const f = fiches[mois];
-      if (f && f.envoyee) continue;
+      const desMois = Object.keys(fiches).filter(c => moisDe(c) === mois);
+      if (desMois.length && desMois.every(c => fiches[c].envoyee)) continue;
       const nom = F.labelMois(mois);
 
       const vers = dateVersement(mois);
@@ -2165,6 +2443,15 @@ async function programmerRappels() {
         body: nom + ' est à verser, et la fiche n\u2019est pas encore partie.',
         schedule: { at: vers.toISOString() }
       });
+
+      if ((profil.sauvegarde || {}).rappel) {
+        const sauv = new Date(vers.getTime() + 86400000);
+        if (sauv > maintenant) liste.push({
+          id: id++, title: 'Sauvegarde',
+          body: 'Pense à mettre tes fiches à l\u2019abri hors du téléphone.',
+          schedule: { at: sauv.toISOString() }
+        });
+      }
 
       // la declaration Pajemploi se fait du 1er au 5 du mois suivant
       const decl = new Date(ref.getFullYear(), ref.getMonth() + 1, 1, heure, 0, 0);
@@ -2239,7 +2526,7 @@ async function envoyerAbsence() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '0.8.0';
+const VERSION = '0.8.1';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -2474,6 +2761,18 @@ function alertes() {
     detail: fer.join(', ') + '.'
   });
 
+  const jSauv = joursDepuisSauvegarde();
+  if (jSauv === null) out.push({
+    ton: 'a', titre: 'Aucune sauvegarde',
+    detail: 'Tes fiches n\u2019existent que sur ce téléphone. Perdu ou réinitialisé, tout disparaît.',
+    action: 'Sauvegarder', fn: () => sauvegarder()
+  });
+  else if (jSauv > 45) out.push({
+    ton: 'i', titre: 'Sauvegarde ancienne',
+    detail: 'La dernière remonte à ' + jSauv + ' jours.',
+    action: 'Sauvegarder', fn: () => sauvegarder()
+  });
+
   if (derniereMaj) out.push({
     ton: 'i', titre: 'Version ' + derniereMaj.tag + ' disponible',
     detail: 'Tu utilises la ' + VERSION + '.',
@@ -2630,7 +2929,7 @@ async function renderAccueil() {
 
   $('#accueil').innerHTML = `
     <div id="hero">
-      <div class="mois">${esc(F.labelMois(cur.mois))}</div>
+      <div class="mois">${esc(F.labelMois(cur.mois))}${enfants().length > 1 ? ' · ' + esc(nomEnfant(enfantActif) || enfantActif) : ''}</div>
       <div class="montant">${eur(c.solde)}</div>
       <div class="sous">${versement || 'à verser à ' + esc(cur.salarie.nom || 'la salariée')}</div>
       <div class="actions">
@@ -2693,6 +2992,196 @@ async function renderAccueil() {
   $$('#accueil [data-lien]').forEach(b => { b.onclick = () => ouvrirLien(b.dataset.lien); });
 }
 
+/* ---------------- Attestations ----------------
+   Documents sur l'honneur. Les attestations officielles de fin de contrat
+   destinées à France Travail se génèrent depuis Pajemploi. */
+function gabaritAttestation(titre, corps, pied) {
+  const d = new Date().toLocaleDateString('fr-FR');
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${esc(titre)}</title>
+<style>
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:A4;margin:0}
+html,body{margin:0;padding:0;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#17322e}
+.page{width:210mm;min-height:297mm;padding:22mm 20mm}
+h1{font-size:17px;margin:0 0 26px;text-transform:uppercase;letter-spacing:.4px}
+p{font-size:12.5px;line-height:1.75;margin:0 0 14px}
+b{color:#000}
+table{width:100%;border-collapse:collapse;margin:18px 0}
+td,th{border-bottom:1px solid #dce8e4;padding:7px 4px;font-size:12px;text-align:right}
+th{color:#5f7a75;font-weight:500;font-size:11px}
+td:first-child,th:first-child{text-align:left;text-transform:capitalize}
+tr.tot td{font-weight:700;border-top:2px solid #17322e;border-bottom:0}
+.sign{margin-top:46px;font-size:12.5px;line-height:1.8}
+.pied{margin-top:34px;font-size:9.5px;color:#9db3ae;line-height:1.5}
+</style></head><body><div class="page">
+<h1>${esc(titre)}</h1>
+${corps}
+<div class="sign">Fait le ${d}<br><br>${esc(cur.employeur.nom || 'L\u2019employeur')}<br>Signature</div>
+<p class="pied">${esc(pied)}</p>
+</div></body></html>`;
+}
+
+function identiteAttestation() {
+  const e = cur.employeur, s = cur.salarie;
+  return `<p>Je soussigné${''} <b>${esc(e.nom || '—')}</b>, demeurant ${esc([e.adresse, e.cpVille].filter(Boolean).join(', ') || '—')},
+  particulier employeur immatriculé sous le numéro Pajemploi ${esc(e.pajemploi || '—')},</p>
+  <p>atteste employer <b>${esc(s.nom || '—')}</b>, demeurant ${esc([s.adresse, s.cpVille].filter(Boolean).join(', ') || '—')},
+  numéro de sécurité sociale ${esc(s.secu || '—')}, en qualité d'assistante maternelle agréée.</p>`;
+}
+
+async function attestationEmploi() {
+  await doSave();
+  const c = F.compute(cur), ct = cur.contrat;
+  const emb = (profil.salarie || {}).dateEmbauche;
+  const enf = [cur.enfant.prenom, cur.enfant.nom].filter(Boolean).join(' ') || '—';
+  const corps = identiteAttestation() + `
+    <p>Ce contrat à durée indéterminée a pris effet le <b>${esc(emb || '—')}</b> et se poursuit à ce jour,
+    pour l'accueil de l'enfant <b>${esc(enf)}</b>.</p>
+    <table><tbody>
+      <tr><td>Durée d'accueil contractuelle</td><td>${F.qn(ct.hnH)} h par semaine</td></tr>
+      <tr><td>Nombre de semaines par période de 12 mois</td><td>${F.qn(ct.hnS)}</td></tr>
+      <tr><td>Salaire mensualisé brut</td><td>${F.f2(c.mensualise)} €</td></tr>
+      <tr><td>Taux horaire brut</td><td>${F.f2(ct.tHn)} €</td></tr>
+    </tbody></table>
+    <p>Cette attestation est délivrée à la demande de l'intéressée pour faire valoir ce que de droit.</p>`;
+  const html = gabaritAttestation('Attestation d\u2019emploi', corps,
+    'Attestation établie sur l\u2019honneur par le particulier employeur. Elle ne remplace pas l\u2019attestation employeur destinée à France Travail, délivrée par Pajemploi en fin de contrat.');
+  await diffuserAttestation(html, 'Attestation emploi - ' + (cur.salarie.nom || 'salariee') + '.pdf');
+}
+
+async function attestationSalaire() {
+  await doSave();
+  const n = Math.min(24, Math.max(1, parseInt((profil.attestation || {}).mois, 10) || 3));
+  const fiches = (await Store.all()).fiches;
+  const cles = Object.keys(fiches)
+    .filter(c => enfantDe(c) === enfantActif)
+    .sort((a, b) => b.localeCompare(a))
+    .slice(0, n)
+    .reverse();
+
+  let net = 0, ind = 0, lignes = '';
+  for (const cle of cles) {
+    const c = F.compute(F.normalizeFiche(fiches[cle]));
+    net += c.netE; ind += c.ti;
+    lignes += `<tr><td>${esc(F.labelMois(moisDe(cle)))}</td><td>${F.f2(c.netE)} €</td><td>${F.f2(c.ti)} €</td><td>${F.f2(c.nap)} €</td></tr>`;
+  }
+
+  const corps = identiteAttestation() + `
+    <p>Les salaires suivants lui ont été versés au cours des ${cles.length} derniers mois déclarés :</p>
+    <table>
+      <thead><tr><th>Mois</th><th>Salaire net</th><th>Indemnités</th><th>Total versé</th></tr></thead>
+      <tbody>${lignes}
+        <tr class="tot"><td>Total</td><td>${F.f2(net)} €</td><td>${F.f2(ind)} €</td><td>${F.f2(net + ind)} €</td></tr>
+      </tbody>
+    </table>
+    <p>Soit une moyenne mensuelle de <b>${F.f2((net + ind) / (cles.length || 1))} €</b>.</p>
+    <p>Cette attestation est délivrée à la demande de l'intéressée pour faire valoir ce que de droit.</p>`;
+  const html = gabaritAttestation('Attestation de salaire', corps,
+    'Montants issus des fiches établies par l\u2019employeur. Les bulletins de salaire officiels sont délivrés par Pajemploi.');
+  await diffuserAttestation(html, 'Attestation salaire - ' + (cur.salarie.nom || 'salariee') + '.pdf');
+}
+
+async function diffuserAttestation(html, nom) {
+  const P = natif();
+  if (P && P.sharePdf) {
+    try { await P.sharePdf({ html, name: nom }); return; }
+    catch (e) { toast('Partage impossible, ouverture de l\u2019impression'); }
+  }
+  imprimerHTML(html, nom);
+}
+
+/* ---------------- Fin de contrat ----------------
+   L'application additionne ce qu'elle sait de façon certaine. Le choix de la
+   formule d'indemnité reste à l'employeur : les sources divergent. */
+async function calculFin() {
+  const box = $('#finResultat');
+  const fiches = (await Store.all()).fiches;
+  const cles = Object.keys(fiches).filter(c => enfantDe(c) === enfantActif).sort();
+
+  let brut = 0, net = 0, indem = 0;
+  for (const cle of cles) {
+    const c = F.compute(F.normalizeFiche(fiches[cle]));
+    brut += c.brut; net += c.netE; indem += c.ti;
+  }
+
+  const emb = dateFR((profil.salarie || {}).dateEmbauche);
+  const fin = dateFR((profil.fin || {}).date) || new Date();
+  const mois = emb ? Math.max(0, Math.round((fin - emb) / 86400000 / 30.44)) : null;
+
+  const cp = await calculConges();
+  const valeurJour = cp.acquis > 0 ? cp.indemnite / cp.acquis : 0;
+  const iccp = cp.restants * valeurJour;
+
+  const ds = (l, v) => `<div class="ds"><span>${esc(l)}</span><b>${esc(v)}</b></div>`;
+
+  box.innerHTML = `
+    <div class="piste">
+      <h4>Ce que l'application sait de façon certaine</h4>
+      <p>Calculé sur les ${cles.length} fiche${cles.length > 1 ? 's' : ''} enregistrée${cles.length > 1 ? 's' : ''} pour ${esc(nomEnfant(enfantActif) || 'cet enfant')}.</p>
+      ${ds('Ancienneté', mois === null ? 'Date d\u2019embauche manquante' : mois + ' mois')}
+      ${ds('Total des salaires bruts', F.f2(brut) + ' €')}
+      ${ds('Total des salaires nets', F.f2(net) + ' €')}
+      ${ds('Indemnités versées, hors salaire', F.f2(indem) + ' €')}
+      ${ds('Congés acquis non pris', F.qn(cp.restants) + ' jours')}
+      ${ds('Indemnité compensatrice de congés payés', F.f2(iccp) + ' €')}
+    </div>
+
+    <div class="piste">
+      <h4>Indemnité de rupture, les deux formules citées</h4>
+      <p>Elle est due lorsque la rupture vient de l'employeur et que l'ancienneté atteint neuf mois.</p>
+      ${ds('1/80e des salaires bruts', F.f2(brut / 80) + ' €')}
+      ${ds('1/120e des salaires nets', F.f2(net / 120) + ' €')}
+    </div>
+
+    <div class="avertissement">
+      Je ne tranche pas entre ces deux formules : mes sources se contredisent.
+      Plusieurs retiennent le 1/80e des bruts issu de l'ancienne convention des
+      assistants maternels, une autre le 1/120e des nets depuis la convention des
+      particuliers employeurs entrée en vigueur en 2022. L'écart est important.
+      Fais confirmer la formule applicable à ton contrat par ton Relais Petite
+      Enfance, c'est gratuit, avant de verser quoi que ce soit.
+    </div>
+
+    <div class="piste" style="margin-top:16px">
+      <h4>Ce qui reste à faire toi-même</h4>
+      <p>Notifier la rupture par écrit, en recommandé ou en main propre contre signature.
+      Respecter le préavis prévu par la convention selon l'ancienneté.
+      Régulariser le dernier mois au prorata.
+      Générer l'attestation employeur destinée à France Travail depuis Pajemploi.
+      Remettre le certificat de travail et le reçu pour solde de tout compte.</p>
+    </div>
+
+    <button class="btn btn-ghost btn-block" data-lien="https://www.pajemploi.urssaf.fr/">Ouvrir Pajemploi</button>`;
+
+  $$('#finResultat [data-lien]').forEach(b => { b.onclick = () => ouvrirLien(b.dataset.lien); });
+}
+
+/* Douze barres, une par mois : l'allure de l'année se lit d'un coup d'œil. */
+function courbeAnnee(cles, toutes, an) {
+  const MOIS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+  const parMois = Array(12).fill(0);
+  for (const cle of cles) {
+    const m = parseInt(moisDe(cle).slice(5), 10) - 1;
+    try { parMois[m] += F.compute(F.normalizeFiche(toutes[cle])).solde; } catch (e) {}
+  }
+  const max = Math.max(...parMois, 1);
+  if (!parMois.some(v => v > 0)) return '';
+
+  // coordonnées en pixels : le texte garde ses proportions à toute largeur
+  const LARG = 348, H = 74, ecart = LARG / 12;
+  const barres = parMois.map((v, i) => {
+    const h = Math.max(v > 0 ? 3 : 0, v / max * H);
+    return `<rect x="${(i * ecart + ecart * 0.22).toFixed(1)}" y="${(H - h).toFixed(1)}"
+      width="${(ecart * 0.56).toFixed(1)}" height="${h.toFixed(1)}" rx="3"
+      opacity="${v > 0 ? 0.85 : 0.16}"></rect>`;
+  }).join('');
+  const etiq = MOIS.map((m, i) =>
+    `<text x="${(i * ecart + ecart / 2).toFixed(1)}" y="${H + 13}" text-anchor="middle">${m}</text>`).join('');
+
+  return `<div class="courbe-legende"><span>Versé par mois</span><span>maximum ${F.f2(max)} €</span></div>
+    <svg class="courbe" viewBox="0 0 ${LARG} ${H + 18}" role="img" aria-label="Montants versés par mois">${barres}${etiq}</svg>`;
+}
+
 /* ---------------- Récapitulatif annuel ---------------- */
 async function renderAnnuel() {
   const toutes = (await Store.all()).fiches;
@@ -2705,10 +3194,11 @@ async function renderAnnuel() {
   }
 
   const annees = {};
-  for (const m of mois) {
-    const an = m.slice(0, 4);
-    (annees[an] = annees[an] || []).push(m);
+  for (const cle of mois) {
+    const an = moisDe(cle).slice(0, 4);
+    (annees[an] = annees[an] || []).push(cle);
   }
+  const plusieurs = enfants().length > 1;
 
   let html = '';
   for (const an of Object.keys(annees).sort().reverse()) {
@@ -2722,7 +3212,8 @@ async function renderAnnuel() {
       if (p) t.paye += c.solde;
       t.hMens += c.hnM + c.hmM;
       t.hReel += c.totP + c.totC + c.totM;
-      lignes += `<tr><td>${esc(F.labelMois(m).replace(' ' + an, ''))}</td>
+      const suffixe = plusieurs ? ' · ' + (nomEnfant(enfantDe(m)) || enfantDe(m)) : '';
+      lignes += `<tr><td>${esc(F.labelMois(moisDe(m)).replace(' ' + an, '') + suffixe)}</td>
         <td>${F.f2(c.brut)}</td><td>${F.f2(c.netE)}</td><td>${F.f2(c.ti)}</td>
         <td>${F.f2(c.solde)}</td><td class="etat">${p ? '✓' : '·'}</td></tr>`;
     }
@@ -2735,6 +3226,8 @@ async function renderAnnuel() {
         </tbody>
       </table>
       <p class="hint">Montants en euros${t.jours > 0 ? ', ' + F.qn(t.jours) + ' jours travaillés déclarés' : ''}. La colonne « Payé » suit ce que tu as marqué comme versé dans chaque fiche.</p>
+
+      ${courbeAnnee(annees[an], toutes, an)}
 
       <div class="fiscal">
         <b>Régularisation</b>
@@ -2756,7 +3249,7 @@ async function renderAnnuel() {
 }
 
 /* ---------------- Dossier salariée ---------------- */
-function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, paiement: {}, conges: {}, contrats: [], seuils: {}, securite: {}, maj: {}, theme: 'clair', ...p }; }
+function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, paiement: {}, conges: {}, contrats: [], seuils: {}, securite: {}, maj: {}, enfants: [], sauvegarde: {}, attestation: {}, fin: {}, theme: 'clair', ...p }; }
 
 const MAIL_SUBJECT_DEFAUT = 'Fiche de salaire — {mois}';
 const MAIL_BODY_DEFAUT = "Bonjour,\n\nVeuillez trouver ci-joint la fiche de calcul du salaire pour l'accueil de {enfant} — {mois}.\n\nCordialement,\n{employeur}";
@@ -2786,6 +3279,7 @@ async function doProfilSave() {
 async function renderDossier() {
   renderAvenants();
   renderConges();
+  majSauvegarde();
   const ds = (label, val) => `<div class="ds"><span>${esc(label)}</span><b>${esc(val || '—')}</b></div>`;
   const s = cur.salarie, e = cur.employeur, en = cur.enfant;
   $('#dosIdent').innerHTML =
@@ -2845,6 +3339,51 @@ async function envoyerMail() {
 }
 
 /* ---------------- Sauvegarde / reprise des données ---------------- */
+/* Envoie la sauvegarde vers Drive, la boîte mail, ce que propose le téléphone.
+   Les données ne vivent que sur l'appareil : sans copie, un téléphone perdu
+   emporte toutes les fiches. */
+async function sauvegarder() {
+  const data = await Store.all();
+  const nom = 'AssMat-sauvegarde-' + new Date().toISOString().slice(0, 10) + '.json';
+  const contenu = JSON.stringify(data, null, 1);
+
+  const P = natif();
+  if (P && P.shareTextFile) {
+    try {
+      await P.shareTextFile({ name: nom, mime: 'application/json', text: contenu });
+      await marquerSauvegarde();
+      return;
+    } catch (e) { toast('Partage impossible : ' + (e.message || e)); return; }
+  }
+  const url = URL.createObjectURL(new Blob([contenu], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nom; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  await marquerSauvegarde();
+}
+
+async function marquerSauvegarde() {
+  profil.sauvegarde = { ...(profil.sauvegarde || {}), dernier: new Date().toISOString() };
+  await doProfilSave();
+  majSauvegarde();
+  majPastille();
+  toast('Sauvegarde effectuée');
+}
+
+function joursDepuisSauvegarde() {
+  const d = (profil.sauvegarde || {}).dernier;
+  if (!d) return null;
+  return Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
+}
+
+function majSauvegarde() {
+  const el = $('#sauvegardeEtat');
+  if (!el) return;
+  const j = joursDepuisSauvegarde();
+  el.querySelector('b').textContent = j === null ? 'Jamais'
+    : j === 0 ? "Aujourd'hui" : 'il y a ' + j + (j > 1 ? ' jours' : ' jour');
+}
+
 async function exportJson() {
   const data = await Store.all();
   const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
@@ -2861,18 +3400,21 @@ async function importJson(file) {
   catch (e) { toast('Fichier illisible : ce n\u2019est pas du JSON'); return; }
   const cible = await Store.all();
   let n = 0;
-  const ajoute = f => {
-    if (f && typeof f === 'object' && /^\d{4}-\d{2}$/.test(f.mois || '')) { cible.fiches[f.mois] = f; n++; }
+  const ajoute = (f, cle) => {
+    if (f && typeof f === 'object' && /^\d{4}-\d{2}$/.test(f.mois || '')) {
+      cible.fiches[cle && String(cle).startsWith(f.mois) ? cle : f.mois] = f; n++;
+    }
   };
-  if (d.fiches) { Object.values(d.fiches).forEach(ajoute); if (d.profil) cible.profil = { ...cible.profil, ...d.profil }; }
-  else if (Array.isArray(d)) d.forEach(ajoute);
+  if (d.fiches) { Object.entries(d.fiches).forEach(([k, v]) => ajoute(v, k)); if (d.profil) cible.profil = { ...cible.profil, ...d.profil }; }
+  else if (Array.isArray(d)) d.forEach(f => ajoute(f));
   else ajoute(d);
   if (!n) { toast('Aucune fiche reconnue dans ce fichier'); return; }
   await Store.flush();
   profil = normalizeProfil(await API.loadProfil());
   fillProfilForm();
   const list = await API.listFiches();
-  await openFiche(list[0].mois);
+  if (list.length) await openFiche(list[0].cle);
+  renderEnfants();
   toast(n + (n > 1 ? ' fiches importées' : ' fiche importée'));
 }
 
@@ -2899,12 +3441,20 @@ document.addEventListener('input', e => {
     if (el.type === 'checkbox') {
       setPath(cur, el.dataset.bind, el.checked);
       if (el.dataset.bind === 'contrat.anneeComplete') applyAnneeComplete();
-    } else setPath(cur, el.dataset.bind, el.value);
+    } else {
+      setPath(cur, el.dataset.bind, el.value);
+      // l'identité saisie dans la fiche nomme l'enfant dans le sélecteur
+      if (el.dataset.bind.startsWith('enfant.')) synchroniserEnfant();
+    }
   } else if (el.dataset.cal) {
     const [i, k] = el.dataset.cal.split(':');
     cur.calendrier[+i][k] = el.value;
   } else if (el.dataset.profil) {
     setPath(profil, el.dataset.profil, el.type === 'checkbox' ? el.checked : el.value);
+    // la même donnée peut apparaître dans deux cartes : garder les champs alignés
+    $$('[data-profil="' + el.dataset.profil + '"]').forEach(autre => {
+      if (autre !== el && autre.value !== el.value) autre.value = el.value;
+    });
     scheduleProfilSave();
     if (el.dataset.profil.startsWith('rappel.') || el.dataset.profil.startsWith('paiement.')) {
       clearTimeout(rappelTimer);
@@ -2938,7 +3488,7 @@ $('#mois').addEventListener('change', async () => {
   const m = $('#mois').value;
   if (!/^\d{4}-\d{2}$/.test(m)) { $('#mois').value = cur.mois; return; }
   if (m === cur.mois) return;
-  if (await API.existsFiche(m)) {
+  if (await API.existsFiche(cleFiche(m))) {
     toast('Une fiche existe déjà pour ' + F.labelMois(m));
     $('#mois').value = cur.mois;
     return;
@@ -2947,8 +3497,8 @@ $('#mois').addEventListener('change', async () => {
   cur.mois = m;
   const per = F.periodeFromMois(m);
   cur.periodeDu = per.du; cur.periodeAu = per.au;
-  await API.renameFiche(old, m, cur);
-  moisOnDisk = m;
+  await API.renameFiche(old, cleFiche(m), cur);
+  moisOnDisk = cleFiche(m);
   fillForm();
   await refreshList();
   setStatus('ok');
@@ -2989,6 +3539,7 @@ $('#btnZoom').onclick = () => {
 };
 $('#btnPdf').onclick = exporterPdf;
 $('#joursApply').onclick = reprendreJours;
+$('#heuresApply').onclick = reprendreHeures;
 $('#actPdf').onclick = () => { closeSheet(); exporterPdf(); };
 $('#actPrint').onclick = () => { closeSheet(); imprimer(); };
 $('#actMail').onclick = () => { closeSheet(); openMailModal(); };
@@ -3028,8 +3579,14 @@ $('#btnChangerCode').onclick = () => {
   afficherVerrou('creer');
 };
 $('#btnMaj').onclick = () => verifierMaj(false);
+$('#rechercheFiche').addEventListener('input', () => refreshList());
+$('#btnAttEmploi').onclick = attestationEmploi;
+$('#btnAttSalaire').onclick = attestationSalaire;
+$('#btnFinCalcul').onclick = calculFin;
+$('#btnAjoutEnfant').onclick = ajouterEnfant;
 $('#btnAvenant').onclick = ajouterAvenant;
 $('#btnIcs').onclick = exporterIcs;
+$('#btnSauvegarde').onclick = sauvegarder;
 $('#btnExportJson').onclick = exportJson;
 $('#btnImportJson').onclick = () => $('#fileJson').click();
 $('#fileJson').onchange = e => { if (e.target.files[0]) importJson(e.target.files[0]); e.target.value = ''; };
@@ -3262,9 +3819,14 @@ buildCalendrier();
   if ((profil.securite || {}).actif) afficherVerrou('ouvrir');
   majSecurite();
   fillProfilForm();
+  enfantActif = profil.enfantActif || 'e1';
   const list = await API.listFiches();
-  if (list.length) await openFiche(list[0].mois);
+  const sien = list.filter(f => f.enfantId === enfantActif);
+  if (sien.length) await openFiche(sien[0].cle);
+  else if (list.length) await openFiche(list[0].cle);
   else await nouveauMois();
+  await initEnfants();
+  renderEnfants();
   showView('accueil');
   integrerAndroid();
   fermerSplash();
