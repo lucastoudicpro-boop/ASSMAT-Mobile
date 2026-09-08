@@ -7,6 +7,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(AssMatPrint.class);
+        registerPlugin(AssMatBio.class);
         super.onCreate(savedInstanceState);
     }
 }

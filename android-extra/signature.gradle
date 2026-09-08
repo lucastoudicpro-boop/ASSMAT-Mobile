@@ -1,0 +1,23 @@
+// Ajoute a la fin de android/app/build.gradle par le workflow.
+// Signe l'APK quand les secrets sont presents, sans rien casser sinon.
+android {
+    signingConfigs {
+        assmat {
+            def fichier = System.getenv("ASSMAT_KEYSTORE_FILE")
+            if (fichier) {
+                storeFile file(fichier)
+                storePassword System.getenv("ASSMAT_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("ASSMAT_KEY_ALIAS")
+                keyPassword System.getenv("ASSMAT_KEY_PASSWORD")
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (System.getenv("ASSMAT_KEYSTORE_FILE")) {
+                signingConfig signingConfigs.assmat
+            }
+            minifyEnabled false
+        }
+    }
+}

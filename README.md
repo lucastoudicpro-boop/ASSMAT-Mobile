@@ -1,6 +1,6 @@
 # AssMat+ — version Android
 
-Version 0.6.0
+Version 0.8.0
 
 Fiches de calcul du salaire d'une assistante maternelle (modèle Pajemploi), portage
 de l'application Windows Electron vers Android via Capacitor.
@@ -63,6 +63,8 @@ L'APK sort dans `android/app/build/outputs/apk/debug/app-debug.apk`.
 | `docs/index.html` | L'application entière : interface, calculs, gabarit A4 |
 | `capacitor.config.json` | Nom, identifiant `fr.lucas.assmat`, dossier web |
 | `android-extra/AssMatPrint.java` | Module natif : impression, PDF, envoi |
+| `android-extra/AssMatBio.java` | Deverrouillage par empreinte |
+| `android-extra/biometrie.gradle` | Dependance androidx.biometric, ajoutee par le workflow |
 | `android-extra/PdfPrint.java` | Ecriture du PDF dans un fichier |
 | `android-extra/res/` | Icones du lanceur Android |
 | `android-extra/MainActivity.java` | Enregistre ce module au démarrage |
@@ -236,3 +238,80 @@ versees et part des indemnites. Ces chiffres viennent de tes fiches et servent
 de controle. L'attestation fiscale de Pajemploi reste la reference : elle
 integre les cotisations et le complement de libre choix du mode de garde, que
 l'application ne connait pas.
+
+## Verrouillage
+
+Dossier salariee -> Securite. Un code a quatre chiffres, saisi sur un pave
+numerique, et l'empreinte si le telephone en a une d'enregistree.
+
+Le code n'est jamais stocke : l'application conserve une empreinte PBKDF2-SHA256
+sur 120 000 iterations, avec un sel tire au hasard a chaque changement de code.
+Verifie dans les tests : le fichier de donnees ne contient nulle part le code en
+clair.
+
+L'application se reverrouille apres deux minutes passees en arriere-plan, pas
+avant : passer sur Pajemploi ou l'application e-mail pendant la saisie ne
+redemande pas le code.
+
+**Ce que ce verrou ne fait pas.** Il protege l'affichage, pas le fichier. Qui a
+un acces root ou une sauvegarde complete du telephone lit les fiches malgre lui.
+Le chiffrement du stockage serait une autre chantier.
+
+## Seuils legaux
+
+Dossier salariee -> Seuils legaux. Le salaire horaire minimum et l'indemnite
+d'entretien minimum se saisissent a la main : ils sont revises chaque annee et
+l'application ne les devine pas. Une alerte remonte des qu'un tarif de la fiche
+passe dessous, et une autre rappelle de les verifier quand l'annee indiquee est
+depassee.
+
+## Regularisation annuelle
+
+En bas du bilan : heures payees par la mensualisation, heures relevees au
+calendrier, et l'ecart entre les deux. Un ecart positif signale des heures
+effectuees au-dela de la mensualisation, a verifier en heures complementaires ou
+majorees.
+
+## Signature de l'APK
+
+Sans clé, le workflow produit une version de debogage : elle s'installe, mais
+chaque nouvelle version doit etre desinstallee avant d'installer la suivante.
+Avec une cle, les mises a jour s'installent par-dessus et gardent les donnees.
+
+**Creer la cle, une seule fois.** Onglet Actions -> « Creer la cle de signature »
+-> Run workflow. Telecharger l'artefact, lire `a-faire.txt`, puis creer quatre
+secrets dans Settings -> Secrets and variables -> Actions :
+
+| Secret | Contenu |
+| --- | --- |
+| `ANDROID_KEYSTORE` | le contenu de `assmat.jks.base64` |
+| `ANDROID_KEYSTORE_PASSWORD` | le mot de passe genere |
+| `ANDROID_KEY_ALIAS` | `assmat` |
+| `ANDROID_KEY_PASSWORD` | le meme mot de passe |
+
+Conserver `assmat.jks` hors de GitHub. Cette cle perdue, aucune mise a jour ne
+s'installe plus par-dessus l'application existante.
+
+**Ce que la signature ne fait pas.** Elle ne supprime pas l'avertissement
+« application inconnue » : celui-ci vient de l'installation hors magasin, pas de
+l'absence de signature. Tout APK est signe, y compris celui de debogage.
+
+## Publier une version
+
+Poser une etiquette declenche la compilation et la publication :
+
+```
+git tag v0.8.0
+git push origin v0.8.0
+```
+
+Le workflow attache `AssMat-plus.apk` a une version publiee du depot.
+
+## Mises a jour
+
+Dossier salariee -> Mises a jour. L'application interroge les versions publiees
+du depot et compare a sa propre version. Si une version plus recente existe,
+elle apparait dans le centre de notifications avec un bouton de telechargement.
+
+L'application ne telecharge ni n'installe rien elle-meme : Android l'interdit a
+une application hors magasin. Elle ouvre la page, le reste est manuel.

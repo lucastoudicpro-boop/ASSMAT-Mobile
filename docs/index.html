@@ -306,6 +306,43 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
 #previewFrame{width:794px;height:1123px;border:0;display:block}
 #previewSpacer{margin:0 auto}
 
+/* ---------- Verrouillage ---------- */
+#verrou{
+  position:fixed;inset:0;z-index:110;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 24px calc(var(--safeB) + 24px);
+}
+#verrou[hidden]{display:none}
+#verrou .cadenas{
+  width:34px;height:34px;fill:none;stroke:var(--acc);
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-bottom:14px;
+}
+#verrouTitre{font:600 17px system-ui;color:var(--txt)}
+#verrouMsg{font-size:13px;color:var(--danger);height:20px;margin-top:8px;text-align:center}
+#verrouPoints{display:flex;gap:14px;margin-top:20px;height:16px}
+#verrouPoints i{
+  width:13px;height:13px;border-radius:7px;border:2px solid var(--bord);
+  transition:background .12s,border-color .12s;
+}
+#verrouPoints i.plein{background:var(--acc);border-color:var(--acc)}
+#clavier{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin-top:26px;width:100%;max-width:280px;
+}
+#clavier button{
+  height:64px;border:0;border-radius:32px;background:var(--card);
+  font:400 24px system-ui;color:var(--txt);cursor:pointer;
+  border:1px solid var(--line);
+}
+#clavier button:active{background:var(--acc-doux)}
+#clavier button svg{
+  width:24px;height:24px;fill:none;stroke:var(--acc);
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+}
+#toucheBio{grid-column:1}
+#clavier button[data-touche="0"]{grid-column:2}
+#clavier button[data-touche="eff"]{grid-column:3}
+
 /* ---------- Écran de lancement ----------
    La pousse grandit, puis le nom apparaît. L'écran s'efface dès que
    l'application est prête, sans jamais durer plus de deux secondes. */
@@ -357,7 +394,8 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
   background:rgba(255,255,255,.16);border-radius:20px;padding:6px 12px;font-size:12.5px;
 }
 .puce svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-#hero .actions{display:flex;gap:8px;margin-top:14px}
+#hero .sous{margin-bottom:2px}
+#hero .actions{display:flex;gap:8px;margin-top:16px}
 #hero .actions button{
   flex:1;border:0;border-radius:12px;padding:11px 8px;cursor:pointer;
   font:600 13.5px system-ui;background:rgba(255,255,255,.17);color:#fff;min-height:44px;
@@ -369,39 +407,60 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
   font-size:12px;font-weight:600;color:var(--mut);margin:0 0 8px 4px;
   letter-spacing:.3px;
 }
-.tuiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.tuile{
-  background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:7px;
-  cursor:pointer;font:500 11.5px system-ui;color:var(--txt);text-align:center;line-height:1.25;
-  min-height:82px;box-shadow:0 1px 2px var(--ombre);
+/* Une carte par idée, plutôt qu'une mosaïque de petites boîtes. */
+.etapes,.liste-liens,.resume{padding:14px 4px 6px 14px}
+.etapes-tete{
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding-right:14px;margin-bottom:2px;
 }
-.tuile:active{background:var(--zebre)}
-.tuile svg{
-  width:23px;height:23px;fill:none;stroke:var(--acc);
-  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;
+.etapes-tete b{font-size:14px}
+.etapes-tete span{font-size:12px;color:var(--mut)}
+.etapes .jauge{margin:12px 14px 6px 0}
+
+.etape,.ligne-lien{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  border:0;background:transparent;padding:13px 14px 13px 0;cursor:pointer;
+  color:var(--txt);font:inherit;border-bottom:1px solid var(--line);
 }
-.liens{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.lien{
-  background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:13px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;
-  font:600 13px system-ui;color:var(--txt);text-align:left;min-height:56px;
-  box-shadow:0 1px 2px var(--ombre);
-}
-.lien:active{background:var(--zebre)}
-.lien svg{
-  width:17px;height:17px;fill:none;stroke:var(--mut);flex:0 0 auto;margin-left:auto;
+.etape:last-child,.ligne-lien:last-child{border-bottom:0}
+.etape:active,.ligne-lien:active{background:var(--zebre)}
+.etape span,.ligne-lien span{flex:1;min-width:0;line-height:1.3}
+.etape b,.ligne-lien b{display:block;font-size:14px;font-weight:600}
+.etape small,.ligne-lien small{font-size:12px;color:var(--mut)}
+.etape .coche{
+  width:22px;height:22px;flex:0 0 auto;fill:none;stroke:var(--bord);
   stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
 }
-.lien i{font-style:normal;line-height:1.2}
-.lien small{display:block;font-weight:400;font-size:11px;color:var(--mut)}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.stat{
-  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 8px;
-  text-align:center;box-shadow:0 1px 2px var(--ombre);
+.etape.faite .coche{stroke:var(--acc)}
+.etape.faite b{color:var(--mut);font-weight:500}
+.etape .fleche,.ligne-lien svg{
+  width:17px;height:17px;flex:0 0 auto;fill:none;stroke:var(--bord);
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
 }
-.stat b{display:block;font-size:17px;font-variant-numeric:tabular-nums;color:var(--miel)}
-.stat span{font-size:11px;color:var(--mut)}
+
+.rangee{
+  display:flex;gap:8px;overflow-x:auto;padding:2px 12px 6px;margin:0 -12px;
+  scrollbar-width:none;
+}
+.rangee::-webkit-scrollbar{display:none}
+.puce-act{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;cursor:pointer;
+  background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:10px 15px;font:600 13px system-ui;color:var(--txt);min-height:44px;
+  box-shadow:0 1px 2px var(--ombre);
+}
+.puce-act:active{background:var(--acc-doux)}
+.puce-act svg{
+  width:18px;height:18px;fill:none;stroke:var(--acc);
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;
+}
+
+.resume-l{
+  display:flex;justify-content:space-between;padding:10px 14px 10px 0;
+  border-bottom:1px solid var(--line);font-size:13.5px;
+}
+.resume-l span{color:var(--mut)}
+.resume-l b{font-variant-numeric:tabular-nums;color:var(--miel)}
 
 .avenants{list-style:none;margin:0 0 12px;padding:0}
 .avenants li{
@@ -521,8 +580,7 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   #sheet{left:auto;right:16px;bottom:16px;width:340px;border-radius:16px}
 }
 @media (min-width:620px){
-  .tuiles{grid-template-columns:repeat(6,1fr)}
-  .liens{grid-template-columns:repeat(3,1fr)}
+  #accueil{max-width:640px;margin:0 auto}
 }
 @media (min-width:1000px){
   #accueil{max-width:820px;margin:0 auto}
@@ -572,8 +630,27 @@ html[data-theme="sombre"] #toast button{background:#33514a}
 <symbol id="i-alerte" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/></symbol>
 <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.3l2.6 2.6 5-5.4"/></symbol>
 <symbol id="i-envoyer" viewBox="0 0 24 24"><path d="M20.5 3.5 10 14M20.5 3.5l-6.5 17-3.5-6.5L4 10.5z"/></symbol>
+<symbol id="i-cercle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/></symbol>
+<symbol id="i-fleche" viewBox="0 0 24 24"><path d="M9 5.5 15.5 12 9 18.5"/></symbol>
 <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 </svg>
+<div id="verrou" hidden>
+  <svg class="cadenas" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="4.5" y="10.5" width="15" height="10" rx="2.4"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>
+  </svg>
+  <div id="verrouTitre">Code de l'application</div>
+  <div id="verrouPoints"></div>
+  <div id="verrouMsg"></div>
+  <div id="clavier">
+    <button data-touche="1">1</button><button data-touche="2">2</button><button data-touche="3">3</button>
+    <button data-touche="4">4</button><button data-touche="5">5</button><button data-touche="6">6</button>
+    <button data-touche="7">7</button><button data-touche="8">8</button><button data-touche="9">9</button>
+    <button id="toucheBio" data-touche="bio" hidden><svg viewBox="0 0 24 24"><path d="M12 3.5c-3 0-5.5 1.4-7 3.4M19 6.9c-.8-1-1.8-1.9-3-2.5M4.6 11.5A8 8 0 0 1 12 7.5a8 8 0 0 1 7.4 4M6.5 16.5c.7-1.3 1-2.7 1-4A4.5 4.5 0 0 1 12 8a4.5 4.5 0 0 1 4.5 4.5c0 1.4-.2 2.7-.6 3.9M12 11v2.5c0 2-.4 4-1.2 5.7M14.6 19.6c.5-1.5.8-3 .9-4.6"/></svg></button>
+    <button data-touche="0">0</button>
+    <button data-touche="eff"><svg viewBox="0 0 24 24"><path d="M9 5.5h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9L3 12z"/><path d="M11.5 9.5l5 5M16.5 9.5l-5 5"/></svg></button>
+  </div>
+</div>
+
 <div id="splash">
   <svg id="marque" viewBox="0 0 512 512" aria-hidden="true">
     <defs>
@@ -864,6 +941,29 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   </details>
 
   <details class="card">
+    <summary><svg class="ico"><use href="#i-alerte"/></svg><span class="ttl">Sécurité</span></summary>
+    <div class="body">
+      <label class="check"><input type="checkbox" id="secActif"><span>Demander un code à l'ouverture</span></label>
+      <label class="check"><input type="checkbox" id="secBio"><span>Proposer l'empreinte</span></label>
+      <button id="btnChangerCode" class="btn btn-ghost btn-block">Changer le code</button>
+      <p class="hint" id="secEtat"></p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-euro"/></svg><span class="ttl">Seuils légaux</span></summary>
+    <div class="body">
+      <div class="two">
+        <label class="field"><span>Salaire horaire brut minimum</span><input data-profil="seuils.taux" inputmode="decimal" placeholder="€/h"></label>
+        <label class="field"><span>Indemnité d'entretien minimum</span><input data-profil="seuils.entretien" inputmode="decimal" placeholder="€/jour"></label>
+        <label class="field"><span>Mis à jour en</span><input data-profil="seuils.annee" inputmode="numeric" placeholder="2026"></label>
+      </div>
+      <button class="btn btn-ghost btn-block" data-lien="https://www.pajemploi.urssaf.fr/">Consulter les montants officiels</button>
+      <p class="hint">Ces planchers sont indexés et révisés chaque année, en général au 1er janvier. L'application ne les devine pas : saisis-les toi-même, elle t'alerte si un tarif de la fiche passe dessous, et te rappelle de les vérifier en début d'année.</p>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-theme"/></svg><span class="ttl">Apparence</span></summary>
     <div class="body">
       <div class="seg" id="segTheme">
@@ -899,9 +999,21 @@ html[data-theme="sombre"] #toast button{background:#33514a}
   </details>
 
   <details class="card">
+    <summary><svg class="ico"><use href="#i-externe"/></svg><span class="ttl">Mises à jour</span></summary>
+    <div class="body">
+      <div class="ds"><span>Version installée</span><b id="majActuelle">—</b></div>
+      <div id="majResultat"></div>
+      <button id="btnMaj" class="btn btn-ghost btn-block" style="margin-top:12px">Vérifier maintenant</button>
+      <label class="check" style="margin-top:12px"><input type="checkbox" data-profil="maj.auto"><span>Vérifier au lancement</span></label>
+      <label class="field"><span>Dépôt GitHub</span><input data-profil="maj.depot" placeholder="compte/depot"></label>
+      <p class="hint">L'application interroge les versions publiées du dépôt. Elle ne télécharge ni n'installe rien toute seule : elle t'ouvre la page de téléchargement.</p>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">0.6.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">0.8.0</b></div>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
     </div>
@@ -2124,6 +2236,55 @@ async function envoyerAbsence() {
     '?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(texte);
 }
 
+/* ---------------- Mises à jour ----------------
+   Interroge les versions publiées du dépôt. L'application ne télécharge ni
+   n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
+const VERSION = '0.8.0';
+const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
+
+function comparerVersions(a, b) {
+  const na = String(a).replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
+  const nb = String(b).replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
+  for (let i = 0; i < 3; i++) {
+    if ((na[i] || 0) > (nb[i] || 0)) return 1;
+    if ((na[i] || 0) < (nb[i] || 0)) return -1;
+  }
+  return 0;
+}
+
+let derniereMaj = null;
+
+async function verifierMaj(silencieux) {
+  const depot = ((profil.maj || {}).depot || DEPOT_DEFAUT).trim().replace(/^https?:\/\/github\.com\//, '');
+  const zone = $('#majResultat');
+  const dire = txt => { if (zone) zone.innerHTML = txt; };
+  if (!silencieux) dire('<p class="hint">Vérification…</p>');
+
+  try {
+    const r = await fetch('https://api.github.com/repos/' + depot + '/releases/latest',
+      { headers: { Accept: 'application/vnd.github+json' } });
+    if (!r.ok) throw new Error(r.status === 404 ? 'Aucune version publiée sur ce dépôt' : 'Réponse ' + r.status);
+    const d = await r.json();
+    const tag = d.tag_name || '';
+    const apk = (d.assets || []).find(a => /\.apk$/i.test(a.name));
+    derniereMaj = comparerVersions(tag, VERSION) > 0
+      ? { tag, url: apk ? apk.browser_download_url : d.html_url, notes: d.body || '' } : null;
+
+    if (derniereMaj) {
+      dire(`<div class="ds"><span>Disponible</span><b>${esc(derniereMaj.tag)}</b></div>
+        <button class="btn btn-primary btn-block" style="margin-top:10px" data-lien="${esc(derniereMaj.url)}">Télécharger</button>`);
+      $$('#majResultat [data-lien]').forEach(b => { b.onclick = () => ouvrirLien(b.dataset.lien); });
+      if (silencieux) toast('AssMat+ ' + derniereMaj.tag + ' est disponible');
+    } else {
+      dire('<p class="hint">L\u2019application est à jour.</p>');
+    }
+    majPastille();
+  } catch (e) {
+    dire('<p class="hint">Vérification impossible : ' + esc(e.message || String(e)) + '</p>');
+    if (!silencieux) toast('Vérification impossible');
+  }
+}
+
 /* ---------------- Contrat et avenants ----------------
    Le contrat vit dans le profil, versionné par date d'effet. Les fiches déjà
    établies gardent leurs propres valeurs : un avenant ne réécrit jamais le passé. */
@@ -2313,6 +2474,31 @@ function alertes() {
     detail: fer.join(', ') + '.'
   });
 
+  if (derniereMaj) out.push({
+    ton: 'i', titre: 'Version ' + derniereMaj.tag + ' disponible',
+    detail: 'Tu utilises la ' + VERSION + '.',
+    action: 'Télécharger', fn: () => ouvrirLien(derniereMaj.url)
+  });
+
+  const seuils = profil.seuils || {};
+  const tauxMin = F.num(seuils.taux), entMin = F.num(seuils.entretien);
+  if (tauxMin > 0 && F.num(cur.contrat.tHn) > 0 && F.num(cur.contrat.tHn) < tauxMin) out.push({
+    ton: 'a', titre: 'Salaire horaire sous le minimum',
+    detail: F.f2(cur.contrat.tHn) + ' €/h contre ' + F.f2(tauxMin) + ' €/h de plancher renseigné.',
+    action: 'Corriger', fn: () => { showView('saisie'); ouvrirCarte('[data-bind="contrat.tHn"]'); }
+  });
+  if (entMin > 0 && F.num(cur.indemnites.e1t) > 0 && F.num(cur.indemnites.e1t) < entMin) out.push({
+    ton: 'a', titre: 'Indemnité d\u2019entretien sous le minimum',
+    detail: F.f2(cur.indemnites.e1t) + ' € contre ' + F.f2(entMin) + ' € de plancher renseigné.',
+    action: 'Corriger', fn: () => { showView('saisie'); ouvrirCarte('[data-bind="indemnites.e1t"]'); }
+  });
+  const anSeuils = parseInt(seuils.annee, 10);
+  if ((tauxMin > 0 || entMin > 0) && anSeuils && anSeuils < new Date().getFullYear()) out.push({
+    ton: 'i', titre: 'Seuils légaux à vérifier',
+    detail: 'Ils datent de ' + anSeuils + ' et sont révisés chaque année.',
+    action: 'Vérifier', fn: () => { showView('dossier'); ouvrirCarte('[data-profil="seuils.taux"]'); }
+  });
+
   const estPaye = !!(cur.paye && cur.paye.fait);
   const reste = joursAvantVersement(cur.mois);
   if (reste !== null && estPaye === false && cur.envoyee && reste < 0) out.push({
@@ -2398,7 +2584,6 @@ async function renderAccueil() {
     totalAn += cc.solde; heuresAn += cc.totP; nbAn++;
   }
 
-  const alertesFortes = alertes().filter(a => a.ton === 'a' || a.ton === 'i').slice(0, 2);
   const paye = cur.paye && cur.paye.fait;
   const etat = paye ? { ico: 'i-ok', txt: 'Salaire versé' }
     : cur.envoyee ? { ico: 'i-ok', txt: 'Fiche envoyée' }
@@ -2423,43 +2608,71 @@ async function renderAccueil() {
     `<button class="lien" data-lien="${esc(d.url)}"><i>${esc(d.titre)}<small>${esc(d.sous)}</small></i>
       <svg><use href="#i-externe"/></svg></button>`).join('');
 
+  const etapes = [
+    { fait: joursAccueil() > 0, titre: 'Calendrier de présence',
+      val: joursAccueil() ? joursAccueil() + ' jours saisis' : 'Aucun jour saisi', act: 'calendrier' },
+    { fait: F.num(cur.net.netPaje) > 0, titre: 'Salaire net',
+      val: F.num(cur.net.netPaje) > 0 ? eur(c.netE) + ' après exonération' : 'À reporter depuis Pajemploi', act: 'net' },
+    { fait: c.ti > 0, titre: 'Indemnités',
+      val: c.ti > 0 ? eur(c.ti) : 'Entretien, repas, kilomètres', act: 'indemnites' },
+    { fait: !!cur.envoyee, titre: 'Fiche transmise',
+      val: cur.envoyee ? 'Envoyée à la salariée' : 'Pas encore envoyée', act: 'mail' },
+    { fait: !!(cur.paye && cur.paye.fait), titre: 'Salaire versé',
+      val: (cur.paye && cur.paye.date) ? 'Le ' + esc(cur.paye.date) : 'À enregistrer une fois payé', act: 'paye' }
+  ];
+  const faites = etapes.filter(e => e.fait).length;
+
+  const raccourcis = [
+    ['i-doc', 'PDF', 'pdf'], ['i-envoyer', 'Envoyer', 'mail'],
+    ['i-planning', 'Planning', 'planning'], ['i-interdit', 'Absence', 'absence'],
+    ['i-plus', 'Nouveau mois', 'nouveau']
+  ].map(([i, t, a]) => `<button class="puce-act" data-act="${a}"><svg><use href="#${i}"/></svg>${t}</button>`).join('');
+
   $('#accueil').innerHTML = `
     <div id="hero">
       <div class="mois">${esc(F.labelMois(cur.mois))}</div>
       <div class="montant">${eur(c.solde)}</div>
-      <div class="sous">à verser à ${esc(cur.salarie.nom || 'la salariée')}</div>
-      <span class="puce"><svg><use href="#${etat.ico}"/></svg>${etat.txt}</span>
-      ${versement ? `<span class="puce"><svg><use href="#i-periode"/></svg>${versement}</span>` : ''}
+      <div class="sous">${versement || 'à verser à ' + esc(cur.salarie.nom || 'la salariée')}</div>
       <div class="actions">
         <button class="plein" data-act="saisie">Ouvrir la saisie</button>
-        <button data-act="pdf">Fiche PDF</button>
       </div>
     </div>
 
-    ${alertesFortes.length ? `<div class="bloc">
-      <p class="bloc-titre">À faire</p>
-      <ul class="notifs card" style="padding:4px 14px">
-        ${alertesFortes.map(a => `<li class="${a.ton}">
-          <svg><use href="#${a.ton === 'a' ? 'i-alerte' : 'i-cloche'}"/></svg>
-          <span><b>${esc(a.titre)}</b><small>${esc(a.detail)}</small></span></li>`).join('')}
-      </ul></div>` : ''}
-
     <div class="bloc">
-      <p class="bloc-titre">Raccourcis</p>
-      <div class="tuiles">${tuiles}</div>
+      <div class="etapes card">
+        <div class="etapes-tete">
+          <b>Progression du mois</b><span>${faites} sur ${etapes.length}</span>
+        </div>
+        <div class="jauge"><i style="width:${Math.round(faites / etapes.length * 100)}%"></i></div>
+        ${etapes.map(e => `<button class="etape ${e.fait ? 'faite' : ''}" data-act="${e.act}">
+          <svg class="coche"><use href="#${e.fait ? 'i-ok' : 'i-cercle'}"/></svg>
+          <span><b>${esc(e.titre)}</b><small>${e.val}</small></span>
+          <svg class="fleche"><use href="#i-fleche"/></svg>
+        </button>`).join('')}
+      </div>
     </div>
 
     <div class="bloc">
-      <p class="bloc-titre">Démarches</p>
-      <div class="liens">${liens}</div>
+      <div class="rangee">${raccourcis}</div>
     </div>
 
     <div class="bloc">
-      <p class="bloc-titre">Année ${an}</p>
-      <div class="stats">
-        <div class="stat"><b>${F.f2(totalAn)}</b><span>versé (€)</span></div>
-        <div class="stat"><b>${F.f2(heuresAn)}</b><span>heures</span></div>
-        <div class="stat"><b>${nbAn}</b><span>fiche${nbAn > 1 ? 's' : ''}</span></div>
+      <div class="card liste-liens">
+        <div class="etapes-tete"><b>Démarches</b><span>sites officiels</span></div>
+        ${DEMARCHES.map(d => `<button class="ligne-lien" data-lien="${esc(d.url)}">
+          <span><b>${esc(d.titre)}</b><small>${esc(d.sous)}</small></span>
+          <svg><use href="#i-externe"/></svg>
+        </button>`).join('')}
+      </div>
+    </div>
+
+    <div class="bloc">
+      <div class="card resume">
+        <div class="etapes-tete"><b>Année ${an}</b><span>${nbAn} fiche${nbAn > 1 ? 's' : ''}</span></div>
+        <div class="resume-l"><span>Versé</span><b>${F.f2(totalAn)} €</b></div>
+        <div class="resume-l"><span>Heures</span><b>${F.f2(heuresAn)} h</b></div>
+        <button class="ligne-lien" data-act="bilan"><span><b>Voir le bilan complet</b></span>
+          <svg><use href="#i-fleche"/></svg></button>
       </div>
     </div>`;
 
@@ -2467,6 +2680,10 @@ async function renderAccueil() {
     saisie: () => showView('saisie'),
     nouveau: () => nouveauMois(),
     calendrier: () => { showView('saisie'); ouvrirCarte('#calendrier'); },
+    net: () => { showView('saisie'); ouvrirCarte('[data-bind="net.netPaje"]'); },
+    indemnites: () => { showView('saisie'); ouvrirCarte('[data-bind="indemnites.e1t"]'); },
+    paye: () => { showView('saisie'); ouvrirCarte('[data-bind="paye.fait"]'); },
+    bilan: () => showView('annuel'),
     pdf: () => exporterPdf(),
     mail: () => openMailModal(),
     absence: () => openAbsModal(),
@@ -2495,7 +2712,7 @@ async function renderAnnuel() {
 
   let html = '';
   for (const an of Object.keys(annees).sort().reverse()) {
-    const t = { brut: 0, net: 0, ti: 0, solde: 0, jours: 0, paye: 0 };
+    const t = { brut: 0, net: 0, ti: 0, solde: 0, jours: 0, paye: 0, hMens: 0, hReel: 0 };
     let lignes = '';
     for (const m of annees[an]) {
       const c = F.compute(F.normalizeFiche(toutes[m]));
@@ -2503,6 +2720,8 @@ async function renderAnnuel() {
       t.jours += F.num(toutes[m].conges && toutes[m].conges.joursTravailles);
       const p = toutes[m].paye && toutes[m].paye.fait;
       if (p) t.paye += c.solde;
+      t.hMens += c.hnM + c.hmM;
+      t.hReel += c.totP + c.totC + c.totM;
       lignes += `<tr><td>${esc(F.labelMois(m).replace(' ' + an, ''))}</td>
         <td>${F.f2(c.brut)}</td><td>${F.f2(c.netE)}</td><td>${F.f2(c.ti)}</td>
         <td>${F.f2(c.solde)}</td><td class="etat">${p ? '✓' : '·'}</td></tr>`;
@@ -2518,6 +2737,14 @@ async function renderAnnuel() {
       <p class="hint">Montants en euros${t.jours > 0 ? ', ' + F.qn(t.jours) + ' jours travaillés déclarés' : ''}. La colonne « Payé » suit ce que tu as marqué comme versé dans chaque fiche.</p>
 
       <div class="fiscal">
+        <b>Régularisation</b>
+        <div class="ds"><span>Heures payées par la mensualisation</span><b>${F.f2(t.hMens)} h</b></div>
+        <div class="ds"><span>Heures relevées au calendrier</span><b>${F.f2(t.hReel)} h</b></div>
+        <div class="ds"><span>Écart</span><b>${(t.hReel - t.hMens > 0 ? '+' : '') + F.f2(t.hReel - t.hMens)} h</b></div>
+        <p class="hint">Un écart positif signale des heures effectuées au-delà de la mensualisation : vérifie qu'elles ont bien été payées en heures complémentaires ou majorées. Un écart négatif est normal si des absences ont été déduites.</p>
+      </div>
+
+      <div class="fiscal">
         <b>Pour la déclaration de revenus</b>
         <div class="ds"><span>Sommes versées à la salariée</span><b>${F.f2(t.paye)} €</b></div>
         <div class="ds"><span>Dont indemnités d'entretien et repas</span><b>${F.f2(t.ti)} €</b></div>
@@ -2529,7 +2756,7 @@ async function renderAnnuel() {
 }
 
 /* ---------------- Dossier salariée ---------------- */
-function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, paiement: {}, conges: {}, contrats: [], theme: 'clair', ...p }; }
+function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, paiement: {}, conges: {}, contrats: [], seuils: {}, securite: {}, maj: {}, theme: 'clair', ...p }; }
 
 const MAIL_SUBJECT_DEFAUT = 'Fiche de salaire — {mois}';
 const MAIL_BODY_DEFAUT = "Bonjour,\n\nVeuillez trouver ci-joint la fiche de calcul du salaire pour l'accueil de {enfant} — {mois}.\n\nCordialement,\n{employeur}";
@@ -2643,7 +2870,6 @@ async function importJson(file) {
   if (!n) { toast('Aucune fiche reconnue dans ce fichier'); return; }
   await Store.flush();
   profil = normalizeProfil(await API.loadProfil());
-  appliquerTheme(profil.theme);
   fillProfilForm();
   const list = await API.listFiches();
   await openFiche(list[0].mois);
@@ -2787,6 +3013,21 @@ if (window.matchMedia) {
   window.matchMedia('(prefers-color-scheme: dark)')
     .addEventListener('change', () => { if ((profil.theme || 'clair') === 'auto') appliquerTheme('auto'); });
 }
+$('#clavier').addEventListener('click', e => {
+  const b = e.target.closest('[data-touche]');
+  if (b) toucheVerrou(b.dataset.touche);
+});
+$('#secActif').onchange = e => activerVerrou(e.target.checked);
+$('#secBio').onchange = async e => {
+  profil.securite = { ...(profil.securite || {}), biometrie: e.target.checked };
+  await doProfilSave();
+  majSecurite();
+};
+$('#btnChangerCode').onclick = () => {
+  if (!(profil.securite || {}).actif) { toast('Active d\u2019abord le code'); return; }
+  afficherVerrou('creer');
+};
+$('#btnMaj').onclick = () => verifierMaj(false);
 $('#btnAvenant').onclick = ajouterAvenant;
 $('#btnIcs').onclick = exporterIcs;
 $('#btnExportJson').onclick = exportJson;
@@ -2800,6 +3041,149 @@ document.addEventListener('visibilitychange', () => {
   if (profilTimer) doProfilSave();
 });
 window.addEventListener('pagehide', () => { if (saveTimer) doSave(); if (profilTimer) doProfilSave(); });
+
+/* ---------------- Verrouillage ----------------
+   Le code n'est jamais stocké : seule une empreinte PBKDF2 l'est, avec un sel
+   tiré au hasard. Ce verrou protège l'affichage, pas le fichier de données :
+   qui a un accès root au téléphone lit les fiches malgré tout. */
+const VERROU = {
+  saisie: '', mode: 'ouvrir', premier: '', longueur: 4, ferme: false, quitteA: 0
+};
+
+function octetsHex(buf) {
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function empreinteCode(code, selHex) {
+  const enc = new TextEncoder();
+  if (!(window.crypto && crypto.subtle)) {
+    // repli très simple si l'environnement n'expose pas la cryptographie
+    let h = 0;
+    for (const ch of selHex + code) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return 'simple:' + h.toString(16);
+  }
+  const sel = Uint8Array.from(selHex.match(/../g).map(o => parseInt(o, 16)));
+  const cle = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: sel, iterations: 120000, hash: 'SHA-256' }, cle, 256);
+  return octetsHex(bits);
+}
+
+function nouveauSel() {
+  const t = new Uint8Array(16);
+  (window.crypto || {}).getRandomValues ? crypto.getRandomValues(t) : t.forEach((_, i) => t[i] = Math.random() * 256 | 0);
+  return octetsHex(t.buffer);
+}
+
+const bioPlugin = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AssMatBio;
+
+async function bioDisponible() {
+  const B = bioPlugin();
+  if (!B) return false;
+  try { return !!(await B.disponible()).disponible; } catch (e) { return false; }
+}
+
+function majPoints() {
+  const n = VERROU.longueur;
+  $('#verrouPoints').innerHTML = Array.from({ length: n },
+    (_, i) => `<i class="${i < VERROU.saisie.length ? 'plein' : ''}"></i>`).join('');
+}
+
+function afficherVerrou(mode) {
+  VERROU.mode = mode; VERROU.saisie = ''; VERROU.premier = '';
+  const titres = { ouvrir: 'Code de l\u2019application', creer: 'Choisis un code à 4 chiffres', confirmer: 'Saisis-le à nouveau' };
+  $('#verrouTitre').textContent = titres[mode];
+  $('#verrouMsg').textContent = '';
+  $('#verrou').hidden = false;
+  VERROU.ferme = true;
+  majPoints();
+  if (mode === 'ouvrir') proposerBio();
+}
+
+function fermerVerrou() {
+  $('#verrou').hidden = true;
+  VERROU.ferme = false;
+  VERROU.saisie = '';
+}
+
+async function proposerBio() {
+  const s = profil.securite || {};
+  const dispo = s.biometrie && await bioDisponible();
+  $('#toucheBio').hidden = !dispo;
+  if (!dispo) return;
+  try {
+    const r = await bioPlugin().verifier();
+    if (r && r.ok) fermerVerrou();
+  } catch (e) { /* l'utilisateur passera par le code */ }
+}
+
+async function toucheVerrou(t) {
+  if (t === 'bio') { proposerBio(); return; }
+  if (t === 'eff') { VERROU.saisie = VERROU.saisie.slice(0, -1); majPoints(); return; }
+  if (VERROU.saisie.length >= VERROU.longueur) return;
+  VERROU.saisie += t;
+  majPoints();
+  if (VERROU.saisie.length < VERROU.longueur) return;
+
+  const code = VERROU.saisie;
+  setTimeout(async () => {
+    if (VERROU.mode === 'creer') {
+      VERROU.premier = code;
+      afficherVerrou('confirmer');
+      VERROU.premier = code;
+      return;
+    }
+    if (VERROU.mode === 'confirmer') {
+      if (code !== VERROU.premier) {
+        $('#verrouMsg').textContent = 'Les deux codes diffèrent';
+        VERROU.saisie = ''; majPoints();
+        VERROU.mode = 'creer';
+        $('#verrouTitre').textContent = 'Choisis un code à 4 chiffres';
+        return;
+      }
+      const sel = nouveauSel();
+      profil.securite = { actif: true, sel, hash: await empreinteCode(code, sel), biometrie: !!(profil.securite || {}).biometrie };
+      await doProfilSave();
+      fermerVerrou();
+      majSecurite();
+      toast('Code enregistré');
+      return;
+    }
+    const s = profil.securite || {};
+    const essai = await empreinteCode(code, s.sel || '');
+    if (essai === s.hash) { fermerVerrou(); return; }
+    $('#verrouMsg').textContent = 'Code incorrect';
+    VERROU.saisie = ''; majPoints();
+  }, 90);
+}
+
+async function activerVerrou(on) {
+  if (on) { afficherVerrou('creer'); return; }
+  profil.securite = { actif: false };
+  await doProfilSave();
+  majSecurite();
+}
+
+async function majSecurite() {
+  const s = profil.securite || {};
+  const c = $('#secActif'); if (c) c.checked = !!s.actif;
+  const b = $('#secBio'); if (b) { b.checked = !!s.biometrie; b.disabled = !s.actif; }
+  const e = $('#secEtat');
+  if (!e) return;
+  if (!s.actif) { e.textContent = 'Le code protège l\u2019affichage de l\u2019application. Les données restent lisibles par qui a un accès complet au téléphone.'; return; }
+  const dispo = await bioDisponible();
+  e.textContent = dispo
+    ? 'Code actif. L\u2019empreinte est proposée à l\u2019ouverture, le code reste le recours.'
+    : 'Code actif. Aucune empreinte n\u2019est enregistrée sur ce téléphone.';
+}
+
+/* Reverrouille après deux minutes passées en arrière-plan. */
+function verrouillerSiBesoin() {
+  const s = profil.securite || {};
+  if (!s.actif || VERROU.ferme) return;
+  if (VERROU.quitteA && Date.now() - VERROU.quitteA < 120000) return;
+  afficherVerrou('ouvrir');
+}
 
 /* ---------------- Écran de lancement ---------------- */
 const splashOuvertA = Date.now();
@@ -2851,6 +3235,7 @@ function integrerAndroid() {
 
   if (C.App && C.App.addListener) {
     C.App.addListener('backButton', () => {
+      if (!$('#verrou').hidden) return;
       if (!$('#notifModal').hidden) { $('#notifModal').hidden = true; return; }
       if (!$('#absModal').hidden) { $('#absModal').hidden = true; return; }
       if (!$('#mailModal').hidden) { $('#mailModal').hidden = true; return; }
@@ -2859,7 +3244,8 @@ function integrerAndroid() {
       if (vue !== 'accueil') { showView('accueil'); return; }
       C.App.exitApp();
     });
-    C.App.addListener('resume', () => { if (saveTimer) doSave(); });
+    C.App.addListener('resume', () => { if (saveTimer) doSave(); verrouillerSiBesoin(); });
+    C.App.addListener('pause', () => { VERROU.quitteA = Date.now(); });
   }
 
 }
@@ -2872,6 +3258,9 @@ if ('serviceWorker' in navigator && !window.Capacitor && location.protocol === '
 buildCalendrier();
 (async () => {
   profil = normalizeProfil(await API.loadProfil());
+  appliquerTheme(profil.theme);
+  if ((profil.securite || {}).actif) afficherVerrou('ouvrir');
+  majSecurite();
   fillProfilForm();
   const list = await API.listFiches();
   if (list.length) await openFiche(list[0].mois);
@@ -2879,6 +3268,8 @@ buildCalendrier();
   showView('accueil');
   integrerAndroid();
   fermerSplash();
+  const m = $('#majActuelle'); if (m) m.textContent = VERSION;
+  if ((profil.maj || {}).auto) setTimeout(() => verifierMaj(true), 2500);
   programmerRappels();
   console.log('AssMat+ mobile — stockage : ' + Store.kind);
 })();
