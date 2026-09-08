@@ -1,0 +1,53 @@
+name: Créer la clé de signature
+
+# À lancer une seule fois. Produit la clé qui signera toutes les versions.
+# Perdre cette clé oblige à désinstaller l'application avant toute mise à jour.
+on:
+  workflow_dispatch:
+    inputs:
+      nom:
+        description: Nom du propriétaire de la clé
+        required: true
+        default: Lucas
+
+jobs:
+  cle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Générer la clé
+        run: |
+          MDP=$(head -c 24 /dev/urandom | base64 | tr -d '/+=' | head -c 24)
+          keytool -genkeypair -v \
+            -keystore assmat.jks \
+            -alias assmat \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$MDP" -keypass "$MDP" \
+            -dname "CN=${{ inputs.nom }}, OU=AssMat+, O=AssMat+, C=FR"
+          base64 -w0 assmat.jks > assmat.jks.base64
+          {
+            echo "Copier ces quatre valeurs dans Settings > Secrets and variables > Actions."
+            echo
+            echo "ANDROID_KEYSTORE        = le contenu du fichier assmat.jks.base64"
+            echo "ANDROID_KEYSTORE_PASSWORD = $MDP"
+            echo "ANDROID_KEY_ALIAS       = assmat"
+            echo "ANDROID_KEY_PASSWORD    = $MDP"
+            echo
+            echo "Conserve aussi assmat.jks hors de GitHub : sans lui, plus aucune"
+            echo "mise a jour n'est installable par-dessus la version precedente."
+          } > a-faire.txt
+
+      - name: Publier la clé
+        uses: actions/upload-artifact@v4
+        with:
+          name: cle-de-signature
+          path: |
+            assmat.jks
+            assmat.jks.base64
+            a-faire.txt
+          retention-days: 1
