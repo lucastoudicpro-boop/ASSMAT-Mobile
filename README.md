@@ -1228,3 +1228,34 @@ avec un serveur qui refuse le premier jeton : l'appel est rejoue et aboutit.
 La fonction journalise desormais chaque etape, ce qu'elle ne faisait pas :
 les logs ne montraient que des demarrages de conteneur, sans jamais dire
 pourquoi un envoi n'aboutissait pas.
+
+## 1.0.13 — la chaine des notifications se diagnostique elle-meme
+
+Je ne peux pas executer l'APK. Plutot que de deviner ou ca casse, l'application
+le dit : Reglages -> Notifications, dans les deux applications.
+
+Cinq lignes, un maillon chacune. La premiere en rouge est le coupable :
+
+| Ligne | Si elle est rouge |
+| --- | --- |
+| Firebase dans l'application | l'APK a ete compile sans les secrets `GOOGLE_SERVICES_*` |
+| Module de notifications | le module n'est pas dans l'APK : voir l'etape « Ajouter le module » du build |
+| Autorisation Android | refusee : Reglages Android -> Applications -> Cocon -> Notifications |
+| Jeton de l'appareil | Firebase n'a pas repondu : nom de package faux, ou `google-services.json` illisible |
+| Jetons deposes pour ce compte | la base a refuse le depot : voir la regle sur `jetons_push` |
+
+Sous les lignes, la derniere etape atteinte en toutes lettres.
+
+**« M'envoyer une notification de test »** appelle la fonction avec `test: true` :
+elle envoie a l'appelant lui-meme, sans contrat ni tiers, et ignore le mode
+silencieux. La reponse s'affiche telle quelle. Si elle dit « Envoye a 1
+appareil » et que rien n'arrive, le probleme est sur le telephone — economiseur
+de batterie, ou APK installe different de celui compile.
+
+**« Reessayer l'enregistrement »** relance la demande a Firebase sans se
+reconnecter.
+
+La fonction `notifier` est a redeployer : elle comprend desormais le mode test.
+
+Corrige au passage cote nounou : l'enregistrement etait demande avant la
+verification de session, donc parfois jamais. Il vient apres, une fois connectee.

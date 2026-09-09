@@ -103,9 +103,10 @@ Deno.serve(async (req) => {
         { status: 401, headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
     }
 
-    const { contrat_id, titre, corps, urgent } = await req.json();
-    if (!contrat_id || !titre) throw new Error('contrat_id et titre sont requis');
-    console.log(`demande | contrat=${contrat_id} titre="${titre}" urgent=${!!urgent}`);
+    const { contrat_id, titre, corps, urgent, test } = await req.json();
+    if (!titre) throw new Error('titre requis');
+    if (!contrat_id && !test) throw new Error('contrat_id requis');
+    console.log(`demande | contrat=${contrat_id ?? '(test)'} titre="${titre}" urgent=${!!urgent} test=${!!test}`);
     if (!COMPTE.client_email) console.error('FCM_COMPTE_SERVICE absent ou illisible');
 
     // Première vérification : le contrat est lu avec les droits de l'appelant.
@@ -116,19 +117,29 @@ Deno.serve(async (req) => {
     const { data: utilisateur } = await commeUtilisateur.auth.getUser();
     if (!utilisateur?.user) throw new Error('Session invalide');
 
-    const { data: contrat } = await commeUtilisateur
+    // Mode test : l'appelant s'envoie une notification a lui-meme. Sert a
+    // verifier la chaine complete sans dependre d'un contrat ni d'un tiers.
+    let destinataire: string | null = null;
+    if (test) {
+      destinataire = utilisateur.user.id;
+      console.log('mode test : destinataire = appelant');
+    }
+
+    const { data: contrat } = test ? { data: null } : await commeUtilisateur
       .from('contrats')
       .select('id, employeur_id, coparent_id, salariee_id')
       .eq('id', contrat_id)
       .maybeSingle();
-    if (!contrat) throw new Error('Contrat inaccessible');
-    console.log(`appelant=${utilisateur.user.id} employeur=${contrat.employeur_id} coparent=${contrat.coparent_id} salariee=${contrat.salariee_id}`);
+    if (!test) {
+      if (!contrat) throw new Error('Contrat inaccessible');
+      console.log(`appelant=${utilisateur.user.id} employeur=${contrat.employeur_id} coparent=${contrat.coparent_id} salariee=${contrat.salariee_id}`);
 
-    // Le destinataire est l'autre partie, jamais l'expéditeur. Le co-parent
-    // compte comme parent : sans cela, sa notification lui reviendrait.
-    const moi = utilisateur.user.id;
-    const coteParent = contrat.employeur_id === moi || contrat.coparent_id === moi;
-    const destinataire = coteParent ? contrat.salariee_id : contrat.employeur_id;
+      // Le destinataire est l'autre partie, jamais l'expéditeur. Le co-parent
+      // compte comme parent : sans cela, sa notification lui reviendrait.
+      const moi = utilisateur.user.id;
+      const coteParent = contrat.employeur_id === moi || contrat.coparent_id === moi;
+      destinataire = coteParent ? contrat.salariee_id : contrat.employeur_id;
+    }
     if (!destinataire) {
       console.warn('aucun destinataire : le contrat n\'a pas de seconde partie');
       return new Response(JSON.stringify({ envoyes: 0, raison: 'aucun destinataire' }),
@@ -139,8 +150,8 @@ Deno.serve(async (req) => {
     // exige la clé de service, et c'est la seule chose qu'elle sert ici.
     const commeService = createClient(URL_SUPABASE, CLE_SERVICE);
 
-    // Mode silencieux du destinataire. L'urgent passe toujours.
-    if (!urgent) {
+    // Mode silencieux du destinataire. L'urgent passe toujours, le test aussi.
+    if (!urgent && !test) {
       const { data: pref } = await commeService
         .from('profils')
         .select('silence_weekend, silence_du, silence_au')
@@ -175,7 +186,7 @@ Deno.serve(async (req) => {
     let envoyes = 0;
     const perimes: string[] = [];
     for (const j of jetons) {
-      const r = await envoyer(j.jeton, titre, corps ?? '', { contrat_id: String(contrat_id) });
+      const r = await envoyer(j.jeton, titre, corps ?? '', { contrat_id: String(contrat_id ?? '') });
       if (r.ok) { envoyes++; console.log('envoi accepté par Firebase'); }
       else {
         console.error(`Firebase a refusé (${r.statut}) : ${r.reponse.slice(0, 300)}`);

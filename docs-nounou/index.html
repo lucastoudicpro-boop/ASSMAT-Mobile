@@ -780,6 +780,17 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     </div>
 
     <div class="card">
+      <div class="tete"><svg><use href="#i-alerte"/></svg>Notifications</div>
+      <div class="corps">
+        <div id="etatPush"></div>
+        <button id="btnRelancerPush" class="btn btn-ghost btn-block" style="margin-top:12px">Réessayer l'enregistrement</button>
+        <button id="btnTestPush" class="btn btn-primary btn-block">M'envoyer une notification de test</button>
+        <p class="hint" id="resultatTestPush"></p>
+        <p class="hint">Chaque ligne est un maillon. La première en rouge dit où ça casse. Le test envoie une notification à ce téléphone, sans passer par un parent.</p>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="tete"><svg><use href="#i-theme"/></svg>Apparence</div>
       <div class="corps">
         <div class="seg" id="segTheme">
@@ -811,7 +822,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.0.12</b></div>
+        <div class="ds"><span>Version</span><b>1.0.13</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1041,6 +1052,7 @@ const Supa = (() => {
   /* Le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
      tables se rejouent apres rafraichissement ; celui-ci ne le faisait pas et
      partait avec un jeton perime, que la passerelle refusait en 401. */
+  /* contratId a null : mode test, la notification revient a l'appelant. */
   async function notifier(contratId, titre, corps, urgent) {
     if (!connecte()) return null;
 
@@ -1048,7 +1060,7 @@ const Supa = (() => {
       const r = await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent })
+        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent, test: contratId === null })
       });
       let corpsRep = null;
       try { corpsRep = await r.json(); } catch (e) {}
@@ -1072,7 +1084,13 @@ const Supa = (() => {
     }
   }
 
-  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse,
+  async function mesJetons() {
+    if (!connecte()) return [];
+    try { return await lire('jetons_push', 'personne_id=eq.' + session.user.id + '&select=jeton,application,maj_le'); }
+    catch (e) { return []; }
+  }
+
+  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse, mesJetons,
            enregistrerJeton, notifier, supprimer, reprendre, rafraichir,
            inscrire, connecter, recuperer, deconnecter, lire, ecrire, modifier, fonction };
 })();
@@ -1146,7 +1164,7 @@ function montrer(v) {
   if (v === 'messages') { renderBesoins(); chargerMessages().then(renderMessages); chargerDemandes().then(renderDemandes); }
   if (v === 'familles') { renderContrats(); chargerFermetures().then(renderFermetures); }
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
-  if (v === 'params') majCompte();
+  if (v === 'params') { majCompte(); majEtatPush(); }
 }
 
 function appliquerTheme(t) {
@@ -2224,6 +2242,8 @@ $('#btnEnvoyer').onclick = envoyerTexte;
 $('#btnDemande').onclick = envoyerDemande;
 $$('.retards [data-retard]').forEach(b => { b.onclick = () => annoncerRetard(b.dataset.retard); });
 $('#btnFermeture').onclick = ajouterFermeture;
+$('#btnRelancerPush').onclick = () => activerPush();
+$('#btnTestPush').onclick = testerPush;
 $('#btnCreerCommun').onclick = creerCommun;
 $('#btnAnnoncer').onclick = annoncer;
 $('#communCategorie').addEventListener('click', e => {
@@ -2435,29 +2455,66 @@ function verrouillerSiBesoin() {
 /* ---------------- Notifications système ----------------
    Le jeton de l'appareil est renouvelé par Android : on le redépose à chaque
    fois. Sans autorisation, l'application fonctionne exactement pareil. */
+const etatPush = { compile: null, plugin: null, autorisation: null, jeton: null, depose: null, etape: '', ecouteurs: false };
+
 async function activerPush() {
-  // Sans google-services.json dans l'APK, Firebase n'est pas initialisé et
-  // l'appel à register() arrête l'application. On ne tente donc rien tant que
-  // la compilation n'a pas confirmé sa présence.
-  if (!PROJET.notifications) return;
+  etatPush.compile = !!PROJET.notifications;
+  if (!PROJET.notifications) { etatPush.etape = 'Firebase absent de cette version de l\u2019application'; majEtatPush(); return; }
   const C = window.Capacitor && window.Capacitor.Plugins;
-  if (!C || !C.PushNotifications || !Supa.connecte()) return;
+  etatPush.plugin = !!(C && C.PushNotifications);
+  if (!etatPush.plugin) { etatPush.etape = 'module de notifications absent'; majEtatPush(); return; }
+  if (!Supa.connecte()) { etatPush.etape = 'pas encore connecté'; majEtatPush(); return; }
   const P = C.PushNotifications;
   try {
     let perm = await P.checkPermissions();
     if (perm.receive !== 'granted') perm = await P.requestPermissions();
-    if (perm.receive !== 'granted') return;
+    etatPush.autorisation = perm.receive;
+    if (perm.receive !== 'granted') { etatPush.etape = 'autorisation Android refusée'; majEtatPush(); return; }
 
-    P.addListener('registration', async (t) => {
-      try { await Supa.enregistrerJeton(t.value, 'nounou'); } catch (e) {}
-    });
-    P.addListener('registrationError', () => {});
-    P.addListener('pushNotificationReceived', () => rafraichirTout(true));
-    P.addListener('pushNotificationActionPerformed', () => rafraichirTout(true));
+    if (!etatPush.ecouteurs) {
+      etatPush.ecouteurs = true;
+      P.addListener('registration', async (t) => {
+        etatPush.jeton = t.value;
+        try { await Supa.enregistrerJeton(t.value, 'nounou'); etatPush.depose = true; etatPush.etape = 'prêt'; }
+        catch (e) { etatPush.depose = false; etatPush.etape = 'dépôt du jeton refusé : ' + (e.message || e); }
+        majEtatPush();
+      });
+      P.addListener('registrationError', (e) => { etatPush.etape = 'Firebase a refusé l\u2019enregistrement : ' + JSON.stringify(e); majEtatPush(); });
+      P.addListener('pushNotificationReceived', () => rafraichirTout(true));
+      P.addListener('pushNotificationActionPerformed', () => rafraichirTout(true));
+    }
+    etatPush.etape = 'enregistrement en cours…';
+    majEtatPush();
     await P.register();
-  } catch (e) { /* appareil sans services Google : on continue sans push */ }
+  } catch (e) { etatPush.etape = 'erreur : ' + (e.message || e); majEtatPush(); }
 }
 
+/* Ce que voit l'écran des réglages : chaque maillon de la chaîne, et un test. */
+async function majEtatPush() {
+  const box = document.getElementById('etatPush');
+  if (!box) return;
+  const oui = v => v === true ? 'oui' : v === false ? 'non' : '—';
+  let deposes = [];
+  if (Supa.connecte()) deposes = await Supa.mesJetons();
+  const ds = (l, v, ok) => `<div class="ds"><span>${l}</span><b style="color:${ok === true ? 'var(--acc)' : ok === false ? 'var(--danger)' : 'inherit'}">${v}</b></div>`;
+  box.innerHTML =
+    ds('Firebase dans l\u2019application', oui(etatPush.compile), etatPush.compile) +
+    ds('Module de notifications', oui(etatPush.plugin), etatPush.plugin) +
+    ds('Autorisation Android', etatPush.autorisation || '—', etatPush.autorisation === 'granted' ? true : etatPush.autorisation ? false : null) +
+    ds('Jeton de l\u2019appareil', etatPush.jeton ? etatPush.jeton.slice(0, 10) + '…' : 'absent', !!etatPush.jeton) +
+    ds('Jetons déposés pour ce compte', String(deposes.length), deposes.length > 0) +
+    `<p class="hint" style="margin-top:8px">${etatPush.etape || ''}</p>`;
+}
+
+async function testerPush() {
+  const box = document.getElementById('resultatTestPush');
+  if (box) box.textContent = 'Envoi…';
+  const r = await Supa.notifier(null, 'Test Cocon', 'Si tu lis ceci, la chaîne fonctionne.', true);
+  if (!box) return;
+  if (!r) box.textContent = 'Aucune réponse : hors ligne, ou fonction injoignable.';
+  else if (r.statut === 200 && r.corps && r.corps.envoyes > 0) box.textContent = 'Envoyé à ' + r.corps.envoyes + ' appareil(s). Regarde la barre de notifications.';
+  else box.textContent = 'Réponse ' + r.statut + ' : ' + JSON.stringify(r.corps);
+}
 /* ---------------- Démarrage ---------------- */
 (async () => {
   const r = Reglages.lire();
@@ -2465,14 +2522,14 @@ async function activerPush() {
   Supa.configurer(r.url || PROJET.url, r.cle || PROJET.cle);
   if (securite().actif) afficherVerrou('ouvrir');
   majSecurite();
-  if (Supa.configure()) { await Supa.reprendre(); activerPush(); }
+  if (Supa.configure()) await Supa.reprendre();
+  if (Supa.connecte() && !sessionValide()) { await Supa.deconnecter(); contrats = []; jours = []; }
   majCompte();
   await charger();
   renderAccueil();
 
-  if (Supa.connecte() && !sessionValide()) { await Supa.deconnecter(); contrats = []; jours = []; majCompte(); renderAccueil(); }
   if (!Supa.connecte()) await ouvrirPorte();
-  else demarrerBoucle();
+  else { demarrerBoucle(); activerPush(); }
   // l'écran de lancement se retire une fois la destination connue
   const attente = Math.max(0, (window.Capacitor ? 700 : 1200) - (Date.now() - demarreA));
   setTimeout(() => {

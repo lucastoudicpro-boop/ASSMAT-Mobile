@@ -1587,6 +1587,17 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     </div>
   </details>
   <details class="card">
+    <summary><svg class="ico"><use href="#i-cloche"/></svg><span class="ttl">Notifications</span></summary>
+    <div class="body">
+      <div id="etatPush"></div>
+      <button id="btnRelancerPush" class="btn btn-ghost btn-block" style="margin-top:12px">Réessayer l'enregistrement</button>
+      <button id="btnTestPush" class="btn btn-primary btn-block">M'envoyer une notification de test</button>
+      <p class="hint" id="resultatTestPush"></p>
+      <p class="hint">Chaque ligne est un maillon. La première en rouge dit où ça casse. Le test envoie une notification à ce téléphone, sans passer par la nounou.</p>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-cloche"/></svg><span class="ttl">Mode silencieux</span></summary>
     <div class="body">
       <label class="check"><input type="checkbox" id="silWeekend"><span>Couper le quotidien le week-end</span></label>
@@ -1694,7 +1705,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.0.12</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.0.13</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3422,7 +3433,7 @@ function showView(v) {
   if (v === 'accueil') renderAccueil();
   if (v === 'apercu') { renderPreview(); fitPreview(); }
   if (v === 'dossier') renderDossier();
-  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); }
+  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); }
   if (v === 'annuel') renderAnnuel().then(renderRegularisation);
   renderTitle();
   renderBarre();
@@ -3897,6 +3908,7 @@ const Supa = (() => {
   /* Le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
      tables se rejouent apres rafraichissement ; celui-ci ne le faisait pas et
      partait avec un jeton perime, que la passerelle refusait en 401. */
+  /* contratId a null : mode test, la notification revient a l'appelant. */
   async function notifier(contratId, titre, corps, urgent) {
     if (!connecte()) return null;
 
@@ -3904,7 +3916,7 @@ const Supa = (() => {
       const r = await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent })
+        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent, test: contratId === null })
       });
       let corpsRep = null;
       try { corpsRep = await r.json(); } catch (e) {}
@@ -3928,7 +3940,13 @@ const Supa = (() => {
     }
   }
 
-  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse,
+  async function mesJetons() {
+    if (!connecte()) return [];
+    try { return await lire('jetons_push', 'personne_id=eq.' + session.user.id + '&select=jeton,application,maj_le'); }
+    catch (e) { return []; }
+  }
+
+  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse, mesJetons,
            enregistrerJeton, notifier, supprimer, reprendre, rafraichir,
            inscrire, connecter, recuperer, deconnecter, lire, ecrire, modifier, fonction };
 })();
@@ -4726,7 +4744,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.0.12';
+const VERSION = '1.0.13';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -6665,6 +6683,8 @@ $('#btnFinCalcul').onclick = calculFin;
 $('#btnAjoutEnfant').onclick = ajouterEnfant;
 $('#btnRepondre').onclick = repondre;
 $('#btnSilence').onclick = enregistrerSilence;
+$('#btnRelancerPush').onclick = () => activerPush();
+$('#btnTestPush').onclick = testerPush;
 $('#tourSuivant').onclick = () => { if (tourEtape < TOUR.length - 1) { tourEtape++; renderTour(); } else finirTour(); };
 $('#btnAnnoncerP').onclick = annoncerParent;
 $('#btnQuitterCommun').onclick = () => { if (confirm('Quitter l\u2019espace commun ? Tes annonces seront retirées.')) repondreCommun(false); };
@@ -6921,30 +6941,66 @@ function integrerAndroid() {
 /* ---------------- Notifications système ----------------
    Le jeton de l'appareil est renouvelé par Android : on le redépose à chaque
    fois. Sans autorisation, l'application fonctionne exactement pareil. */
+const etatPush = { compile: null, plugin: null, autorisation: null, jeton: null, depose: null, etape: '', ecouteurs: false };
+
 async function activerPush() {
-  // Sans google-services.json dans l'APK, Firebase n'est pas initialisé et
-  // l'appel à register() arrête l'application. On ne tente donc rien tant que
-  // la compilation n'a pas confirmé sa présence.
-  if (!PROJET.notifications) return;
+  etatPush.compile = !!PROJET.notifications;
+  if (!PROJET.notifications) { etatPush.etape = 'Firebase absent de cette version de l\u2019application'; majEtatPush(); return; }
   const C = window.Capacitor && window.Capacitor.Plugins;
-  if (!C || !C.PushNotifications || !Supa.connecte()) return;
+  etatPush.plugin = !!(C && C.PushNotifications);
+  if (!etatPush.plugin) { etatPush.etape = 'module de notifications absent'; majEtatPush(); return; }
+  if (!Supa.connecte()) { etatPush.etape = 'pas encore connecté'; majEtatPush(); return; }
   const P = C.PushNotifications;
   try {
     let perm = await P.checkPermissions();
     if (perm.receive !== 'granted') perm = await P.requestPermissions();
-    if (perm.receive !== 'granted') return;
+    etatPush.autorisation = perm.receive;
+    if (perm.receive !== 'granted') { etatPush.etape = 'autorisation Android refusée'; majEtatPush(); return; }
 
-    P.addListener('registration', async (t) => {
-      try { await Supa.enregistrerJeton(t.value, 'parent'); } catch (e) {}
-    });
-    P.addListener('registrationError', () => {});
-    // une notification reçue doit se voir dans l'application, tout de suite
-    P.addListener('pushNotificationReceived', () => rafraichirTout(true));
-    P.addListener('pushNotificationActionPerformed', () => rafraichirTout(true));
+    if (!etatPush.ecouteurs) {
+      etatPush.ecouteurs = true;
+      P.addListener('registration', async (t) => {
+        etatPush.jeton = t.value;
+        try { await Supa.enregistrerJeton(t.value, 'parent'); etatPush.depose = true; etatPush.etape = 'prêt'; }
+        catch (e) { etatPush.depose = false; etatPush.etape = 'dépôt du jeton refusé : ' + (e.message || e); }
+        majEtatPush();
+      });
+      P.addListener('registrationError', (e) => { etatPush.etape = 'Firebase a refusé l\u2019enregistrement : ' + JSON.stringify(e); majEtatPush(); });
+      P.addListener('pushNotificationReceived', () => rafraichirTout(true));
+      P.addListener('pushNotificationActionPerformed', () => rafraichirTout(true));
+    }
+    etatPush.etape = 'enregistrement en cours…';
+    majEtatPush();
     await P.register();
-  } catch (e) { /* appareil sans services Google : on continue sans push */ }
+  } catch (e) { etatPush.etape = 'erreur : ' + (e.message || e); majEtatPush(); }
 }
 
+/* Ce que voit l'écran des réglages : chaque maillon de la chaîne, et un test. */
+async function majEtatPush() {
+  const box = document.getElementById('etatPush');
+  if (!box) return;
+  const oui = v => v === true ? 'oui' : v === false ? 'non' : '—';
+  let deposes = [];
+  if (Supa.connecte()) deposes = await Supa.mesJetons();
+  const ds = (l, v, ok) => `<div class="ds"><span>${l}</span><b style="color:${ok === true ? 'var(--acc)' : ok === false ? 'var(--danger)' : 'inherit'}">${v}</b></div>`;
+  box.innerHTML =
+    ds('Firebase dans l\u2019application', oui(etatPush.compile), etatPush.compile) +
+    ds('Module de notifications', oui(etatPush.plugin), etatPush.plugin) +
+    ds('Autorisation Android', etatPush.autorisation || '—', etatPush.autorisation === 'granted' ? true : etatPush.autorisation ? false : null) +
+    ds('Jeton de l\u2019appareil', etatPush.jeton ? etatPush.jeton.slice(0, 10) + '…' : 'absent', !!etatPush.jeton) +
+    ds('Jetons déposés pour ce compte', String(deposes.length), deposes.length > 0) +
+    `<p class="hint" style="margin-top:8px">${etatPush.etape || ''}</p>`;
+}
+
+async function testerPush() {
+  const box = document.getElementById('resultatTestPush');
+  if (box) box.textContent = 'Envoi…';
+  const r = await Supa.notifier(null, 'Test Cocon', 'Si tu lis ceci, la chaîne fonctionne.', true);
+  if (!box) return;
+  if (!r) box.textContent = 'Aucune réponse : hors ligne, ou fonction injoignable.';
+  else if (r.statut === 200 && r.corps && r.corps.envoyes > 0) box.textContent = 'Envoyé à ' + r.corps.envoyes + ' appareil(s). Regarde la barre de notifications.';
+  else box.textContent = 'Réponse ' + r.statut + ' : ' + JSON.stringify(r.corps);
+}
 /* ---------------- Démarrage ---------------- */
 if ('serviceWorker' in navigator && !window.Capacitor && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});
