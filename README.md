@@ -1663,3 +1663,75 @@ La meme visionneuse : plein ecran, date en toutes lettres, glissement du doigt,
 enregistrement dans la pellicule. La grille est regroupee par mois.
 
 La fonction `notifier` est a redeployer : elle transmet la destination.
+
+## 1.3.6 — le centre du parent ignorait la nounou
+
+Le centre de notifications est **une liste de ce qui demande une action**, pas
+un historique des bannieres recues. C'est voulu : une notification touchee mene
+deja au bon endroit, et un journal d'evenements de plus ne ferait que doubler
+ce que chaque module affiche avec sa pastille.
+
+Mais cote parent, il ne contenait que les obligations administratives —
+calendrier a remplir, sauvegarde, seuils, versement. **Rien de ce que la nounou
+envoyait.** Ouvrir la cloche ne disait pas qu'un message attendait.
+
+Il annonce desormais aussi :
+
+- messages non lus, en signalant les demandes de materiel qu'ils contiennent
+- demandes a accepter ou refuser
+- journal du jour, avec l'humeur et le mot, tant qu'il n'a pas ete ouvert
+- photos des trois derniers jours
+- absences annoncees non encore accusees
+- etapes d'adaptation ou la nounou attend le ressenti du parent
+- invitation a l'espace commun
+
+Un point important : ces elements disparaissent une fois consultes. Le journal
+retient la date de derniere lecture, les messages leur accuse, les absences leur
+accuse de reception. Un centre qui repete indefiniment la meme chose finit par
+ne plus etre lu.
+
+La boucle de rafraichissement charge maintenant tout ce dont le centre parle —
+absences, adaptation, espace commun — sinon il annonçait moins que ce qui
+attendait vraiment.
+
+## 1.4.0
+
+### Messages d'erreur en français
+
+Supabase repond en anglais et en jargon. Douze messages courants sont traduits
+en ce qu'il faut faire : « Adresse e-mail ou mot de passe incorrect », « Confirme
+ton adresse : un lien t'a ete envoye », « Trop d'essais, attends une minute ».
+Le formulaire se secoue brievement — un refus se comprend avant d'etre lu.
+
+### La mauvaise application
+
+Une nounou qui se connecte dans Cocon Parent voyait un ecran vide sans
+comprendre pourquoi. Le profil porte son role : l'application le lit, le dit, et
+la deconnecte plutot que de la laisser devant un espace qui ne sera jamais
+rempli. Dans les deux sens.
+
+### Le telechargement des photos
+
+Un lien de telechargement ne fait rien dans une WebView Android. La photo est
+desormais ecrite dans le cache puis confiee au systeme, qui propose la
+pellicule, un message ou un courriel. Deux modules s'ajoutent a la
+compilation : `@capacitor/filesystem` et `@capacitor/share`.
+
+### La visionneuse suit le doigt
+
+Le glissement attendait le relachement pour agir : d'ou l'impression de saut.
+L'image suit maintenant le doigt en direct.
+
+- **Vers le cote** : l'image se decale, et au relachement l'ancienne part du
+  cote du geste pendant que la nouvelle entre de l'autre.
+- **Vers le bas** : l'image descend et retrecit, le fond s'eclaircit
+  progressivement. Passe cent dix pixels, la visionneuse se ferme.
+- **Au bout de la serie** : un rebond de dix-huit pixels. Un geste doit
+  toujours repondre quelque chose.
+
+### Animations
+
+Le heros eclot a l'ouverture, les pastilles apparaissent par une breve
+impulsion, le bouton central respire lentement — jamais de clignotement. Les
+messages envoyes montent depuis le bas, les frimousses se posent en tournant
+legerement. Tout est desactive en mouvement reduit.

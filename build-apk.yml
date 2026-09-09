@@ -82,6 +82,11 @@ jobs:
           else
             echo "::error::Module appareil photo NON installé : la prise de photo ouvrira le sélecteur."
           fi
+          # Ecrire un fichier puis le confier au systeme : sans ces deux modules,
+          # « enregistrer la photo » ne fait rien dans une WebView.
+          npm install "@capacitor/filesystem@^6" "@capacitor/share@^6" --no-audit --no-fund \
+            || echo "::warning::Modules fichier et partage indisponibles"
+
           if npm install "@capacitor/push-notifications@^6" --no-audit --no-fund; then
             echo "push=oui" >> "$GITHUB_ENV"
             echo "Module de notifications installé."
@@ -96,7 +101,7 @@ jobs:
           echo "--- modules Capacitor présents ---"
           node -e "
             const d = require('./package.json').dependencies || {};
-            const attendus = ['@capacitor/camera','@capacitor/push-notifications','@capacitor/preferences','@capacitor/app'];
+            const attendus = ['@capacitor/camera','@capacitor/push-notifications','@capacitor/preferences','@capacitor/app','@capacitor/filesystem','@capacitor/share'];
             let manque = 0;
             for (const m of attendus) {
               const ok = !!d[m];

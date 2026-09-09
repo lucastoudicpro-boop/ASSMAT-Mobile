@@ -1088,6 +1088,74 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   .btn:active,.tuile-m:active,.besoin-b:active,.puce-act:active,.module:active{transform:none}
 }
 
+
+/* ============================================================
+   Animations : ce qui rend l'application accueillante
+   ============================================================ */
+
+/* Un refus se voit avant d'etre lu. */
+@keyframes secousse{
+  0%,100%{transform:translateX(0)}
+  15%{transform:translateX(-9px)} 30%{transform:translateX(8px)}
+  45%{transform:translateX(-6px)} 60%{transform:translateX(5px)}
+  75%{transform:translateX(-3px)}
+}
+.secoue{animation:secousse .45s ease-in-out}
+
+/* Le heros respire doucement au premier affichage. */
+@keyframes eclot{
+  from{opacity:0;transform:scale(.97) translateY(8px)}
+  to{opacity:1;transform:none}
+}
+#hero{animation:eclot .5s cubic-bezier(.2,.8,.3,1) both}
+
+/* Les cartes arrivent l'une apres l'autre, sans que ce soit une cascade
+   mecanique : chaque decalage est court. */
+@keyframes monte{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* Une pastille qui apparait doit se remarquer une fois, puis se taire. */
+@keyframes pulse{
+  0%{transform:scale(.4);opacity:0}
+  55%{transform:scale(1.18);opacity:1}
+  100%{transform:scale(1)}
+}
+.nav-pastille,.pastille,.compteur{animation:pulse .38s cubic-bezier(.3,1.4,.5,1) both}
+
+/* Le bouton central invite : une respiration lente, jamais clignotante. */
+@keyframes souffle{
+  0%,100%{box-shadow:0 8px 18px rgba(47,125,115,.35)}
+  50%{box-shadow:0 10px 26px rgba(47,125,115,.5)}
+}
+.nav-plus span{animation:souffle 3.4s ease-in-out infinite}
+
+/* Le message envoye part du bas, comme s'il quittait la main. */
+@keyframes envoi{
+  from{opacity:0;transform:translateY(14px) scale(.96)}
+  to{opacity:1;transform:none}
+}
+.bulle-l.moi .bulle{animation:envoi .3s cubic-bezier(.2,.9,.3,1.05) both}
+
+/* Le toast entre et sort en glissant, plutot qu'en clignotant. */
+#toast{transition:transform .3s cubic-bezier(.2,.9,.3,1.05), opacity .25s ease}
+
+/* La visionneuse se retire en s'eloignant. */
+@keyframes recule{to{opacity:0;transform:scale(.94)}}
+#visionneuse.part{animation:recule .17s ease-in both}
+
+/* Les frimousses se posent en tournant tres legerement. */
+@keyframes pose{from{opacity:0;transform:scale(.7) rotate(-8deg)}to{opacity:1;transform:none}}
+.portrait svg,.portrait-img,.portrait-grand svg,.portrait-grand img{animation:pose .4s cubic-bezier(.3,1.3,.5,1) both}
+
+/* Un enregistrement reussi se confirme par un bref acquiescement. */
+@keyframes acquiesce{0%,100%{transform:scale(1)}40%{transform:scale(1.06)}}
+.vient-de-changer{animation:acquiesce .3s ease}
+
+@media (prefers-reduced-motion:reduce){
+  .secoue,.nav-plus span,.nav-pastille,.pastille,.compteur,
+  #hero,.bulle-l.moi .bulle,#visionneuse.part,
+  .portrait svg,.portrait-img,.portrait-grand svg,.portrait-grand img{animation:none}
+}
+
 </style>
 </head>
 <body>
@@ -1821,7 +1889,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.3.5</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.4.0</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -4891,9 +4959,15 @@ async function ouvrirModule(id) {
 /* Chaque page recharge ce qu'elle montre à l'ouverture. */
 async function rafraichirModule(id) {
   const travaux = {
-    journal:    async () => { await chargerJournal(); renderJournal(); },
+    journal:    async () => {
+      await chargerJournal(); renderJournal();
+      const auj = new Date().toISOString().slice(0, 10);
+      const j = journal.find(x => x.jour === auj);
+      if (j && j.maj_le) marquerVu('journal', j.maj_le);
+      majPastille();
+    },
     galerie:    async () => { await chargerGalerie(); renderGalerie(); },
-    messages:   async () => { await chargerMessages(); renderMessages(); await marquerMessagesLus(); renderBarre(); },
+    messages:   async () => { await chargerMessages(); renderMessages(); await marquerMessagesLus(); renderBarre(); majPastille(); },
     demandes:   async () => { await chargerDemandes(); renderDemandes(); },
     fermetures: async () => { await chargerFermetures(); renderFermetures(); },
     nounous:    async () => { await chercherOrphelins(); await renderPartage(); },
@@ -5048,6 +5122,7 @@ async function fermerPorte() {
   $('#porte').hidden = true;
   if (!profil.tourVu) setTimeout(ouvrirTour, 450);
   await assurerProfil();
+  if (!await verifierRole('employeur', 'Cocon Nounou')) { await Supa.deconnecter(); await ouvrirPorte(); return; }
   await reconcilierContrats(false);
   demarrerBoucle();
   activerPush();
@@ -5079,7 +5154,7 @@ async function passerPorte(creer) {
     occuper('Préparation de ton espace…');
     await fermerPorte();
     occuper('');
-  } catch (e) { occuper(''); dire(e.message || String(e), true); }
+  } catch (e) { occuper(''); dire(enClair(e), true); secouer(); }
 }
 
 /* ---------------- Compte en ligne ---------------- */
@@ -5191,7 +5266,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.3.5';
+const VERSION = '1.4.0';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -5739,8 +5814,16 @@ async function ouvrirVisionneuse(id) {
 }
 
 function fermerVisionneuse() {
-  $('#visionneuse').hidden = true;
-  document.body.style.overflow = '';
+  const v = $('#visionneuse');
+  v.classList.add('part');
+  setTimeout(() => {
+    v.hidden = true;
+    v.classList.remove('part');
+    v.style.background = '';
+    const i = $('#visioImage');
+    if (i) { i.style.transform = ''; i.style.opacity = ''; i.style.transition = ''; }
+    document.body.style.overflow = '';
+  }, 170);
 }
 
 async function montrerVisio(sens) {
@@ -5763,29 +5846,59 @@ async function montrerVisio(sens) {
   if (visioURL) img.src = visioURL;
 }
 
+let enTransition = false;
 async function glisserVisio(pas) {
   const n = visioIndex + pas;
-  if (n < 0 || n >= galerie.length) return;
+  if (n < 0 || n >= galerie.length || enTransition) {
+    // rebond quand on est au bout : le geste doit repondre quelque chose
+    const i = document.getElementById('visioImage');
+    if (i) { i.style.transform = `translateX(${pas > 0 ? -18 : 18}px)`; setTimeout(() => { i.style.transform = ''; }, 140); }
+    return;
+  }
+  enTransition = true;
   visioIndex = n;
-  await montrerVisio(pas);
+  await animerVers(pas, () => montrerVisio());
+  enTransition = false;
+}
+
+/* Un lien de telechargement ne fait rien dans une WebView Android. Il faut
+   ecrire le fichier puis le confier au systeme, qui propose la pellicule. */
+async function partagerFichier(blob, nom) {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.Filesystem && C.Share) {
+    const b64 = await new Promise(r => {
+      const fr = new FileReader();
+      fr.onload = () => r(String(fr.result).split(',')[1]);
+      fr.readAsDataURL(blob);
+    });
+    const ecrit = await C.Filesystem.writeFile({ path: nom, data: b64, directory: 'CACHE' });
+    await C.Share.share({ title: nom, url: ecrit.uri, dialogTitle: 'Enregistrer la photo' });
+    return true;
+  }
+  if (navigator.canShare) {
+    const f = new File([blob], nom, { type: blob.type || 'image/jpeg' });
+    if (navigator.canShare({ files: [f] })) { await navigator.share({ files: [f] }); return true; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nom;
+  document.body.appendChild(a); a.click(); a.remove();
+  return true;
 }
 
 async function enregistrerPhoto() {
   const p = galerie[visioIndex];
-  if (!p || !visioURL) return;
+  if (!p || !visioURL) { toast('Photo pas encore chargée'); return; }
   const nom = 'cocon-' + (cur.enfant.prenom || 'photo') + '-' + String(p.prise_le).slice(0, 10) + '.jpg';
+  const bouton = document.getElementById('visioEnregistrer');
+  if (bouton) bouton.textContent = '…';
   try {
     const blob = await (await fetch(visioURL)).blob();
-    if (navigator.canShare) {
-      const f = new File([blob], nom, { type: blob.type || 'image/jpeg' });
-      if (navigator.canShare({ files: [f] })) { await navigator.share({ files: [f] }); return; }
-    }
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = nom;
-    a.click();
+    await partagerFichier(blob, nom);
     toast('Photo enregistrée');
-  } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
+  } catch (e) {
+    toast('Enregistrement impossible : ' + enClair(e));
+  } finally { if (bouton) bouton.textContent = '⤓'; }
 }
 
 /* ---------------- Fermetures de la salariée ---------------- */
@@ -6340,6 +6453,51 @@ function alertes() {
     });
   }
 
+  // Ce qui vient de la nounou. Le centre ne repertoriait que les obligations
+  // administratives : rien de ce qu'elle envoyait n'y apparaissait, alors que
+  // c'est ce qu'on ouvre l'application pour voir.
+  const moi = (Supa.moi() || {}).id;
+
+  const nonLus = messages.filter(m => m.auteur_id !== moi && !m.lu_le);
+  if (nonLus.length) {
+    const besoins = nonLus.filter(m => m.categorie === 'besoin').length;
+    out.push({ ton: besoins ? 'a' : 'i',
+      titre: nonLus.length + (nonLus.length > 1 ? ' messages non lus' : ' message non lu'),
+      detail: besoins ? besoins + (besoins > 1 ? ' demandes de matériel' : ' demande de matériel') : (nonLus[0].texte || 'De la nounou'),
+      action: 'Lire', fn: () => ouvrirModule('messages') });
+  }
+
+  const enAttente = demandes.filter(d => d.etat === 'attente').length;
+  if (enAttente) out.push({ ton: 'a',
+    titre: enAttente + (enAttente > 1 ? ' demandes à traiter' : ' demande à traiter'),
+    detail: 'À accepter ou refuser.', action: 'Voir', fn: () => ouvrirModule('demandes') });
+
+  const auj = new Date().toISOString().slice(0, 10);
+  const jDuJour = journal.find(j => j.jour === auj);
+  if (jDuJour && jDuJour.maj_le && !dejaVu('journal', jDuJour.maj_le))
+    out.push({ ton: 'i', titre: 'Journal du jour',
+      detail: (JOURNAL_HUMEUR[jDuJour.humeur] || '') + (jDuJour.mot ? ' · ' + jDuJour.mot.slice(0, 40) : ''),
+      action: 'Ouvrir', fn: () => ouvrirModule('journal') });
+
+  const recentes = galerie.filter(p => Date.now() - new Date(p.prise_le).getTime() < 3 * 86400000).length;
+  if (recentes) out.push({ ton: 'i',
+    titre: recentes + (recentes > 1 ? ' nouvelles photos' : ' nouvelle photo'),
+    detail: 'Ces trois derniers jours.', action: 'Voir', fn: () => ouvrirModule('galerie') });
+
+  const absAVenir = fermetures.filter(f => f.au >= auj && !f.vu_le);
+  if (absAVenir.length) out.push({ ton: 'a',
+    titre: absAVenir.length + (absAVenir.length > 1 ? ' absences annoncées' : ' absence annoncée'),
+    detail: 'À prendre en compte.', action: 'Voir', fn: () => ouvrirModule('fermetures') });
+
+  const nouvellesEtapes = adaptation.filter(a => a.ressenti_salariee && !a.ressenti_parent).length;
+  if (nouvellesEtapes) out.push({ ton: 'i',
+    titre: nouvellesEtapes + (nouvellesEtapes > 1 ? ' étapes d\u2019adaptation' : ' étape d\u2019adaptation'),
+    detail: 'La nounou attend ton ressenti.', action: 'Répondre', fn: () => ouvrirModule('adaptation') });
+
+  if (adhesion && !adhesion.accepte_le && !adhesion.quitte_le)
+    out.push({ ton: 'i', titre: 'Invitation à l\u2019espace commun',
+      detail: 'Ta nounou t\u2019y invite.', action: 'Voir', fn: () => ouvrirModule('commun') });
+
   const seuils = profil.seuils || {};
   const tauxMin = F.num(seuils.taux), entMin = F.num(seuils.entretien);
   if (tauxMin > 0 && F.num(cur.contrat.tHn) > 0 && F.num(cur.contrat.tHn) < tauxMin) out.push({
@@ -6411,6 +6569,17 @@ function ouvrirCarte(selecteur) {
   }, 120);
 }
 
+/* Ce qu'on a deja consulte ne doit pas reapparaitre indefiniment. */
+function dejaVu(quoi, horodatage) {
+  const v = (profil.vus || {})[quoi];
+  return !!v && v >= horodatage;
+}
+function marquerVu(quoi, horodatage) {
+  if (!horodatage) return;
+  profil.vus = { ...(profil.vus || {}), [quoi]: horodatage };
+  scheduleProfilSave();
+}
+
 function majPastille() {
   const n = alertes().filter(a => a.ton === 'a' || a.ton === 'i').length;
   $('#pastille').hidden = n === 0;
@@ -6447,10 +6616,14 @@ async function rafraichirTout(force) {
   syncEnCours = true;
   accueilCharge = Date.now();
   try {
-    await Promise.all([chargerMessages(), chargerJournal(), chargerGalerie(), chargerDemandes(), chargerPortrait()]);
+    // Le centre de notifications parle de tout cela : il faut donc tout charger,
+    // sinon il annonce moins que ce qui attend vraiment.
+    await Promise.all([chargerMessages(), chargerJournal(), chargerGalerie(), chargerDemandes(),
+                       chargerPortrait(), chargerFermetures(), chargerAdaptation(), chargerCommun()]);
     if (vue === 'accueil') renderAccueil();
     else if (vue === 'module') await rafraichirModule(moduleActif);
     renderBarre();
+    majPastille();
   } catch (e) { /* hors ligne : on retentera au prochain tour */ }
   syncEnCours = false;
 }
@@ -6975,7 +7148,7 @@ async function renderAnnuel() {
 }
 
 /* ---------------- Dossier salariée ---------------- */
-function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, paiement: {}, conges: {}, contrats: [], seuils: {}, securite: {}, maj: {}, cloud: {}, enfants: [], sauvegarde: {}, nouveauMois: {}, attestation: {}, fin: {}, banniere: { actif: true }, theme: 'clair', ...p }; }
+function normalizeProfil(p) { return { salarie: {}, notes: '', mailTpl: {}, planning: {}, rappel: {}, paiement: {}, conges: {}, contrats: [], seuils: {}, securite: {}, maj: {}, cloud: {}, enfants: [], sauvegarde: {}, nouveauMois: {}, vus: {}, attestation: {}, fin: {}, banniere: { actif: true }, theme: 'clair', ...p }; }
 
 const MAIL_SUBJECT_DEFAUT = 'Fiche de salaire — {mois}';
 const MAIL_BODY_DEFAUT = "Bonjour,\n\nVeuillez trouver ci-joint la fiche de calcul du salaire pour l'accueil de {enfant} — {mois}.\n\nCordialement,\n{employeur}";
@@ -7367,17 +7540,7 @@ $('#visioFermer').onclick = fermerVisionneuse;
 $('#visioEnregistrer').onclick = enregistrerPhoto;
 $('#visioPrec').onclick = () => glisserVisio(-1);
 $('#visioSuiv').onclick = () => glisserVisio(1);
-(() => {
-  let x0 = null;
-  const sc = $('#visioScene');
-  sc.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
-  sc.addEventListener('touchend', e => {
-    if (x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0;
-    x0 = null;
-    if (Math.abs(dx) > 55) glisserVisio(dx < 0 ? 1 : -1);
-  }, { passive: true });
-})();
+brancherGestes($('#visioScene'), glisserVisio, fermerVisionneuse);
 $('#btnArchive').onclick = preparerArchive;
 $('#btnRelancerPush').onclick = () => activerPush();
 $('#btnTestPush').onclick = testerPush;
@@ -7679,6 +7842,114 @@ function renderModulesNatifs() {
     (liste.some(m => !m.present)
       ? '<p class="hint">Un module absent vient de la compilation, pas des réglages. Vérifie que <b>build-apk.yml</b> est à jour dans le dépôt : il ne peut pas être mis à jour par l\u2019extraction automatique.</p>'
       : '');
+}
+
+/* Supabase repond en anglais et en jargon. Ce que lit la personne doit dire
+   quoi faire, pas ce que la base a pense. */
+const ERREURS = [
+  [/invalid login credentials/i,        'Adresse e-mail ou mot de passe incorrect.'],
+  [/email not confirmed/i,              'Confirme ton adresse : un lien t\u2019a été envoyé par e-mail.'],
+  [/user already registered/i,          'Un compte existe déjà avec cette adresse. Connecte-toi.'],
+  [/password should be at least/i,      'Le mot de passe doit faire au moins six caractères.'],
+  [/unable to validate email|invalid email/i, 'Cette adresse e-mail ne semble pas valide.'],
+  [/for security purposes.*(\d+) seconds/i, 'Trop d\u2019essais. Attends une minute avant de réessayer.'],
+  [/signups? not allowed|signup is disabled/i, 'La création de compte est fermée. Demande une invitation.'],
+  [/rate limit|too many requests/i,     'Trop de tentatives. Réessaie dans quelques minutes.'],
+  [/failed to fetch|network|offline/i,  'Pas de connexion. Vérifie ton réseau et réessaie.'],
+  [/session|jwt|expired/i,              'Session expirée. Reconnecte-toi.'],
+  [/row-level security/i,               'La base a refusé : ce contenu n\u2019est pas rattaché à ton compte.'],
+  [/does not exist/i,                   'La base est en retard sur l\u2019application. Lance le dernier fichier SQL.']
+];
+
+function enClair(e) {
+  const m = String((e && e.message) || e || '');
+  for (const [motif, texte] of ERREURS) if (motif.test(m)) return texte;
+  return m || 'Une erreur est survenue.';
+}
+
+/* Une nounou qui se connecte dans Cocon Parent verrait un ecran vide sans
+   comprendre pourquoi. Son profil porte son role : on le lui dit. */
+async function verifierRole(attendu, autre) {
+  if (!Supa.connecte()) return true;
+  try {
+    const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=role');
+    const role = r && r.length ? r[0].role : null;
+    if (!role || role === attendu) return true;
+    alert('Ce compte est un compte ' + (role === 'salariee' ? 'assistante maternelle' : 'parent') +
+      '.\n\nTu es dans ' + (attendu === 'employeur' ? 'Cocon Parent' : 'Cocon Nounou') +
+      ', il te faut ' + autre + '.\n\nDéconnecte-toi et ouvre l\u2019autre application.');
+    return false;
+  } catch (e) { return true; }
+}
+
+/* Le doigt entraine l'image en direct plutot que d'attendre le relachement :
+   c'est ce qui fait la difference entre « ça glisse » et « ça saute ». */
+function brancherGestes(scene, onChange, onClose) {
+  let x0 = null, y0 = null, dx = 0, dy = 0, axe = null;
+  const img = () => scene.querySelector('img');
+
+  scene.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    dx = dy = 0; axe = null;
+    const i = img(); if (i) i.style.transition = 'none';
+  }, { passive: true });
+
+  scene.addEventListener('touchmove', e => {
+    if (x0 === null) return;
+    dx = e.touches[0].clientX - x0;
+    dy = e.touches[0].clientY - y0;
+    if (!axe) axe = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    const i = img(); if (!i) return;
+    if (axe === 'x') i.style.transform = `translateX(${dx}px)`;
+    else {
+      // vers le bas : l'image suit et le fond s'eclaircit, comme une pellicule
+      const p = Math.min(1, Math.abs(dy) / 320);
+      i.style.transform = `translateY(${dy}px) scale(${1 - p * 0.18})`;
+      scene.parentElement.style.background = `rgba(10,10,12,${1 - p * 0.75})`;
+    }
+  }, { passive: true });
+
+  scene.addEventListener('touchend', () => {
+    if (x0 === null) return;
+    const i = img();
+    if (i) i.style.transition = 'transform .24s cubic-bezier(.2,.8,.3,1)';
+    const fx = dx, fy = dy, ax = axe;
+    x0 = y0 = null; axe = null;
+
+    if (ax === 'y' && fy > 110) { onClose(); return; }
+    if (ax === 'x' && Math.abs(fx) > 70) { onChange(fx < 0 ? 1 : -1); return; }
+    if (i) i.style.transform = '';
+    scene.parentElement.style.background = '';
+  }, { passive: true });
+}
+
+/* L'image sortante part du cote du geste, la nouvelle entre de l'autre. */
+async function animerVers(sens, charger) {
+  const img = document.getElementById('visioImage');
+  if (!img) { await charger(); return; }
+  img.style.transition = 'transform .16s ease-in, opacity .16s ease-in';
+  img.style.transform = `translateX(${sens > 0 ? -60 : 60}px)`;
+  img.style.opacity = '0';
+  await new Promise(r => setTimeout(r, 150));
+  await charger();
+  img.style.transition = 'none';
+  img.style.transform = `translateX(${sens > 0 ? 60 : -60}px)`;
+  void img.offsetWidth;
+  img.style.transition = 'transform .26s cubic-bezier(.2,.8,.3,1), opacity .26s ease';
+  img.style.transform = '';
+  img.style.opacity = '1';
+}
+
+/* Secouer le formulaire : le refus se comprend avant d'etre lu. */
+function secouer(sel) {
+  const el = document.querySelector(sel || '.porte-form');
+  if (!el) return;
+  el.classList.remove('secoue');
+  void el.offsetWidth;
+  el.classList.add('secoue');
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.Haptics) { try { C.Haptics.notification({ type: 'ERROR' }); } catch (e) {} }
 }
 
 async function activerPush() {
