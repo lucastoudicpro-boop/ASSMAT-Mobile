@@ -1,8 +1,8 @@
 name: Extraire une archive
 
-# Depose le zip a la racine du depot, puis lance ce workflow.
-# Il extrait le contenu, remplace les dossiers concernes, supprime le zip et
-# commite le tout. Pratique depuis un telephone, ou seul l'envoi d'un fichier
+# Depose le zip a la racine du depot, puis lance ce workflow depuis l'onglet
+# Actions. Il extrait le contenu, remplace les dossiers concernes, supprime le
+# zip et commite. Pratique depuis un telephone, ou seul l'envoi d'un fichier
 # unique est possible.
 
 on:
@@ -43,7 +43,6 @@ jobs:
           echo "Archive : $ZIP ($(du -h "$ZIP" | cut -f1))"
 
       - name: Extraire
-        id: extraction
         run: |
           set -e
           rm -rf /tmp/extrait && mkdir -p /tmp/extrait
@@ -62,21 +61,51 @@ jobs:
           echo "--- contenu de l'archive ---"
           ls -A /tmp/contenu
 
+      - name: Comparer les workflows
+        id: workflows
+        run: |
+          # Le jeton fourni aux actions n'a pas le droit de modifier
+          # .github/workflows : GitHub refuse le push. On ne peut donc pas les
+          # remplacer, mais on peut dire lesquels ont change — sans quoi une
+          # etape de compilation manquante passerait inapercue.
+          DIFFS=""
+          mkdir -p /tmp/workflows
+          if [ -d /tmp/contenu/.github/workflows ]; then
+            for F in /tmp/contenu/.github/workflows/*.yml; do
+              [ -e "$F" ] || continue
+              NOM=$(basename "$F")
+              CIBLE=".github/workflows/$NOM"
+              if [ ! -f "$CIBLE" ]; then
+                DIFFS="$DIFFS $NOM(nouveau)"
+                cp "$F" /tmp/workflows/
+              elif ! cmp -s "$F" "$CIBLE"; then
+                DIFFS="$DIFFS $NOM(modifié)"
+                cp "$F" /tmp/workflows/
+              fi
+            done
+          fi
+          echo "diffs=$DIFFS" >> "$GITHUB_OUTPUT"
+          if [ -n "$DIFFS" ]; then
+            echo "::warning::Workflows à recopier à la main :$DIFFS"
+          else
+            echo "Aucun workflow modifié."
+          fi
+
+      - name: Déposer les workflows à recopier
+        if: steps.workflows.outputs.diffs != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflows-a-recopier
+          path: /tmp/workflows
+          if-no-files-found: ignore
+
       - name: Remplacer les fichiers
         id: remplacement
         run: |
           set -e
-          IGNORE=0
           REMPLACES=""
-
           for ENTREE in $(ls -A /tmp/contenu); do
-            # Le jeton fourni aux workflows n'a pas le droit de modifier les
-            # workflows eux-memes : GitHub refuse le push. On les laisse donc
-            # de cote, et on le signale.
-            if [ "$ENTREE" = ".github" ]; then
-              IGNORE=1
-              continue
-            fi
+            if [ "$ENTREE" = ".github" ]; then continue; fi
             rm -rf "./$ENTREE"
             cp -r "/tmp/contenu/$ENTREE" "./$ENTREE"
             REMPLACES="$REMPLACES $ENTREE"
@@ -86,36 +115,61 @@ jobs:
             rm -f "${{ steps.archive.outputs.zip }}"
           fi
 
-          echo "ignore_workflows=$IGNORE" >> "$GITHUB_OUTPUT"
           echo "remplaces=$REMPLACES" >> "$GITHUB_OUTPUT"
           echo "Remplacés :$REMPLACES"
 
+      - name: Relever la version et le SQL
+        id: infos
+        run: |
+          VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo '?')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          DERNIER=$(ls -1 supabase/*.sql 2>/dev/null | grep -E '/[0-9]{3}-' | sort | tail -1)
+          echo "sql=$(basename "${DERNIER:-aucun}")" >> "$GITHUB_OUTPUT"
+
       - name: Commiter
+        id: commit
         run: |
           git config user.name "Extraction automatique"
           git config user.email "actions@github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "::warning::Aucun changement : l'archive était identique au dépôt."
+            echo "change=non" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git commit -m "Extraction de ${{ steps.archive.outputs.zip }}"
+          git commit -m "Cocon ${{ steps.infos.outputs.version }} — extraction de ${{ steps.archive.outputs.zip }}"
           git push
+          echo "change=oui" >> "$GITHUB_OUTPUT"
           echo "Commit poussé."
 
       - name: Résumé
         if: always()
         run: |
           {
-            echo "## Extraction terminée"
+            echo "## Cocon ${{ steps.infos.outputs.version }}"
             echo ""
-            echo "**Archive** : \`${{ steps.archive.outputs.zip }}\`"
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Archive | \`${{ steps.archive.outputs.zip }}\` |"
+            echo "| Dernier fichier SQL | \`${{ steps.infos.outputs.sql }}\` |"
             echo ""
-            echo "**Dossiers remplacés** :${{ steps.remplacement.outputs.remplaces }}"
-            if [ "${{ steps.remplacement.outputs.ignore_workflows }}" = "1" ]; then
+            echo "**Remplacés** :${{ steps.remplacement.outputs.remplaces }}"
+            echo ""
+            if [ -n "${{ steps.workflows.outputs.diffs }}" ]; then
+              echo "### À recopier à la main"
               echo ""
-              echo "> Le dossier \`.github\` a été ignoré : le jeton des workflows"
-              echo "> n'a pas le droit de modifier les workflows eux-mêmes."
-              echo "> Si \`build-apk.yml\` a changé, mets-le à jour à la main."
+              echo "Ces workflows ont changé dans l'archive :**${{ steps.workflows.outputs.diffs }}**"
+              echo ""
+              echo "Le jeton des actions n'a pas le droit de modifier \`.github/workflows\`."
+              echo "Ils sont déposés en artefact **workflows-a-recopier**, en haut de cette page."
+              echo ""
+              echo "Sans cela, la compilation tournera avec l'ancienne version."
+            else
+              echo "Aucun workflow modifié : rien à recopier."
             fi
+            echo ""
+            echo "### Ensuite"
+            echo ""
+            echo "1. Exécuter \`supabase/${{ steps.infos.outputs.sql }}\` s'il n'est pas déjà passé"
+            echo "2. Onglet Actions → **Construire les APK** → Run workflow"
           } >> "$GITHUB_STEP_SUMMARY"

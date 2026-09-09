@@ -400,6 +400,18 @@ html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#31202a 0%,va
   padding:9px 13px;font:600 13px system-ui;color:var(--txt);cursor:pointer;min-height:42px;
 }
 .choix button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.absence{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.absence:last-of-type{border-bottom:0}
+.absence.passee{opacity:.55}
+.abs-txt{flex:1;min-width:0;line-height:1.35}
+.abs-txt b{display:block;font-size:14px}
+.abs-txt small{display:block;font-size:12px;color:var(--mut)}
+.abs-txt .manque{color:#b4690e;font-weight:600}
+.abs-txt .ok{color:var(--acc)}
+.abs-act{border:0;background:transparent;color:var(--bord);cursor:pointer;padding:7px;
+  border-radius:9px;flex:0 0 auto;font-size:16px}
+.abs-act:active{background:var(--zebre)}
+.abs-act svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sieste{display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid var(--line)}
 .sieste:last-of-type{border-bottom:0}
 .sieste .num{width:22px;height:22px;border-radius:11px;flex:0 0 auto;background:var(--acc-doux);
@@ -862,16 +874,30 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     </details>
 
     <div class="card">
-      <div class="tete"><svg><use href="#i-cal"/></svg>Mes fermetures</div>
+      <div class="tete"><svg><use href="#i-cal"/></svg><span>Mes absences</span><b class="compteur" id="compteurAbsences"></b></div>
       <div class="corps">
         <div id="listeFermetures"></div>
-        <div class="deux" style="margin-top:12px">
-          <input id="fermDu" placeholder="du jj/mm/aaaa">
-          <input id="fermAu" placeholder="au jj/mm/aaaa">
+
+        <div class="rub">Déclarer une absence</div>
+        <div class="choix" id="typeAbsence">
+          <button data-type="conges" class="on">🏖 Congés</button>
+          <button data-type="formation">📚 Formation</button>
+          <button data-type="ferie">📅 Férié</button>
+          <button data-type="maladie">🤒 Maladie</button>
+          <button data-type="accident">🩹 Accident du travail</button>
+          <button data-type="maternite">🤰 Maternité</button>
+          <button data-type="urgence">⚠️ Urgence</button>
         </div>
-        <input id="fermMotif" placeholder="Motif, facultatif" style="margin-top:8px">
-        <button id="btnFermeture" class="btn btn-primary btn-block" style="margin-top:8px">Ajouter</button>
-        <p class="hint">Congés, formation, jour férié pris. Toutes tes familles les voient et sont prévenues.</p>
+
+        <div class="deux" style="margin-top:10px">
+          <input id="fermDu" placeholder="du jj/mm/aaaa" inputmode="numeric">
+          <input id="fermAu" placeholder="au jj/mm/aaaa" inputmode="numeric">
+        </div>
+        <input id="fermMotif" placeholder="Motif" style="margin-top:8px">
+        <p class="hint" id="regleAbsence"></p>
+        <button id="btnFermeture" class="btn btn-primary btn-block">Déclarer</button>
+        <input id="fichierJustif" type="file" accept="image/*,application/pdf" hidden>
+        <p class="hint">Toutes tes familles la voient et sont prévenues.</p>
       </div>
     </div>
   </section>
@@ -1014,7 +1040,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.1.5</b></div>
+        <div class="ds"><span>Version</span><b>1.2.0</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1398,7 +1424,7 @@ function montrer(v) {
   renderChoixEnfant();
   if (v === 'journal') chargerJournal();
   if (v === 'messages') { chargerBoite().then(renderBoite); if (conversationActive) ouvrirConversation(conversationActive); }
-  if (v === 'familles') { renderContrats(); chargerFermetures().then(renderFermetures); }
+  if (v === 'familles') { renderContrats(); renderRegleAbsence(); chargerFermetures().then(renderFermetures); }
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
   if (v === 'galerie') chargerGalerie();
   if (v === 'params') { majCompte(); majEtatPush(); }
@@ -2080,7 +2106,7 @@ function demarrerBoucle() {
 function arreterBoucle() { if (boucleSync) clearInterval(boucleSync); boucleSync = null; }
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') rafraichirTout(true);
+  if (document.visibilityState === 'visible') { rafraichirTout(true); viderNotifications(); }
 });
 
 /* ---------------- Aujourd'hui ----------------
@@ -2582,6 +2608,33 @@ async function annoncer() {
   } catch (e) { toast('Impossible : ' + (e.message || e)); }
 }
 
+/* ---------------- Absences ----------------
+   Toutes ne se declarent pas de la meme facon. Des conges se posent a
+   l'avance ; une maladie survient et se justifie apres coup. */
+const TYPES_ABSENCE = {
+  conges:    { nom: 'Congés',              preavis: 14, motif: false, justificatif: false },
+  formation: { nom: 'Formation',           preavis: 14, motif: false, justificatif: false },
+  ferie:     { nom: 'Jour férié',          preavis: 0,  motif: false, justificatif: false },
+  maladie:   { nom: 'Maladie',             preavis: 0,  motif: true,  justificatif: true },
+  accident:  { nom: 'Accident du travail', preavis: 0,  motif: true,  justificatif: true },
+  maternite: { nom: 'Congé maternité',     preavis: 30, motif: true,  justificatif: true },
+  urgence:   { nom: 'Urgence',             preavis: 0,  motif: true,  justificatif: false }
+};
+let typeAbsence = 'conges';
+
+function renderRegleAbsence() {
+  const t = TYPES_ABSENCE[typeAbsence];
+  const box = $('#regleAbsence');
+  const motif = $('#fermMotif');
+  if (motif) motif.placeholder = t.motif ? 'Motif (obligatoire)' : 'Motif, facultatif';
+  if (!box) return;
+  const bouts = [];
+  if (t.preavis) bouts.push('à prévenir ' + (t.preavis >= 30 ? 'un mois' : 'deux semaines') + ' à l\u2019avance');
+  else bouts.push('sans délai, elle survient');
+  if (t.justificatif) bouts.push('justificatif à joindre ensuite');
+  box.textContent = t.nom + ' : ' + bouts.join(', ') + '.';
+}
+
 /* ---------------- Fermetures ----------------
    Ses congés, visibles de toutes ses familles. */
 let fermetures = [];
@@ -2596,39 +2649,112 @@ async function chargerFermetures() {
   if (!Supa.connecte()) { fermetures = []; return; }
   try {
     fermetures = await Supa.lire('fermetures',
-      'salariee_id=eq.' + Supa.moi().id + '&select=id,du,au,motif&order=du.desc&limit=30');
+      'salariee_id=eq.' + Supa.moi().id +
+      '&select=id,du,au,motif,type,justificatif,depose_le,vu_le&order=du.desc&limit=40');
   } catch (e) { fermetures = []; }
 }
 
 function renderFermetures() {
   const box = $('#listeFermetures');
+  const cpt = $('#compteurAbsences');
+  if (cpt) cpt.textContent = fermetures.length ? String(fermetures.length) : '';
   if (!box) return;
-  box.innerHTML = fermetures.length ? fermetures.map(f =>
-    `<div class="ds"><span>${esc(versFR(f.du))} → ${esc(versFR(f.au))}${f.motif ? ' · ' + esc(f.motif) : ''}</span>
-      <button class="besoin-b" style="min-height:32px;padding:5px 10px" data-ferm="${esc(f.id)}">Retirer</button></div>`).join('')
-    : '<p class="hint" style="margin:0">Aucune fermeture enregistrée.</p>';
+  if (!fermetures.length) { box.innerHTML = '<p class="hint" style="margin:0">Aucune absence déclarée.</p>'; return; }
+
+  const auj = new Date().toISOString().slice(0, 10);
+  box.innerHTML = fermetures.map(f => {
+    const t = TYPES_ABSENCE[f.type] || TYPES_ABSENCE.conges;
+    const passee = f.au < auj;
+    const attendJustif = t.justificatif && !f.justificatif;
+    return `<div class="absence ${passee ? 'passee' : ''}">
+      <span class="abs-txt">
+        <b>${esc(t.nom)}</b>
+        <small>${esc(versFR(f.du))}${f.du === f.au ? '' : ' → ' + esc(versFR(f.au))}${f.motif ? ' · ' + esc(f.motif) : ''}</small>
+        ${attendJustif ? '<small class="manque">Justificatif à joindre</small>' : ''}
+        ${f.justificatif ? '<small class="ok">Justificatif joint</small>' : ''}
+        ${f.vu_le ? '<small class="ok">Vu par la famille</small>' : ''}
+      </span>
+      ${t.justificatif ? `<button class="abs-act" data-justif="${esc(f.id)}" aria-label="Joindre">📎</button>` : ''}
+      <button class="abs-act" data-ferm="${esc(f.id)}" aria-label="Retirer">
+        <svg><use href="#i-poubelle"/></svg></button>
+    </div>`;
+  }).join('');
+
+  $$('#listeFermetures [data-justif]').forEach(b => {
+    b.onclick = () => { justificatifPour = b.dataset.justif; $('#fichierJustif').click(); };
+  });
   $$('#listeFermetures [data-ferm]').forEach(b => { b.onclick = () => retirerFermeture(b.dataset.ferm); });
 }
 
+/* Le justificatif emprunte le chemin des photos : une ligne, un dossier à son
+   nom, puis le lien vers la famille — les mêmes règles d'accès s'appliquent. */
+let justificatifPour = null;
+
+async function joindreJustificatif(fichier) {
+  if (!justificatifPour) return;
+  if (fichier.size > 8 * 1024 * 1024) { toast('Fichier trop lourd, 8 Mo maximum'); return; }
+  toast('Envoi du justificatif…');
+  try {
+    const p = await Supa.ecrire('photos', { auteur_id: Supa.moi().id, chemin: 'temporaire', groupe: false });
+    const id = p[0].id;
+    const chemin = id + '/justificatif.jpg';
+    const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin, {
+      method: 'POST', headers: { ...Supa.entetes(), 'Content-Type': fichier.type || 'image/jpeg' }, body: fichier });
+    if (!r.ok) throw new Error('Envoi refusé (' + r.status + ')');
+    await Supa.modifier('photos', { chemin, legende: 'justificatif' }, 'id=eq.' + id);
+    await Supa.modifier('fermetures',
+      { justificatif: chemin, depose_le: new Date().toISOString() }, 'id=eq.' + justificatifPour);
+
+    const f = fermetures.find(x => x.id === justificatifPour);
+    for (const c of contrats)
+      Supa.notifier(c.id, 'Justificatif déposé', f ? (TYPES_ABSENCE[f.type] || {}).nom + ' du ' + versFR(f.du) : '');
+    justificatifPour = null;
+    await chargerFermetures(); renderFermetures();
+    toast('Justificatif joint');
+  } catch (e) { toast('Impossible : ' + (e.message || e)); }
+}
+
 async function ajouterFermeture() {
+  const t = TYPES_ABSENCE[typeAbsence];
   const du = versISO($('#fermDu').value), au = versISO($('#fermAu').value);
+  const motif = $('#fermMotif').value.trim();
+
   if (!du || !au) { toast('Dates attendues au format jj/mm/aaaa'); return; }
   if (au < du) { toast('La fin doit suivre le début'); return; }
+  if (t.motif && !motif) { toast('Le motif est obligatoire pour une absence de ce type'); return; }
   if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord'); return; }
+
+  // Le préavis n'interdit rien : il prévient. Une convention n'est pas un
+  // verrou, et une absence tardive reste parfois inévitable.
+  if (t.preavis) {
+    const jours = Math.round((new Date(du) - new Date(new Date().toISOString().slice(0, 10))) / 86400000);
+    if (jours < t.preavis && !confirm(
+      t.nom + ' : ' + (jours < 0 ? 'ces dates sont passées' : 'il reste ' + jours + ' jour(s)') +
+      ', alors que ' + t.preavis + ' jours de prévenance sont attendus.\n\n' +
+      'Déclarer quand même ? Tes familles verront la date de déclaration.')) return;
+  }
+
   try {
     await Supa.ecrire('fermetures', {
-      salariee_id: Supa.moi().id, du, au, motif: $('#fermMotif').value.trim() || null });
-    // chaque famille est prévenue une fois
-    const texte = 'Fermeture du ' + versFR(du) + ' au ' + versFR(au);
+      salariee_id: Supa.moi().id, du, au, type: typeAbsence,
+      motif: motif || null });
+
+    const libelle = t.nom + ' du ' + versFR(du) + (du === au ? '' : ' au ' + versFR(au));
     for (const c of contrats) {
       await Supa.ecrire('messages', {
-        contrat_id: c.id, auteur_id: Supa.moi().id, texte, categorie: 'info' });
-      Supa.notifier(c.id, 'Fermeture annoncée', texte);
+        contrat_id: c.id, auteur_id: Supa.moi().id,
+        texte: libelle + (motif ? ' — ' + motif : ''), categorie: 'info' });
+      Supa.notifier(c.id, 'Absence de votre nounou', libelle, typeAbsence !== 'conges' && typeAbsence !== 'formation');
     }
     $('#fermDu').value = ''; $('#fermAu').value = ''; $('#fermMotif').value = '';
     await chargerFermetures(); renderFermetures();
-    toast('Fermeture enregistrée, familles prévenues');
-  } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
+    toast(contrats.length + ' famille(s) prévenue(s)');
+  } catch (e) {
+    const m = String(e.message || e);
+    toast(/motif_requis/.test(m) ? 'Le motif est obligatoire pour ce type d\u2019absence.'
+        : /type_valide/.test(m) ? 'Type d\u2019absence inconnu. Relance le fichier SQL 015.'
+        : 'Impossible : ' + m);
+  }
 }
 
 async function retirerFermeture(id) {
@@ -2646,6 +2772,21 @@ const BESOINS = [
   ['🧴', 'Crème'], ['🥣', 'Repas'], ['🧦', 'Chaussons'], ['🧸', 'Doudou']
 ];
 const EMOJIS_BESOIN = Object.fromEntries(BESOINS.map(([e, t]) => [t.toLowerCase(), e]));
+
+/* « Il manque du lait » se lit ; « Il manque : lait » se déchiffre. */
+const ARTICLES = {
+  couches: 'des couches', lait: 'du lait', eau: 'de l\u2019eau',
+  'tenue de rechange': 'une tenue de rechange', 'crème': 'de la crème',
+  repas: 'un repas', chaussons: 'des chaussons', doudou: 'le doudou'
+};
+const avecArticle = quoi => ARTICLES[String(quoi).toLowerCase()] || quoi.toLowerCase();
+
+/* On retrouve l'objet dans la phrase pour choisir l'emoji. */
+function emojiDuBesoin(texte) {
+  const t = String(texte || '').toLowerCase();
+  for (const [nom, emoji] of Object.entries(EMOJIS_BESOIN)) if (t.includes(nom)) return emoji;
+  return '📦';
+}
 
 function basculerVolet(id) {
   ['volBesoins', 'volDemande', 'volRetard'].forEach(v => {
@@ -2684,14 +2825,18 @@ function renderBesoins() {
 
 async function envoyerBesoin(quoi) {
   if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  const c = contrats.find(x => x.id === contratActif);
+  const prenom = (c && c.enfant_prenom) || 'votre enfant';
+  const phrase = 'Il manque ' + avecArticle(quoi) + ' pour ' + prenom;
   try {
     await Supa.ecrire('messages', {
       contrat_id: contratActif, auteur_id: Supa.moi().id,
-      texte: 'Il manque : ' + quoi.toLowerCase(), categorie: 'besoin'
+      texte: phrase, categorie: 'besoin'
     });
-    Supa.notifier(contratActif, 'Il manque ' + quoi.toLowerCase(), nomEnfantActif());
+    Supa.notifier(contratActif, prenom, phrase);
     toast(quoi + ' — la famille est prévenue');
     await chargerMessages(); renderMessages();
+    await chargerBoite(); renderBoite();
   } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
 }
 
@@ -2794,9 +2939,9 @@ function bulles(liste, moi, nomAutre) {
     const mien = m.auteur_id === moi;
     const h = new Date(m.cree_le).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const cat = m.categorie || 'info';
-    const quoi = cat === 'besoin' ? String(m.texte || '').replace(/^il manque\s*:\s*/i, '') : (m.texte || '');
+    const quoi = m.texte || '';
     const chapeau = cat === 'besoin' ? 'Il manque' : cat === 'retard' ? 'Retard' : '';
-    const emoji = cat === 'besoin' ? (EMOJIS_BESOIN[quoi.toLowerCase()] || '📦') : cat === 'retard' ? '🕒' : '';
+    const emoji = cat === 'besoin' ? emojiDuBesoin(quoi) : cat === 'retard' ? '🕒' : '';
     html += `<div class="bulle-l ${mien ? 'moi' : 'lui'}">
       <div class="bulle cat-${esc(cat)}">
         ${chapeau ? `<i class="etiq">${emoji} ${esc(chapeau)}</i>` : ''}
@@ -3113,9 +3258,21 @@ $('#btnEnvoyer').onclick = () => (conversationActive === 'commun' ? annoncerDepu
 $('#btnDemande').onclick = envoyerDemande;
 $$('.retards [data-retard]').forEach(b => { b.onclick = () => annoncerRetard(b.dataset.retard); });
 $('#btnFermeture').onclick = ajouterFermeture;
+$('#typeAbsence').addEventListener('click', e => {
+  const b = e.target.closest('[data-type]');
+  if (!b) return;
+  typeAbsence = b.dataset.type;
+  $$('#typeAbsence button').forEach(x => x.classList.toggle('on', x === b));
+  renderRegleAbsence();
+});
+$('#fichierJustif').onchange = e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) joindreJustificatif(f);
+  e.target.value = '';
+};
 $('#btnFrimousse').onclick = ouvrirFrimousses;
 // un bouton qui déclenche le champ : plus fiable qu'un label enveloppant
-$('#btnPhotoPortrait').onclick = () => $('#photoPortrait').click();
+$('#btnPhotoPortrait').onclick = () => photoOuChamp('photoPortrait', f => envoyerPortrait(f));
 $('#photoPortrait').onchange = e => {
   const f = e.target.files && e.target.files[0];
   if (f) envoyerPortrait(f);
@@ -3191,7 +3348,7 @@ $('#coucheMoins').onclick = () => {
   const n = Math.max(0, Number($('#coucheN').textContent) - 1);
   $('#coucheN').textContent = String(n);
 };
-$('#btnPrendrePhoto').onclick = () => $('#prisePhoto').click();
+$('#btnPrendrePhoto').onclick = () => photoOuChamp('prisePhoto', f => envoyerGalerie(f));
 $('#btnImporterPhoto').onclick = () => $('#importPhoto').click();
 $('#prisePhoto').onchange = e => {
   const f = e.target.files && e.target.files[0];
@@ -3212,7 +3369,7 @@ $('#fichierGalerie').onchange = e => {
   if (f) envoyerGalerie(f);
   e.target.value = '';
 };
-$('#ouvrirPhoto').onclick = () => $('#fichierPhoto').click();
+$('#ouvrirPhoto').onclick = () => photoOuChamp('fichierPhoto', f => envoyerGalerie(f, true));
 $('#fichierPhoto').onchange = e => {
   const f = e.target.files && e.target.files[0];
   if (f) envoyerGalerie(f, true);
@@ -3227,7 +3384,7 @@ $('#btnRefus').onclick = () => {
 
 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
   window.Capacitor.Plugins.App.addListener('pause', () => { VERROU.quitteA = Date.now(); });
-  window.Capacitor.Plugins.App.addListener('resume', () => { verrouillerSiBesoin(); rafraichirTout(true); });
+  window.Capacitor.Plugins.App.addListener('resume', () => { verrouillerSiBesoin(); rafraichirTout(true); viderNotifications(); });
   window.Capacitor.Plugins.App.addListener('backButton', () => {
     if (!$('#porte').hidden) return;
     if (!$('#volet').hidden) { $('#volet').hidden = true; return; }
@@ -3361,6 +3518,47 @@ function verrouillerSiBesoin() {
    fois. Sans autorisation, l'application fonctionne exactement pareil. */
 const etatPush = { compile: null, plugin: null, autorisation: null, jeton: null, depose: null, etape: '', ecouteurs: false };
 
+
+/* Ouvrir l'application vaut prise de connaissance : les bannieres encore
+   affichees n'ont plus lieu d'etre, meme si on n'a pas clique dessus. */
+async function viderNotifications() {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (!C || !C.PushNotifications) return;
+  try { await C.PushNotifications.removeAllDeliveredNotifications(); } catch (e) {}
+  try { if (C.Badge) await C.Badge.clear(); } catch (e) {}
+}
+
+
+/* Le champ de fichier avec capture="environment" n'ouvre pas l'appareil quand
+   il est declenche par script : Android retombe sur le selecteur de fichiers.
+   Le plugin natif, lui, ouvre bien l'appareil. Le champ reste le recours. */
+async function prendreUnePhoto() {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (!C || !C.Camera) return null;
+  try {
+    const p = await C.Camera.getPhoto({
+      quality: 82, allowEditing: false, resultType: 'base64',
+      source: 'CAMERA', saveToGallery: false, width: 1600
+    });
+    if (!p || !p.base64String) return null;
+    const bin = atob(p.base64String);
+    const t = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) t[i] = bin.charCodeAt(i);
+    return new File([t], 'photo.jpg', { type: 'image/' + (p.format || 'jpeg') });
+  } catch (e) {
+    // l'utilisateur a annule, ou le plugin n'est pas disponible
+    return null;
+  }
+}
+
+async function photoOuChamp(champ, suite) {
+  const f = await prendreUnePhoto();
+  if (f) { suite(f); return; }
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.Camera) return;   // le plugin existe : l'utilisateur a annule
+  document.getElementById(champ).click();
+}
+
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
   if (!PROJET.notifications) { etatPush.etape = 'Firebase absent de cette version de l\u2019application'; majEtatPush(); return; }
@@ -3435,7 +3633,7 @@ async function testerPush() {
   renderAccueil();
 
   if (!Supa.connecte()) await ouvrirPorte();
-  else { demarrerBoucle(); activerPush(); }
+  else { demarrerBoucle(); activerPush(); viderNotifications(); }
   // l'écran de lancement se retire une fois la destination connue
   const attente = Math.max(0, (window.Capacitor ? 700 : 1200) - (Date.now() - demarreA));
   setTimeout(() => {

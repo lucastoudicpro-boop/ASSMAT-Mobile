@@ -778,6 +778,8 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
 .tuile-m.large>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .tuile-m.large>div b{line-height:1.3}
 .tuile-m.large>div small{line-height:1.35}
+.lien-justif{border:0;background:transparent;color:var(--acc);font:600 12.5px system-ui;
+  cursor:pointer;padding:4px 0;text-align:left}
 .puce-famille{display:inline-block;background:var(--acc-doux);color:var(--acc);border-radius:14px;
   padding:6px 12px;font:600 13px system-ui;margin:0 6px 6px 0}
 .choix{display:flex;gap:7px;flex-wrap:wrap}
@@ -1738,7 +1740,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.1.5</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.2.0</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -4934,7 +4936,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.1.5';
+const VERSION = '1.2.0';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -5459,19 +5461,46 @@ async function chargerFermetures() {
   if (!Supa.connecte()) return;
   try {
     fermetures = await Supa.lire('fermetures',
-      'select=du,au,motif&order=du.desc&limit=20');
+      'select=id,du,au,motif,type,justificatif,vu_le&order=du.desc&limit=20');
   } catch (e) { fermetures = []; }
 }
+
+const TYPES_ABSENCE = {
+  conges: 'Congés', formation: 'Formation', ferie: 'Jour férié', maladie: 'Maladie',
+  accident: 'Accident du travail', maternite: 'Congé maternité', urgence: 'Urgence'
+};
 
 function renderFermetures() {
   const box = $('#listeFermetures');
   if (!box) return;
   const fr = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '';
   const auj = new Date().toISOString().slice(0, 10);
-  box.innerHTML = fermetures.length ? fermetures.map(f =>
-    `<div class="ds"><span>${esc(fr(f.du))} → ${esc(fr(f.au))}${f.motif ? ' · ' + esc(f.motif) : ''}</span>
-      <b>${f.au < auj ? 'passée' : 'à venir'}</b></div>`).join('')
-    : '<p class="hint" style="margin:0">Aucune fermeture annoncée.</p>';
+  if (!fermetures.length) { box.innerHTML = '<p class="hint" style="margin:0">Aucune absence annoncée.</p>'; return; }
+
+  box.innerHTML = fermetures.map(f => `<div class="ds" style="flex-direction:column;align-items:stretch;gap:3px">
+      <div style="display:flex;justify-content:space-between;gap:10px">
+        <b>${esc(TYPES_ABSENCE[f.type] || 'Absence')}</b>
+        <span>${f.au < auj ? 'passée' : 'à venir'}</span>
+      </div>
+      <small style="color:var(--mut)">${esc(fr(f.du))}${f.du === f.au ? '' : ' → ' + esc(fr(f.au))}${f.motif ? ' · ' + esc(f.motif) : ''}</small>
+      ${f.justificatif ? `<button class="lien-justif" data-justif="${esc(f.justificatif)}">Voir le justificatif</button>` : ''}
+      ${!f.vu_le ? `<button class="lien-justif" data-vu="${esc(f.id)}">J\u2019ai bien noté</button>` : '<small style="color:var(--acc)">Vous avez accusé réception</small>'}
+    </div>`).join('');
+
+  $$('#listeFermetures [data-justif]').forEach(b => {
+    b.onclick = async () => {
+      const d = await telechargerPhoto(b.dataset.justif);
+      if (d) window.open(d, '_blank'); else toast('Justificatif illisible');
+    };
+  });
+  $$('#listeFermetures [data-vu]').forEach(b => {
+    b.onclick = async () => {
+      try {
+        await Supa.modifier('fermetures', { vu_le: new Date().toISOString() }, 'id=eq.' + b.dataset.vu);
+        await chargerFermetures(); renderFermetures();
+      } catch (e) { toast('Impossible : ' + (e.message || e)); }
+    };
+  });
 }
 
 /* ---------------- Fiche d'urgence ----------------
@@ -5646,8 +5675,15 @@ const EMOJIS_BESOIN = {
   couches: '🧷', lait: '🍼', eau: '💧', 'tenue de rechange': '👕',
   creme: '🧴', 'crème': '🧴', repas: '🥣', chaussons: '🧦', doudou: '🧸'
 };
+/* L'objet manquant est nommé dans la phrase : on l'y retrouve pour l'emoji. */
+function emojiDuBesoin(texte) {
+  const t = String(texte || '').toLowerCase();
+  for (const [nom, emoji] of Object.entries(EMOJIS_BESOIN)) if (t.includes(nom)) return emoji;
+  return '📦';
+}
+
 const FACON = {
-  besoin: { chapeau: 'Il manque', emoji: '📦' },
+  besoin: { chapeau: '', emoji: '📦' },
   retard: { chapeau: 'Retard annoncé', emoji: '🕒' },
   photo:  { chapeau: '', emoji: '📷' },
   info:   { chapeau: '', ico: 'i-mail' }
@@ -5691,9 +5727,9 @@ function renderMessages() {
     const mien = m.auteur_id === moi;
     const h = new Date(m.cree_le).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const cat = m.categorie || 'info';
-    const quoi = cat === 'besoin' ? String(m.texte || '').replace(/^il manque\s*:\s*/i, '') : (m.texte || '');
+    const quoi = m.texte || '';
     const f = FACON[cat] || FACON.info;
-    const emoji = cat === 'besoin' ? (EMOJIS_BESOIN[quoi.toLowerCase()] || '📦') : (f.emoji || '');
+    const emoji = cat === 'besoin' ? emojiDuBesoin(quoi) : (f.emoji || '');
     html += `<div class="bulle-l ${mien ? 'moi' : 'lui'}">
       <div class="bulle cat-${esc(cat)}">
         ${f.chapeau ? `<i class="etiq">${emoji} ${esc(f.chapeau)}</i>` : ''}
@@ -6095,7 +6131,7 @@ function demarrerBoucle() {
 function arreterBoucle() { if (boucleSync) clearInterval(boucleSync); boucleSync = null; }
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') rafraichirTout(true);
+  if (document.visibilityState === 'visible') { rafraichirTout(true); viderNotifications(); }
 });
 
 async function renderAccueil() {
@@ -7243,6 +7279,7 @@ function integrerAndroid() {
       verrouillerSiBesoin();
       rafraichirTout(true);
       syncPlanning(true);
+      viderNotifications();
     });
     C.App.addListener('pause', () => { VERROU.quitteA = Date.now(); });
   }
@@ -7254,6 +7291,16 @@ function integrerAndroid() {
    Le jeton de l'appareil est renouvelé par Android : on le redépose à chaque
    fois. Sans autorisation, l'application fonctionne exactement pareil. */
 const etatPush = { compile: null, plugin: null, autorisation: null, jeton: null, depose: null, etape: '', ecouteurs: false };
+
+
+/* Ouvrir l'application vaut prise de connaissance : les bannieres encore
+   affichees n'ont plus lieu d'etre, meme si on n'a pas clique dessus. */
+async function viderNotifications() {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (!C || !C.PushNotifications) return;
+  try { await C.PushNotifications.removeAllDeliveredNotifications(); } catch (e) {}
+  try { if (C.Badge) await C.Badge.clear(); } catch (e) {}
+}
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
@@ -7347,6 +7394,7 @@ basculerVueCal('grille');
   if (await sessionValide()) { majCompte(); await reconcilierContrats(true); syncPlanning(true); activerPush(); }
   else await ouvrirPorte();
   demarrerBoucle();
+  viderNotifications();
   const m = $('#majActuelle'); if (m) m.textContent = VERSION;
   if ((profil.maj || {}).auto) setTimeout(() => verifierMaj(true), 2500);
   programmerRappels();

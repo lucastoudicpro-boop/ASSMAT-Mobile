@@ -1474,3 +1474,48 @@ une etape echoue plutot que de continuer a moitie.
 enfant correspondant, les nomme, et propose de les supprimer.
 
 La fonction `notifier` est a redeployer.
+
+## 1.2.0
+
+`015-absences.sql` est a executer.
+
+### Trois correctifs
+
+**Les bannieres restaient apres ouverture de l'application.** Elles sont
+retirees a chaque retour au premier plan, meme sans avoir clique dessus :
+ouvrir l'application vaut prise de connaissance.
+
+**« Prendre une photo » ouvrait le selecteur de fichiers.** Un champ de fichier
+avec `capture="environment"` n'ouvre pas l'appareil quand il est declenche par
+script : Android retombe sur le selecteur. Le module appareil photo natif est
+desormais utilise, le champ restant le recours quand il n'est pas disponible.
+
+**« Il manque : lait » etait du texte brut.** La nounou envoie maintenant une
+phrase : « Il manque du lait pour Elio », articles compris — du lait, des
+couches, de l'eau, une tenue de rechange. La notification porte le prenom en
+titre et la phrase en corps.
+
+### Module absences
+
+Sept types, chacun avec ses regles :
+
+| Type | Prevenance | Motif | Justificatif |
+| --- | --- | --- | --- |
+| Conges, Formation | deux semaines | facultatif | non |
+| Conge maternite | un mois | obligatoire | oui |
+| Maladie, Accident du travail | aucune | obligatoire | oui |
+| Urgence | aucune | obligatoire | non |
+| Jour ferie | aucune | facultatif | non |
+
+Le delai **previent sans interdire** : declarer des conges dans six jours
+affiche « il reste 6 jours alors que 14 sont attendus », et laisse passer si on
+confirme. Une convention n'est pas un verrou, et une absence tardive reste
+parfois inevitable.
+
+Les absences qui l'exigent affichent « Justificatif a joindre » tant qu'il
+manque. Le trombone ouvre l'appareil ou les fichiers ; l'arret de travail
+emprunte le chemin des photos, donc les memes regles d'acces.
+
+Cote parent, chaque absence montre son type, son motif, le justificatif s'il
+existe, et un bouton « J'ai bien note ». Un declencheur limite le parent a ce
+seul accuse : il ne peut ni changer les dates ni retirer l'absence.
