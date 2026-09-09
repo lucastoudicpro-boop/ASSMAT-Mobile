@@ -1559,3 +1559,41 @@ salaire, journal, adaptation, transmissions, et **les photos telechargees**.
 Un lien vers le serveur ne vaudrait rien le jour ou le contrat n'existe plus.
 
 Trois ans de la vie d'un enfant ne devraient pas disparaitre avec un contrat.
+
+## 1.3.1 — les photos orphelines
+
+Le bucket contenait des dossiers, les fichiers etaient bien la, et l'application
+n'affichait rien. Cause : l'ordre des operations.
+
+`envoyerGalerie` creait la ligne photo, **deposait le fichier**, puis tentait le
+lien vers la famille. Or le declencheur `verifier_autorisation_photo` refuse ce
+lien tant que le parent n'a pas coche « photos » dans sa fiche d'urgence. Le
+fichier restait alors dans le stockage sans aucun lien — donc invisible pour
+tout le monde, y compris son auteur.
+
+Trois corrections :
+
+- **L'autorisation est verifiee avant le depot.** Rien n'est envoye si elle
+  manque, et le message le dit : « la famille n'a pas coche photos dans sa fiche
+  d'urgence, rien n'a ete envoye ».
+- **Le fichier est retire si aucun lien n'aboutit.** La ligne photo et l'objet
+  du stockage partent ensemble.
+- **Une photo illisible ne disparait plus en silence.** Elle laisse une case
+  « illisible » plutot que de s'effacer sans rien dire.
+
+**Pour reparer l'existant** : onglet Photos, une banniere compte les photos
+orphelines et propose de les rattacher a la famille affichee, ou de les
+supprimer.
+
+Teste dans les deux cas : sans autorisation, zero fichier depose et zero ligne
+creee ; avec autorisation, un fichier, une ligne, un lien.
+
+### Appareil photo
+
+Il ouvre encore le selecteur de fichiers ? Le module natif n'est pas dans l'APK.
+`build-apk.yml` a change en 1.2.0 pour l'installer, et **ce fichier ne peut pas
+etre mis a jour par l'extraction automatique** : GitHub interdit a un workflow
+de se modifier lui-meme. Il faut le recopier a la main.
+
+L'application le dit desormais au lieu de laisser croire a un bug : « Module
+appareil photo absent de cette version ».

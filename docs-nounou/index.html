@@ -377,6 +377,8 @@ html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#31202a 0%,va
   border-radius:12px;padding:4px 9px}
 .gal{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 .gal img{cursor:pointer;transition:transform .12s ease}
+.photo-cassee{aspect-ratio:1;border-radius:10px;background:var(--zebre);display:flex;
+  align-items:center;justify-content:center;font:600 10px system-ui;color:var(--mut)}
 .gal img:active{transform:scale(.96)}
 .gal-mois{grid-column:1/-1;font:600 12px system-ui;color:var(--mut);
   text-transform:capitalize;margin:10px 0 2px}
@@ -785,6 +787,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
           <input id="fichierGalerie" type="file" accept="image/*" capture="environment" hidden>
         </label>
         <div id="galerieEtat"></div>
+        <div id="orphelines"></div>
       </div>
     </div>
   </section>
@@ -1096,7 +1099,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.3.0</b></div>
+        <div class="ds"><span>Version</span><b>1.3.1</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1486,7 +1489,7 @@ function montrer(v) {
     chargerRemplacements().then(renderRemplacements);
   }
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
-  if (v === 'galerie') chargerGalerie();
+  if (v === 'galerie') chargerGalerie().then(() => chercherOrphelines().then(renderOrphelines));
   if (v === 'params') { majCompte(); majEtatPush(); }
   prevenirMigration();
 }
@@ -1822,6 +1825,62 @@ function renderUrgence(u) {
    autorisé les photos de groupe sont proposées, et la base le revérifie. */
 let galerie = [];
 
+/* Les photos deposees avant la verification d'autorisation : le fichier est
+   dans le stockage, mais aucun lien ne les rattache a une famille. */
+let photosOrphelines = [];
+
+async function chercherOrphelines() {
+  photosOrphelines = [];
+  if (!Supa.connecte()) return;
+  try {
+    const miennes = await Supa.lire('photos',
+      'auteur_id=eq.' + Supa.moi().id + '&select=id,chemin,prise_le&order=prise_le.desc&limit=100');
+    if (!miennes.length) return;
+    const liens = await Supa.lire('photos_contrats',
+      'photo_id=in.(' + miennes.map(p => p.id).join(',') + ')&select=photo_id');
+    const relies = new Set(liens.map(l => l.photo_id));
+    photosOrphelines = miennes.filter(p => !relies.has(p.id) && p.chemin !== 'temporaire');
+  } catch (e) {}
+}
+
+function renderOrphelines() {
+  const box = $('#orphelines');
+  if (!box) return;
+  if (!photosOrphelines.length) { box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="avertissement">
+    ${photosOrphelines.length} photo(s) déposée(s) sans être rattachée(s) à une famille : personne ne les voit.
+    Elles datent d'avant la vérification d'autorisation.</div>
+    <div class="deux" style="margin-bottom:10px">
+      <button class="btn btn-primary" id="btnRattacher">Rattacher à ${esc(nomEnfantActif() || 'cette famille')}</button>
+      <button class="btn btn-ghost" id="btnJeterOrphelines">Supprimer</button>
+    </div>`;
+  $('#btnRattacher').onclick = rattacherOrphelines;
+  $('#btnJeterOrphelines').onclick = jeterOrphelines;
+}
+
+async function rattacherOrphelines() {
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  if (!await photosAutorisees(contratActif)) {
+    toast('La famille n\u2019a pas coché « photos » : le rattachement serait refusé.');
+    return;
+  }
+  let faites = 0;
+  for (const p of photosOrphelines) {
+    try { await Supa.ecrire('photos_contrats', { photo_id: p.id, contrat_id: contratActif }); faites++; }
+    catch (e) {}
+  }
+  await chercherOrphelines(); renderOrphelines();
+  await chargerGalerie(); renderGalerie();
+  toast(faites + ' photo(s) rattachée(s)');
+}
+
+async function jeterOrphelines() {
+  if (!confirm('Supprimer ' + photosOrphelines.length + ' photo(s) définitivement ?')) return;
+  for (const p of photosOrphelines) await nettoyerPhoto(p.id, p.chemin);
+  await chercherOrphelines(); renderOrphelines();
+  toast('Photos supprimées');
+}
+
 async function chargerGalerie() {
   galerie = [];
   if (!contratActif || !Supa.connecte()) { renderGalerie(); return; }
@@ -1863,7 +1922,11 @@ function renderGalerie() {
   $$('#galerie [data-photo]').forEach(async img => {
     const d = await telechargerPhoto(img.dataset.photo);
     if (d) { img.src = d; img.onclick = () => ouvrirVisionneuse(img.dataset.id); }
-    else img.remove();
+    else {
+      // ne pas la faire disparaitre en silence : on veut savoir qu'elle existe
+      img.replaceWith(Object.assign(document.createElement('div'),
+        { className: 'photo-cassee', textContent: 'illisible' }));
+    }
   });
 }
 
@@ -1915,6 +1978,15 @@ async function envoyerGalerie(fichier, depuisLeFil) {
   if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
   if (fichier.size > 8 * 1024 * 1024) { toast('Photo trop lourde, 8 Mo maximum'); return; }
 
+  // On verifie l'autorisation AVANT de deposer le fichier. L'inverse laissait
+  // des photos orphelines dans le stockage : le fichier envoye, le lien
+  // refuse, et plus personne pour les voir.
+  const autorise = await photosAutorisees(contratActif);
+  if (!autorise) {
+    toast('La famille n\u2019a pas coché « photos » dans sa fiche d\u2019urgence. Rien n\u2019a été envoyé.');
+    return;
+  }
+
   const autres = await famillesAutorisantLeGroupe();
   let concernes = [contratActif];
   let groupe = false;
@@ -1928,40 +2000,60 @@ async function envoyerGalerie(fichier, depuisLeFil) {
   }
 
   $('#galerieEtat').innerHTML = '<p class="hint">Envoi…</p>';
+  let id = null, chemin = null;
   try {
-    const p = await Supa.ecrire('photos', {
-      auteur_id: Supa.moi().id, chemin: 'temporaire', groupe });
-    const id = p[0].id;
-    const chemin = id + '/' + Date.now() + '.jpg';
+    const p = await Supa.ecrire('photos', { auteur_id: Supa.moi().id, chemin: 'temporaire', groupe });
+    id = p[0].id;
+    chemin = id + '/' + Date.now() + '.jpg';
 
     const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin, {
       method: 'POST',
       headers: { ...Supa.entetes(), 'Content-Type': fichier.type || 'image/jpeg' },
       body: fichier });
-    if (!r.ok) throw new Error('Envoi refusé (' + r.status + ')');
+    if (!r.ok) throw new Error('Dépôt refusé (' + r.status + ') : ' + (await r.text()).slice(0, 120));
 
     await Supa.modifier('photos', { chemin }, 'id=eq.' + id);
-    let refusees = 0;
+
+    const liees = [];
     for (const c of concernes) {
-      try { await Supa.ecrire('photos_contrats', { photo_id: id, contrat_id: c }); }
-      catch (e) { refusees++; concernes.splice(concernes.indexOf(c), 1); }
+      try { await Supa.ecrire('photos_contrats', { photo_id: id, contrat_id: c }); liees.push(c); }
+      catch (e) { /* famille sans autorisation de groupe */ }
     }
-    if (refusees && !concernes.length) {
-      throw new Error('La famille n\u2019a pas encore autorisé les photos dans la fiche d\u2019urgence.');
-    }
-    if (refusees) toast(refusees + ' famille(s) n\u2019ont pas autorisé les photos de groupe');
-    // depuis le fil, la photo apparaît aussi dans la conversation
-    if (depuisLeFil && concernes.includes(contratActif)) {
+    // Sans aucun lien, la photo serait invisible : on la retire plutot que de
+    // la laisser trainer dans le stockage.
+    if (!liees.length) { await nettoyerPhoto(id, chemin); throw new Error('Aucune famille n\u2019a autorisé cette photo.'); }
+    if (liees.length < concernes.length) toast((concernes.length - liees.length) + ' famille(s) sans autorisation de groupe');
+
+    if (depuisLeFil && liees.includes(contratActif)) {
       try { await Supa.ecrire('messages', { contrat_id: contratActif, auteur_id: Supa.moi().id, texte: null, categorie: 'photo', piece: chemin }); } catch (e) {}
       await chargerMessages(); renderMessages();
     }
-    for (const c of concernes) Supa.notifier(c, 'Nouvelle photo', '');
+    for (const c of liees) Supa.notifier(c, 'Nouvelle photo', '');
     $('#galerieEtat').innerHTML = '';
-    toast(groupe ? 'Photo partagée avec ' + concernes.length + ' familles' : 'Photo envoyée');
-    await chargerGalerie();
+    toast(groupe && liees.length > 1 ? 'Photo partagée avec ' + liees.length + ' familles' : 'Photo envoyée');
+    await chargerGalerie(); renderGalerie();
   } catch (e) {
+    if (id && chemin) await nettoyerPhoto(id, chemin);
     $('#galerieEtat').innerHTML = '<p class="hint" style="color:var(--danger)">' + esc(e.message || e) + '</p>';
   }
+}
+
+/* Le parent a-t-il coche « photos » dans sa fiche d'urgence ? */
+async function photosAutorisees(contratId) {
+  try {
+    const r = await Supa.lire('fiche_urgence', 'contrat_id=eq.' + contratId + '&select=autorisations');
+    return !!(r && r.length && (r[0].autorisations || {}).photo);
+  } catch (e) { return false; }
+}
+
+/* Une photo sans lien n'appartient a personne : on la retire du stockage
+   comme de la table, pour ne pas encombrer. */
+async function nettoyerPhoto(id, chemin) {
+  try {
+    await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin,
+      { method: 'DELETE', headers: Supa.entetes() });
+  } catch (e) {}
+  try { await Supa.supprimer('photos', 'id=eq.' + id); } catch (e) {}
 }
 
 async function famillesAutorisantLeGroupe() {
@@ -3416,6 +3508,10 @@ async function choisirFrimousse(cle) {
 async function envoyerPortrait(fichier) {
   if (!contratActif) return;
   if (fichier.size > 8 * 1024 * 1024) { toast('Photo trop lourde, 8 Mo maximum'); return; }
+  if (!await photosAutorisees(contratActif)) {
+    toast('La famille n\u2019a pas coché « photos » dans sa fiche d\u2019urgence.');
+    return;
+  }
   toast('Envoi du portrait…');
   try {
     const p = await Supa.ecrire('photos', { auteur_id: Supa.moi().id, chemin: 'temporaire', groupe: false });
@@ -3825,10 +3921,15 @@ async function prendreUnePhoto() {
 }
 
 async function photoOuChamp(champ, suite) {
-  const f = await prendreUnePhoto();
-  if (f) { suite(f); return; }
   const C = window.Capacitor && window.Capacitor.Plugins;
-  if (C && C.Camera) return;   // le plugin existe : l'utilisateur a annule
+  if (C && C.Camera) {
+    const f = await prendreUnePhoto();
+    if (f) suite(f);
+    return;                     // le plugin existe : l'utilisateur a annulé
+  }
+  // Sans le module natif, Android ouvre le sélecteur de fichiers malgré
+  // l'attribut capture. On le dit, plutôt que de laisser croire à un bug.
+  if (window.Capacitor) toast('Module appareil photo absent de cette version : le sélecteur s\u2019ouvre à la place.');
   document.getElementById(champ).click();
 }
 
