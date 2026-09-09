@@ -136,6 +136,7 @@ jobs:
           fi
           cat android-extra/biometrie.gradle >> android/app/build.gradle
           cat android-extra/signature.gradle >> android/app/build.gradle
+          python3 android-extra/icone-notification.py "${{ matrix.config }}"
           echo "--- classes copiées ---"; ls -1 "$APP"
 
       - name: Brancher les notifications Firebase

@@ -653,6 +653,23 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
   align-items:center;justify-content:center;background:var(--acc-doux)}
 .msg .rond svg{width:17px;height:17px;fill:none;stroke:var(--acc);stroke-width:1.8;
   stroke-linecap:round;stroke-linejoin:round}
+.jour-sep{display:flex;align-items:center;gap:10px;margin:14px 0 10px;
+  font:600 11.5px system-ui;color:var(--mut);text-transform:capitalize}
+.jour-sep::before,.jour-sep::after{content:'';flex:1;height:1px;background:var(--line)}
+.bulle-l{display:flex;margin-bottom:7px}
+.bulle-l.moi{justify-content:flex-end}
+.bulle{max-width:78%;border-radius:18px;padding:9px 13px 6px;line-height:1.4;
+  background:var(--card);border:1px solid var(--line);
+  animation:surgit .3s cubic-bezier(.2,.8,.3,1) both}
+.bulle-l.moi .bulle{background:var(--acc);border-color:var(--acc);color:#fff;border-bottom-right-radius:6px}
+.bulle-l.lui .bulle{border-bottom-left-radius:6px}
+.bulle .dit{display:block;font-size:14.5px;white-space:pre-wrap;word-break:break-word}
+.bulle time{display:block;text-align:right;font-size:10.5px;opacity:.65;margin-top:3px}
+.bulle .etiq{font-style:normal;display:block;font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.4px;opacity:.75;margin-bottom:2px}
+.bulle-img{width:100%;max-width:220px;border-radius:12px;display:block;margin-bottom:6px}
+.bulle-l.lui .bulle.cat-besoin{background:#fdf3e7;border-color:#f0dcc0}
+.bulle-l.lui .bulle.cat-retard{background:#fbe9ea;border-color:#f0cdd2}
 .msg .rond{font-size:19px}
 .msg.cat-besoin .rond{background:#fdf3e7}
 .msg.cat-besoin .rond svg{stroke:#b4690e}
@@ -684,6 +701,14 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
 .jour-b .mot{font-size:13px;color:var(--mut);margin-top:7px;line-height:1.45}
 .rub{font-size:12px;color:var(--mut);margin:16px 0 8px;font-weight:600;
   text-transform:uppercase;letter-spacing:.4px}
+.contact{padding:10px 0;border-bottom:1px solid var(--line)}
+.contact:last-child{border-bottom:0}
+.contact select{min-height:44px;border:1px solid var(--bord);border-radius:12px;
+  padding:0 10px;background:var(--card);color:var(--txt);font:inherit}
+.contact .two{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center}
+.contact .two:first-child{grid-template-columns:120px 1fr}
+.contact .retirer{border:0;background:transparent;color:var(--bord);cursor:pointer;padding:9px;border-radius:9px}
+.contact .retirer svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .pers{display:grid;grid-template-columns:1fr 1fr 40px;gap:7px;margin-bottom:7px;align-items:center}
 .pers input{min-height:42px}
 .pers button{border:0;background:transparent;color:var(--danger);cursor:pointer;
@@ -759,6 +784,8 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
 .choix button{border:1px solid var(--bord);background:var(--card);border-radius:20px;
   padding:9px 13px;font:600 13px system-ui;color:var(--txt);cursor:pointer;min-height:42px}
 .choix button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.portrait{overflow:hidden;background:var(--zebre)}
+.portrait svg,.portrait-img{width:100%;height:100%;object-fit:cover;border-radius:12px}
 .semaine-humeur{display:flex;align-items:center;gap:14px;padding:12px 14px;margin-bottom:8px;
   background:var(--acc-doux);border-radius:14px;font-size:34px}
 .semaine-humeur b{display:block;font-size:14px}
@@ -1341,6 +1368,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <label class="field"><span>Nom et prénom du parent employeur</span><input data-identite="employeur.nom"></label>
       <label class="field"><span>Adresse</span><input data-identite="employeur.adresse"></label>
       <label class="field"><span>Code postal et ville</span><input data-identite="employeur.cpVille"></label>
+      <label class="field"><span>Téléphone</span><input data-identite="employeur.tel" inputmode="tel"></label>
       <label class="field"><span>N° employeur Pajemploi</span><input data-identite="employeur.pajemploi"></label>
       <div id="coparentBloc" style="margin-top:12px"></div>
       <p class="hint">Les fiches reprennent ces informations. Le co-parent invité voit tout ce que tu vois et peut agir à ta place.</p>
@@ -1456,6 +1484,11 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <label class="field"><span>Allergies</span><textarea id="uAllergies" rows="2" placeholder="Aucune connue"></textarea></label>
       <label class="field"><span>Traitements en cours</span><textarea id="uTraitements" rows="2"></textarea></label>
       <label class="field"><span>Particularités à connaître</span><textarea id="uParticularites" rows="2" placeholder="Sommeil, alimentation, peurs…"></textarea></label>
+
+      <div class="rub">Qui joindre, dans l'ordre</div>
+      <div id="uContacts"></div>
+      <button id="btnAjoutContact" class="btn btn-ghost btn-block">Ajouter un contact</button>
+      <p class="hint" style="margin:-2px 0 8px">Toi, l'autre parent, un grand-parent. C'est la première liste que la nounou ouvrira.</p>
 
       <div class="rub">Personnes autorisées à venir chercher l'enfant</div>
       <div id="uPersonnes"></div>
@@ -1705,7 +1738,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.0.14</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.1.3</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -2682,15 +2715,28 @@ async function ajouterEnfant() {
   toast('Enfant ajouté : renseigne son prénom, puis crée sa première fiche');
 }
 
+/* Tout enfant peut être retiré, y compris le premier : il n'a rien de
+   particulier sinon que ses fiches n'ont pas de suffixe. On supprime ses
+   fiches en même temps, sans quoi elles resteraient sans propriétaire. */
 async function retirerEnfant(id) {
-  if (id === 'e1') { toast('Le premier enfant ne peut pas être retiré'); return; }
+  const restants = enfants().filter(e => e.id !== id);
+  if (!restants.length) { toast('Il faut au moins un enfant. Modifie celui-ci plutôt que de le retirer.'); return; }
+
   const nom = nomEnfant(id) || 'cet enfant';
-  if (!confirm('Retirer ' + nom + ' ? Ses fiches sont conservées mais ne seront plus accessibles.')) return;
-  profil.enfants = enfants().filter(e => e.id !== id);
-  if (enfantActif === id) enfantActif = 'e1';
+  const list = (await API.listFiches()).filter(f => f.enfantId === id);
+  const combien = list.length
+    ? '\n\n' + list.length + (list.length > 1 ? ' fiches seront supprimées' : ' fiche sera supprimée') + ' avec lui.'
+    : '';
+  if (!confirm('Retirer ' + nom + ' ?' + combien + '\n\nCette action ne peut pas être annulée.')) return;
+
+  for (const f of list) { try { await API.deleteFiche(f.cle); } catch (e) {} }
+  profil.enfants = restants;
+  if (enfantActif === id) enfantActif = restants[0].id;
+  profil.enfantActif = enfantActif;
   await doProfilSave();
   renderEnfants();
-  await changerEnfant('e1');
+  await changerEnfant(enfantActif);
+  toast(nom + ' retiré' + (list.length ? ' avec ses fiches' : ''));
 }
 
 async function changerEnfant(id) {
@@ -2710,9 +2756,9 @@ function renderEnfants() {
   const box = $('#listeEnfants');
   if (box) {
     box.innerHTML = enfants().map(e => `<li>
-      <span><b>${esc(nomEnfant(e.id) || 'Enfant sans prénom')}</b><small>${esc(e.id === 'e1' ? 'Premier enfant' : 'Fiches séparées')}</small></span>
+      <span><b>${esc(nomEnfant(e.id) || 'Enfant sans prénom')}</b><small>${esc(e.contratId ? 'relié à la nounou' : 'fiches locales')}</small></span>
       ${e.id === enfantActif ? '<em>affiché</em>' : `<button class="choisir" data-enfant="${e.id}">Afficher</button>`}
-      ${e.id !== 'e1' ? `<button class="retirer" data-retirer="${e.id}" aria-label="Retirer"><svg><use href="#i-poubelle"/></svg></button>` : ''}
+      ${enfants().length > 1 ? `<button class="retirer" data-retirer="${e.id}" aria-label="Retirer"><svg><use href="#i-poubelle"/></svg></button>` : ''}
     </li>`).join('');
     $$('#listeEnfants [data-enfant]').forEach(b => { b.onclick = () => changerEnfant(b.dataset.enfant); });
     $$('#listeEnfants [data-retirer]').forEach(b => { b.onclick = () => retirerEnfant(b.dataset.retirer); });
@@ -2728,7 +2774,7 @@ function renderEnfants() {
     }
   }
 }
-let saveTimer = null, previewTimer = null, profilTimer = null;
+let saveTimer = null, previewTimer = null, profilTimer = null, telTimer = null;
 let profil = {};
 let vue = 'saisie';
 let rappelTimer = null;
@@ -3877,8 +3923,15 @@ const Supa = (() => {
       body: JSON.stringify(valeurs)
     }, requete);
 
+  /* On demande les lignes supprimees pour pouvoir verifier que la suppression
+     a bien eu lieu : une regle d'acces qui bloque ne provoque pas d'erreur,
+     elle ne touche simplement aucune ligne. Sauf sur les tables sans regle de
+     lecture, ou cette demande ferait echouer l'operation entiere. */
   const supprimer = (nom, requete) =>
-    table(nom, { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, requete);
+    table(nom, {
+      method: 'DELETE',
+      headers: { Prefer: SANS_RELECTURE.includes(nom) ? 'return=minimal' : 'return=representation' }
+    }, requete);
 
   const fonction = (nom, args) =>
     appel('/rest/v1/rpc/' + nom, { method: 'POST', body: JSON.stringify(args || {}) });
@@ -4006,6 +4059,13 @@ function remplirIdentites() {
 
 async function identiteModifiee(el) {
   const [bloc, champ] = el.dataset.identite.split('.');
+  // le numéro du parent est publié : la nounou doit pouvoir appeler
+  if (bloc === 'employeur' && champ === 'tel' && Supa.connecte()) {
+    clearTimeout(telTimer);
+    telTimer = setTimeout(async () => {
+      try { await Supa.modifier('profils', { telephone: el.value.trim() }, 'id=eq.' + Supa.moi().id); } catch (e) {}
+    }, 900);
+  }
   profil.identites = identites();
   profil.identites[bloc] = { ...(profil.identites[bloc] || {}), [champ]: el.value };
   scheduleProfilSave();
@@ -4126,6 +4186,33 @@ async function enregistrerSilence() {
   } catch (e) { toast('Impossible : ' + (e.message || e)); }
 }
 
+/* Frimousses dessinées : de quoi mettre un visage sur un prénom tant qu'on n'a
+   pas de photo. Volontairement naïves, elles s'adressent à des tout-petits. */
+const FRIMOUSSES = {
+  renard:  ['#f0a860', '<circle cx="32" cy="34" r="18" fill="#f0a860"/><path d="M14 22l4-10 10 6M50 22l-4-10-10 6" fill="#f0a860"/><circle cx="26" cy="32" r="2.6" fill="#3a2a1a"/><circle cx="38" cy="32" r="2.6" fill="#3a2a1a"/><ellipse cx="32" cy="40" rx="4" ry="3" fill="#3a2a1a"/><path d="M24 45c3 3 11 3 16 0" stroke="#3a2a1a" stroke-width="2" fill="none" stroke-linecap="round"/>'],
+  koala:   ['#9db4c0', '<circle cx="15" cy="26" r="9" fill="#9db4c0"/><circle cx="49" cy="26" r="9" fill="#9db4c0"/><circle cx="32" cy="34" r="18" fill="#c3d3db"/><circle cx="26" cy="32" r="2.6" fill="#2c3a42"/><circle cx="38" cy="32" r="2.6" fill="#2c3a42"/><ellipse cx="32" cy="40" rx="5" ry="4" fill="#2c3a42"/>'],
+  lapin:   ['#f3c9d6', '<ellipse cx="24" cy="16" rx="5" ry="13" fill="#f3c9d6"/><ellipse cx="40" cy="16" rx="5" ry="13" fill="#f3c9d6"/><circle cx="32" cy="38" r="17" fill="#fadfe7"/><circle cx="26" cy="36" r="2.6" fill="#5a3a44"/><circle cx="38" cy="36" r="2.6" fill="#5a3a44"/><path d="M29 44h6" stroke="#5a3a44" stroke-width="2" stroke-linecap="round"/>'],
+  ourson:  ['#c8a07a', '<circle cx="17" cy="22" r="8" fill="#c8a07a"/><circle cx="47" cy="22" r="8" fill="#c8a07a"/><circle cx="32" cy="36" r="18" fill="#dcbb98"/><circle cx="26" cy="33" r="2.6" fill="#4a3323"/><circle cx="38" cy="33" r="2.6" fill="#4a3323"/><ellipse cx="32" cy="41" rx="6" ry="5" fill="#f0dcc8"/><ellipse cx="32" cy="39" rx="3" ry="2" fill="#4a3323"/>'],
+  chaton:  ['#b8a9d9', '<path d="M16 24l2-12 12 7M48 24l-2-12-12 7" fill="#b8a9d9"/><circle cx="32" cy="36" r="17" fill="#cfc3e6"/><circle cx="26" cy="34" r="2.6" fill="#3d3350"/><circle cx="38" cy="34" r="2.6" fill="#3d3350"/><path d="M32 40l-2 2 2 2 2-2z" fill="#3d3350"/><path d="M12 36h10M42 36h10M12 42h10M42 42h10" stroke="#3d3350" stroke-width="1.4" stroke-linecap="round" opacity=".5"/>'],
+  poussin: ['#f5d76e', '<circle cx="32" cy="36" r="18" fill="#f7e08c"/><path d="M32 14l-4 6h8z" fill="#f0a860"/><circle cx="26" cy="34" r="2.6" fill="#4a3d16"/><circle cx="38" cy="34" r="2.6" fill="#4a3d16"/><path d="M28 41l4 4 4-4z" fill="#f0a860"/>'],
+  grenouille: ['#94c9a0', '<circle cx="21" cy="24" r="8" fill="#b3dcbc"/><circle cx="43" cy="24" r="8" fill="#b3dcbc"/><circle cx="21" cy="24" r="3" fill="#243a29"/><circle cx="43" cy="24" r="3" fill="#243a29"/><circle cx="32" cy="40" r="16" fill="#94c9a0"/><path d="M24 44c4 4 12 4 16 0" stroke="#243a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>'],
+  hibou:   ['#a89078', '<circle cx="32" cy="36" r="18" fill="#c4ae96"/><circle cx="25" cy="33" r="7" fill="#f3ebe0"/><circle cx="39" cy="33" r="7" fill="#f3ebe0"/><circle cx="25" cy="33" r="3" fill="#3a2e22"/><circle cx="39" cy="33" r="3" fill="#3a2e22"/><path d="M32 40l-3 4h6z" fill="#e0a94f"/><path d="M18 22l6 6M46 22l-6 6" stroke="#a89078" stroke-width="4" stroke-linecap="round"/>']
+};
+const CLES_FRIMOUSSE = Object.keys(FRIMOUSSES);
+
+function frimousseSVG(cle, taille) {
+  const f = FRIMOUSSES[cle] || FRIMOUSSES.renard;
+  return `<svg viewBox="0 0 64 64" width="${taille}" height="${taille}" aria-hidden="true">${f[1]}</svg>`;
+}
+
+/* Une frimousse stable par enfant tant que rien n'est choisi : le même prénom
+   donne toujours le même animal. */
+function frimousseParDefaut(cle) {
+  let h = 0;
+  for (const c of String(cle || '')) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return CLES_FRIMOUSSE[h % CLES_FRIMOUSSE.length];
+}
+
 /* ---------------- Espace commun ----------------
    La nounou l'ouvre, chaque famille décide d'y entrer. Ce qu'on y lit vient
    uniquement de ce que les membres y écrivent. */
@@ -4192,7 +4279,7 @@ function renderCommun() {
     const q = new Date(a.cree_le).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     return `<div class="msg cat-${esc(a.categorie)}"><span class="rond">${emoji}</span>
       <span class="txt${a.auteur_id === moi ? ' mien' : ''}"><i class="etiq">${esc(lib)}</i><b>${esc(a.texte)}</b>
-      <small>${a.auteur_id === moi ? 'vous' : 'la nounou ou une famille'} · ${esc(q)}</small></span></div>`;
+      <small>${a.auteur_id === moi ? 'vous' : 'la nounou ou une autre famille'} · ${esc(q)}</small></span></div>`;
   }).join('') : '<p class="msg-vide">Aucune annonce pour le moment.</p>';
 }
 
@@ -4287,6 +4374,29 @@ function resumeMessages() {
   return t.length > 38 ? t.slice(0, 37) + '…' : t;
 }
 
+/* Le portrait posé par la nounou, sinon une frimousse tirée du prénom. */
+let portraitLocal = null;
+async function chargerPortrait() {
+  portraitLocal = null;
+  const id = contratLie();
+  if (!id || !Supa.connecte()) return;
+  try {
+    const r = await Supa.lire('contrats', 'id=eq.' + id + '&select=enfant_frimousse,enfant_photo');
+    const c = r[0];
+    if (!c) return;
+    if (c.enfant_photo) portraitLocal = { photo: await telechargerPhoto(c.enfant_photo) };
+    else portraitLocal = { frimousse: c.enfant_frimousse || frimousseParDefaut(cur.enfant.prenom || id) };
+  } catch (e) {}
+}
+
+function portraitHTML(taille) {
+  const t = taille || 44;
+  if (portraitLocal && portraitLocal.photo)
+    return `<img class="portrait-img" src="${portraitLocal.photo}" alt="" width="${t}" height="${t}">`;
+  const cle = (portraitLocal && portraitLocal.frimousse) || frimousseParDefaut(cur.enfant.prenom || 'e');
+  return frimousseSVG(cle, t);
+}
+
 function tuileJournal() {
   const auj = new Date().toISOString().slice(0, 10);
   const j = journal.find(x => x.jour === auj) || journal[0];
@@ -4296,9 +4406,10 @@ function tuileJournal() {
   const quand = j.jour === auj ? 'Aujourd\u2019hui' : new Date(j.jour + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long' });
   const bouts = [];
   if (j.repas) bouts.push(JOURNAL_REPAS[j.repas]);
-  if (j.sieste_debut && j.sieste_fin) bouts.push('sieste ' + j.sieste_debut.slice(0, 5) + '–' + j.sieste_fin.slice(0, 5));
+  const sies = siestesDe(j);
+  if (sies.length) bouts.push(sies.length > 1 ? sies.length + ' siestes' : sies[0].toLowerCase());
   return `<button class="tuile-m large" data-mod="journal">
-    <span class="rond" style="font-size:22px">${face || '<svg><use href="#i-journal"/></svg>'}</span>
+    <span class="rond portrait">${portraitHTML(38)}</span>
     <div><b>${esc(quand)} — ${esc(JOURNAL_HUMEUR[j.humeur] || 'Journal')}</b>
     <small>${esc(bouts.join(' · ') || j.mot || 'Voir le journal')}</small></div></button>`;
 }
@@ -4744,7 +4855,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.0.14';
+const VERSION = '1.1.3';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -4832,7 +4943,7 @@ async function reconcilierContrats(silencieux) {
   let distants = [];
   try {
     distants = await Supa.lire('contrats',
-      'select=id,enfant_prenom,enfant_naissance,statut,salariee_id,employeur_id,coparent_id&statut=neq.termine&order=cree_le');
+      'select=id,enfant_prenom,enfant_naissance,statut,salariee_id,employeur_id,coparent_id,enfant_frimousse,enfant_photo&statut=neq.termine&order=cree_le');
   } catch (e) { return 0; }
   const moi = (Supa.moi() || {}).id;
   distants = distants.filter(c => c.employeur_id === moi || c.coparent_id === moi);
@@ -4935,6 +5046,30 @@ async function verifierContrat() {
     if (!r || !r.length) return { etat: 'fantome' };
     return { etat: 'bon', contrat: r[0], nounou: !!r[0].salariee_id, termine: r[0].statut === 'termine' };
   } catch (e) { return { etat: 'injoignable', message: e.message || String(e) }; }
+}
+
+/* Efface le contrat du serveur. Tout ce qui en dépend part avec lui : jours,
+   mois, messages, journal, photos, invitations. Les fiches de salaire, elles,
+   vivent sur le téléphone et ne sont pas touchées. */
+async function supprimerContrat() {
+  const id = contratLie();
+  if (!id) { toast('Aucun contrat en ligne'); return; }
+  const nom = nomEnfant(enfantActif) || 'cet enfant';
+
+  if (!confirm('Supprimer le contrat en ligne de ' + nom + ' ?\n\n' +
+      'Le journal, les photos, les messages et la fiche d\u2019urgence seront effacés du serveur, pour toi comme pour la nounou.\n\n' +
+      'Tes fiches de salaire restent sur ce téléphone.')) return;
+  if (!confirm('Dernière vérification : cette suppression est définitive.\n\nSi le contrat s\u2019achève réellement, utilise plutôt Documents → Fin de contrat.')) return;
+
+  try {
+    const r = await Supa.supprimer('contrats', 'id=eq.' + id);
+    if (Array.isArray(r) && !r.length) {
+      toast('La base n\u2019a rien supprimé : ce contrat n\u2019est pas rattaché à ton compte.');
+      return;
+    }
+    await oublierContrat();
+    toast('Contrat supprimé du serveur');
+  } catch (e) { toast('Suppression impossible : ' + (e.message || e)); }
 }
 
 async function oublierContrat() {
@@ -5086,7 +5221,10 @@ async function renderPartage() {
         ? '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>' +
           '<button class="btn btn-danger btn-block" data-part="retirer">Retirer l\u2019accès de la nounou</button>'
         : '<button class="btn btn-primary btn-block" data-part="code">Nouveau code d\u2019invitation</button>' +
-          '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>');
+          '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>') +
+      '<div class="rub">Fin de la relation</div>' +
+      '<p class="hint" style="margin:0 0 8px">Un contrat qui s\u2019achève vraiment passe par <b>Documents → Fin de contrat</b> : préavis, congés payés, indemnité de rupture. La suppression ci-dessous est faite pour effacer un essai.</p>' +
+      '<button class="btn btn-danger btn-block" data-part="supprimer">Supprimer le contrat en ligne</button>';
 
     const valide = e.code && e.codeExpire && new Date(e.codeExpire) > new Date();
     zoneQR.innerHTML =
@@ -5104,6 +5242,7 @@ async function renderPartage() {
 
   const actions = {
     compte: () => showView('parametres'),
+    supprimer: supprimerContrat,
     oublier: oublierContrat,
     publier: publierContrat,
     code: genererInvitation,
@@ -5232,6 +5371,37 @@ async function chargerUrgence() {
   } catch (e) { /* la vue le dira */ }
 }
 
+const ROLES_CONTACT = ['Mère', 'Père', 'Parent', 'Grand-parent', 'Autre'];
+let contactsUrgence = [];
+
+function renderContacts() {
+  const box = $('#uContacts');
+  if (!box) return;
+  box.innerHTML = contactsUrgence.map((c, i) =>
+    `<div class="contact">
+      <div class="two">
+        <select data-contact="${i}:role">${ROLES_CONTACT.map(r =>
+          `<option ${r === c.role ? 'selected' : ''}>${r}</option>`).join('')}</select>
+        <input data-contact="${i}:nom" placeholder="Nom" value="${esc(c.nom || '')}">
+      </div>
+      <div class="two" style="margin-top:6px">
+        <input data-contact="${i}:tel" placeholder="Téléphone" inputmode="tel" value="${esc(c.tel || '')}">
+        <button class="retirer" data-retire-contact="${i}" aria-label="Retirer"><svg><use href="#i-poubelle"/></svg></button>
+      </div>
+    </div>`).join('') ||
+    '<p class="hint" style="margin:0 0 8px">Aucun contact. Sans eux, la nounou n\u2019a que le carnet de son téléphone.</p>';
+
+  $$('#uContacts [data-contact]').forEach(el => {
+    el.oninput = el.onchange = () => {
+      const [n, champ] = el.dataset.contact.split(':');
+      contactsUrgence[+n][champ] = el.value;
+    };
+  });
+  $$('#uContacts [data-retire-contact]').forEach(b => {
+    b.onclick = () => { contactsUrgence.splice(+b.dataset.retireContact, 1); renderContacts(); };
+  });
+}
+
 function renderPersonnes() {
   const box = $('#uPersonnes');
   if (!box) return;
@@ -5262,6 +5432,8 @@ function renderUrgence() {
   $('#uAllergies').value = u.allergies || '';
   $('#uTraitements').value = u.traitements || '';
   $('#uParticularites').value = u.particularites || '';
+  contactsUrgence = u.contacts || [];
+  renderContacts();
   const a = u.autorisations || {};
   $$('[data-autor]').forEach(c => { c.checked = !!a[c.dataset.autor]; });
   renderPersonnes();
@@ -5287,6 +5459,7 @@ async function enregistrerUrgence() {
     traitements: $('#uTraitements').value.trim() || null,
     particularites: $('#uParticularites').value.trim() || null,
     personnes: personnes.filter(p => (p.nom || '').trim()),
+    contacts: contactsUrgence.filter(c => (c.nom || '').trim() || (c.tel || '').trim()),
     autorisations,
     signe_par: (cur.employeur.nom || '').trim() || 'Le parent',
     signe_le: new Date().toISOString()
@@ -5311,8 +5484,19 @@ async function chargerJournal() {
   if (!id || !Supa.connecte()) { journal = []; return; }
   try {
     journal = await Supa.lire('journal',
-      'contrat_id=eq.' + id + '&select=jour,repas,sieste_debut,sieste_fin,humeur,couches,mot,maj_le&order=jour.desc&limit=14');
+      'contrat_id=eq.' + id + '&select=jour,repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le&order=jour.desc&limit=14');
   } catch (e) { journal = []; }
+}
+
+/* Les siestes, qu'elles viennent de la nouvelle liste ou de l'ancienne paire. */
+function siestesDe(j) {
+  const liste = Array.isArray(j.siestes) && j.siestes.length
+    ? j.siestes
+    : (j.sieste_debut ? [{ debut: j.sieste_debut, fin: j.sieste_fin }] : []);
+  return liste
+    .filter(s => s.debut || s.fin)
+    .map((s, i) => (liste.length > 1 ? 'Sieste ' + (i + 1) + ' ' : 'Sieste ') +
+      String(s.debut || '').slice(0, 5) + (s.fin ? ' → ' + String(s.fin).slice(0, 5) : ''));
 }
 
 function renderJournal() {
@@ -5327,8 +5511,7 @@ function renderJournal() {
     const puces = [];
     if (j.repas) puces.push(JOURNAL_REPAS[j.repas] || j.repas);
     if (j.humeur) puces.push(JOURNAL_HUMEUR[j.humeur] || j.humeur);
-    if (j.sieste_debut && j.sieste_fin)
-      puces.push('Sieste ' + j.sieste_debut.slice(0, 5) + ' → ' + j.sieste_fin.slice(0, 5));
+    for (const p of siestesDe(j)) puces.push(p);
     if (j.couches) puces.push(j.couches + (j.couches > 1 ? ' changes' : ' change'));
     return `<div class="jour-b">
       <div class="date">${esc(d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }))}</div>
@@ -5351,6 +5534,15 @@ const FACON = {
   info:   { chapeau: '', ico: 'i-mail' }
 };
 
+/* Le même fil que la nounou, en bulles, du plus ancien au plus récent. */
+function libelleJour(iso) {
+  const d = new Date(iso), auj = new Date();
+  const hier = new Date(auj); hier.setDate(auj.getDate() - 1);
+  if (d.toDateString() === auj.toDateString()) return "Aujourd'hui";
+  if (d.toDateString() === hier.toDateString()) return 'Hier';
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
 /* ---------------- Messages ----------------
    Elle signale un besoin ou envoie une photo, il répond. Les demandes de
    fourniture arrivent en un geste de son côté, sans texte à rédiger. */
@@ -5370,38 +5562,35 @@ function renderMessages() {
   const box = $('#listeMessages');
   if (!box) return;
   const moi = (Supa.moi() || {}).id;
-  const badge = $('#badgeMessages');
-  const nonLus = messages.filter(m => m.auteur_id !== moi && !m.lu_le).length;
-  if (badge) badge.textContent = nonLus ? String(nonLus) : '';
+  if (!messages.length) { box.innerHTML = '<p class="msg-vide">Aucun message pour le moment.</p>'; return; }
 
-  box.innerHTML = messages.length ? messages.map(m => {
-    if (m.categorie === 'besoin') {
-      const quoi = String(m.texte || '').replace(/^il manque\s*:\s*/i, '');
-      FACON.besoin.emoji = EMOJIS_BESOIN[quoi.toLowerCase()] || '📦';
-    }
+  const ordre = [...messages].sort((a, b) => new Date(a.cree_le) - new Date(b.cree_le));
+  let jour = '', html = '';
+  for (const m of ordre) {
+    const j = String(m.cree_le).slice(0, 10);
+    if (j !== jour) { jour = j; html += `<div class="jour-sep"><span>${esc(libelleJour(m.cree_le))}</span></div>`; }
     const mien = m.auteur_id === moi;
-    const quand = new Date(m.cree_le).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-    const f = FACON[m.categorie] || FACON.info;
-    const objet = m.categorie === 'besoin'
-      ? String(m.texte || '').replace(/^il manque\s*:\s*/i, '')
-      : (m.texte || (m.categorie === 'photo' ? 'Photo' : ''));
-    return `<div class="msg cat-${esc(m.categorie)}">
-      <span class="rond">${f.emoji || `<svg><use href="#${f.ico}"/></svg>`}</span>
-      <span class="txt${mien ? ' mien' : ''}">
-        ${f.chapeau ? `<i class="etiq">${esc(f.chapeau)}</i>` : ''}
-        <b>${esc(objet)}</b>
-        <small>${mien ? 'vous' : 'la salariée'} · ${esc(quand)}</small>
-        ${m.piece ? `<img data-photo="${esc(m.piece)}" alt="">` : ''}
-      </span></div>`;
-  }).join('') : '<p class="msg-vide">Aucun message pour le moment.</p>';
+    const h = new Date(m.cree_le).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const cat = m.categorie || 'info';
+    const quoi = cat === 'besoin' ? String(m.texte || '').replace(/^il manque\s*:\s*/i, '') : (m.texte || '');
+    const f = FACON[cat] || FACON.info;
+    const emoji = cat === 'besoin' ? (EMOJIS_BESOIN[quoi.toLowerCase()] || '📦') : (f.emoji || '');
+    html += `<div class="bulle-l ${mien ? 'moi' : 'lui'}">
+      <div class="bulle cat-${esc(cat)}">
+        ${f.chapeau ? `<i class="etiq">${emoji} ${esc(f.chapeau)}</i>` : ''}
+        ${m.piece ? `<img data-photo="${esc(m.piece)}" alt="" class="bulle-img">` : ''}
+        ${quoi ? `<span class="dit">${esc(quoi)}</span>` : (m.piece ? '' : '<span class="dit">Photo</span>')}
+        <time>${esc(h)}</time>
+      </div></div>`;
+  }
+  box.innerHTML = html;
 
-  // les photos sont privées : on les charge avec le jeton, jamais par URL publique
   $$('#listeMessages [data-photo]').forEach(async img => {
     const d = await telechargerPhoto(img.dataset.photo);
     if (d) img.src = d; else img.remove();
   });
-
-  marquerMessagesLus();
+  const c = box.closest('.body') || box;
+  c.scrollTop = c.scrollHeight;
 }
 
 async function telechargerPhoto(chemin) {
@@ -5433,7 +5622,7 @@ async function repondre() {
   if (!t) return;
   try {
     await Supa.ecrire('messages', { contrat_id: id, auteur_id: Supa.moi().id, texte: t, categorie: 'info' });
-    Supa.notifier(id, (cur.enfant.prenom || 'Cocon') + ' — message du parent', t);
+    Supa.notifier(id, (cur.enfant.prenom || 'Cocon') + ' — message de la famille', t);
     $('#reponse').value = '';
     await chargerMessages();
     renderMessages();
@@ -5768,7 +5957,7 @@ async function rafraichirTout(force) {
   syncEnCours = true;
   accueilCharge = Date.now();
   try {
-    await Promise.all([chargerMessages(), chargerJournal(), chargerGalerie(), chargerDemandes()]);
+    await Promise.all([chargerMessages(), chargerJournal(), chargerGalerie(), chargerDemandes(), chargerPortrait()]);
     if (vue === 'accueil') renderAccueil();
     else if (vue === 'module') await rafraichirModule(moduleActif);
     renderBarre();
@@ -6694,6 +6883,10 @@ $('#communCatP').addEventListener('click', e => {
 });
 $('#btnUrgence').onclick = enregistrerUrgence;
 $('#btnAjoutPersonne').onclick = () => { personnes.push({ nom: '', lien: '', tel: '' }); renderPersonnes(); };
+$('#btnAjoutContact').onclick = () => {
+  contactsUrgence.push({ role: ROLES_CONTACT[contactsUrgence.length] || 'Autre', nom: '', tel: '' });
+  renderContacts();
+};
 $('#btnAvenant').onclick = ajouterAvenant;
 $('#btnIcs').onclick = exporterIcs;
 $('#btnSauvegarde').onclick = sauvegarder;

@@ -150,8 +150,15 @@ const Supa = (() => {
       body: JSON.stringify(valeurs)
     }, requete);
 
+  /* On demande les lignes supprimees pour pouvoir verifier que la suppression
+     a bien eu lieu : une regle d'acces qui bloque ne provoque pas d'erreur,
+     elle ne touche simplement aucune ligne. Sauf sur les tables sans regle de
+     lecture, ou cette demande ferait echouer l'operation entiere. */
   const supprimer = (nom, requete) =>
-    table(nom, { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, requete);
+    table(nom, {
+      method: 'DELETE',
+      headers: { Prefer: SANS_RELECTURE.includes(nom) ? 'return=minimal' : 'return=representation' }
+    }, requete);
 
   const fonction = (nom, args) =>
     appel('/rest/v1/rpc/' + nom, { method: 'POST', body: JSON.stringify(args || {}) });

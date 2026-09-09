@@ -1271,3 +1271,171 @@ A faire : Project Settings -> API Keys -> copier la cle **publishable**, et la
 mettre a la place de l'ancienne dans `commun/projet.js` puis dans les deux
 `index.html` — ou dans le secret GitHub `SUPABASE_ANON_KEY`, que le workflow
 injecte. Elle vaut pour tout : base, authentification, fonctions.
+
+## 1.0.15 — l'icone de notification
+
+Android n'affiche pas l'icone de l'application dans la barre d'etat : il exige
+une **silhouette monochrome**, dont il ne garde que la transparence avant de la
+teinter lui-meme. Sans elle, il reduit l'icone coloree a un rond blanc.
+
+Une icone dediee est desormais dessinee aux cinq densites, `ic_stat_cocon` :
+le cocon en cadre, la pousse a deux feuilles au centre, lisible a 24 pixels.
+Le script `android-extra/icone-notification.py` la declare dans le manifeste au
+moment de la compilation, avec une couleur de teinte prise dans la
+configuration : vert d'eau pour Cocon Parent, rose poudre pour Cocon Nounou.
+
+Le script est idempotent et verifie la presence de la balise `</application>`
+avant d'ecrire. Teste sur un faux projet : manifeste et ressource couleur
+valides apres une execution comme apres deux.
+
+## 1.0.16
+
+### Retirer n'importe quel enfant
+
+Le premier enfant etait indeboulonnable. C'etait une facilite de ma part : ses
+fiches sont les seules sans suffixe dans les cles, et je n'avais pas voulu
+traiter le cas. Rien ne le justifiait.
+
+Tout enfant peut maintenant partir, tant qu'il en reste un. Ses fiches sont
+supprimees avec lui — sinon elles resteraient sans proprietaire, invisibles et
+encombrantes. Le nombre de fiches concernees est annonce avant confirmation.
+
+Le libelle sous chaque nom disait « Premier enfant » ou « Fiches separees », ce
+qui ne renseignait sur rien. Il dit desormais si l'enfant est relie a la nounou.
+
+### Supprimer le contrat en ligne
+
+Dans Mes nounous, sous un intitule « Fin de la relation » qui rappelle d'abord
+qu'un contrat qui s'acheve vraiment passe par **Documents -> Fin de contrat** :
+preavis, conges payes, indemnite de rupture. Le bouton de suppression est fait
+pour effacer un essai, et le dit.
+
+Deux confirmations, la seconde renvoyant explicitement vers Fin de contrat. La
+suppression emporte tout ce qui depend du contrat cote serveur — jours, mois,
+messages, journal, photos, invitations — pour les deux parties. Les fiches de
+salaire, elles, vivent sur le telephone et ne sont pas touchees.
+
+### Les suppressions se verifient
+
+Meme defaut que pour le retrait d'acces : `Prefer: return=minimal` ne renvoyait
+rien, donc aucun moyen de savoir si une regle d'acces avait bloque l'operation.
+Les suppressions demandent desormais les lignes supprimees, sauf sur les tables
+sans regle de lecture ou cette demande ferait echouer l'operation entiere.
+
+## 1.1.0
+
+`014-contacts-siestes-portraits.sql` est a executer.
+
+### Joindre les parents
+
+La fiche d'urgence ne donnait que le medecin. Elle commence desormais par
+**qui joindre, dans l'ordre** : mere, pere, grand-parent, autant de lignes que
+voulu, chacune avec son role. Cote nounou, ce sont des boutons d'appel : un
+appui, le telephone compose.
+
+Le numero de l'employeur, saisi une fois dans Dossier -> Ma famille, apparait
+aussi. Il est masque s'il figure deja dans les contacts, pour ne pas afficher le
+meme numero deux fois.
+
+### Siestes multiples
+
+Un bebe en fait deux ou trois. Autant de lignes qu'il en faut, chacune avec sa
+duree calculee en direct. Les journees deja saisies avec une sieste unique sont
+reprises par la migration ; les deux anciennes colonnes gardent la premiere
+sieste, rien n'est perdu.
+
+### Un vrai module photo
+
+Onglet **Photos** cote nounou. Deux boutons : prendre une photo avec l'appareil,
+ou en choisir plusieurs d'un coup dans la pellicule. Les photos sont regroupees
+par mois. Un appui ouvre la visionneuse, avec navigation et suppression.
+
+### Portraits
+
+Huit frimousses dessinees — renard, koala, lapin, ourson, chaton, poussin,
+grenouille, hibou — ou une vraie photo prise depuis l'application. Tant que
+rien n'est choisi, chaque enfant recoit une frimousse stable tiree de son
+prenom : le meme prenom donne toujours le meme animal.
+
+C'est la nounou qui pose le portrait, souvent elle qui prend la photo. Un
+declencheur limite ce qu'elle peut modifier sur le contrat : le portrait, rien
+d'autre.
+
+### Centre de notifications cote nounou
+
+Comme chez le parent, une cloche en haut a droite. Ce qui demande son
+attention : familles manquantes, messages non lus, retards annonces, demandes
+refusees, journal du jour non rempli passe seize heures, notifications
+inactives. Un point rouge quand quelque chose presse.
+
+## 1.1.1 — une vraie messagerie cote nounou
+
+Le selecteur d'enfant en tete de l'ecran Messages supposait qu'on sache deja ou
+chercher. Avec trois familles, un message pouvait attendre des heures dans un fil
+qu'on ne regardait pas.
+
+**Une boite de reception.** Chaque famille est une conversation : portrait de
+l'enfant, dernier message, heure, pastille des non-lus. Le total apparait en
+tete de carte. Ce qui attend se voit d'un coup d'oeil.
+
+**L'espace commun y figure comme une conversation**, epinglee en premier. Meme
+allure, meme fil, meme champ de saisie — sauf que le message part vers toutes
+les familles membres. Les actions du quotidien y sont masquees : on ne signale
+pas un manque de couches a tout le monde.
+
+**Une conversation ouverte** montre le fil, un champ, et quatre actions rangees
+sous lui : photo, il manque, demander, retard. Chacune deplie son volet a la
+demande, au lieu des quatre cartes empilees en permanence.
+
+Le bouton retour d'Android ferme la conversation avant de quitter l'ecran.
+
+Teste : trois conversations dont l'espace commun, deux non-lus comptes
+correctement, ouverture, volet, retour, et le fil du commun avec ses actions
+masquees.
+
+## 1.1.2
+
+### La barre du bas cote nounou
+
+Sept entrees, c'etait trop. Meme dispositif que chez le parent : quatre
+emplacements autour d'un « + » qui ouvre les huit ecrans. Un appui long en
+epingle un dans la barre, le choix est conserve. La pastille des messages non
+lus remonte dans la barre.
+
+### Une vraie conversation
+
+Ce que j'ai repris de la messagerie classique :
+
+- **Des bulles**, a droite ce qu'on ecrit, a gauche ce qu'on recoit. Un fil se
+  lit d'un coup d'oeil, la ou une liste plate demande de dechiffrer « moi » ou
+  « le parent » a chaque ligne.
+- **Du plus ancien au plus recent**, avec descente automatique en bas. C'est le
+  sens d'une conversation ; l'ordre inverse convient a une boite, pas a un fil.
+- **Des separateurs de jour** — aujourd'hui, hier, puis la date — au lieu de
+  dater chaque ligne.
+- Les besoins et les retards gardent leur couleur et leur chapeau dans la bulle.
+
+Ce que je n'ai pas repris, et pourquoi :
+
+- **Pas d'accuse de lecture par message.** La pastille des non-lus suffit. Des
+  petites coches diraient « elle a vu et n'a pas repondu », ce qui cree une
+  tension inutile entre deux personnes qui se voient tous les jours.
+- **Pas d'indicateur de frappe.** Il demanderait une connexion permanente, et
+  installerait une attente de reponse immediate. Un mot depose le matin peut
+  attendre le soir.
+
+Les deux applications affichent le meme fil.
+
+## 1.1.3 — « la famille » plutot que « le parent »
+
+Depuis que le co-parent existe, un contrat peut avoir deux parents. Toutes les
+formulations qui en supposaient un seul etaient fausses des qu'ils sont deux :
+« Un mot au parent », « Un appui envoie la demande au parent », « Autorise par
+le parent », « Le parent te donne ce code ».
+
+Elles parlent desormais de **la famille**. Quinze formulations revues cote
+nounou, deux cote parent.
+
+Restent au singulier les endroits ou c'est juridiquement exact : « le parent
+employeur » designe la personne qui signe le contrat et verse le salaire, meme
+si un co-parent l'accompagne.

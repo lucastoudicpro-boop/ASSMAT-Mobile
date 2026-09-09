@@ -7,5 +7,6 @@
   },
   "server": {
     "androidScheme": "https"
-  }
+  },
+  "teinte": "#2f7d73"
 }

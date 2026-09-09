@@ -12,7 +12,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const URL_SUPABASE = Deno.env.get('SUPABASE_URL')!;
-const CLE_ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
 const CLE_SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const COMPTE = JSON.parse(Deno.env.get('FCM_COMPTE_SERVICE') ?? '{}');
 
@@ -110,12 +109,17 @@ Deno.serve(async (req) => {
     if (!COMPTE.client_email) console.error('FCM_COMPTE_SERVICE absent ou illisible');
 
     // Première vérification : le contrat est lu avec les droits de l'appelant.
-    // S'il n'y appartient pas, la règle d'accès ne renvoie rien.
-    const commeUtilisateur = createClient(URL_SUPABASE, CLE_ANON, {
+    // S'il n'y appartient pas, la règle d'accès ne renvoie rien. La clé passée
+    // ici n'est qu'un laissez-passer réseau ; c'est l'en-tête Authorization
+    // qui fixe l'identité, donc les règles s'appliquent bien à l'appelant.
+    const commeUtilisateur = createClient(URL_SUPABASE, CLE_SERVICE, {
       global: { headers: { Authorization: autorisation } },
+      auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: utilisateur } = await commeUtilisateur.auth.getUser();
+    // On identifie l'appelant à partir de son propre jeton, explicitement.
+    const { data: utilisateur } = await commeUtilisateur.auth.getUser(autorisation.slice(7));
     if (!utilisateur?.user) throw new Error('Session invalide');
+    console.log('appelant identifié : ' + utilisateur.user.id);
 
     // Mode test : l'appelant s'envoie une notification a lui-meme. Sert a
     // verifier la chaine complete sans dependre d'un contrat ni d'un tiers.
@@ -148,7 +152,9 @@ Deno.serve(async (req) => {
 
     // Les jetons ne sont lisibles que par leur propriétaire : cette lecture
     // exige la clé de service, et c'est la seule chose qu'elle sert ici.
-    const commeService = createClient(URL_SUPABASE, CLE_SERVICE);
+    const commeService = createClient(URL_SUPABASE, CLE_SERVICE, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
     // Mode silencieux du destinataire. L'urgent passe toujours, le test aussi.
     if (!urgent && !test) {

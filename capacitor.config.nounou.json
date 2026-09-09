@@ -2,6 +2,11 @@
   "appId": "fr.lucas.cocon.nounou",
   "appName": "Cocon Nounou",
   "webDir": "docs-nounou",
-  "android": { "allowMixedContent": false },
-  "server": { "androidScheme": "https" }
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  },
+  "teinte": "#b8556e"
 }
