@@ -1439,3 +1439,38 @@ nounou, deux cote parent.
 Restent au singulier les endroits ou c'est juridiquement exact : « le parent
 employeur » designe la personne qui signe le contrat et verse le salaire, meme
 si un co-parent l'accompagne.
+
+## 1.1.5 — six correctifs
+
+**Les pastilles de messages ne partaient jamais.** `marquerMessagesLus` existait
+cote parent mais n'etait appelee nulle part, et la nounou n'en avait pas du
+tout. Ouvrir un module ou une conversation vaut desormais lecture.
+
+**Photo et Frimousse se chevauchaient**, et « Prendre une photo » ne
+declenchait rien. Les champs de fichier etaient enveloppes dans des `label`,
+ce qui echoue dans une WebView Android selon la mise en page. Des boutons
+declenchent maintenant le champ explicitement, aux trois endroits concernes.
+
+**Notifications envoyees au mauvais appareil.** La fonction se fiait au seul
+filtre `.eq('personne_id', ...)`. Elle verifie desormais chaque jeton en
+memoire avant l'envoi, et journalise l'ecart s'il y en a un. Envoyer a la
+mauvaise personne serait pire qu'un envoi manque.
+
+Un jeton n'est plus supprime sur un simple code 400 : seuls un 404 ou un refus
+explicite de Firebase le retirent. Un 400 peut venir d'une charge mal formee, et
+supprimait des jetons valides — ce qui expliquait les notifications
+parent vers nounou perdues apres un essai.
+
+**Deux ecrans de lancement.** Celui d'Android, puis le mien. Le mien est retire
+des que l'application tourne sous Capacitor, et la configuration reduit la duree
+du natif.
+
+**Retirer un enfant laissait un contrat orphelin** : la nounou continuait de le
+voir, le parent n'y accedait plus. La suppression se fait maintenant dans
+l'ordre — acces de la nounou, contrat en ligne, puis l'enfant — et s'arrete si
+une etape echoue plutot que de continuer a moitie.
+
+**Et pour reparer l'existant** : Mes nounous detecte les contrats en ligne sans
+enfant correspondant, les nomme, et propose de les supprimer.
+
+La fonction `notifier` est a redeployer.

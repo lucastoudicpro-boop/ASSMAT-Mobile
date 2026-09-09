@@ -184,6 +184,8 @@ input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--
   stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 #carteRejoindre[open] .tete-repli{border-bottom:1px solid var(--line)}
 .portrait-choix{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.portrait-btns{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
+.portrait-btns .btn{margin:0;width:100%}
 .portrait-grand{width:72px;height:72px;border-radius:36px;flex:0 0 auto;overflow:hidden;
   background:var(--zebre);display:flex;align-items:center;justify-content:center;
   box-shadow:0 4px 12px -6px rgba(60,25,35,.4)}
@@ -712,12 +714,10 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <div class="corps">
         <div class="portrait-choix">
           <div class="portrait-grand" id="portraitGrand"></div>
-          <div>
-            <label class="btn btn-primary btn-petit" style="margin:0">
-              Photo
-              <input id="photoPortrait" type="file" accept="image/*" capture="environment" hidden>
-            </label>
-            <button id="btnFrimousse" class="btn btn-ghost btn-petit" style="margin-left:6px">Frimousse</button>
+          <div class="portrait-btns">
+            <button id="btnPhotoPortrait" class="btn btn-primary btn-petit">Photo</button>
+            <button id="btnFrimousse" class="btn btn-ghost btn-petit">Frimousse</button>
+            <input id="photoPortrait" type="file" accept="image/*" capture="environment" hidden>
           </div>
         </div>
         <div id="choixFrimousse" class="frimousses" hidden></div>
@@ -803,10 +803,8 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
           <button id="btnEnvoyer" class="btn btn-primary">Envoyer</button>
         </div>
         <div class="conv-actions">
-          <label class="conv-act">
-            <svg><use href="#i-image"/></svg>Photo
-            <input id="fichierPhoto" type="file" accept="image/*" capture="environment" hidden>
-          </label>
+          <button class="conv-act" id="ouvrirPhoto"><svg><use href="#i-image"/></svg>Photo</button>
+          <input id="fichierPhoto" type="file" accept="image/*" capture="environment" hidden>
           <button class="conv-act" id="ouvrirBesoins"><svg><use href="#i-alerte"/></svg>Il manque</button>
           <button class="conv-act" id="ouvrirDemande"><svg><use href="#i-ok"/></svg>Demander</button>
           <button class="conv-act" id="ouvrirRetard"><svg><use href="#i-cal"/></svg>Retard</button>
@@ -881,14 +879,10 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <section id="vueGalerie" hidden>
     <div class="choix-enfant" data-pour="galerie"></div>
     <div class="deux" style="margin-bottom:10px">
-      <label class="btn btn-primary" style="text-align:center;margin:0">
-        Prendre une photo
-        <input id="prisePhoto" type="file" accept="image/*" capture="environment" hidden>
-      </label>
-      <label class="btn btn-ghost" style="text-align:center;margin:0">
-        Choisir dans la pellicule
-        <input id="importPhoto" type="file" accept="image/*" multiple hidden>
-      </label>
+      <button id="btnPrendrePhoto" class="btn btn-primary" style="margin:0">Prendre une photo</button>
+      <button id="btnImporterPhoto" class="btn btn-ghost" style="margin:0">Choisir dans la pellicule</button>
+      <input id="prisePhoto" type="file" accept="image/*" capture="environment" hidden>
+      <input id="importPhoto" type="file" accept="image/*" multiple hidden>
     </div>
     <div id="galerieEtat"></div>
     <div class="card">
@@ -1020,7 +1014,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.1.3</b></div>
+        <div class="ds"><span>Version</span><b>1.1.5</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1203,7 +1197,36 @@ const Supa = (() => {
     }
   }
 
-  const lire = (nom, requete) => table(nom, { method: 'GET' }, requete);
+  /* Une base qui n'a pas encore recu la derniere migration ne connait pas les
+     colonnes recentes, et PostgREST rejette la requete entiere : l'ecran se
+     vide alors que les donnees sont la. On reessaie sans la colonne fautive,
+     autant de fois qu'il en manque. */
+  const colonnesManquantes = new Set();
+
+  function retirerColonne(requete, colonne) {
+    return String(requete || '').replace(/select=([^&]+)/, (tout, liste) => {
+      const restantes = liste.split(',').filter(c => c.trim() !== colonne);
+      return restantes.length && restantes.length < liste.split(',').length
+        ? 'select=' + restantes.join(',') : tout;
+    });
+  }
+
+  async function lire(nom, requete) {
+    let r = requete, tentatives = 0;
+    while (true) {
+      try { return await table(nom, { method: 'GET' }, r); }
+      catch (e) {
+        const m = String(e.message || e).match(/column\s+[\w."]*?(\w+)\s+does not exist/i);
+        if (!m || tentatives++ > 6) throw e;
+        const sans = retirerColonne(r, m[1]);
+        if (sans === r) throw e;
+        r = sans;
+        colonnesManquantes.add(nom + '.' + m[1]);
+      }
+    }
+  }
+
+  const manquantes = () => [...colonnesManquantes];
 
   /* Certaines tables n'ont volontairement aucune regle de lecture. Redemander
      la ligne inseree obligerait Postgres a la relire, ce qu'il refuse : l'ecriture
@@ -1302,7 +1325,7 @@ const Supa = (() => {
     catch (e) { return []; }
   }
 
-  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse, mesJetons,
+  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse, mesJetons, manquantes,
            enregistrerJeton, notifier, supprimer, reprendre, rafraichir,
            inscrire, connecter, recuperer, deconnecter, lire, ecrire, modifier, fonction };
 })();
@@ -1379,6 +1402,7 @@ function montrer(v) {
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
   if (v === 'galerie') chargerGalerie();
   if (v === 'params') { majCompte(); majEtatPush(); }
+  prevenirMigration();
 }
 
 function appliquerTheme(t) {
@@ -2258,6 +2282,21 @@ function epingler(id) {
 let conversationActive = null;   // null = boîte, un id de contrat, ou 'commun'
 let messagesParFamille = {};
 
+/* Ouvrir une conversation vaut lecture : sans cela la pastille ne part jamais. */
+async function marquerMessagesLus() {
+  const moi = (Supa.moi() || {}).id;
+  const aLire = messages.filter(m => m.auteur_id !== moi && !m.lu_le);
+  if (!aLire.length) return;
+  try {
+    await Supa.modifier('messages', { lu_le: new Date().toISOString() },
+      'id=in.(' + aLire.map(m => m.id).join(',') + ')');
+    const t = new Date().toISOString();
+    aLire.forEach(m => { m.lu_le = t; });
+    for (const liste of Object.values(messagesParFamille))
+      for (const m of liste) if (aLire.some(x => x.id === m.id)) m.lu_le = t;
+  } catch (e) { /* la regle d'accusé de lecture manque peut-être encore */ }
+}
+
 async function chargerBoite() {
   messagesParFamille = {};
   if (!Supa.connecte() || !contrats.length) return;
@@ -2353,8 +2392,10 @@ async function ouvrirConversation(id) {
   $('#convSous').textContent = '';
   renderBesoins();
   await chargerMessages(); renderMessages();
+  await marquerMessagesLus();
   await chargerDemandes(); renderDemandes();
   await chargerBoite(); renderBoite();
+  renderBarre();
 }
 
 function fermerConversation() {
@@ -2445,6 +2486,18 @@ function ouvrirCentreNotif() {
     b.onclick = () => { $('#centreNotif').hidden = true; liste[+b.dataset.alerte].fn(); };
   });
   $('#centreNotif').hidden = false;
+}
+
+/* Quand la base est en retard sur l'application, on le dit une fois plutot que
+   d'afficher un ecran incomplet sans explication. */
+let migrationSignalee = false;
+function prevenirMigration() {
+  if (migrationSignalee) return;
+  const m = Supa.manquantes();
+  if (!m.length) return;
+  migrationSignalee = true;
+  toast('La base est en retard sur l\u2019application : ' + m[0].split('.')[1] +
+    ' manque. Lance le dernier fichier SQL, tout reviendra.');
 }
 
 /* ---------------- Espace commun ----------------
@@ -3061,6 +3114,8 @@ $('#btnDemande').onclick = envoyerDemande;
 $$('.retards [data-retard]').forEach(b => { b.onclick = () => annoncerRetard(b.dataset.retard); });
 $('#btnFermeture').onclick = ajouterFermeture;
 $('#btnFrimousse').onclick = ouvrirFrimousses;
+// un bouton qui déclenche le champ : plus fiable qu'un label enveloppant
+$('#btnPhotoPortrait').onclick = () => $('#photoPortrait').click();
 $('#photoPortrait').onchange = e => {
   const f = e.target.files && e.target.files[0];
   if (f) envoyerPortrait(f);
@@ -3136,6 +3191,8 @@ $('#coucheMoins').onclick = () => {
   const n = Math.max(0, Number($('#coucheN').textContent) - 1);
   $('#coucheN').textContent = String(n);
 };
+$('#btnPrendrePhoto').onclick = () => $('#prisePhoto').click();
+$('#btnImporterPhoto').onclick = () => $('#importPhoto').click();
 $('#prisePhoto').onchange = e => {
   const f = e.target.files && e.target.files[0];
   if (f) envoyerGalerie(f);
@@ -3155,6 +3212,7 @@ $('#fichierGalerie').onchange = e => {
   if (f) envoyerGalerie(f);
   e.target.value = '';
 };
+$('#ouvrirPhoto').onclick = () => $('#fichierPhoto').click();
 $('#fichierPhoto').onchange = e => {
   const f = e.target.files && e.target.files[0];
   if (f) envoyerGalerie(f, true);
@@ -3365,6 +3423,8 @@ async function testerPush() {
 (async () => {
   const r = Reglages.lire();
   appliquerTheme(r.theme || 'clair');
+  // un seul écran de lancement : celui d'Android
+  if (window.Capacitor) { const sp = $('#splash'); if (sp) sp.remove(); }
   Supa.configurer(r.url || PROJET.url, r.cle || PROJET.cle);
   if (securite().actif) afficherVerrou('ouvrir');
   majSecurite();

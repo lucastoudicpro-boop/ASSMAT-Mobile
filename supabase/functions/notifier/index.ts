@@ -177,10 +177,19 @@ Deno.serve(async (req) => {
         }
       }
     }
-    const { data: jetons } = await commeService
+    const { data: bruts, error: errJetons } = await commeService
       .from('jetons_push')
-      .select('jeton')
+      .select('jeton, personne_id, application')
       .eq('personne_id', destinataire);
+    if (errJetons) console.error('lecture des jetons : ' + errJetons.message);
+
+    // Filtre de securite : on ne se fie pas au seul .eq(). Envoyer au mauvais
+    // appareil serait pire qu'un envoi manque.
+    const jetons = (bruts ?? []).filter((j) => j.personne_id === destinataire);
+    if ((bruts ?? []).length !== jetons.length) {
+      console.error(`FILTRE : ${bruts!.length} jetons recus, ${jetons.length} appartiennent vraiment a ${destinataire}`);
+    }
+    console.log(`destinataire=${destinataire} jetons=${jetons.length} (${jetons.map((j) => j.application).join(',')})`);
 
     if (!jetons?.length) {
       console.warn(`aucun jeton pour ${destinataire} : la table jetons_push est vide pour cette personne`);
@@ -196,7 +205,9 @@ Deno.serve(async (req) => {
       if (r.ok) { envoyes++; console.log('envoi accepté par Firebase'); }
       else {
         console.error(`Firebase a refusé (${r.statut}) : ${r.reponse.slice(0, 300)}`);
-        if (r.statut === 404 || r.statut === 400) perimes.push(j.jeton);
+        // 404 = appareil disparu. Un 400 peut venir d'une charge mal formee :
+        // on ne supprime pas un jeton valide sur cette seule base.
+        if (r.statut === 404 || /UNREGISTERED|NOT_FOUND/i.test(r.reponse)) perimes.push(j.jeton);
       }
     }
 

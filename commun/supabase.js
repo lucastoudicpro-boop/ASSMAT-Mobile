@@ -127,7 +127,36 @@ const Supa = (() => {
     }
   }
 
-  const lire = (nom, requete) => table(nom, { method: 'GET' }, requete);
+  /* Une base qui n'a pas encore recu la derniere migration ne connait pas les
+     colonnes recentes, et PostgREST rejette la requete entiere : l'ecran se
+     vide alors que les donnees sont la. On reessaie sans la colonne fautive,
+     autant de fois qu'il en manque. */
+  const colonnesManquantes = new Set();
+
+  function retirerColonne(requete, colonne) {
+    return String(requete || '').replace(/select=([^&]+)/, (tout, liste) => {
+      const restantes = liste.split(',').filter(c => c.trim() !== colonne);
+      return restantes.length && restantes.length < liste.split(',').length
+        ? 'select=' + restantes.join(',') : tout;
+    });
+  }
+
+  async function lire(nom, requete) {
+    let r = requete, tentatives = 0;
+    while (true) {
+      try { return await table(nom, { method: 'GET' }, r); }
+      catch (e) {
+        const m = String(e.message || e).match(/column\s+[\w."]*?(\w+)\s+does not exist/i);
+        if (!m || tentatives++ > 6) throw e;
+        const sans = retirerColonne(r, m[1]);
+        if (sans === r) throw e;
+        r = sans;
+        colonnesManquantes.add(nom + '.' + m[1]);
+      }
+    }
+  }
+
+  const manquantes = () => [...colonnesManquantes];
 
   /* Certaines tables n'ont volontairement aucune regle de lecture. Redemander
      la ligne inseree obligerait Postgres a la relire, ce qu'il refuse : l'ecriture
@@ -226,7 +255,7 @@ const Supa = (() => {
     catch (e) { return []; }
   }
 
-  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse, mesJetons,
+  return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse, mesJetons, manquantes,
            enregistrerJeton, notifier, supprimer, reprendre, rafraichir,
            inscrire, connecter, recuperer, deconnecter, lire, ecrire, modifier, fonction };
 })();

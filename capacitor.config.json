@@ -8,5 +8,14 @@
   "server": {
     "androidScheme": "https"
   },
-  "teinte": "#2f7d73"
+  "teinte": "#2f7d73",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffff",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    }
+  }
 }
