@@ -52,6 +52,11 @@ const Supa = (() => {
   }
 
   async function memoriser(s) {
+    // on conserve l'heure de premiere connexion d'une session a l'autre :
+    // c'est elle qui fixe la duree de validite cote application
+    let ancienne = null;
+    try { ancienne = await lireSession(); } catch (e) {}
+    if (s && ancienne && ancienne.connecte_a && !s.connecte_a) s = { ...s, connecte_a: ancienne.connecte_a };
     session = s;
     try {
       await ecrireSession(s ? { ...s, expire_a: Date.now() + (s.expires_in || 3600) * 1000 } : null);
@@ -124,12 +129,19 @@ const Supa = (() => {
 
   const lire = (nom, requete) => table(nom, { method: 'GET' }, requete);
 
-  const ecrire = (nom, lignes, options = '') =>
-    table(nom, {
+  /* Certaines tables n'ont volontairement aucune regle de lecture. Redemander
+     la ligne inseree obligerait Postgres a la relire, ce qu'il refuse : l'ecriture
+     entiere echoue alors, avec un message qui accuse a tort la regle d'ecriture. */
+  const SANS_RELECTURE = ['invitations', 'jetons_push'];
+
+  const ecrire = (nom, lignes, options = '') => {
+    const retour = SANS_RELECTURE.includes(nom) ? 'return=minimal' : 'return=representation';
+    return table(nom, {
       method: 'POST',
-      headers: { Prefer: 'return=representation' + (options ? ',' + options : '') },
+      headers: { Prefer: retour + (options ? ',' + options : '') },
       body: JSON.stringify(lignes)
     });
+  };
 
   const modifier = (nom, valeurs, requete) =>
     table(nom, {
@@ -166,13 +178,13 @@ const Supa = (() => {
     });
   }
 
-  async function notifier(contratId, titre, corps) {
+  async function notifier(contratId, titre, corps, urgent) {
     if (!connecte()) return;
     try {
       await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contrat_id: contratId, titre, corps })
+        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent })
       });
     } catch (e) { /* le message est déjà enregistré : la notification n'est qu'un plus */ }
   }

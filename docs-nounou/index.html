@@ -17,7 +17,7 @@
   --side:#4a1f2b; --side2:#6b2f3f;
   --champ:#fff; --bord:#e2ced4; --zebre:#faf3f5; --ombre:rgba(60,25,35,.06);
   --radius:18px;
-  --halo:#fbeef1;
+  --halo:#f6dfe5;
   --safeT:env(safe-area-inset-top,0px); --safeB:env(safe-area-inset-bottom,0px);
   --hdr:54px;
 }
@@ -90,6 +90,36 @@ input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--
   border:0;background:transparent;padding:13px 0;cursor:pointer;color:var(--txt);
   font:inherit;border-bottom:1px solid var(--line)}
 .famille:last-child{border-bottom:0}
+.famille-ouvrir{flex:1;min-width:0;display:flex;align-items:center;gap:12px;
+  border:0;background:transparent;padding:0;cursor:pointer;color:var(--txt);font:inherit;text-align:left}
+.famille-quitter{border:0;background:transparent;color:var(--bord);cursor:pointer;
+  padding:8px;border-radius:9px;flex:0 0 auto;transition:color .18s ease,background .18s ease}
+.famille-quitter:active{background:var(--zebre);color:var(--danger)}
+.famille-quitter svg{width:18px;height:18px;fill:none;stroke:currentColor;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.choix-enfant{display:flex;gap:7px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;scrollbar-width:none}
+.choix-enfant::-webkit-scrollbar{display:none}
+.choix-enfant[hidden]{display:none}
+.choix-enfant button{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;cursor:pointer;
+  border:1px solid var(--bord);background:var(--card);border-radius:22px;
+  padding:7px 14px 7px 7px;font:600 13px system-ui;color:var(--txt);min-height:42px;
+  transition:background .18s ease,border-color .18s ease,color .18s ease;
+}
+.choix-enfant button .init{
+  width:28px;height:28px;border-radius:14px;background:var(--acc-doux);color:var(--acc);
+  display:flex;align-items:center;justify-content:center;font:700 12px system-ui;flex:0 0 auto;
+}
+.choix-enfant button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.choix-enfant button.on .init{background:rgba(255,255,255,.25);color:#fff}
+.compteur{margin-left:auto;background:var(--acc-doux);color:var(--acc);
+  border-radius:11px;padding:2px 9px;font:700 12px system-ui}
+.tete-repli{padding:13px 14px;display:flex;align-items:center;gap:9px;font-weight:600;
+  font-size:14px;cursor:pointer;list-style:none}
+.tete-repli::-webkit-details-marker{display:none}
+.tete-repli svg{width:21px;height:21px;flex:0 0 auto;fill:none;stroke:var(--acc);
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#carteRejoindre[open] .tete-repli{border-bottom:1px solid var(--line)}
 .famille .pastille{width:38px;height:38px;border-radius:19px;flex:0 0 auto;
   background:var(--acc-doux);color:var(--acc);display:flex;align-items:center;
   justify-content:center;font:700 15px system-ui}
@@ -97,6 +127,10 @@ input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--
 .famille b{display:block;font-size:14px}
 .famille small{font-size:12px;color:var(--mut)}
 
+.creneau{flex:0 0 auto;background:var(--acc-doux);color:var(--acc);border-radius:12px;
+  padding:5px 11px;font:700 12.5px system-ui}
+.gr-jour.absent{background:var(--zebre);opacity:.6}
+.gr-jour.absent .h{color:var(--mut)}
 .gr-tete,.gr-corps{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .gr-tete span{font-size:10.5px;color:var(--mut);text-align:center;padding-bottom:5px}
 .gr-jour{border:1px solid var(--line);background:var(--card);border-radius:10px;
@@ -117,6 +151,79 @@ input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--
   box-sizing:content-box;transition:background .15s}
 .nav-item.active{color:var(--acc)}
 .nav-item.active svg{background:var(--acc-doux)}
+
+.profil-tete{
+  display:flex;align-items:center;gap:13px;padding:16px;margin-bottom:10px;
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 1px 2px var(--ombre), 0 10px 24px -16px rgba(60,25,35,.25);
+}
+.profil-tete .avatar{
+  width:48px;height:48px;border-radius:24px;flex:0 0 auto;
+  background:linear-gradient(140deg,var(--acc),var(--acc-d));color:#fff;
+  display:flex;align-items:center;justify-content:center;font:700 20px system-ui;
+}
+.profil-tete>div:nth-child(2){flex:1;min-width:0;line-height:1.35}
+.profil-tete b{display:block;font-size:15px}
+.profil-tete small{font-size:12.5px;color:var(--mut)}
+.btn-petit{padding:8px 12px;min-height:36px;font-size:12.5px;flex:0 0 auto}
+
+.bascule{
+  display:flex;align-items:center;gap:14px;padding:12px 0;
+  border-bottom:1px solid var(--line);cursor:pointer;
+}
+.bascule:last-of-type{border-bottom:0}
+.bascule>span{flex:1;min-width:0;line-height:1.35}
+.bascule b{display:block;font-size:14px;font-weight:600}
+.bascule small{font-size:12px;color:var(--mut)}
+.bascule input{
+  appearance:none;width:46px;height:28px;border-radius:14px;background:var(--bord);
+  position:relative;flex:0 0 auto;cursor:pointer;transition:background .2s ease;margin:0;padding:0;min-height:0;
+}
+.bascule input::after{
+  content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;
+  background:#fff;transition:transform .2s cubic-bezier(.3,1.3,.5,1);
+  box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
+.bascule input:checked{background:var(--acc)}
+.bascule input:checked::after{transform:translateX(18px)}
+.bascule input:disabled{opacity:.45;cursor:default}
+
+.seg{display:flex;gap:6px;background:var(--zebre);border-radius:14px;padding:4px}
+.seg button{
+  flex:1;border:0;background:transparent;border-radius:11px;padding:10px 4px;
+  font:600 13px system-ui;color:var(--mut);cursor:pointer;min-height:42px;
+  transition:background .18s ease,color .18s ease;
+}
+.seg button.on{background:var(--card);color:var(--acc);box-shadow:0 1px 3px var(--ombre)}
+
+#porte{
+  position:fixed;inset:0;z-index:105;
+  background:linear-gradient(170deg,#fbeef1 0%,var(--bg) 42%);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:calc(var(--safeT) + 32px) 26px calc(var(--safeB) + 28px);
+  animation:apparait .3s ease both;
+}
+html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#31202a 0%,var(--bg) 42%)}
+#porte[hidden]{display:none}
+.porte-haut{text-align:center;margin-bottom:26px}
+.porte-haut img{border-radius:22px;box-shadow:0 12px 28px rgba(90,30,50,.24)}
+.porte-haut h2{margin:14px 0 4px;font-size:22px;font-weight:700}
+.porte-haut p{margin:0;color:var(--mut);font-size:14px}
+.porte-form{max-width:380px;width:100%;margin:0 auto}
+.lien-discret{border:0;background:transparent;color:var(--acc);font:600 13px system-ui;
+  cursor:pointer;display:block;margin:6px auto 0;padding:8px}
+#porteEtat{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;
+  font-size:13.5px;color:var(--mut)}
+#porteEtat[hidden]{display:none}
+#porteMsg{text-align:center}
+.roue{width:17px;height:17px;flex:0 0 auto;border-radius:50%;
+  border:2.5px solid var(--acc-doux);border-top-color:var(--acc);animation:tourne .7s linear infinite}
+@keyframes tourne{to{transform:rotate(360deg)}}
+.btn{position:relative;display:flex;align-items:center;justify-content:center}
+.btn.occupe{pointer-events:none;opacity:.75}
+.btn.occupe .etiquette{visibility:hidden}
+.btn.occupe::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:tourne .7s linear infinite}
 
 #verrou{
   position:fixed;inset:0;z-index:110;background:var(--bg);
@@ -143,7 +250,7 @@ input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--
 #clavier button[data-touche="0"]{grid-column:2}
 #clavier button[data-touche="eff"]{grid-column:3}
 
-#splash{position:fixed;inset:0;z-index:100;
+#splash{position:fixed;inset:0;z-index:130;
   background:linear-gradient(160deg,#e8a0ae,#d4738a 45%,#8f3f52);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   transition:opacity .38s ease}
@@ -197,6 +304,10 @@ input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--
 .compteur b{font-size:20px;min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
 textarea{font:16px/1.4 system-ui;color:var(--txt);background:var(--champ);
   border:1px solid var(--bord);border-radius:9px;padding:10px 11px;width:100%;resize:vertical}
+.retards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.retards button{border:1px solid var(--bord);background:var(--card);border-radius:14px;padding:14px 4px;
+  font:700 15px system-ui;color:var(--acc);cursor:pointer;min-height:54px;transition:transform .1s ease,background .15s ease}
+.retards button:active{transform:scale(.96);background:var(--acc-doux)}
 .besoins{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .besoin-b{display:flex;align-items:center;gap:9px;border:1px solid var(--bord);
   background:var(--card);border-radius:12px;padding:12px 10px;cursor:pointer;
@@ -208,6 +319,32 @@ textarea{font:16px/1.4 system-ui;color:var(--txt);background:var(--champ);
 .hor-l:last-child{border-bottom:0}
 .hor-l b{font-variant-numeric:tabular-nums}
 .hor-l.off{color:var(--mut)}
+.msg .rond{width:36px;height:36px;border-radius:12px;flex:0 0 auto;display:flex;
+  align-items:center;justify-content:center;font-size:18px;background:var(--zebre)}
+.msg.cat-besoin .rond{background:#fdf3e7}
+.msg.cat-retard .rond{background:#fbe9ea}
+.msg .etiq{font-style:normal;display:inline-block;font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:2px}
+.msg.cat-besoin .etiq{color:#b4690e}
+.msg.cat-retard .etiq{color:#b8556e}
+.msg.cat-besoin b,.msg.cat-retard b{font-size:15px}
+
+.demande{display:flex;align-items:flex-start;gap:11px;padding:12px 0;
+  border-bottom:1px solid var(--line)}
+.demande:last-child{border-bottom:0}
+.demande .pastille-etat{
+  width:28px;height:28px;border-radius:14px;flex:0 0 auto;display:flex;
+  align-items:center;justify-content:center;font-size:13px;background:var(--zebre);color:var(--mut);
+}
+.demande.etat-acceptee .pastille-etat{background:#eaf5ec;color:#3e8a55}
+.demande.etat-refusee .pastille-etat{background:#fbe9ea;color:#c2554e}
+.demande .corps-d{flex:1;min-width:0;line-height:1.35}
+.demande .corps-d b{display:block;font-size:14px}
+.demande .corps-d small{display:block;font-size:12px;color:var(--mut)}
+.demande .corps-d .motif{color:#c2554e;margin-top:2px}
+.demande .etiq-etat{flex:0 0 auto;font-size:11px;color:var(--mut);padding-top:3px}
+.demande.etat-acceptee .etiq-etat{color:#3e8a55}
+
 .msg{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
 .msg:last-child{border-bottom:0}
 .msg .txt{flex:1;min-width:0;line-height:1.4}
@@ -240,6 +377,99 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (min-width:620px){#contenu,#hdr>*{max-width:640px;margin-left:auto;margin-right:auto}}
+
+/* ============================================================
+   Charte 1.0 — chaleur, profondeur, mouvement
+   ============================================================ */
+
+/* Surfaces : un fond légèrement chaud, des cartes qui flottent un peu. */
+body{
+  background:
+    radial-gradient(90% 40% at 50% -5%, var(--halo) 0%, transparent 70%),
+    var(--bg);
+}
+.card{
+  border-radius:22px;
+  border:1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  box-shadow:0 1px 2px var(--ombre), 0 8px 24px -14px rgba(20,30,28,.18);
+}
+html[data-theme="sombre"] .card{box-shadow:0 1px 2px var(--ombre)}
+
+/* Héros : deux halos doux dans le coin pour donner de la matière. */
+#hero{
+  position:relative;overflow:hidden;border-radius:24px;
+  box-shadow:0 16px 32px -18px rgba(23,64,60,.55);
+}
+#hero::before,#hero::after{
+  content:'';position:absolute;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle, rgba(255,255,255,.22), transparent 62%);
+}
+#hero::before{width:220px;height:220px;right:-70px;top:-90px}
+#hero::after{width:160px;height:160px;left:-50px;bottom:-80px;opacity:.7}
+#hero>*{position:relative}
+#hero .montant,#hero .gros{letter-spacing:-.5px}
+
+/* Boutons : le principal a du relief, tous répondent au doigt. */
+.btn-primary{
+  background:linear-gradient(150deg,var(--acc),var(--acc-d));
+  box-shadow:0 8px 18px -8px var(--acc);
+}
+.btn,.tuile-m,.puce-act,.famille,.etape,.ligne-lien,.besoin-b,.choix button,.module,.nav-item{
+  transition:transform .14s cubic-bezier(.2,.8,.3,1), background .18s ease,
+             box-shadow .18s ease, border-color .18s ease, color .18s ease;
+}
+.btn:active,.tuile-m:active,.besoin-b:active,.puce-act:active,.module:active{transform:scale(.965)}
+
+/* Entrée en cascade : chaque bloc arrive un peu après le précédent. */
+@keyframes surgit{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+#contenu>section>*,#accueil>*,#saisie>.card,#dossier>.card,#parametres>.card,#annuel>*{
+  animation:surgit .38s cubic-bezier(.2,.8,.3,1) both;
+}
+#contenu>section>*:nth-child(2),#accueil>*:nth-child(2),#saisie>.card:nth-child(2),#dossier>.card:nth-child(2),#parametres>.card:nth-child(2){animation-delay:.05s}
+#contenu>section>*:nth-child(3),#accueil>*:nth-child(3),#saisie>.card:nth-child(3),#dossier>.card:nth-child(3),#parametres>.card:nth-child(3){animation-delay:.1s}
+#contenu>section>*:nth-child(4),#accueil>*:nth-child(4),#saisie>.card:nth-child(4),#dossier>.card:nth-child(4),#parametres>.card:nth-child(4){animation-delay:.15s}
+#contenu>section>*:nth-child(5),#accueil>*:nth-child(5),#saisie>.card:nth-child(5),#dossier>.card:nth-child(5),#parametres>.card:nth-child(5){animation-delay:.2s}
+#contenu>section>*:nth-child(n+6),#accueil>*:nth-child(n+6),#saisie>.card:nth-child(n+6),#dossier>.card:nth-child(n+6),#parametres>.card:nth-child(n+6){animation-delay:.25s}
+
+/* Tuiles du dashboard : une teinte par module, un icône qui respire. */
+.tuile-m{border-radius:20px;box-shadow:0 1px 2px var(--ombre), 0 10px 24px -16px rgba(20,30,28,.25)}
+.tuile-m .rond{transition:transform .2s cubic-bezier(.2,.8,.3,1)}
+.tuile-m:active .rond{transform:scale(1.08) rotate(-4deg)}
+.tuile-m[data-mod="galerie"] .rond{background:#fdf0e4}.tuile-m[data-mod="galerie"] .rond svg{stroke:#c47a2b}
+.tuile-m[data-mod="messages"] .rond{background:#e7effa}.tuile-m[data-mod="messages"] .rond svg{stroke:#3b6fb6}
+.tuile-m[data-mod="retard"] .rond{background:#fbe9ea}.tuile-m[data-mod="retard"] .rond svg{stroke:#b8556e}
+.tuile-m[data-mod="demandes"] .rond{background:#eaf5ec}.tuile-m[data-mod="demandes"] .rond svg{stroke:#3e8a55}
+.tuile-m[data-mod="journal"] .rond{background:var(--acc-doux)}
+
+/* Barre du bas : l'actif est une pastille qui glisse, l'icône fait un petit saut. */
+#nav{box-shadow:0 -10px 24px -18px rgba(20,30,28,.35)}
+.nav-item svg{transition:transform .22s cubic-bezier(.3,1.4,.5,1), background .2s ease}
+.nav-item.active svg{transform:translateY(-2px)}
+.nav-item:active svg{transform:scale(.9)}
+
+/* Volets : arrivent du bas avec un léger ressort. */
+@keyframes glisse{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.modal{animation:apparait .2s ease both}
+.modal-box{animation:glisse .32s cubic-bezier(.2,.9,.3,1.05) both;border-radius:24px 24px 0 0}
+
+/* Champs : un halo de couleur au focus, pas un simple contour. */
+input,textarea{border-radius:12px}
+input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-doux)}
+
+/* États vides : un petit dessin, pas une phrase sèche. */
+.vide-doux{display:flex;flex-direction:column;align-items:center;text-align:center;padding:22px 12px 14px;gap:8px}
+.vide-doux svg{width:64px;height:64px}
+.vide-doux b{font-size:14px}
+.vide-doux small{font-size:12.5px;color:var(--mut);line-height:1.45;max-width:260px}
+
+/* Toast : plus rond, plus doux. */
+#toast{border-radius:16px;padding:14px 18px;box-shadow:0 14px 34px -10px rgba(0,0,0,.35)}
+
+@media (prefers-reduced-motion:reduce){
+  #contenu>section>*,#accueil>*,#saisie>.card,#dossier>.card,#parametres>.card,#annuel>*,.modal,.modal-box{animation:none}
+  .btn:active,.tuile-m:active,.besoin-b:active,.puce-act:active,.module:active{transform:none}
+}
+
 </style>
 </head>
 <body>
@@ -255,9 +485,28 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
 <symbol id="i-alerte" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/></symbol>
 <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 16.5v-5M12 8h.01"/></symbol>
 <symbol id="i-journal" viewBox="0 0 24 24"><path d="M5.5 4.5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-12a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z"/><path d="M8.5 3v4M8 10.5h8M8 14h5"/></symbol>
+<symbol id="i-commun" viewBox="0 0 24 24"><circle cx="8" cy="9" r="2.6"/><circle cx="16" cy="9" r="2.6"/><circle cx="12" cy="15" r="2.6"/><path d="M3.5 18.5c0-2.4 2-4 4.5-4M20.5 18.5c0-2.4-2-4-4.5-4M8 21c0-2.4 1.8-4 4-4s4 1.6 4 4"/></symbol>
+<symbol id="i-poubelle" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 6.5V4.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7M6.5 6.5l.8 12.2a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4l.8-12.2"/></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l4.5-4.5 3.5 3.5 3-3L20 17"/></symbol>
 <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5"/></symbol>
 </svg>
+
+<div id="porte" hidden>
+  <div class="porte-haut">
+    <img src="icones/icone-192.png" alt="" width="84" height="84">
+    <h2>Cocon Nounou</h2>
+    <p>Connecte-toi pour retrouver tes accueils.</p>
+  </div>
+  <div class="porte-form">
+    <label class="field"><span>Adresse e-mail</span><input id="porteEmail" inputmode="email" autocomplete="username"></label>
+    <label class="field"><span>Mot de passe</span><input id="porteMdp" type="password" autocomplete="current-password"></label>
+    <button id="porteConnexion" class="btn btn-primary btn-block"><span class="etiquette">Se connecter</span></button>
+    <button id="porteInscription" class="btn btn-ghost btn-block">Créer mon compte</button>
+    <button id="porteOublie" class="lien-discret">Mot de passe oublié</button>
+    <div id="porteEtat" hidden><span class="roue"></span><span id="porteEtatTxt"></span></div>
+    <p class="hint" id="porteMsg"></p>
+  </div>
+</div>
 
 <div id="verrou" hidden>
   <svg class="cadenas" viewBox="0 0 24 24" aria-hidden="true">
@@ -342,6 +591,7 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
   </section>
 
   <section id="vueJournal" hidden>
+    <div class="choix-enfant" data-pour="journal"></div>
     <div class="card">
       <div class="tete"><svg><use href="#i-journal"/></svg><span id="journalTitre">Journal</span></div>
       <div class="corps">
@@ -380,11 +630,38 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
   </section>
 
   <section id="vueMessages" hidden>
+    <div class="choix-enfant" data-pour="messages"></div>
     <div class="card">
       <div class="tete"><svg><use href="#i-alerte"/></svg>Il manque quelque chose</div>
       <div class="corps">
         <div class="besoins" id="besoins"></div>
         <p class="hint">Un appui envoie la demande au parent. Tu peux en signaler plusieurs.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-alerte"/></svg>Je serai en retard</div>
+      <div class="corps">
+        <div class="retards">
+          <button data-retard="15 minutes">15 min</button>
+          <button data-retard="30 minutes">30 min</button>
+          <button data-retard="45 minutes">45 min</button>
+          <button data-retard="1 heure">1 h</button>
+        </div>
+        <p class="hint">Toutes les familles attendues aujourd'hui sont prévenues d'un coup.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-ok"/></svg>Demander quelque chose</div>
+      <div class="corps">
+        <div class="deux">
+          <input id="demandeObjet" placeholder="Tétine, grignoteuse, tenue…">
+          <button id="btnDemande" class="btn btn-primary">Demander</button>
+        </div>
+        <input id="demandeDetail" placeholder="Précision, facultatif" style="margin-top:8px">
+        <div id="listeDemandes" style="margin-top:10px"></div>
+        <p class="hint">Les parents acceptent ou refusent, avec un motif. Tu es prévenue de leur réponse.</p>
       </div>
     </div>
 
@@ -406,17 +683,18 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
 
   <section id="vueFamilles" hidden>
     <div class="card">
-      <div class="tete"><svg><use href="#i-plus"/></svg>Rejoindre une famille</div>
-      <div class="corps">
-        <label class="field"><span>Code d'invitation</span><input id="codeInvit" placeholder="XXXXXX" autocapitalize="characters" maxlength="8"></label>
-        <button id="btnRejoindre" class="btn btn-primary btn-block">Rejoindre</button>
-        <p class="hint">Le code est fourni par le parent employeur depuis son application. Il est valable sept jours.</p>
-      </div>
-    </div>
-    <div class="card">
-      <div class="tete"><svg><use href="#i-gens"/></svg>Mes contrats</div>
+      <div class="tete"><svg><use href="#i-gens"/></svg><span>Mes familles</span><b class="compteur" id="compteurFamilles"></b></div>
       <div class="corps" id="listeContrats"></div>
     </div>
+
+    <details class="card" id="carteRejoindre">
+      <summary class="tete-repli"><svg><use href="#i-plus"/></svg><span>Rejoindre une famille</span></summary>
+      <div class="corps">
+        <label class="field"><span>Code d'invitation</span><input id="codeInvit" placeholder="XXXXXX" autocapitalize="characters" maxlength="8"></label>
+        <button id="btnRejoindre" class="btn btn-primary btn-block"><span class="etiquette">Rejoindre</span></button>
+        <p class="hint">Le parent te donne ce code depuis son application. Il vaut sept jours.</p>
+      </div>
+    </details>
 
     <div class="card">
       <div class="tete"><svg><use href="#i-cal"/></svg>Mes fermetures</div>
@@ -433,43 +711,107 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
     </div>
   </section>
 
-  <section id="vueParams" hidden>
-    <div class="card">
-      <div class="tete"><svg><use href="#i-reglages"/></svg>Compte</div>
-      <div class="corps">
-        <div class="ds"><span>État</span><b id="etatCompte">Hors ligne</b></div>
-        <div id="blocConnexion" style="margin-top:12px">
-          <details id="reglageProjet" class="avance">
-            <summary>Projet Supabase</summary>
-            <label class="field"><span>Adresse du projet</span><input id="url" placeholder="https://xxxx.supabase.co" inputmode="url"></label>
-            <label class="field"><span>Clé publique</span><input id="cle" placeholder="eyJhbG..."></label>
-          </details>
-          <label class="field"><span>Adresse e-mail</span><input id="email" inputmode="email"></label>
-          <label class="field"><span>Mot de passe</span><input id="mdp" type="password"></label>
-          <button id="btnConnexion" class="btn btn-primary btn-block">Se connecter</button>
-          <button id="btnInscription" class="btn btn-ghost btn-block">Créer mon compte</button>
-          <button id="btnMdpOublie" class="btn btn-ghost btn-block">Mot de passe oublié</button>
+  <section id="vueCommun" hidden>
+    <div class="card" id="carteCommunVide">
+      <div class="corps" style="padding-top:14px">
+        <div class="vide-doux">
+          <svg viewBox="0 0 64 64" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="20" cy="26" r="7" fill="var(--acc-doux)"/><circle cx="44" cy="26" r="7" fill="var(--acc-doux)"/><circle cx="32" cy="40" r="7" fill="var(--acc-doux)"/>
+            <path d="M8 48c0-6 5-10 12-10M56 48c0-6-5-10-12-10M22 56c0-6 4-9 10-9s10 3 10 9"/></svg>
+          <b>Un espace pour toutes tes familles</b>
+          <small>Signaler une maladie contagieuse, une sortie, une fermeture. Chaque famille choisit d'y entrer, et ne voit que les prénoms.</small>
         </div>
-        <div id="blocConnecte" hidden style="margin-top:12px">
-          <button id="btnDeconnexion" class="btn btn-ghost btn-block">Se déconnecter</button>
-        </div>
-        <div id="messageCompte"></div>
+        <button id="btnCreerCommun" class="btn btn-primary btn-block">Ouvrir l'espace commun</button>
       </div>
     </div>
+
+    <div id="communActif" hidden>
+      <div class="card">
+        <div class="tete"><svg><use href="#i-gens"/></svg><span>Familles</span><b class="compteur" id="communCompteur"></b></div>
+        <div class="corps" id="communMembres"></div>
+      </div>
+
+      <div class="card">
+        <div class="tete"><svg><use href="#i-mail"/></svg>Annoncer</div>
+        <div class="corps">
+          <div class="choix" id="communCategorie">
+            <button data-cat="maladie">🤒 Maladie</button>
+            <button data-cat="absence">📅 Fermeture</button>
+            <button data-cat="sortie">🌳 Sortie</button>
+            <button data-cat="info" class="on">💬 Info</button>
+          </div>
+          <textarea id="communTexte" rows="3" placeholder="Un mot pour toutes les familles" style="margin-top:10px"></textarea>
+          <button id="btnAnnoncer" class="btn btn-primary btn-block" style="margin-top:8px">Publier</button>
+          <p class="hint">Rien n'est publié automatiquement : seul ce que tu écris ici est visible des familles membres.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tete"><svg><use href="#i-journal"/></svg>Annonces</div>
+        <div class="corps" id="communAnnonces"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="vueParams" hidden>
+    <div class="profil-tete">
+      <div class="avatar" id="avatarInitiale">?</div>
+      <div>
+        <b id="profilNom">Mon compte</b>
+        <small id="profilEtat">Hors ligne</small>
+      </div>
+      <button id="btnDeconnexion" class="btn btn-ghost btn-petit">Déconnexion</button>
+    </div>
+
     <div class="card">
       <div class="tete"><svg><use href="#i-alerte"/></svg>Sécurité</div>
       <div class="corps">
-        <label class="check"><input type="checkbox" id="secActif"><span>Demander un code à l'ouverture</span></label>
-        <label class="check"><input type="checkbox" id="secBio"><span>Proposer l'empreinte</span></label>
+        <label class="bascule">
+          <span><b>Code à l'ouverture</b><small>Protège l'application sur ce téléphone</small></span>
+          <input type="checkbox" id="secActif">
+        </label>
+        <label class="bascule">
+          <span><b>Empreinte</b><small>Proposée avant le code</small></span>
+          <input type="checkbox" id="secBio">
+        </label>
         <button id="btnChangerCode" class="btn btn-ghost btn-block">Changer le code</button>
         <p class="hint" id="secEtat"></p>
       </div>
     </div>
 
     <div class="card">
+      <div class="tete"><svg><use href="#i-theme"/></svg>Apparence</div>
+      <div class="corps">
+        <div class="seg" id="segTheme">
+          <button data-theme="clair">Clair</button>
+          <button data-theme="sombre">Sombre</button>
+          <button data-theme="auto">Auto</button>
+        </div>
+      </div>
+    </div>
+
+    <details class="card">
+      <summary class="tete-repli"><svg><use href="#i-lien"/></svg><span>Connexion au projet</span></summary>
+      <div class="corps">
+        <label class="field"><span>Adresse du projet</span><input id="url" placeholder="https://xxxx.supabase.co" inputmode="url"></label>
+        <label class="field"><span>Clé publique</span><input id="cle" placeholder="eyJhbG..."></label>
+        <label class="field"><span>Adresse e-mail</span><input id="email" inputmode="email"></label>
+        <label class="field"><span>Mot de passe</span><input id="mdp" type="password"></label>
+        <div class="deux">
+          <button id="btnConnexion" class="btn btn-primary">Connexion</button>
+          <button id="btnInscription" class="btn btn-ghost">Créer</button>
+        </div>
+        <button id="btnMdpOublie" class="lien-discret">Mot de passe oublié</button>
+        <div id="messageCompte"></div>
+        <div class="ds" style="margin-top:6px"><span>État</span><b id="etatCompte">Hors ligne</b></div>
+        <p class="hint">Réservé au dépannage. L'adresse du projet est déjà fournie avec l'application.</p>
+      </div>
+    </details>
+
+    <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>0.9.8</b></div>
+        <div class="ds"><span>Version</span><b>1.0.10</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -479,10 +821,10 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
 
 <nav id="nav">
   <button class="nav-item active" data-vue="accueil"><svg><use href="#i-accueil"/></svg><span>Accueil</span></button>
-  <button class="nav-item" data-vue="planning"><svg><use href="#i-cal"/></svg><span>Planning</span></button>
   <button class="nav-item" data-vue="journal"><svg><use href="#i-journal"/></svg><span>Journal</span></button>
   <button class="nav-item" data-vue="messages"><svg><use href="#i-mail"/></svg><span>Messages</span></button>
   <button class="nav-item" data-vue="familles"><svg><use href="#i-gens"/></svg><span>Familles</span></button>
+  <button class="nav-item" data-vue="commun"><svg><use href="#i-commun"/></svg><span>Commun</span></button>
   <button class="nav-item" data-vue="params"><svg><use href="#i-reglages"/></svg><span>Réglages</span></button>
 </nav>
 
@@ -509,17 +851,16 @@ input:focus,textarea:focus{box-shadow:0 0 0 4px var(--acc-doux)}
    Supabase expose de l'HTTP simple, une centaine de lignes suffisent. */
 /* Reglages livres avec l'application, communs aux deux versions.
 
-   url et cle : adresse du projet Supabase. La cle « anon » est publique par
-   conception, ce sont les regles de la base qui protegent les donnees.
-   Le workflow les remplit depuis les secrets SUPABASE_URL et SUPABASE_ANON_KEY
-   s'ils existent ; sinon on peut les ecrire ici a la main.
+   La cle « anon » est publique par conception : elle identifie le projet et
+   n'autorise rien par elle-meme. Ce sont les regles de la base qui decident de
+   ce que chacun peut lire. La cle service_role, elle, n'est nulle part ici.
 
-   notifications : ne passer a true que si google-services.json est bien present
-   dans l'APK. Sans lui, demander l'enregistrement a Firebase fait tomber
-   l'application, et pas proprement : c'est le processus natif qui s'arrete. */
+   notifications : ne passer a true que si google-services.json est present dans
+   l'APK. Le workflow s'en charge. Sans lui, demander l'enregistrement a Firebase
+   arrete l'application, et pas proprement : c'est le processus natif qui tombe. */
 const PROJET = {
-  url: '',
-  cle: '',
+  url: "https://epixqfxqcaibxxdfujvb.supabase.co",
+  cle: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwaXhxZnhxY2FpYnh4ZGZ1anZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NjMyMjUsImV4cCI6MjEwNDQzOTIyNX0.Q-680Vy-7l23ikaByvAywXX-rlsHyloShkdEU9UYCMM",
   notifications: false
 };
 
@@ -571,6 +912,11 @@ const Supa = (() => {
   }
 
   async function memoriser(s) {
+    // on conserve l'heure de premiere connexion d'une session a l'autre :
+    // c'est elle qui fixe la duree de validite cote application
+    let ancienne = null;
+    try { ancienne = await lireSession(); } catch (e) {}
+    if (s && ancienne && ancienne.connecte_a && !s.connecte_a) s = { ...s, connecte_a: ancienne.connecte_a };
     session = s;
     try {
       await ecrireSession(s ? { ...s, expire_a: Date.now() + (s.expires_in || 3600) * 1000 } : null);
@@ -643,12 +989,19 @@ const Supa = (() => {
 
   const lire = (nom, requete) => table(nom, { method: 'GET' }, requete);
 
-  const ecrire = (nom, lignes, options = '') =>
-    table(nom, {
+  /* Certaines tables n'ont volontairement aucune regle de lecture. Redemander
+     la ligne inseree obligerait Postgres a la relire, ce qu'il refuse : l'ecriture
+     entiere echoue alors, avec un message qui accuse a tort la regle d'ecriture. */
+  const SANS_RELECTURE = ['invitations', 'jetons_push'];
+
+  const ecrire = (nom, lignes, options = '') => {
+    const retour = SANS_RELECTURE.includes(nom) ? 'return=minimal' : 'return=representation';
+    return table(nom, {
       method: 'POST',
-      headers: { Prefer: 'return=representation' + (options ? ',' + options : '') },
+      headers: { Prefer: retour + (options ? ',' + options : '') },
       body: JSON.stringify(lignes)
     });
+  };
 
   const modifier = (nom, valeurs, requete) =>
     table(nom, {
@@ -685,13 +1038,13 @@ const Supa = (() => {
     });
   }
 
-  async function notifier(contratId, titre, corps) {
+  async function notifier(contratId, titre, corps, urgent) {
     if (!connecte()) return;
     try {
       await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contrat_id: contratId, titre, corps })
+        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent })
       });
     } catch (e) { /* le message est déjà enregistré : la notification n'est qu'un plus */ }
   }
@@ -704,7 +1057,7 @@ const Supa = (() => {
 <script>
 'use strict';
 const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
+const $$ = (s, racine) => [...(racine || document).querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -714,6 +1067,7 @@ const labelMois = m => { const [y, n] = m.split('-').map(Number); return MOIS_FR
 const f1 = n => (Math.round(Number(n||0)*100)/100).toString().replace('.', ',');
 
 let vue = 'accueil', contrats = [], contratActif = null, jours = [], enAttenteConsentement = null;
+const demarreA = Date.now();
 
 /* ---------------- Réglages locaux ---------------- */
 const Reglages = {
@@ -729,35 +1083,125 @@ function toast(m) {
 }
 
 /* ---------------- Navigation ---------------- */
+/* Un sélecteur d'enfant en tête des écrans qui n'en concernent qu'un. */
+function renderChoixEnfant() {
+  $$('.choix-enfant').forEach(box => {
+    if (contrats.length < 2) { box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML = contrats.map(c =>
+      `<button data-choix="${esc(c.id)}" class="${c.id === contratActif ? 'on' : ''}">
+        <span class="init">${esc((c.enfant_prenom || '?')[0].toUpperCase())}</span>
+        ${esc(c.enfant_prenom || 'Enfant')}
+      </button>`).join('');
+    $$('[data-choix]', box).forEach(b => {
+      b.onclick = async () => {
+        if (contratActif === b.dataset.choix) return;
+        contratActif = b.dataset.choix;
+        await chargerJours();
+        renderChoixEnfant();
+        if (vue === 'journal') chargerJournal();
+        if (vue === 'messages') { await chargerMessages(); renderMessages(); await chargerDemandes(); renderDemandes(); }
+        if (vue === 'planning') renderPlanning();
+      };
+    });
+  });
+}
+
 function montrer(v) {
   vue = v;
-  for (const nom of ['accueil', 'planning', 'journal', 'messages', 'familles', 'params'])
+  for (const nom of ['accueil', 'planning', 'journal', 'messages', 'familles', 'commun', 'params'])
     $('#vue' + nom[0].toUpperCase() + nom.slice(1)).hidden = v !== nom;
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.vue === v));
   const c = contrats.find(x => x.id === contratActif);
   const titres = { accueil: 'Cocon', planning: c ? c.enfant_prenom : 'Planning',
                    journal: 'Journal', messages: 'Messages',
-                   familles: 'Mes familles', params: 'Réglages' };
+                   familles: 'Mes familles', commun: 'Espace commun', params: 'Réglages' };
   $('#titre').textContent = titres[v];
   if (v === 'planning') renderPlanning();
+  renderChoixEnfant();
   if (v === 'journal') chargerJournal();
-  if (v === 'messages') { renderBesoins(); chargerMessages().then(renderMessages); }
+  if (v === 'messages') { renderBesoins(); chargerMessages().then(renderMessages); chargerDemandes().then(renderDemandes); }
   if (v === 'familles') { renderContrats(); chargerFermetures().then(renderFermetures); }
+  if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
   if (v === 'params') majCompte();
 }
+
+function appliquerTheme(t) {
+  const sombre = t === 'sombre' ||
+    (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  if (sombre) document.documentElement.dataset.theme = 'sombre';
+  else delete document.documentElement.dataset.theme;
+}
+
+/* ---------------- Porte d'entrée ----------------
+   Toutes ses données viennent du serveur : sans compte, il n'y a rien à voir. */
+async function ouvrirPorte() {
+  $('#porte').hidden = false;
+  $('#porteMsg').textContent = '';
+  const r = Reglages.lire();
+  if (r.email) $('#porteEmail').value = r.email;
+}
+
+async function fermerPorte() {
+  $('#porte').hidden = true;
+  await assurerProfil();
+  activerPush();
+  marquerConnexion();
+  await charger();
+  montrer('accueil');
+}
+
+async function passerPorte(creer) {
+  const email = $('#porteEmail').value.trim(), mdp = $('#porteMdp').value;
+  const dire = (t, mal) => { const m = $('#porteMsg'); m.textContent = t; m.style.color = mal ? 'var(--danger)' : ''; };
+  const occuper = (txt) => {
+    $('#porteConnexion').classList.toggle('occupe', !!txt);
+    $('#porteInscription').disabled = !!txt;
+    $('#porteEtat').hidden = !txt;
+    $('#porteEtatTxt').textContent = txt || '';
+    if (txt) dire('');
+  };
+  if (!email.includes('@') || mdp.length < 6) { dire('Adresse valide et mot de passe d\u2019au moins six caractères.', true); return; }
+  occuper(creer ? 'Création du compte…' : 'Connexion…');
+  try {
+    if (creer) {
+      await Supa.inscrire(email, mdp);
+      if (!Supa.connecte()) { occuper(''); dire('Compte créé. Confirme ton adresse par e-mail, puis connecte-toi.'); return; }
+    } else await Supa.connecter(email, mdp);
+    const r = Reglages.lire(); r.email = email; Reglages.ecrire(r);
+    $('#porteMdp').value = '';
+    occuper('Préparation de ton espace…');
+    await fermerPorte();
+    occuper('');
+  } catch (e) { occuper(''); dire(e.message || String(e), true); }
+}
+
+/* ---------------- Session de huit heures ----------------
+   Au-delà, on redemande le mot de passe. Entre deux, le verrou local garde. */
+const DUREE_SESSION = 8 * 3600 * 1000;
+function sessionValide() {
+  if (!Supa.connecte()) return false;
+  const s = Reglages.lire().connecte_a;
+  return !!s && (Date.now() - new Date(s).getTime()) < DUREE_SESSION;
+}
+function marquerConnexion() { const r = Reglages.lire(); r.connecte_a = new Date().toISOString(); Reglages.ecrire(r); }
 
 /* ---------------- Compte ---------------- */
 function majCompte() {
   const r = Reglages.lire();
+  const m = Supa.moi();
+  const nom = (m && m.email) ? m.email.split('@')[0] : 'Mon compte';
+  const av = $('#avatarInitiale'); if (av) av.textContent = nom[0].toUpperCase();
+  const pn = $('#profilNom'); if (pn) pn.textContent = nom;
+  const pe = $('#profilEtat');
+  if (pe) pe.textContent = Supa.connecte() ? ((m && m.email) || 'Connectée') : 'Déconnectée';
+  const bd = $('#btnDeconnexion'); if (bd) bd.hidden = !Supa.connecte();
+  $$('#segTheme button').forEach(b => b.classList.toggle('on', b.dataset.theme === (r.theme || 'clair')));
   $('#url').value = r.url || ''; $('#cle').value = r.cle || '';
   Supa.configurer(r.url || PROJET.url, r.cle || PROJET.cle);
-  const rp = $('#reglageProjet');
-  if (rp) rp.hidden = !!(PROJET.url && PROJET.cle) && !r.url;
   const b = $('#etatCompte');
-  b.textContent = !Supa.configure() ? 'Non configuré'
+  if (b) b.textContent = !Supa.configure() ? 'Non configuré'
     : Supa.connecte() ? ((Supa.moi() || {}).email || 'Connectée') : 'Déconnectée';
-  $('#blocConnexion').hidden = Supa.connecte();
-  $('#blocConnecte').hidden = !Supa.connecte();
 }
 
 function direCompte(t, mal) {
@@ -787,6 +1231,7 @@ async function seConnecter(creer) {
       direCompte('Connectée.');
     }
     activerPush();
+    marquerConnexion();
     $('#mdp').value = '';
     await charger();
   } catch (e) { direCompte(e.message || String(e), true); }
@@ -805,12 +1250,32 @@ async function assurerProfil() {
 async function charger() {
   if (!Supa.connecte()) return;
   try {
-    contrats = await Supa.lire('contrats',
-      'select=id,enfant_prenom,enfant_naissance,statut,employeur_id,planning,lieu&statut=neq.termine&order=cree_le');
+    // La règle d'accès cache déjà les contrats qu'on a quittés ; on filtre en
+    // plus sur son propre identifiant, au cas où une version précédente de la
+    // règle laisserait passer un contrat vide.
+    contrats = (await Supa.lire('contrats',
+      'select=id,enfant_prenom,enfant_naissance,statut,employeur_id,salariee_id,planning,lieu&statut=neq.termine&order=cree_le'))
+      .filter(c => c.salariee_id === Supa.moi().id);
+    if (contratActif && !contrats.some(c => c.id === contratActif)) contratActif = contrats.length ? contrats[0].id : null;
     if (!contratActif && contrats.length) contratActif = contrats[0].id;
     await chargerJours();
+    await chargerRetards();
+    await chargerEtatFiches();
   } catch (e) { toast('Chargement impossible : ' + (e.message || e)); }
-  renderAccueil(); renderContrats(); renderAujourdhui();
+  renderAccueil(); renderContrats(); renderAujourdhui(); renderChoixEnfant();
+}
+
+/* L'état de la fiche de paie du mois, tel que le parent le marque. */
+let etatFiche = {};
+async function chargerEtatFiches() {
+  etatFiche = {};
+  if (!Supa.connecte() || !contrats.length) return;
+  const d = new Date();
+  const mois = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  try {
+    const r = await Supa.lire('mois', 'mois=eq.' + mois + '&contrat_id=in.(' + contrats.map(c => c.id).join(',') + ')&select=contrat_id,etat_fiche');
+    for (const m of r) etatFiche[m.contrat_id] = m.etat_fiche;
+  } catch (e) {}
 }
 
 async function chargerJours() {
@@ -826,12 +1291,28 @@ async function chargerJours() {
 async function rejoindre() {
   const code = $('#codeInvit').value.trim().toUpperCase();
   if (code.length < 4) { toast('Saisis le code fourni par la famille'); return; }
-  if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord dans Réglages'); montrer('params'); return; }
+  if (!Supa.connecte()) { ouvrirPorte(); return; }
+  const b = $('#btnRejoindre');
+  b.classList.add('occupe');
   try {
     const id = await Supa.fonction('rejoindre', { p_code: code });
     enAttenteConsentement = id;
     ouvrirConsentement();
   } catch (e) { toast(e.message || String(e)); }
+  finally { b.classList.remove('occupe'); }
+}
+
+async function quitterFamille(id) {
+  const c = contrats.find(x => x.id === id);
+  const nom = (c && c.enfant_prenom) || 'cette famille';
+  if (!confirm('Quitter l\u2019accueil de ' + nom + ' ?\n\nTu ne verras plus son planning ni ses messages. La famille pourra inviter quelqu\u2019un d\u2019autre. Rien n\u2019est effacé.')) return;
+  try {
+    await Supa.fonction('quitter_contrat', { p_contrat: id });
+    if (contratActif === id) contratActif = null;
+    await charger();
+    renderContrats();
+    toast('Tu as quitté l\u2019accueil de ' + nom);
+  } catch (e) { toast('Impossible : ' + (e.message || e)); }
 }
 
 /* ---------------- Consentement ---------------- */
@@ -877,6 +1358,7 @@ async function signer() {
     $('#codeInvit').value = '';
     contratActif = enAttenteConsentement;
     enAttenteConsentement = null;
+    rejoindreTouche = false;
     await charger();
     montrer('accueil');
     toast('Famille ajoutée');
@@ -967,7 +1449,7 @@ function renderGalerie() {
 
 /* Envoi : on crée d'abord la fiche photo pour obtenir son dossier, puis le
    fichier, puis les liens vers les enfants concernés. */
-async function envoyerGalerie(fichier) {
+async function envoyerGalerie(fichier, depuisLeFil) {
   if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
   if (fichier.size > 8 * 1024 * 1024) { toast('Photo trop lourde, 8 Mo maximum'); return; }
 
@@ -997,9 +1479,19 @@ async function envoyerGalerie(fichier) {
     if (!r.ok) throw new Error('Envoi refusé (' + r.status + ')');
 
     await Supa.modifier('photos', { chemin }, 'id=eq.' + id);
+    let refusees = 0;
     for (const c of concernes) {
       try { await Supa.ecrire('photos_contrats', { photo_id: id, contrat_id: c }); }
-      catch (e) { toast('Une famille n\u2019a pas autorisé cette photo'); }
+      catch (e) { refusees++; concernes.splice(concernes.indexOf(c), 1); }
+    }
+    if (refusees && !concernes.length) {
+      throw new Error('Le parent n\u2019a pas encore autorisé les photos dans la fiche d\u2019urgence.');
+    }
+    if (refusees) toast(refusees + ' famille(s) n\u2019ont pas autorisé les photos de groupe');
+    // depuis le fil, la photo apparaît aussi dans la conversation
+    if (depuisLeFil && concernes.includes(contratActif)) {
+      try { await Supa.ecrire('messages', { contrat_id: contratActif, auteur_id: Supa.moi().id, texte: null, categorie: 'photo', piece: chemin }); } catch (e) {}
+      await chargerMessages(); renderMessages();
     }
     for (const c of concernes) Supa.notifier(c, 'Nouvelle photo', '');
     $('#galerieEtat').innerHTML = '';
@@ -1025,7 +1517,7 @@ async function famillesAutorisantLeGroupe() {
    Elle remplit, les parents lisent. La base leur interdit d'écrire ici :
    une transmission qui pourrait être réécrite ne vaudrait rien. */
 const REPAS = [['bien','A bien mangé'],['moyen','Correct'],['peu','Peu mangé'],['refus','A refusé']];
-const HUMEURS = [['joyeux','Joyeux'],['calme','Calme'],['fatigue','Fatigué'],['grognon','Grognon'],['souffrant','Patraque']];
+const HUMEURS = [['joyeux','😄 Joyeux'],['calme','😌 Calme'],['fatigue','😴 Fatigué'],['grognon','😠 Grognon'],['souffrant','🤒 Patraque']];
 
 let jourJournal = null, entree = {};
 
@@ -1117,6 +1609,10 @@ function decalerJour(n) {
   chargerJournal();
 }
 
+const ILLU_FAM = `<svg viewBox="0 0 64 64" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="26" cy="24" r="8" fill="var(--acc-doux)"/><circle cx="44" cy="28" r="6" fill="var(--acc-doux)"/>
+  <path d="M12 50c0-8 6-13 14-13s14 5 14 13M40 46c1-6 5-9 10-9s8 3 8 9"/></svg>`;
+
 /* ---------------- Aujourd'hui ----------------
    Ce qui compte le matin : qui vient, de quelle heure à quelle heure. */
 const CLES_JOURS = ['d0','d1','d2','d3','d4','d5','d6'];
@@ -1124,8 +1620,11 @@ const CLES_JOURS = ['d0','d1','d2','d3','d4','d5','d6'];
 function renderAujourdhui() {
   const box = $('#aujourdhui');
   if (!box) return;
+  const banniereRetard = retardsDuJour();
   if (!Supa.connecte() || !contrats.length) {
-    box.innerHTML = '<p class="hint" style="margin:0">Rien de prévu pour le moment.</p>';
+    box.innerHTML = `<div class="vide-doux"><svg viewBox="0 0 64 64" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="10" y="14" width="44" height="40" rx="8" fill="var(--acc-doux)"/><path d="M10 26h44M22 10v8M42 10v8"/>
+  <circle cx="32" cy="40" r="6" fill="#fff"/><path d="M29.5 40l2 2 3.5-4"/></svg><b>Rien de prévu pour le moment</b><small>Quand une famille t\u2019aura rejointe, ses horaires apparaîtront ici chaque matin.</small></div>`;
     return;
   }
   const d = new Date();
@@ -1136,13 +1635,16 @@ function renderAujourdhui() {
   }).filter(x => x.debut && x.fin).sort((a, b) => a.debut.localeCompare(b.debut));
 
   if (!lignes.length) {
-    box.innerHTML = '<p class="hint" style="margin:0">Aucun accueil prévu aujourd\u2019hui.</p>';
+    box.innerHTML = banniereRetard + `<div class="vide-doux"><svg viewBox="0 0 64 64" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="10" y="14" width="44" height="40" rx="8" fill="var(--acc-doux)"/><path d="M10 26h44M22 10v8M42 10v8"/>
+  <circle cx="32" cy="40" r="6" fill="#fff"/><path d="M29.5 40l2 2 3.5-4"/></svg><b>Pas d\u2019accueil aujourd\u2019hui</b><small>Profite de ta journée.</small></div>`;
     return;
   }
-  box.innerHTML = lignes.map(l =>
+  box.innerHTML = banniereRetard + lignes.map(l =>
     `<button class="famille" data-jour-contrat="${esc(l.id)}">
        <span class="pastille">${esc(l.prenom[0].toUpperCase())}</span>
        <span><b>${esc(l.prenom)}</b><small>${esc(l.debut)} → ${esc(l.fin)}</small></span>
+       <span class="creneau">${esc(F1(dureeCreneau(l.debut, l.fin)))} h</span>
      </button>`).join('');
   $$('#aujourdhui [data-jour-contrat]').forEach(b => {
     b.onclick = async () => {
@@ -1151,6 +1653,121 @@ function renderAujourdhui() {
       montrer('planning');
     };
   });
+}
+
+/* Durée d'un créneau, à partir de deux horaires du contrat. */
+function minutesDe(txt) {
+  const m = String(txt || '').match(/^(\d{1,2})[:hH.]?(\d{2})?$/);
+  return m ? (+m[1]) * 60 + (m[2] ? +m[2] : 0) : null;
+}
+function dureeCreneau(debut, fin) {
+  const a = minutesDe(debut), b = minutesDe(fin);
+  return (a === null || b === null || b <= a) ? 0 : (b - a) / 60;
+}
+const F1 = n => (Math.round(Number(n || 0) * 100) / 100).toString().replace('.', ',');
+
+/* Les retards annoncés aujourd'hui par les parents, toutes familles. */
+let retards = [];
+
+async function chargerRetards() {
+  retards = [];
+  if (!Supa.connecte() || !contrats.length) return;
+  const debut = new Date(); debut.setHours(0, 0, 0, 0);
+  try {
+    retards = await Supa.lire('messages',
+      'categorie=eq.retard&cree_le=gte.' + debut.toISOString() + '&select=contrat_id,texte,cree_le&order=cree_le.desc');
+  } catch (e) { retards = []; }
+}
+
+function retardsDuJour() {
+  if (!retards.length) return '';
+  return retards.map(r => {
+    const c = contrats.find(x => x.id === r.contrat_id);
+    const h = new Date(r.cree_le).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="urg-alerte" style="margin-bottom:8px"><b>${esc((c && c.enfant_prenom) || 'Un enfant')}</b> — ${esc(r.texte)} <small style="opacity:.7">· ${h}</small></div>`;
+  }).join('');
+}
+
+/* ---------------- Espace commun ----------------
+   Un seul espace par nounou, toutes ses familles y sont invitées. Chacune
+   accepte pour elle-même ; refuser, c'est aussi rester invisible des autres. */
+let espace = null, membres = [], annonces = [];
+const CAT_COMMUN = { maladie: ['🤒', 'Maladie'], absence: ['📅', 'Fermeture'], sortie: ['🌳', 'Sortie'], info: ['💬', 'Info'] };
+
+async function chargerCommun() {
+  espace = null; membres = []; annonces = [];
+  if (!Supa.connecte()) return;
+  try {
+    const e = await Supa.lire('espaces', 'salariee_id=eq.' + Supa.moi().id + '&select=id,nom&limit=1');
+    if (!e.length) return;
+    espace = e[0];
+    membres = await Supa.lire('membres_espace', 'espace_id=eq.' + espace.id + '&select=contrat_id,accepte_le,quitte_le');
+    annonces = await Supa.lire('annonces', 'espace_id=eq.' + espace.id + '&select=id,auteur_id,categorie,texte,cree_le&order=cree_le.desc&limit=40');
+  } catch (e) {}
+}
+
+async function creerCommun() {
+  const m = Supa.moi();
+  const nom = 'Chez ' + ((m && m.email) ? m.email.split('@')[0] : 'nounou');
+  try {
+    await Supa.ecrire('espaces', { salariee_id: m.id, nom });
+    await chargerCommun();
+    await inviterToutes();
+    renderCommun();
+    toast('Espace ouvert. Chaque famille choisit d\u2019y entrer.');
+  } catch (e) { toast('Impossible : ' + (e.message || e)); }
+}
+
+/* Chaque famille reliée reçoit une invitation, en attente de son accord. */
+async function inviterToutes() {
+  if (!espace) return;
+  const deja = new Set(membres.map(x => x.contrat_id));
+  const nouvelles = contrats.filter(c => !deja.has(c.id)).map(c => ({ espace_id: espace.id, contrat_id: c.id }));
+  if (!nouvelles.length) return;
+  try {
+    await Supa.ecrire('membres_espace', nouvelles);
+    for (const n of nouvelles) Supa.notifier(n.contrat_id, 'Espace commun', 'Ta nounou t\u2019invite à rejoindre l\u2019espace des familles.');
+    await chargerCommun();
+  } catch (e) {}
+}
+
+function renderCommun() {
+  const vide = $('#carteCommunVide'), actif = $('#communActif');
+  if (!vide) return;
+  vide.hidden = !!espace;
+  actif.hidden = !espace;
+  if (!espace) return;
+
+  const acceptes = membres.filter(m => m.accepte_le && !m.quitte_le).length;
+  $('#communCompteur').textContent = acceptes ? String(acceptes) : '';
+  $('#communMembres').innerHTML = contrats.length ? contrats.map(c => {
+    const m = membres.find(x => x.contrat_id === c.id);
+    const etat = !m ? 'pas encore invitée' : m.quitte_le ? 'a quitté' : m.accepte_le ? 'membre' : 'invitation envoyée';
+    const ton = !m ? 'var(--mut)' : m.accepte_le && !m.quitte_le ? 'var(--acc)' : 'var(--mut)';
+    return `<div class="ds"><span>${esc(c.enfant_prenom || 'Enfant')}</span><b style="color:${ton}">${etat}</b></div>`;
+  }).join('') : '<p class="hint" style="margin:0">Aucune famille reliée pour l\u2019instant.</p>';
+
+  $('#communAnnonces').innerHTML = annonces.length ? annonces.map(a => {
+    const [emoji, lib] = CAT_COMMUN[a.categorie] || CAT_COMMUN.info;
+    const q = new Date(a.cree_le).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    return `<div class="msg cat-${esc(a.categorie)}"><span class="rond">${emoji}</span>
+      <span class="txt"><i class="etiq">${esc(lib)}</i><b>${esc(a.texte)}</b>
+      <small>${a.auteur_id === Supa.moi().id ? 'moi' : 'un parent'} · ${esc(q)}</small></span></div>`;
+  }).join('') : '<p class="hint" style="margin:0">Aucune annonce pour le moment.</p>';
+}
+
+async function annoncer() {
+  const texte = $('#communTexte').value.trim();
+  const cat = ($('#communCategorie .on') || {}).dataset ? $('#communCategorie .on').dataset.cat : 'info';
+  if (!texte || !espace) return;
+  try {
+    await Supa.ecrire('annonces', { espace_id: espace.id, auteur_id: Supa.moi().id, categorie: cat, texte });
+    for (const m of membres.filter(x => x.accepte_le && !x.quitte_le))
+      Supa.notifier(m.contrat_id, CAT_COMMUN[cat][1] + ' — espace commun', texte.slice(0, 80), cat === 'maladie');
+    $('#communTexte').value = '';
+    await chargerCommun(); renderCommun();
+    toast('Publié pour ' + membres.filter(x => x.accepte_le && !x.quitte_le).length + ' famille(s)');
+  } catch (e) { toast('Impossible : ' + (e.message || e)); }
 }
 
 /* ---------------- Fermetures ----------------
@@ -1216,6 +1833,7 @@ const BESOINS = [
   ['🧷', 'Couches'], ['🍼', 'Lait'], ['💧', 'Eau'], ['👕', 'Tenue de rechange'],
   ['🧴', 'Crème'], ['🥣', 'Repas'], ['🧦', 'Chaussons'], ['🧸', 'Doudou']
 ];
+const EMOJIS_BESOIN = Object.fromEntries(BESOINS.map(([e, t]) => [t.toLowerCase(), e]));
 
 function renderBesoins() {
   const box = $('#besoins');
@@ -1237,6 +1855,66 @@ async function envoyerBesoin(quoi) {
     Supa.notifier(contratActif, 'Il manque ' + quoi.toLowerCase(), nomEnfantActif());
     toast(quoi + ' — le parent est prévenu');
     await chargerMessages(); renderMessages();
+  } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
+}
+
+/* ---------------- Mon retard ----------------
+   Les familles attendues aujourd'hui sont prévenues ensemble. */
+async function annoncerRetard(dur) {
+  const cle = CLES_JOURS[new Date().getDay()];
+  const attendues = contrats.filter(c => (c.planning || {})[cle] && c.planning[cle].debut);
+  if (!attendues.length) { toast('Aucune famille attendue aujourd\u2019hui'); return; }
+  const texte = 'Votre nounou aura environ ' + dur + ' de retard';
+  try {
+    for (const c of attendues) {
+      await Supa.ecrire('messages', { contrat_id: c.id, auteur_id: Supa.moi().id, texte, categorie: 'retard' });
+      Supa.notifier(c.id, 'Retard de la nounou : ' + dur, '');
+    }
+    toast(attendues.length + (attendues.length > 1 ? ' familles prévenues' : ' famille prévenue'));
+  } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
+}
+
+/* ---------------- Demandes de matériel ----------------
+   Elle demande, les parents tranchent. La base l'empêche de décider seule. */
+let demandes = [];
+
+async function chargerDemandes() {
+  demandes = [];
+  if (!contratActif || !Supa.connecte()) return;
+  try {
+    demandes = await Supa.lire('demandes',
+      'contrat_id=eq.' + contratActif + '&select=id,objet,detail,etat,motif_refus,decide_le,cree_le&order=cree_le.desc&limit=20');
+  } catch (e) { demandes = []; }
+}
+
+function renderDemandes() {
+  const box = $('#listeDemandes');
+  if (!box) return;
+  const etiq = { attente: 'en attente', acceptee: 'acceptée ✓', refusee: 'refusée' };
+  box.innerHTML = demandes.length ? demandes.map(d =>
+    `<div class="demande etat-${esc(d.etat)}">
+      <span class="pastille-etat">${d.etat === 'acceptee' ? '✓' : d.etat === 'refusee' ? '✕' : '⏳'}</span>
+      <span class="corps-d">
+        <b>${esc(d.objet)}</b>
+        ${d.detail ? `<small>${esc(d.detail)}</small>` : ''}
+        ${d.etat === 'refusee' && d.motif_refus ? `<small class="motif">Motif : ${esc(d.motif_refus)}</small>` : ''}
+      </span>
+      <span class="etiq-etat">${etiq[d.etat]}</span>
+    </div>`).join('') : '';
+}
+
+async function envoyerDemande() {
+  const objet = $('#demandeObjet').value.trim();
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  if (!objet) return;
+  try {
+    await Supa.ecrire('demandes', {
+      contrat_id: contratActif, auteur_id: Supa.moi().id,
+      objet, detail: $('#demandeDetail').value.trim() || null });
+    Supa.notifier(contratActif, 'Demande : ' + objet, nomEnfantActif());
+    $('#demandeObjet').value = ''; $('#demandeDetail').value = '';
+    toast('Demande envoyée aux parents');
+    await chargerDemandes(); renderDemandes();
   } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
 }
 
@@ -1263,10 +1941,19 @@ function renderMessages() {
   box.innerHTML = messages.length ? messages.map(m => {
     const mien = m.auteur_id === moi;
     const q = new Date(m.cree_le).toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
-    return `<div class="msg"><span class="txt${mien ? ' mien' : ''}">
-      <b>${esc(m.texte || 'Photo')}</b><small>${mien ? 'moi' : 'le parent'} · ${esc(q)}</small>
-      ${m.piece ? `<img data-photo="${esc(m.piece)}" alt="">` : ''}</span></div>`;
-  }).join('') : '<p class="hint">Aucun échange pour le moment.</p>';
+    const cat = m.categorie || 'info';
+    const quoi = cat === 'besoin' ? String(m.texte || '').replace(/^il manque\s*:\s*/i, '') : (m.texte || 'Photo');
+    const emoji = cat === 'besoin' ? (EMOJIS_BESOIN[quoi.toLowerCase()] || '📦')
+      : cat === 'retard' ? '🕒' : cat === 'photo' ? '📷' : '';
+    const chapeau = cat === 'besoin' ? 'Il manque' : cat === 'retard' ? 'Retard annoncé' : '';
+    return `<div class="msg cat-${esc(cat)}">
+      ${emoji ? `<span class="rond">${emoji}</span>` : ''}
+      <span class="txt${mien ? ' mien' : ''}">
+        ${chapeau ? `<i class="etiq">${esc(chapeau)}</i>` : ''}
+        <b>${esc(quoi)}</b><small>${mien ? 'moi' : 'le parent'} · ${esc(q)}</small>
+        ${m.piece ? `<img data-photo="${esc(m.piece)}" alt="">` : ''}</span></div>`;
+  }).join('') : `<div class="vide-doux"><svg viewBox="0 0 64 64" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 18h40v26H26l-10 8v-8h-4z" fill="var(--acc-doux)"/><path d="M22 28h20M22 35h12"/></svg><b>Pas encore d\u2019échange</b><small>Un mot, une photo, une demande : tout arrive ici.</small></div>`;
 
   $$('#fluxMessages [data-photo]').forEach(async img => {
     const d = await telechargerPhoto(img.dataset.photo);
@@ -1298,37 +1985,18 @@ async function envoyerTexte() {
 
 /* La photo part dans un dossier nommé d'après le contrat : les règles du
    stockage s'appuient dessus pour qu'une famille ne voie que les siennes. */
-async function envoyerPhoto(fichier) {
-  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
-  if (fichier.size > 8 * 1024 * 1024) { toast('Photo trop lourde, 8 Mo maximum'); return; }
-  toast('Envoi de la photo…');
-  const nom = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
-  const chemin = contratActif + '/' + nom;
-  try {
-    const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin, {
-      method: 'POST',
-      headers: { ...Supa.entetes(), 'Content-Type': fichier.type || 'image/jpeg' },
-      body: fichier
-    });
-    if (!r.ok) throw new Error('Envoi refusé (' + r.status + ')');
-    await Supa.ecrire('messages', {
-      contrat_id: contratActif, auteur_id: Supa.moi().id,
-      texte: null, categorie: 'photo', piece: chemin });
-    Supa.notifier(contratActif, nomEnfantActif() + ' — nouvelle photo', '');
-    toast('Photo envoyée');
-    await chargerMessages(); renderMessages();
-  } catch (e) { toast('Photo non envoyée : ' + (e.message || e)); }
-}
 
 /* ---------------- Rendus ---------------- */
+/* Les heures de la semaine viennent des horaires du contrat : ce sont eux qui
+   font foi pour la paie, pas l'heure réelle d'arrivée. */
 function heuresSemaine() {
-  const d = new Date();
-  const lundi = new Date(d); lundi.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  const dim = new Date(lundi); dim.setDate(lundi.getDate() + 6);
   let total = 0;
-  for (const j of jours) {
-    const jd = new Date(j.jour + 'T00:00:00');
-    if (jd >= lundi && jd <= dim) total += Number(j.heures_prevues || 0);
+  for (const c of contrats) {
+    const pl = c.planning || {};
+    for (const d of CLES_JOURS) {
+      const h = pl[d];
+      if (h) total += dureeCreneau(h.debut, h.fin);
+    }
   }
   return total;
 }
@@ -1340,17 +2008,24 @@ function renderAccueil() {
     $('#listeFamilles').innerHTML = '<p class="hint">Aucune famille pour le moment.</p>';
     return;
   }
-  $('#heroHeures').textContent = f1(heuresSemaine()) + ' h';
-  $('#heroBas').textContent = contrats.length
-    ? contrats.length + (contrats.length > 1 ? ' enfants accueillis' : ' enfant accueilli')
-    : 'Rejoins une famille avec son code d\u2019invitation';
+  if (!contrats.length) {
+    $('#heroHaut').textContent = 'Bienvenue';
+    $('#heroHeures').textContent = 'Cocon';
+    $('#heroBas').textContent = 'Ton espace est prêt. Il attend sa première famille.';
+  } else {
+    $('#heroHaut').textContent = 'Cette semaine';
+    $('#heroHeures').textContent = f1(heuresSemaine()) + ' h';
+    $('#heroBas').textContent = contrats.length + (contrats.length > 1 ? ' enfants accueillis' : ' enfant accueilli');
+  }
 
   $('#listeFamilles').innerHTML = contrats.length ? contrats.map(c =>
     `<button class="famille" data-contrat="${esc(c.id)}">
        <span class="pastille">${esc((c.enfant_prenom || '?')[0].toUpperCase())}</span>
        <span><b>${esc(c.enfant_prenom || 'Enfant')}</b><small>${c.id === contratActif ? 'affiché' : 'voir le planning'}</small></span>
      </button>`).join('')
-    : '<p class="hint">Aucune famille. Onglet Familles pour saisir un code d\u2019invitation.</p>';
+    : `<div class="vide-doux"><svg viewBox="0 0 64 64" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="26" cy="24" r="8" fill="var(--acc-doux)"/><circle cx="44" cy="28" r="6" fill="var(--acc-doux)"/>
+  <path d="M12 50c0-8 6-13 14-13s14 5 14 13M40 46c1-6 5-9 10-9s8 3 8 9"/></svg><b>Aucune famille pour l\u2019instant</b><small>Le parent te donne un code depuis son application. Saisis-le dans l\u2019onglet Familles.</small></div>`;
 
   $$('#listeFamilles [data-contrat]').forEach(b => {
     b.onclick = async () => {
@@ -1361,10 +2036,46 @@ function renderAccueil() {
   });
 }
 
+let rejoindreAuto = false, rejoindreTouche = false;
+
 function renderContrats() {
-  $('#listeContrats').innerHTML = contrats.length ? contrats.map(c =>
-    `<div class="ds"><span>${esc(c.enfant_prenom || 'Enfant')}</span><b>${esc(c.statut)}</b></div>`).join('')
-    : '<p class="hint">Aucun contrat pour le moment.</p>';
+  const n = contrats.length;
+  const cpt = $('#compteurFamilles');
+  if (cpt) cpt.textContent = n ? String(n) : '';
+  // la carte « rejoindre » ne s'ouvre d'elle-même que tant qu'aucune famille
+  // n'est reliée ; l'ouverture programmée ne compte pas comme un geste
+  const rej = $('#carteRejoindre');
+  if (rej && !rejoindreTouche && rej.open !== (n === 0)) {
+    // l'événement toggle arrive au tour suivant : le drapeau doit lui survivre
+    rejoindreAuto = true;
+    rej.open = n === 0;
+    setTimeout(() => { rejoindreAuto = false; }, 0);
+  }
+
+  $('#listeContrats').innerHTML = n ? contrats.map(c => {
+    const pl = c.planning || {};
+    const jours = ['d1','d2','d3','d4','d5','d6','d0'].filter(d => pl[d] && pl[d].debut);
+    const resume = jours.length ? jours.length + (jours.length > 1 ? ' jours par semaine' : ' jour par semaine') : 'horaires à venir';
+    return `<div class="famille">
+      <button class="famille-ouvrir" data-famille="${esc(c.id)}">
+        <span class="pastille">${esc((c.enfant_prenom || '?')[0].toUpperCase())}</span>
+        <span><b>${esc(c.enfant_prenom || 'Enfant')}</b><small>${esc(resume)}</small></span>
+      </button>
+      <button class="famille-quitter" data-quitter="${esc(c.id)}" aria-label="Quitter">
+        <svg><use href="#i-poubelle"/></svg>
+      </button>
+    </div>`;
+  }).join('')
+    : `<div class="vide-doux">${ILLU_FAM}<b>Aucune famille pour l\u2019instant</b><small>Le parent te donne un code depuis son application. Saisis-le juste en dessous.</small></div>`;
+
+  $$('#listeContrats [data-quitter]').forEach(b => { b.onclick = () => quitterFamille(b.dataset.quitter); });
+  $$('#listeContrats [data-famille]').forEach(b => {
+    b.onclick = async () => {
+      contratActif = b.dataset.famille;
+      await chargerJours(); await chargerMessages();
+      montrer('planning');
+    };
+  });
 }
 
 const JOURS_NOMS = { d1:'lundi', d2:'mardi', d3:'mercredi', d4:'jeudi', d5:'vendredi', d6:'samedi', d0:'dimanche' };
@@ -1393,8 +2104,10 @@ function renderInfoEnfant(c) {
     const mois = Math.floor((Date.now() - new Date(c.enfant_naissance).getTime()) / 2629800000);
     age = mois < 24 ? mois + ' mois' : Math.floor(mois / 12) + ' ans';
   }
+  const etatF = { brouillon: 'en préparation', transmise: 'envoyée', versee: 'salaire versé' };
   box.innerHTML = ds('Prénom', c.enfant_prenom) + ds('Naissance', naiss) +
-    ds('Âge', age) + ds('Lieu d\u2019accueil', c.lieu) + ds('Contrat', c.statut);
+    ds('Âge', age) + ds('Lieu d\u2019accueil', c.lieu) +
+    ds('Fiche du mois', etatFiche[c.id] ? etatF[etatFiche[c.id]] || etatFiche[c.id] : '—');
 }
 
 function renderPlanning() {
@@ -1410,16 +2123,21 @@ function renderPlanning() {
   const parJour = {};
   for (const j of jours) parJour[Number(j.jour.slice(8, 10))] = j;
 
+  const pl = (c && c.planning) || {};
   let html = '';
   for (let i = 0; i < decalage; i++) html += '<div class="gr-jour vide"></div>';
   let total = 0;
   for (let n = 1; n <= nb; n++) {
     const j = parJour[n] || {};
-    const h = Number(j.heures_prevues || 0);
-    total += h;
     const wd = new Date(y, m, n).getDay();
-    html += `<div class="gr-jour${wd === 0 || wd === 6 ? ' we' : ''}">
-      <span class="n">${n}</span><span class="h">${h > 0 ? f1(h) : ''}</span></div>`;
+    const creneau = pl[CLES_JOURS[wd]];
+    // une exception saisie par le parent prime sur l'horaire habituel
+    const h = j.heures_prevues != null ? Number(j.heures_prevues)
+      : (creneau ? dureeCreneau(creneau.debut, creneau.fin) : 0);
+    const absent = j.absence_enfant || j.absence_salariee;
+    total += absent ? 0 : h;
+    html += `<div class="gr-jour${wd === 0 || wd === 6 ? ' we' : ''}${absent ? ' absent' : ''}">
+      <span class="n">${n}</span><span class="h">${absent ? '—' : (h > 0 ? f1(h) : '')}</span></div>`;
   }
   $('#grille').innerHTML = html;
   $('#totalMois').textContent = f1(total) + ' h';
@@ -1428,12 +2146,33 @@ function renderPlanning() {
 /* ---------------- Branchements ---------------- */
 $$('.nav-item').forEach(b => { b.onclick = () => montrer(b.dataset.vue); });
 $('#btnParams').onclick = () => montrer('params');
+$('#porteConnexion').onclick = () => passerPorte(false);
+$('#porteInscription').onclick = () => passerPorte(true);
+$('#porteOublie').onclick = async () => {
+  const email = $('#porteEmail').value.trim();
+  if (!email.includes('@')) { $('#porteMsg').textContent = 'Saisis ton adresse d\u2019abord.'; return; }
+  try { await Supa.recuperer(email); $('#porteMsg').textContent = 'Si un compte existe, un lien vient d\u2019être envoyé.'; }
+  catch (e) { $('#porteMsg').textContent = e.message || String(e); }
+};
 $('#btnConnexion').onclick = () => seConnecter(false);
 $('#btnInscription').onclick = () => seConnecter(true);
-$('#btnDeconnexion').onclick = async () => { await Supa.deconnecter(); contrats = []; jours = []; majCompte(); renderAccueil(); };
+$('#btnDeconnexion').onclick = async () => {
+  await Supa.deconnecter(); contrats = []; jours = []; messages = []; majCompte(); renderAccueil(); ouvrirPorte();
+};
 $('#btnRejoindre').onclick = rejoindre;
+$('#carteRejoindre').addEventListener('toggle', () => {
+  if (!rejoindreAuto) rejoindreTouche = true;
+});
 $('#btnEnvoyer').onclick = envoyerTexte;
+$('#btnDemande').onclick = envoyerDemande;
+$$('.retards [data-retard]').forEach(b => { b.onclick = () => annoncerRetard(b.dataset.retard); });
 $('#btnFermeture').onclick = ajouterFermeture;
+$('#btnCreerCommun').onclick = creerCommun;
+$('#btnAnnoncer').onclick = annoncer;
+$('#communCategorie').addEventListener('click', e => {
+  const b = e.target.closest('[data-cat]');
+  if (b) $$('#communCategorie button').forEach(x => x.classList.toggle('on', x === b));
+});
 $('#clavier').addEventListener('click', e => {
   const b = e.target.closest('[data-touche]');
   if (b) toucheVerrou(b.dataset.touche);
@@ -1443,6 +2182,13 @@ $('#secActif').onchange = e => {
   else { ecrireSecurite({ actif: false }); majSecurite(); }
 };
 $('#secBio').onchange = e => { ecrireSecurite({ ...securite(), biometrie: e.target.checked }); majSecurite(); };
+$('#segTheme').addEventListener('click', e => {
+  const b = e.target.closest('[data-theme]');
+  if (!b) return;
+  const r = Reglages.lire(); r.theme = b.dataset.theme; Reglages.ecrire(r);
+  appliquerTheme(r.theme);
+  $$('#segTheme button').forEach(x => x.classList.toggle('on', x === b));
+});
 $('#btnChangerCode').onclick = () => {
   if (!securite().actif) { toast('Active d\u2019abord le code'); return; }
   afficherVerrou('creer');
@@ -1492,7 +2238,7 @@ $('#fichierGalerie').onchange = e => {
 };
 $('#fichierPhoto').onchange = e => {
   const f = e.target.files && e.target.files[0];
-  if (f) envoyerPhoto(f);
+  if (f) envoyerGalerie(f, true);
   e.target.value = '';
 };
 $('#btnSigner').onclick = signer;
@@ -1506,6 +2252,7 @@ if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App
   window.Capacitor.Plugins.App.addListener('pause', () => { VERROU.quitteA = Date.now(); });
   window.Capacitor.Plugins.App.addListener('resume', verrouillerSiBesoin);
   window.Capacitor.Plugins.App.addListener('backButton', () => {
+    if (!$('#porte').hidden) return;
     if (!$('#verrou').hidden) return;
     if (!$('#consentModal').hidden) { $('#consentModal').hidden = true; return; }
     if (vue !== 'accueil') { montrer('accueil'); return; }
@@ -1655,7 +2402,7 @@ async function activerPush() {
 /* ---------------- Démarrage ---------------- */
 (async () => {
   const r = Reglages.lire();
-  if (r.theme === 'sombre') document.documentElement.dataset.theme = 'sombre';
+  appliquerTheme(r.theme || 'clair');
   Supa.configurer(r.url || PROJET.url, r.cle || PROJET.cle);
   if (securite().actif) afficherVerrou('ouvrir');
   majSecurite();
@@ -1664,19 +2411,16 @@ async function activerPush() {
   await charger();
   renderAccueil();
 
-  // Toutes ses données viennent du serveur : sans compte, l'accueil serait vide
-  // sans expliquer pourquoi. On ouvre directement sur la connexion.
-  if (!Supa.connecte()) {
-    montrer('params');
-    direCompte(Supa.configure()
-      ? 'Connecte-toi, ou crée ton compte si c\u2019est la première fois.'
-      : 'Renseigne d\u2019abord l\u2019adresse du projet, sous « Projet Supabase ».');
-  }
+  if (Supa.connecte() && !sessionValide()) { await Supa.deconnecter(); contrats = []; jours = []; majCompte(); renderAccueil(); }
+  if (!Supa.connecte()) await ouvrirPorte();
+  // l'écran de lancement se retire une fois la destination connue
+  const attente = Math.max(0, (window.Capacitor ? 700 : 1200) - (Date.now() - demarreA));
   setTimeout(() => {
-    const s = $('#splash');
-    s.classList.add('parti');
-    setTimeout(() => s.remove(), 420);
-  }, window.Capacitor ? 700 : 1500);
+    const el = $('#splash');
+    if (!el) return;
+    el.classList.add('parti');
+    setTimeout(() => el.remove(), 420);
+  }, attente);
 })();
 </script>
 </body>

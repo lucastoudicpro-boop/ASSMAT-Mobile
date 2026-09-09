@@ -732,3 +732,455 @@ n'aurait aucun sens.
 **Cocon Parent** ne demande rien. Fiches, calculs, PDF, sauvegardes : tout
 fonctionne sans compte. La connexion ne sert qu'au partage, et l'imposer
 casserait l'usage principal.
+
+## 1.0.0 — refonte
+
+### Cocon Parent
+
+**Connexion obligatoire.** Une porte d'entree a l'ouverture, sans compte on
+n'entre pas. La session vaut huit heures ; au-dela, le mot de passe est
+redemande. Entre deux, le verrou local par code ou empreinte protege l'appareil.
+
+**Dashboard en tuiles.** Journal du jour avec l'humeur de l'enfant, galerie,
+messages, retard, demandes. Puis la progression du mois.
+
+**Barre du bas personnalisable.** Quatre emplacements autour d'un bouton « + »
+qui ouvre le volet de tous les modules. Un appui long sur un module le place
+dans la barre. Le choix est conserve.
+
+**Le Dossier fait foi.** Famille, salariee, enfant s'y saisissent ; chaque fiche
+les reprend et une modification se repercute sur le mois affiche. Les champs de
+la saisie deviennent un simple miroir.
+
+**Mes nounous.** L'ancien « Partage avec la salariee », au meme endroit :
+publication du contrat, code et QR d'invitation, synchronisation, retrait.
+
+**Co-parent.** Dossier -> Ma famille -> Inviter le co-parent. Un code et un QR ;
+il cree son compte dans Cocon Parent, saisit le code, et voit tout ce que tu
+vois. Deux parents maximum par contrat, verifie par la base.
+
+**Retard.** Cinq boutons : 15, 30, 45 minutes, une heure, plus. La nounou est
+notifiee aussitot, et le retard apparait sur son ecran du jour.
+
+**Demandes.** Ce qu'elle demande, tu l'acceptes ou le refuses avec un motif
+qu'elle voit. La base l'empeche de decider elle-meme.
+
+### Cocon Nounou
+
+Session de huit heures, comme le parent. Demandes de materiel depuis l'onglet
+Messages, avec le suivi des reponses. Humeur de fin de journee avec des visages.
+Retards des parents affiches sur Aujourd'hui.
+
+### Base
+
+`008-a-011-tout.sql` : co-parent, invitation par l'une ou l'autre partie,
+demandes, retards, pointage arrivee / depart, accuse de lecture des messages.
+
+### Pointage et presences
+
+Cocon Nounou, ecran Aujourd'hui : un bouton « Arrive » puis « Parti » par enfant.
+L'heure est notee, le parent recoit une notification, et la base en deduit les
+heures reelles. Ces deux colonnes appartiennent a la nounou : un envoi du parent
+ne peut pas les ecraser.
+
+Cocon Parent, module Presences : les trois dernieres semaines, avec l'ecart
+entre prevu et reel jour par jour.
+
+### Ma semaine
+
+Cocon Parent, module Ma semaine : humeur la plus frequente, journees notees,
+repas, heures de presence, photos, demandes, et les mots de la nounou. Un rappel
+arrive le dimanche a 19 h.
+
+### Charte 1.0
+
+Fond legerement chaud, cartes qui flottent, heros avec des halos, boutons en
+relief, entree en cascade des blocs, tuiles colorees par module, barre du bas
+avec pastille et petit saut de l'icone, volets qui glissent avec un leger
+ressort, etats vides dessines. Tout est desactive en mouvement reduit.
+
+## Quand l'invitation est refusee
+
+Message typique : *new row violates row-level security policy for table
+"invitations"*.
+
+**Cause principale, corrigee en 1.0.0.** La table `invitations` n'a
+volontairement aucune regle de lecture : un compte capable de lister les codes
+pourrait rejoindre le contrat de n'importe qui. Mais le client demandait a
+PostgREST de lui renvoyer la ligne inseree. Postgres devait donc la relire,
+n'y parvenait pas, et refusait l'ecriture entiere — en accusant la regle
+d'ecriture, qui n'y etait pour rien.
+
+Le client envoie desormais `Prefer: return=minimal` sur les tables sans lecture,
+`invitations` et `jetons_push`.
+
+**Autre cause possible.** Le contrat n'existe plus cote serveur, ou appartient a
+une autre adresse e-mail. Attention : l'editeur SQL de Supabase tourne en role
+privilege, ou `auth.uid()` vaut NULL et les regles d'acces ne s'appliquent pas.
+Voir un contrat dans le tableau de bord ne signifie donc pas que l'application
+peut le voir.
+
+L'application le detecte desormais seule. La carte « Mes nounous » affiche
+« Contrat en ligne : introuvable », explique pourquoi, et propose **Oublier ce
+lien et republier**. Rien n'est perdu : les fiches, les calculs et les
+sauvegardes vivent sur le telephone, pas sur le serveur.
+
+Pour verifier soi-meme, dans l'editeur SQL :
+
+```sql
+select c.id, c.enfant_prenom, c.statut,
+       e.email as compte_employeur,
+       s.email as compte_salariee
+  from contrats c
+  left join auth.users e on e.id = c.employeur_id
+  left join auth.users s on s.id = c.salariee_id;
+```
+
+`compte_employeur` doit etre l'adresse avec laquelle tu es connecte dans Cocon
+Parent. Si c'en est une autre, l'application ne verra jamais ce contrat.
+
+## L'accuse de lecture ne tenait pas
+
+Trouve par un controle systematique, pas en s'en apercevant a l'usage : pour
+chaque table, comparer ce que les applications font a ce que les regles
+autorisent.
+
+`messages` n'avait aucune regle de modification. L'application marquait les
+messages comme lus, PostgREST ne mettait a jour aucune ligne, et n'en disait
+rien. La pastille des non-lus serait revenue a chaque ouverture, indefiniment,
+sans aucun message d'erreur.
+
+La regle existe desormais, mais un declencheur n'accepte que le champ `lu_le` :
+personne ne peut reecrire le texte d'un message recu, changer son auteur, ni
+retirer un accuse deja pose. Marquer comme lu ne vaut que pour ce qu'on n'a pas
+ecrit soi-meme.
+
+### Le controle
+
+Il vaut la peine d'etre rejoue apres chaque ajout de table :
+
+```
+pour chaque table ecrite par une application
+  si l'operation utilisee n'a pas de regle correspondante  -> faille silencieuse
+  si INSERT sans regle de lecture et relecture demandee    -> ecriture refusee
+```
+
+C'est ce controle qui a trouve les deux bugs de la 1.0.0, celui des invitations
+et celui-ci.
+
+## Mettre a jour le depot depuis un telephone
+
+Deposer une arborescence complete demande un ordinateur : le glisser-deposer
+n'existe pas sur mobile, et GitHub ne decompresse pas les archives.
+
+Le workflow **Extraire une archive** contourne cela. Deposer un seul fichier
+fonctionne depuis un telephone, et le reste se fait cote serveur.
+
+1. Depot -> Add file -> Upload files -> deposer `cocon-vX.Y.Z.zip` a la racine.
+2. Onglet Actions -> « Extraire une archive » -> Run workflow.
+3. Il extrait, retire le dossier racine `cocon/`, remplace les dossiers
+   concernes, supprime le zip et commite.
+
+Deux points a connaitre.
+
+**Les workflows ne sont jamais remplaces.** Le jeton fourni aux actions n'a pas
+le droit de modifier `.github/workflows` : GitHub refuse le push. Le dossier
+est donc ignore, et le resume de l'execution le signale. Si `build-apk.yml` a
+change, il faut le mettre a jour a la main — c'est rare.
+
+**Seuls les dossiers presents dans l'archive sont remplaces.** Ce qui existe
+dans le depot mais pas dans le zip reste en place. Aucun risque d'effacer un
+fichier qu'on avait ajoute de son cote.
+
+**Prealable** : Settings -> Actions -> General -> Workflow permissions ->
+« Read and write permissions ». Sans cela, le commit final echoue.
+
+## 1.0.1 — refonte des ecrans
+
+### Cocon Parent
+
+**Une page par module.** Journal, galerie, messages, demandes, ma semaine,
+presences, mes nounous, fiche d'urgence, conges, documents, fermetures : chacun
+a son ecran, avec son titre. Le Dossier ne garde que le contractuel, celui qui
+alimente la saisie : ma famille, salariee, enfants, planning type, contrat,
+avenants, notes.
+
+Techniquement, les cartes vivent dans une reserve masquee et sont deplacees dans
+la page a l'ouverture. Un seul balisage, un seul rendu, pas de duplication.
+
+**Roue de chargement.** Le bouton de connexion se vide et tourne, une ligne
+centree annonce l'etape en cours. Plus de texte de travers.
+
+### Cocon Nounou
+
+**Ecran de connexion**, comme le parent, avec la meme roue et la session de huit
+heures.
+
+**Familles.** La liste d'abord, avec le nombre et le rythme hebdomadaire de
+chaque enfant. La carte « Rejoindre » se replie des qu'une famille est reliee, et
+respecte ensuite les ouvertures manuelles.
+
+**Reglages refondus.** Un en-tete de profil avec initiale et adresse, des
+interrupteurs a glissiere pour la securite, un selecteur de theme a trois
+positions. La connexion au projet passe dans une carte repliee, reservee au
+depannage.
+
+**Planning sur les horaires du contrat.** Le pointage arrivee / depart est
+retire : c'est l'horaire prevu qui fait foi pour la paie, meme en cas de retard.
+L'ecran du jour montre le creneau et sa duree, le mois affiche les creneaux
+habituels, et les exceptions saisies par le parent priment.
+
+## 1.0.2 — l'exoneration etait soustraite
+
+L'exoneration des heures complementaires et majorees est un **report** : les
+cotisations allegees sur ces heures reviennent a la salariee. Elle s'ajoute donc
+au net, elle ne s'en retire pas.
+
+Le moteur la soustrayait. Le libelle de la fiche A4 disait pourtant deja
+« Report du montant de l'exoneration au titre des heures complementaires et / ou
+majorees », juste avant « SALAIRE NET en tenant compte de l'exoneration ».
+
+Consequence : toutes les fiches ou une exoneration etait saisie affichaient un
+net trop bas, du double du montant saisi. Sur 12,40 € d'exoneration, l'ecart est
+de 24,80 €.
+
+**A verifier de ton cote** : rouvre les mois deja etablis ou tu avais saisi une
+exoneration, et compare le net a ton decompte Pajemploi. Si un versement a deja
+ete fait sur l'ancien calcul, il manque la difference.
+
+## 1.0.3 — retouches
+
+**L'ecran de lancement se retirait trop tot.** Il partait avant que
+l'application sache s'il fallait afficher le tableau de bord ou la connexion :
+on apercevait l'un une fraction de seconde avant l'autre. Il reste desormais
+au-dessus jusqu'a ce que la destination soit connue.
+
+**Quitter une famille**, cote nounou. La regle d'acces l'en empechait : une fois
+la famille reliee, les termes du contrat appartiennent a l'employeur. Une
+fonction dediee, `quitter_contrat`, lui permet de se retirer sans dependre de
+lui. Le contrat repasse en attente, la famille peut inviter quelqu'un d'autre,
+et rien n'est efface.
+
+**Selecteur d'enfant** en tete des ecrans Journal et Messages, quand plusieurs
+familles sont reliees. Il n'apparait pas s'il n'y en a qu'une.
+
+**Mise en forme des demandes et des besoins.** Un besoin s'affiche avec son
+emoji, un chapeau « Il manque » et l'objet en gras, plus « Il manque : couches »
+en texte brut. Les retards ont leur propre couleur. Les demandes de materiel
+montrent leur etat par une pastille : en attente, acceptee, refusee avec le
+motif en rouge.
+
+`012-quitter-contrat.sql` est a executer.
+
+## 1.0.4
+
+**Un nouveau mois reprend le precedent.** Horaires, tarifs, quantites
+d'indemnites : tout est repris, et le calendrier est **regenere depuis les
+horaires du contrat** plutot que recopie jour par jour. Recopier decalerait
+tout, les jours de la semaine ne tombant pas aux memes dates. Les feries sont
+sautes, les quantites d'indemnites suivent le nouveau nombre de jours.
+
+Ne se reprennent jamais : le salaire net, les acomptes, les heures
+complementaires, les absences. Une absence est par nature exceptionnelle.
+
+Un reglage permet de repartir a vide : Parametres -> Banniere -> « Commencer
+chaque mois a vide ».
+
+**Motifs d'absence.** Maladie, conges, jour non travaille, ecole, formation,
+autre. Le motif apparait dans la case du calendrier, dans le recapitulatif des
+absences, et dans le message pre-rempli : « Elii sera absent le 2 octobre 2026
+pour maladie. »
+
+**Corrige** : la tuile du journal collait son titre a son sous-titre.
+
+### Trois bugs trouves en testant
+
+`base` etait declare dans une branche et utilise en dehors : toute creation de
+mois levait une erreur qui tuait le demarrage de l'application.
+
+`MOTIFS` s'etait glisse dans le moteur de calcul, a l'interieur d'un bloc, donc
+invisible depuis l'application : les motifs ne s'affichaient jamais.
+
+L'ecran de lancement passait au-dessus de l'ecran de connexion sans jamais lui
+ceder la place quand le demarrage echouait.
+
+### Audit
+
+Syntaxe des deux applications, identifiants references mais absents, tables et
+colonnes appelees contre le schema, regles d'acces manquantes, pages de modules
+sans carte : aucun ecart.
+
+## 1.0.5
+
+### Modules regroupes en pages a onglets
+
+Dix-neuf entrees, c'etait trop. Cote parent, deux familles de modules :
+
+- **Au quotidien** : journal, galerie, messages, demandes, ma semaine, espace
+  commun.
+- **Le contrat** : mes nounous, urgence, presences, fermetures, conges,
+  documents.
+
+Chaque page porte une barre d'onglets ; on passe de l'un a l'autre sans revenir
+en arriere. Le volet « + » range les modules par groupe, avec le salaire et
+l'application a part. On peut toujours epingler un onglet precis dans la barre
+du bas.
+
+### L'espace commun
+
+Les tables existaient depuis le premier fichier SQL. L'interface arrive.
+
+**Cote nounou**, onglet Commun. Elle ouvre l'espace en un geste ; chaque
+famille reliee recoit une invitation. Elle publie des annonces par categorie :
+maladie, fermeture, sortie, info. Rien n'est publie automatiquement.
+
+**Cote parent**, onglet Espace commun dans « Au quotidien ». L'invitation
+s'affiche avec ce que les autres verront — le prenom de l'enfant et ce qu'on
+ecrit, rien d'autre — et deux boutons, rejoindre ou pas maintenant. Une fois
+membre : les prenoms des autres familles, les annonces, et la possibilite d'en
+publier. Quitter est possible a tout moment.
+
+Teste de bout en bout : la nounou ouvre, invite deux familles, publie une
+alerte varicelle ; le parent recoit l'invitation, accepte, lit l'alerte, repond.
+
+## 1.0.6
+
+### Mode silencieux
+
+Parametres -> Mode silencieux. Couper le quotidien le week-end, ou sur une
+periode : journal, photos, messages et demandes se taisent. L'urgent passe
+toujours — fiche d'urgence modifiee, alerte maladie de l'espace commun.
+
+Le reglage est enregistre sur le profil serveur, et c'est **la fonction
+d'envoi** qui l'applique. Un filtre sur le telephone ne servirait a rien : la
+notification arriverait quand meme. La fonction calcule le week-end a l'heure
+de Paris, celle du destinataire, pas celle du serveur.
+
+`013-mode-silencieux.sql` ajoute les trois colonnes ; la fonction `notifier`
+est a redeployer.
+
+### Tour guide
+
+Trois ecrans apres la premiere connexion : le bouton « + », l'appui long, le
+quotidien sur l'accueil. Une seule fois ; « Revoir la presentation » dans A
+propos pour le relancer. Le bouton retour d'Android le ferme.
+
+### Corrige
+
+Le numero de version affiche dans A propos etait reste a 0.9.8 : ma mise a jour
+cherchait un ancien numero qui n'y etait plus. Il est desormais remplace quel
+que soit son contenu.
+
+## 1.0.7 — retirer l'acces de la nounou
+
+Deux defauts, dont un qui masquait l'autre.
+
+**La carte ne disait jamais si une nounou etait reliee.** « Contrat en ligne :
+publie », avant comme apres le retrait. Quoi que fasse la base, l'ecran ne
+bougeait pas. Elle affiche desormais « en attente d'une nounou » ou « nounou
+reliee », et les boutons suivent : code d'invitation dans le premier cas,
+retrait dans le second.
+
+**Le retrait ne verifiait pas son resultat.** PostgREST ne se plaint pas quand
+une regle d'acces bloque une mise a jour : il ne modifie aucune ligne et repond
+normalement. L'application affichait « Acces retire » sans rien avoir retire.
+Elle lit maintenant la reponse : aucune ligne modifiee donne un message clair,
+et la nounou encore presente aussi.
+
+Le contrat revient en **attente** plutot qu'en « termine » : le parent peut
+inviter quelqu'un d'autre sans republier.
+
+Cote nounou, la liste des familles filtre en plus sur son propre identifiant,
+et l'enfant affiche bascule si celui qu'elle regardait a disparu.
+
+Si le message « la base n'a rien modifie » apparait chez toi, la cause est
+ailleurs que dans l'application : le contrat n'est pas rattache au compte
+connecte. La requete du README, section « Quand l'invitation est refusee », le
+montre.
+
+## 1.0.8 — le lien survit a une reinstallation
+
+**Cote nounou**, rien a faire : tout est sur le serveur, elle se reconnecte et
+ses familles reviennent.
+
+**Cote parent**, le lien avec la nounou n'etait qu'un identifiant garde sur le
+telephone. Apres reinstallation, l'application ne le connaissait plus, proposait
+« Publier ce contrat », et creait un doublon — la nounou restait reliee a
+l'ancien.
+
+Desormais, a chaque connexion et a chaque demarrage, l'application redemande
+ses contrats au serveur et les rattache aux enfants du telephone : par prenom si
+un enfant sans lien porte le meme, sinon en reutilisant l'enfant vide du
+premier lancement, sinon en creant l'enfant. « Publier » verifie aussi avant de
+creer : si le contrat de cet enfant existe deja, il est rattache.
+
+Teste : telephone vierge, deux contrats sur le serveur, les deux reviennent
+avec prenom et date de naissance, aucun doublon.
+
+**Ce qui ne revient pas** : les fiches de salaire, les calculs, les
+sauvegardes. Ces donnees ne vivent que sur le telephone, c'est voulu. Pour les
+retrouver apres reinstallation, importer la sauvegarde JSON depuis Parametres.
+Le journal, les photos, les messages et la fiche d'urgence, eux, sont sur le
+serveur et reviennent seuls.
+
+## 1.0.9 — verification complete
+
+### Ce qui ne tenait plus debout
+
+**Les photos du fil de messages etaient refusees.** Depuis l'evolution 007, la
+regle de stockage exige que le dossier d'une photo soit l'identifiant d'une
+ligne de `photos`. Le bouton « Ajouter une photo » du fil envoyait encore dans
+un dossier nomme d'apres le contrat : refus silencieux a chaque fois. Il passe
+desormais par le meme chemin que la galerie, et poste en plus la photo dans la
+conversation. Un seul chemin pour les photos.
+
+**Le module Presences lisait un pointage que plus personne n'ecrivait.** Le
+pointage arrivee / depart a ete retire cote nounou en 1.0.1 ; le module etait
+reste, toujours vide. Retire. « Ma semaine » compte les heures d'accueil
+prevues, pas plus un pointage inexistant.
+
+**Refus de photo sans explication.** Quand le parent n'a pas encore rempli la
+fiche d'urgence, aucune photo n'est autorisee, et la nounou voyait un message
+vague. Elle lit maintenant : « Le parent n'a pas encore autorise les photos dans
+la fiche d'urgence. »
+
+### Menu
+
+Deux fonctions mortes retirees, un identifiant en double dans le logo anime
+renomme, la requete des jours allegee des colonnes qui ne servaient plus.
+
+### Ajouts
+
+**« Je serai en retard »**, cote nounou : quatre boutons, toutes les familles
+attendues aujourd'hui sont prevenues d'un coup. Le miroir de ce que le parent a
+deja.
+
+**L'etat de la fiche du mois**, dans la fiche de l'enfant cote nounou : en
+preparation, envoyee, salaire verse. Elle sait ou en est sa paie sans demander.
+
+### Audit
+
+Syntaxe, identifiants en double, references sans element, fonctions jamais
+appelees, chemins de stockage contre la regle, colonnes du schema jamais
+utilisees. Restent inutilisees : `profils.telephone` et la table `support`,
+prevue pour un acces d'assistance qui n'est pas construit. Sans consequence.
+
+## 1.0.10
+
+**La fonction `notifier` ne reconnaissait pas le co-parent.** Elle testait
+seulement `employeur_id` : pour un co-parent, le destinataire calcule etait
+l'employeur, donc sa propre notification lui revenait au lieu d'aller a la
+nounou. Corrige dans le depot ; redeployer la fonction.
+
+Le reste est inchange depuis 1.0.9.
+
+### Rappel de l'ordre pour les notifications
+
+1. `013-mode-silencieux.sql` dans l'editeur SQL
+2. Secret `FCM_COMPTE_SERVICE` dans Edge Functions -> Secrets
+3. Fonction `notifier`, nom exact, contenu de `supabase/functions/notifier/index.ts`
+4. Secrets GitHub `GOOGLE_SERVICES_PARENT` et `GOOGLE_SERVICES_NOUNOU`
+5. Compiler : l'etape « Brancher les notifications Firebase » doit afficher
+   « Notifications Firebase activees »
+6. Installer, se connecter, accepter l'autorisation Android
+7. Verifier que `jetons_push` contient une ligne par appareil

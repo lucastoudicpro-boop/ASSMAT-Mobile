@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
         { status: 401, headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
     }
 
-    const { contrat_id, titre, corps } = await req.json();
+    const { contrat_id, titre, corps, urgent } = await req.json();
     if (!contrat_id || !titre) throw new Error('contrat_id et titre sont requis');
 
     // Première vérification : le contrat est lu avec les droits de l'appelant.
@@ -116,14 +116,16 @@ Deno.serve(async (req) => {
 
     const { data: contrat } = await commeUtilisateur
       .from('contrats')
-      .select('id, employeur_id, salariee_id')
+      .select('id, employeur_id, coparent_id, salariee_id')
       .eq('id', contrat_id)
       .maybeSingle();
     if (!contrat) throw new Error('Contrat inaccessible');
 
-    // Le destinataire est l'autre partie, jamais l'expéditeur.
+    // Le destinataire est l'autre partie, jamais l'expéditeur. Le co-parent
+    // compte comme parent : sans cela, sa notification lui reviendrait.
     const moi = utilisateur.user.id;
-    const destinataire = contrat.employeur_id === moi ? contrat.salariee_id : contrat.employeur_id;
+    const coteParent = contrat.employeur_id === moi || contrat.coparent_id === moi;
+    const destinataire = coteParent ? contrat.salariee_id : contrat.employeur_id;
     if (!destinataire) {
       return new Response(JSON.stringify({ envoyes: 0, raison: 'aucun destinataire' }),
         { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
@@ -132,6 +134,27 @@ Deno.serve(async (req) => {
     // Les jetons ne sont lisibles que par leur propriétaire : cette lecture
     // exige la clé de service, et c'est la seule chose qu'elle sert ici.
     const commeService = createClient(URL_SUPABASE, CLE_SERVICE);
+
+    // Mode silencieux du destinataire. L'urgent passe toujours.
+    if (!urgent) {
+      const { data: pref } = await commeService
+        .from('profils')
+        .select('silence_weekend, silence_du, silence_au')
+        .eq('id', destinataire)
+        .maybeSingle();
+      if (pref) {
+        // heure de Paris : le week-end est celui du destinataire, pas du serveur
+        const maintenant = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+        const jour = maintenant.getDay();
+        const aujourdhui = maintenant.toISOString().slice(0, 10);
+        const weekend = pref.silence_weekend && (jour === 0 || jour === 6);
+        const periode = pref.silence_du && pref.silence_au && aujourdhui >= pref.silence_du && aujourdhui <= pref.silence_au;
+        if (weekend || periode) {
+          return new Response(JSON.stringify({ envoyes: 0, raison: 'mode silencieux' }),
+            { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
+        }
+      }
+    }
     const { data: jetons } = await commeService
       .from('jetons_push')
       .select('jeton')

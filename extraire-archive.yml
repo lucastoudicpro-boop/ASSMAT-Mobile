@@ -1,0 +1,121 @@
+name: Extraire une archive
+
+# Depose le zip a la racine du depot, puis lance ce workflow.
+# Il extrait le contenu, remplace les dossiers concernes, supprime le zip et
+# commite le tout. Pratique depuis un telephone, ou seul l'envoi d'un fichier
+# unique est possible.
+
+on:
+  workflow_dispatch:
+    inputs:
+      archive:
+        description: Nom du zip. Vide = le plus recent trouve a la racine.
+        required: false
+        default: ''
+      garder_archive:
+        description: Conserver le zip apres extraction
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  extraire:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Trouver l'archive
+        id: archive
+        run: |
+          if [ -n "${{ inputs.archive }}" ]; then
+            ZIP="${{ inputs.archive }}"
+          else
+            ZIP=$(ls -t *.zip 2>/dev/null | head -1)
+          fi
+          if [ -z "$ZIP" ] || [ ! -f "$ZIP" ]; then
+            echo "::error::Aucune archive trouvée. Dépose un .zip à la racine du dépôt."
+            exit 1
+          fi
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+          echo "Archive : $ZIP ($(du -h "$ZIP" | cut -f1))"
+
+      - name: Extraire
+        id: extraction
+        run: |
+          set -e
+          rm -rf /tmp/extrait && mkdir -p /tmp/extrait
+          unzip -q "${{ steps.archive.outputs.zip }}" -d /tmp/extrait
+
+          # Si tout tient dans un seul dossier racine, on l'enleve : le zip
+          # contient « cocon/docs/... », le depot veut « docs/... ».
+          RACINE=$(ls -A /tmp/extrait)
+          if [ "$(echo "$RACINE" | wc -l)" = "1" ] && [ -d "/tmp/extrait/$RACINE" ]; then
+            echo "Dossier racine « $RACINE » retiré."
+            mv "/tmp/extrait/$RACINE" /tmp/contenu
+          else
+            mv /tmp/extrait /tmp/contenu
+          fi
+
+          echo "--- contenu de l'archive ---"
+          ls -A /tmp/contenu
+
+      - name: Remplacer les fichiers
+        id: remplacement
+        run: |
+          set -e
+          IGNORE=0
+          REMPLACES=""
+
+          for ENTREE in $(ls -A /tmp/contenu); do
+            # Le jeton fourni aux workflows n'a pas le droit de modifier les
+            # workflows eux-memes : GitHub refuse le push. On les laisse donc
+            # de cote, et on le signale.
+            if [ "$ENTREE" = ".github" ]; then
+              IGNORE=1
+              continue
+            fi
+            rm -rf "./$ENTREE"
+            cp -r "/tmp/contenu/$ENTREE" "./$ENTREE"
+            REMPLACES="$REMPLACES $ENTREE"
+          done
+
+          if [ "${{ inputs.garder_archive }}" != "true" ]; then
+            rm -f "${{ steps.archive.outputs.zip }}"
+          fi
+
+          echo "ignore_workflows=$IGNORE" >> "$GITHUB_OUTPUT"
+          echo "remplaces=$REMPLACES" >> "$GITHUB_OUTPUT"
+          echo "Remplacés :$REMPLACES"
+
+      - name: Commiter
+        run: |
+          git config user.name "Extraction automatique"
+          git config user.email "actions@github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "::warning::Aucun changement : l'archive était identique au dépôt."
+            exit 0
+          fi
+          git commit -m "Extraction de ${{ steps.archive.outputs.zip }}"
+          git push
+          echo "Commit poussé."
+
+      - name: Résumé
+        if: always()
+        run: |
+          {
+            echo "## Extraction terminée"
+            echo ""
+            echo "**Archive** : \`${{ steps.archive.outputs.zip }}\`"
+            echo ""
+            echo "**Dossiers remplacés** :${{ steps.remplacement.outputs.remplaces }}"
+            if [ "${{ steps.remplacement.outputs.ignore_workflows }}" = "1" ]; then
+              echo ""
+              echo "> Le dossier \`.github\` a été ignoré : le jeton des workflows"
+              echo "> n'a pas le droit de modifier les workflows eux-mêmes."
+              echo "> Si \`build-apk.yml\` a changé, mets-le à jour à la main."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
