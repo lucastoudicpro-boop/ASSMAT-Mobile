@@ -74,6 +74,14 @@ jobs:
         run: |
           # Un module indisponible ne doit jamais empecher de produire l'APK :
           # l'application fonctionne sans, simplement sans notifications.
+          # L'appareil photo : sans lui, Android ouvre le selecteur de fichiers
+          # au lieu de la camera, et aucune permission CAMERA n'apparait dans
+          # les reglages du telephone.
+          if npm install "@capacitor/camera@^6" --no-audit --no-fund; then
+            echo "Module appareil photo installé."
+          else
+            echo "::error::Module appareil photo NON installé : la prise de photo ouvrira le sélecteur."
+          fi
           if npm install "@capacitor/push-notifications@^6" --no-audit --no-fund; then
             echo "push=oui" >> "$GITHUB_ENV"
             echo "Module de notifications installé."
@@ -81,6 +89,22 @@ jobs:
             echo "push=non" >> "$GITHUB_ENV"
             echo "::warning::Module de notifications indisponible, compilation sans."
           fi
+
+      - name: Vérifier les modules installés
+        working-directory: ${{ steps.projet.outputs.dossier }}
+        run: |
+          echo "--- modules Capacitor présents ---"
+          node -e "
+            const d = require('./package.json').dependencies || {};
+            const attendus = ['@capacitor/camera','@capacitor/push-notifications','@capacitor/preferences','@capacitor/app'];
+            let manque = 0;
+            for (const m of attendus) {
+              const ok = !!d[m];
+              console.log((ok ? '  present ' : '  ABSENT  ') + m + (ok ? ' ' + d[m] : ''));
+              if (!ok) manque++;
+            }
+            if (manque) console.log('::warning::' + manque + ' module(s) manquant(s) dans l\'APK');
+          "
 
       - name: Choisir la configuration
         working-directory: ${{ steps.projet.outputs.dossier }}
