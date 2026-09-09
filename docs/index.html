@@ -1663,6 +1663,8 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <summary><svg class="ico"><use href="#i-cloche"/></svg><span class="ttl">Notifications</span></summary>
     <div class="body">
       <div id="etatPush"></div>
+      <div class="rub">Modules natifs</div>
+      <div id="modulesNatifs"></div>
       <button id="btnRelancerPush" class="btn btn-ghost btn-block" style="margin-top:12px">Réessayer l'enregistrement</button>
       <button id="btnTestPush" class="btn btn-primary btn-block">M'envoyer une notification de test</button>
       <p class="hint" id="resultatTestPush"></p>
@@ -1778,7 +1780,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.3.1</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.3.3</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3556,7 +3558,7 @@ function showView(v) {
   if (v === 'accueil') renderAccueil();
   if (v === 'apercu') { renderPreview(); fitPreview(); }
   if (v === 'dossier') renderDossier();
-  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); }
+  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); renderModulesNatifs(); }
   prevenirMigration();
   if (v === 'annuel') renderAnnuel().then(renderRegularisation);
   renderTitle();
@@ -5146,7 +5148,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.3.1';
+const VERSION = '1.3.3';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -7512,6 +7514,32 @@ async function viderNotifications() {
   if (!C || !C.PushNotifications) return;
   try { await C.PushNotifications.removeAllDeliveredNotifications(); } catch (e) {}
   try { if (C.Badge) await C.Badge.clear(); } catch (e) {}
+}
+
+
+/* Ce que l'APK contient reellement. Sans cela, un module manquant se devine
+   par ses symptomes au lieu de se lire. */
+function modulesNatifs() {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (!C) return null;
+  const attendus = {
+    Camera: 'Appareil photo', PushNotifications: 'Notifications',
+    Preferences: 'Stockage', App: 'Cycle de vie', LocalNotifications: 'Rappels',
+    StatusBar: 'Barre d\u2019état', Browser: 'Navigateur', AssMatBio: 'Empreinte'
+  };
+  return Object.entries(attendus).map(([cle, nom]) => ({ nom, present: !!C[cle] }));
+}
+
+function renderModulesNatifs() {
+  const box = document.getElementById('modulesNatifs');
+  if (!box) return;
+  const liste = modulesNatifs();
+  if (!liste) { box.innerHTML = '<p class="hint" style="margin:0">Version web : aucun module natif.</p>'; return; }
+  box.innerHTML = liste.map(m =>
+    `<div class="ds"><span>${esc(m.nom)}</span><b style="color:${m.present ? 'var(--acc)' : 'var(--danger)'}">${m.present ? 'présent' : 'absent'}</b></div>`).join('') +
+    (liste.some(m => !m.present)
+      ? '<p class="hint">Un module absent vient de la compilation, pas des réglages. Vérifie que <b>build-apk.yml</b> est à jour dans le dépôt : il ne peut pas être mis à jour par l\u2019extraction automatique.</p>'
+      : '');
 }
 
 async function activerPush() {

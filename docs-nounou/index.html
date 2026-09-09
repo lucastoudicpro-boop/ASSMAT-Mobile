@@ -1060,6 +1060,8 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <div class="tete"><svg><use href="#i-alerte"/></svg>Notifications</div>
       <div class="corps">
         <div id="etatPush"></div>
+        <div class="rub">Modules natifs</div>
+        <div id="modulesNatifs"></div>
         <button id="btnRelancerPush" class="btn btn-ghost btn-block" style="margin-top:12px">Réessayer l'enregistrement</button>
         <button id="btnTestPush" class="btn btn-primary btn-block">M'envoyer une notification de test</button>
         <p class="hint" id="resultatTestPush"></p>
@@ -1099,7 +1101,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.3.1</b></div>
+        <div class="ds"><span>Version</span><b>1.3.3</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1490,7 +1492,7 @@ function montrer(v) {
   }
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
   if (v === 'galerie') chargerGalerie().then(() => chercherOrphelines().then(renderOrphelines));
-  if (v === 'params') { majCompte(); majEtatPush(); }
+  if (v === 'params') { majCompte(); majEtatPush(); renderModulesNatifs(); }
   prevenirMigration();
 }
 
@@ -1919,15 +1921,25 @@ function renderGalerie() {
     liste.map(p => `<img data-photo="${esc(p.chemin)}" data-id="${esc(p.id)}" alt="${esc(p.legende || '')}">`).join('')
   ).join('');
 
-  $$('#galerie [data-photo]').forEach(async img => {
-    const d = await telechargerPhoto(img.dataset.photo);
-    if (d) { img.src = d; img.onclick = () => ouvrirVisionneuse(img.dataset.id); }
-    else {
-      // ne pas la faire disparaitre en silence : on veut savoir qu'elle existe
-      img.replaceWith(Object.assign(document.createElement('div'),
-        { className: 'photo-cassee', textContent: 'illisible' }));
+  // On telecharge en serie plutot qu'en parallele : un echec silencieux dans
+  // une boucle asynchrone laissait la grille vide sans rien signaler.
+  (async () => {
+    let echecs = 0;
+    for (const img of $$('#galerie [data-photo]')) {
+      let d = null;
+      try { d = await telechargerPhoto(img.dataset.photo); } catch (e) { d = null; }
+      if (d) { img.src = d; img.onclick = () => ouvrirVisionneuse(img.dataset.id); }
+      else {
+        echecs++;
+        img.replaceWith(Object.assign(document.createElement('div'),
+          { className: 'photo-cassee', textContent: 'illisible' }));
+      }
     }
-  });
+    const e = $('#galerieEtat');
+    if (e) e.innerHTML = echecs
+      ? `<div class="avertissement">${echecs} photo(s) présente(s) mais illisible(s) : le stockage refuse la lecture. Vérifie la règle « photos lecture » du fichier SQL 007.</div>`
+      : '';
+  })();
 }
 
 /* ---------------- Visionneuse ---------------- */
@@ -3343,7 +3355,7 @@ async function telechargerPhoto(chemin) {
   try {
     const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin,
       { headers: Supa.entetes() });
-    if (!r.ok) return null;
+    if (!r.ok) { console.warn('photo refusée', r.status, chemin); return null; }
     return URL.createObjectURL(await r.blob());
   } catch (e) { return null; }
 }
@@ -3931,6 +3943,32 @@ async function photoOuChamp(champ, suite) {
   // l'attribut capture. On le dit, plutôt que de laisser croire à un bug.
   if (window.Capacitor) toast('Module appareil photo absent de cette version : le sélecteur s\u2019ouvre à la place.');
   document.getElementById(champ).click();
+}
+
+
+/* Ce que l'APK contient reellement. Sans cela, un module manquant se devine
+   par ses symptomes au lieu de se lire. */
+function modulesNatifs() {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (!C) return null;
+  const attendus = {
+    Camera: 'Appareil photo', PushNotifications: 'Notifications',
+    Preferences: 'Stockage', App: 'Cycle de vie', LocalNotifications: 'Rappels',
+    StatusBar: 'Barre d\u2019état', Browser: 'Navigateur', AssMatBio: 'Empreinte'
+  };
+  return Object.entries(attendus).map(([cle, nom]) => ({ nom, present: !!C[cle] }));
+}
+
+function renderModulesNatifs() {
+  const box = document.getElementById('modulesNatifs');
+  if (!box) return;
+  const liste = modulesNatifs();
+  if (!liste) { box.innerHTML = '<p class="hint" style="margin:0">Version web : aucun module natif.</p>'; return; }
+  box.innerHTML = liste.map(m =>
+    `<div class="ds"><span>${esc(m.nom)}</span><b style="color:${m.present ? 'var(--acc)' : 'var(--danger)'}">${m.present ? 'présent' : 'absent'}</b></div>`).join('') +
+    (liste.some(m => !m.present)
+      ? '<p class="hint">Un module absent vient de la compilation, pas des réglages. Vérifie que <b>build-apk.yml</b> est à jour dans le dépôt : il ne peut pas être mis à jour par l\u2019extraction automatique.</p>'
+      : '');
 }
 
 async function activerPush() {
