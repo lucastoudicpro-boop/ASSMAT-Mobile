@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
         { status: 401, headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
     }
 
-    const { contrat_id, titre, corps, urgent, test } = await req.json();
+    const { contrat_id, titre, corps, urgent, test, cible } = await req.json();
     if (!titre) throw new Error('titre requis');
     if (!contrat_id && !test) throw new Error('contrat_id requis');
     console.log(`demande | contrat=${contrat_id ?? '(test)'} titre="${titre}" urgent=${!!urgent} test=${!!test}`);
@@ -201,7 +201,8 @@ Deno.serve(async (req) => {
     let envoyes = 0;
     const perimes: string[] = [];
     for (const j of jetons) {
-      const r = await envoyer(j.jeton, titre, corps ?? '', { contrat_id: String(contrat_id ?? '') });
+      const r = await envoyer(j.jeton, titre, corps ?? '',
+        { contrat_id: String(contrat_id ?? ''), cible: String(cible ?? '') });
       if (r.ok) { envoyes++; console.log('envoi accepté par Firebase'); }
       else {
         console.error(`Firebase a refusé (${r.statut}) : ${r.reponse.slice(0, 300)}`);

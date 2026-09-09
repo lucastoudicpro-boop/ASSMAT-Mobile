@@ -217,15 +217,17 @@ const Supa = (() => {
   /* Le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
      tables se rejouent apres rafraichissement ; celui-ci ne le faisait pas et
      partait avec un jeton perime, que la passerelle refusait en 401. */
-  /* contratId a null : mode test, la notification revient a l'appelant. */
-  async function notifier(contratId, titre, corps, urgent) {
+  /* contratId a null : mode test, la notification revient a l'appelant.
+     cible : le module a ouvrir quand on touche la banniere. */
+  async function notifier(contratId, titre, corps, urgent, cible) {
     if (!connecte()) return null;
 
     const envoyer = async () => {
       const r = await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent, test: contratId === null })
+        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent,
+          cible: cible || null, test: contratId === null })
       });
       let corpsRep = null;
       try { corpsRep = await r.json(); } catch (e) {}

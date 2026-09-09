@@ -383,12 +383,28 @@ html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#31202a 0%,va
 .gal-mois{grid-column:1/-1;font:600 12px system-ui;color:var(--mut);
   text-transform:capitalize;margin:10px 0 2px}
 .gal-mois:first-child{margin-top:0}
-.visio{position:fixed;inset:0;background:rgba(12,8,10,.94);display:flex;
-  flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px}
-.visio img{max-width:100%;max-height:70vh;border-radius:14px;object-fit:contain}
-.visio-actions{display:flex;gap:10px;align-items:center}
-.visio-actions .btn{min-width:64px}
-.visio .lien-discret{color:#fff;opacity:.8}
+#visionneuse{position:fixed;inset:0;z-index:120;background:#0d0a0c;
+  display:flex;flex-direction:column;animation:apparait .2s ease both}
+#visionneuse[hidden]{display:none}
+.visio-haut,.visio-bas{display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:calc(var(--safeT) + 12px) 16px 12px}
+.visio-bas{padding:12px 16px calc(var(--safeB) + 16px)}
+.visio-info{flex:1;min-width:0;text-align:center;color:#fff;line-height:1.3}
+.visio-info b{display:block;font-size:14px;text-transform:capitalize}
+.visio-info small{font-size:12px;opacity:.6}
+.visio-btn{border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:22px;
+  min-width:44px;height:44px;padding:0 14px;font:600 17px system-ui;cursor:pointer;
+  flex:0 0 auto;transition:background .15s ease,transform .1s ease}
+.visio-btn:active{transform:scale(.94);background:rgba(255,255,255,.22)}
+.visio-btn:disabled{opacity:.25}
+.visio-btn.danger{background:rgba(220,80,90,.22);font-size:14px}
+.visio-scene{flex:1;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;padding:0 8px}
+#visioImage{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+@keyframes glisse-d{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes glisse-g{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+#visioImage.entre-d{animation:glisse-d .22s cubic-bezier(.2,.8,.3,1) both}
+#visioImage.entre-g{animation:glisse-g .22s cubic-bezier(.2,.8,.3,1) both}
 .gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;background:var(--zebre)}
 .avance{margin-bottom:12px}
 .avance>summary{font-size:12.5px;color:var(--mut);cursor:pointer;padding:6px 0;list-style:none}
@@ -778,18 +794,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <div class="corps" id="ficheUrgence"></div>
     </div>
 
-    <div class="card">
-      <div class="tete"><svg><use href="#i-image"/></svg>Galerie</div>
-      <div class="corps">
-        <div class="gal" id="galerie"></div>
-        <label class="btn btn-ghost btn-block" style="margin-top:10px;text-align:center;display:block">
-          Ajouter une photo
-          <input id="fichierGalerie" type="file" accept="image/*" capture="environment" hidden>
-        </label>
-        <div id="galerieEtat"></div>
-        <div id="orphelines"></div>
-      </div>
-    </div>
+    
   </section>
 
   <section id="vueJournal" hidden>
@@ -970,23 +975,28 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <input id="importPhoto" type="file" accept="image/*" multiple hidden>
     </div>
     <div id="galerieEtat"></div>
+    <div id="orphelines"></div>
     <div class="card">
       <div class="tete"><svg><use href="#i-image"/></svg><span>Photos</span><b class="compteur" id="compteurPhotos"></b></div>
       <div class="corps"><div class="gal" id="galerie"></div></div>
     </div>
   </section>
 
-  <div id="visionneuse" class="modal" hidden>
-    <div class="visio">
-      <img id="visioImage" alt="">
-      <div class="visio-actions">
-        <button id="visioPrec" class="btn btn-ghost">◀</button>
-        <button id="visioSuppr" class="btn btn-danger">Supprimer</button>
-        <button id="visioSuiv" class="btn btn-ghost">▶</button>
-      </div>
-      <button id="visioFermer" class="lien-discret">Fermer</button>
-    </div>
+  <div id="visionneuse" hidden>
+  <div class="visio-haut">
+    <button id="visioFermer" class="visio-btn" aria-label="Fermer">✕</button>
+    <div class="visio-info"><b id="visioDate"></b><small id="visioRang"></small></div>
+    <button id="visioEnregistrer" class="visio-btn" aria-label="Enregistrer">⤓</button>
   </div>
+  <div class="visio-scene" id="visioScene">
+    <img id="visioImage" alt="">
+  </div>
+  <div class="visio-bas">
+    <button id="visioPrec" class="visio-btn" aria-label="Précédente">‹</button>
+    <button id="visioSuppr" class="visio-btn danger" aria-label="Supprimer">Supprimer</button>
+    <button id="visioSuiv" class="visio-btn" aria-label="Suivante">›</button>
+  </div>
+</div>
 
   <section id="vueCommun" hidden>
     <div class="card" id="carteCommunVide">
@@ -1101,7 +1111,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.3.3</b></div>
+        <div class="ds"><span>Version</span><b>1.3.5</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1374,15 +1384,17 @@ const Supa = (() => {
   /* Le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
      tables se rejouent apres rafraichissement ; celui-ci ne le faisait pas et
      partait avec un jeton perime, que la passerelle refusait en 401. */
-  /* contratId a null : mode test, la notification revient a l'appelant. */
-  async function notifier(contratId, titre, corps, urgent) {
+  /* contratId a null : mode test, la notification revient a l'appelant.
+     cible : le module a ouvrir quand on touche la banniere. */
+  async function notifier(contratId, titre, corps, urgent, cible) {
     if (!connecte()) return null;
 
     const envoyer = async () => {
       const r = await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent, test: contratId === null })
+        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent,
+          cible: cible || null, test: contratId === null })
       });
       let corpsRep = null;
       try { corpsRep = await r.json(); } catch (e) {}
@@ -1942,36 +1954,86 @@ function renderGalerie() {
   })();
 }
 
-/* ---------------- Visionneuse ---------------- */
-let visioIndex = 0;
+/* ---------------- Visionneuse ----------------
+   Plein écran, la date en tête, le glissement pour changer de photo, et
+   l'enregistrement dans la pellicule : ce qu'on attend d'une galerie. */
+let visioIndex = 0, visioURL = null;
 
 async function ouvrirVisionneuse(id) {
   const i = galerie.findIndex(p => p.id === id);
   if (i < 0) return;
   visioIndex = i;
-  await montrerVisio();
   $('#visionneuse').hidden = false;
+  document.body.style.overflow = 'hidden';
+  await montrerVisio();
 }
 
-async function montrerVisio() {
+function fermerVisionneuse() {
+  $('#visionneuse').hidden = true;
+  document.body.style.overflow = '';
+}
+
+async function montrerVisio(sens) {
   const p = galerie[visioIndex];
-  if (!p) { $('#visionneuse').hidden = true; return; }
-  const d = await telechargerPhoto(p.chemin);
-  if (d) $('#visioImage').src = d;
+  if (!p) { fermerVisionneuse(); return; }
+  const img = $('#visioImage');
+  if (sens) {
+    img.classList.remove('entre-g', 'entre-d');
+    void img.offsetWidth;                       // relance l'animation
+    img.classList.add(sens > 0 ? 'entre-d' : 'entre-g');
+  }
+  const d = new Date(p.prise_le);
+  $('#visioDate').textContent = d.toLocaleDateString('fr-FR',
+    { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  $('#visioRang').textContent = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) +
+    ' · ' + (visioIndex + 1) + ' sur ' + galerie.length;
+  $('#visioPrec').disabled = visioIndex === 0;
+  $('#visioSuiv').disabled = visioIndex === galerie.length - 1;
+
+  visioURL = await telechargerPhoto(p.chemin);
+  if (visioURL) img.src = visioURL;
 }
 
 async function supprimerPhoto() {
   const p = galerie[visioIndex];
   if (!p) return;
-  if (!confirm('Supprimer cette photo ? Les parents ne la verront plus.')) return;
+  if (!confirm('Supprimer cette photo ? La famille ne la verra plus.')) return;
   try {
     await Supa.supprimer('photos', 'id=eq.' + p.id);
     galerie.splice(visioIndex, 1);
     if (visioIndex >= galerie.length) visioIndex = galerie.length - 1;
     renderGalerie();
-    if (!galerie.length) $('#visionneuse').hidden = true; else await montrerVisio();
+    if (!galerie.length) fermerVisionneuse(); else await montrerVisio();
     toast('Photo supprimée');
   } catch (e) { toast('Suppression impossible : ' + (e.message || e)); }
+}
+
+async function glisserVisio(pas) {
+  const n = visioIndex + pas;
+  if (n < 0 || n >= galerie.length) return;
+  visioIndex = n;
+  await montrerVisio(pas);
+}
+
+/* Enregistrer dans la pellicule du téléphone, ou télécharger sur le web. */
+async function enregistrerPhoto() {
+  const p = galerie[visioIndex];
+  if (!p || !visioURL) return;
+  const nom = 'cocon-' + String(p.prise_le).slice(0, 10) + '.jpg';
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  try {
+    const blob = await (await fetch(visioURL)).blob();
+    // Le partage natif laisse choisir : pellicule, message, courriel.
+    if (C && C.Share && navigator.canShare) {
+      const f = new File([blob], nom, { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare({ files: [f] })) { await navigator.share({ files: [f] }); return; }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nom;
+    a.click();
+    toast('Photo enregistrée');
+  } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
 }
 
 /* Plusieurs photos d'un coup depuis la pellicule. */
@@ -2040,7 +2102,7 @@ async function envoyerGalerie(fichier, depuisLeFil) {
       try { await Supa.ecrire('messages', { contrat_id: contratActif, auteur_id: Supa.moi().id, texte: null, categorie: 'photo', piece: chemin }); } catch (e) {}
       await chargerMessages(); renderMessages();
     }
-    for (const c of liees) Supa.notifier(c, 'Nouvelle photo', '');
+    for (const c of liees) Supa.notifier(c, 'Nouvelle photo', '', false, 'galerie');
     $('#galerieEtat').innerHTML = '';
     toast(groupe && liees.length > 1 ? 'Photo partagée avec ' + liees.length + ' familles' : 'Photo envoyée');
     await chargerGalerie(); renderGalerie();
@@ -2218,7 +2280,7 @@ async function enregistrerJournal() {
     ].filter(Boolean).join(' · ');
     Supa.notifier(contratActif,
       'Journal de ' + ((c && c.enfant_prenom) || 'l\u2019enfant'),
-      resume || 'La journée est notée');
+      resume || 'La journée est notée', false, 'journal');
     toast('Journal enregistré, parent prévenu');
     await chargerJournal();
   } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
@@ -2728,7 +2790,7 @@ async function inviterToutes() {
   if (!nouvelles.length) return;
   try {
     await Supa.ecrire('membres_espace', nouvelles);
-    for (const n of nouvelles) Supa.notifier(n.contrat_id, 'Espace commun', 'Ta nounou t\u2019invite à rejoindre l\u2019espace des familles.');
+    for (const n of nouvelles) Supa.notifier(n.contrat_id, 'Espace commun', 'Ta nounou t\u2019invite à rejoindre l\u2019espace des familles.', false, 'commun');
     await chargerCommun();
   } catch (e) {}
 }
@@ -2765,7 +2827,7 @@ async function annoncer() {
   try {
     await Supa.ecrire('annonces', { espace_id: espace.id, auteur_id: Supa.moi().id, categorie: cat, texte });
     for (const m of membres.filter(x => x.accepte_le && !x.quitte_le))
-      Supa.notifier(m.contrat_id, CAT_COMMUN[cat][1] + ' — espace commun', texte.slice(0, 80), cat === 'maladie');
+      Supa.notifier(m.contrat_id, CAT_COMMUN[cat][1] + ' — espace commun', texte.slice(0, 80), cat === 'maladie', 'commun');
     $('#communTexte').value = '';
     await chargerCommun(); renderCommun();
     toast('Publié pour ' + membres.filter(x => x.accepte_le && !x.quitte_le).length + ' famille(s)');
@@ -2826,7 +2888,7 @@ async function enregistrerAdaptation() {
       ressenti_salariee: $('#adaptRessenti').value.trim() || null
     }], 'resolution=merge-duplicates');
     const p = PALIERS.find(x => x[0] === (b ? b.dataset.palier : 'visite'));
-    Supa.notifier(contratActif, 'Adaptation — ' + (p ? p[1].replace(/^\S+\s/, '') : ''), $('#adaptRessenti').value.trim().slice(0, 90));
+    Supa.notifier(contratActif, 'Adaptation — ' + (p ? p[1].replace(/^\S+\s/, '') : ''), $('#adaptRessenti').value.trim().slice(0, 90), false, 'adaptation');
     $('#adaptJour').value = ''; $('#adaptDuree').value = ''; $('#adaptRessenti').value = '';
     await chargerAdaptation(); renderAdaptation();
     toast('Étape enregistrée');
@@ -2961,7 +3023,7 @@ async function creerRemplacement() {
       motif: $('#remplMotif').value.trim() || null });
     const c = contrats.find(x => x.id === contrat);
     Supa.notifier(contrat, 'Remplacement prévu',
-      'Du ' + versFR(du) + ' au ' + versFR(au) + (c ? ' pour ' + c.enfant_prenom : ''), true);
+      'Du ' + versFR(du) + ' au ' + versFR(au) + (c ? ' pour ' + c.enfant_prenom : ''), true, 'nounous');
     $('#remplDu').value = ''; $('#remplAu').value = ''; $('#remplMotif').value = '';
     await chargerRemplacements(); renderRemplacements();
     toast('Code créé : ' + code);
@@ -3079,7 +3141,7 @@ async function joindreJustificatif(fichier) {
 
     const f = fermetures.find(x => x.id === justificatifPour);
     for (const c of contrats)
-      Supa.notifier(c.id, 'Justificatif déposé', f ? (TYPES_ABSENCE[f.type] || {}).nom + ' du ' + versFR(f.du) : '');
+      Supa.notifier(c.id, 'Justificatif déposé', f ? (TYPES_ABSENCE[f.type] || {}).nom + ' du ' + versFR(f.du) : '', false, 'fermetures');
     justificatifPour = null;
     await chargerFermetures(); renderFermetures();
     toast('Justificatif joint');
@@ -3116,7 +3178,8 @@ async function ajouterFermeture() {
       await Supa.ecrire('messages', {
         contrat_id: c.id, auteur_id: Supa.moi().id,
         texte: libelle + (motif ? ' — ' + motif : ''), categorie: 'info' });
-      Supa.notifier(c.id, 'Absence de votre nounou', libelle, typeAbsence !== 'conges' && typeAbsence !== 'formation');
+      Supa.notifier(c.id, 'Absence de votre nounou', libelle,
+        typeAbsence !== 'conges' && typeAbsence !== 'formation', 'fermetures');
     }
     $('#fermDu').value = ''; $('#fermAu').value = ''; $('#fermMotif').value = '';
     await chargerFermetures(); renderFermetures();
@@ -3178,7 +3241,7 @@ async function annoncerDepuisFil() {
   try {
     await Supa.ecrire('annonces', { espace_id: espace.id, auteur_id: Supa.moi().id, categorie: 'info', texte: t });
     for (const m of membres.filter(x => x.accepte_le && !x.quitte_le))
-      Supa.notifier(m.contrat_id, 'Info — espace commun', t.slice(0, 80));
+      Supa.notifier(m.contrat_id, 'Info — espace commun', t.slice(0, 80), false, 'commun');
     $('#texteMsg').value = '';
     await chargerCommun(); renderFilCommun();
     toast('Publié');
@@ -3205,7 +3268,7 @@ async function envoyerBesoin(quoi) {
       contrat_id: contratActif, auteur_id: Supa.moi().id,
       texte: phrase, categorie: 'besoin'
     });
-    Supa.notifier(contratActif, prenom, phrase);
+    Supa.notifier(contratActif, prenom, phrase, false, 'messages');
     toast(quoi + ' — la famille est prévenue');
     await chargerMessages(); renderMessages();
     await chargerBoite(); renderBoite();
@@ -3222,7 +3285,7 @@ async function annoncerRetard(dur) {
   try {
     for (const c of attendues) {
       await Supa.ecrire('messages', { contrat_id: c.id, auteur_id: Supa.moi().id, texte, categorie: 'retard' });
-      Supa.notifier(c.id, 'Retard de la nounou : ' + dur, '');
+      Supa.notifier(c.id, 'Retard de la nounou : ' + dur, '', false, 'messages');
     }
     toast(attendues.length + (attendues.length > 1 ? ' familles prévenues' : ' famille prévenue'));
   } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
@@ -3265,7 +3328,7 @@ async function envoyerDemande() {
     await Supa.ecrire('demandes', {
       contrat_id: contratActif, auteur_id: Supa.moi().id,
       objet, detail: $('#demandeDetail').value.trim() || null });
-    Supa.notifier(contratActif, 'Demande : ' + objet, nomEnfantActif());
+    Supa.notifier(contratActif, 'Demande : ' + objet, nomEnfantActif(), false, 'demandes');
     $('#demandeObjet').value = ''; $('#demandeDetail').value = '';
     toast('Demande envoyée aux parents');
     await chargerDemandes(); renderDemandes();
@@ -3367,7 +3430,7 @@ async function envoyerTexte() {
   try {
     await Supa.ecrire('messages', {
       contrat_id: contratActif, auteur_id: Supa.moi().id, texte: t, categorie: 'info' });
-    Supa.notifier(contratActif, nomEnfantActif() + ' — message', t);
+    Supa.notifier(contratActif, nomEnfantActif() + ' — message', t, false, 'messages');
     $('#texteMsg').value = '';
     await chargerMessages(); renderMessages();
   } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
@@ -3740,16 +3803,23 @@ $('#importPhoto').onchange = e => {
   if (e.target.files && e.target.files.length) envoyerPlusieurs(e.target.files);
   e.target.value = '';
 };
-$('#visioFermer').onclick = () => { $('#visionneuse').hidden = true; };
+$('#visioFermer').onclick = fermerVisionneuse;
 $('#visioSuppr').onclick = supprimerPhoto;
-$('#visioPrec').onclick = async () => { if (visioIndex > 0) { visioIndex--; await montrerVisio(); } };
-$('#visioSuiv').onclick = async () => { if (visioIndex < galerie.length - 1) { visioIndex++; await montrerVisio(); } };
-$('#visionneuse').addEventListener('click', e => { if (e.target === e.currentTarget) $('#visionneuse').hidden = true; });
-$('#fichierGalerie').onchange = e => {
-  const f = e.target.files && e.target.files[0];
-  if (f) envoyerGalerie(f);
-  e.target.value = '';
-};
+$('#visioEnregistrer').onclick = enregistrerPhoto;
+$('#visioPrec').onclick = () => glisserVisio(-1);
+$('#visioSuiv').onclick = () => glisserVisio(1);
+// glissement du doigt : le geste attendu dans une galerie
+(() => {
+  let x0 = null;
+  const sc = $('#visioScene');
+  sc.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  sc.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    x0 = null;
+    if (Math.abs(dx) > 55) glisserVisio(dx < 0 ? 1 : -1);
+  }, { passive: true });
+})();
 $('#ouvrirPhoto').onclick = () => photoOuChamp('fichierPhoto', f => envoyerGalerie(f, true));
 $('#fichierPhoto').onchange = e => {
   const f = e.target.files && e.target.files[0];
@@ -3770,7 +3840,7 @@ if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App
     if (!$('#porte').hidden) return;
     if (!$('#volet').hidden) { $('#volet').hidden = true; return; }
     if (vue === 'messages' && conversationActive) { fermerConversation(); return; }
-    if (!$('#visionneuse').hidden) { $('#visionneuse').hidden = true; return; }
+    if (!$('#visionneuse').hidden) { fermerVisionneuse(); return; }
     if (!$('#centreNotif').hidden) { $('#centreNotif').hidden = true; return; }
     if (!$('#verrou').hidden) return;
     if (!$('#consentModal').hidden) { $('#consentModal').hidden = true; return; }
@@ -3995,7 +4065,17 @@ async function activerPush() {
       });
       P.addListener('registrationError', (e) => { etatPush.etape = 'Firebase a refusé l\u2019enregistrement : ' + JSON.stringify(e); majEtatPush(); });
       P.addListener('pushNotificationReceived', () => rafraichirTout(true));
-      P.addListener('pushNotificationActionPerformed', () => rafraichirTout(true));
+      // Toucher une bannière doit mener à ce qu'elle annonce, pas à l'accueil.
+    P.addListener('pushNotificationActionPerformed', async (ev) => {
+      await rafraichirTout(true);
+      const d = (ev && ev.notification && ev.notification.data) || {};
+      if (d.contrat_id && contrats.some(c => c.id === d.contrat_id)) contratActif = d.contrat_id;
+      const ecrans = ['accueil', 'planning', 'journal', 'messages', 'galerie', 'familles', 'commun', 'params'];
+      if (d.cible && ecrans.includes(d.cible)) {
+        montrer(d.cible);
+        if (d.cible === 'messages' && d.contrat_id) ouvrirConversation(d.contrat_id);
+      }
+    });
     }
     etatPush.etape = 'enregistrement en cours…';
     majEtatPush();

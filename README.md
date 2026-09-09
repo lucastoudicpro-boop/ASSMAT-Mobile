@@ -1597,3 +1597,69 @@ de se modifier lui-meme. Il faut le recopier a la main.
 
 L'application le dit desormais au lieu de laisser croire a un bug : « Module
 appareil photo absent de cette version ».
+
+## 1.3.4 — la galerie
+
+**Deux elements portaient le meme identifiant `galerie`** : l'ancienne carte de
+l'ecran Planning et la nouvelle page Photos. `$('#galerie')` renvoie le premier
+trouve — donc le rendu allait dans une carte invisible pendant que la page
+restait blanche, compteur a jour et grille vide.
+
+L'ancienne carte est retiree : la page Photos la remplace entierement.
+
+Mon controle des identifiants en double existait depuis la 1.0.9, mais je ne
+l'avais pas rejoue apres avoir ajoute l'ecran. Il fait desormais partie du
+controle systematique.
+
+**Une erreur tuait le demarrage** : en remplacant la visionneuse, mon
+remplacement avait emporte `supprimerPhoto`, encore branchee sur un bouton.
+L'application ne depassait plus l'ecran de lancement.
+
+### Une vraie visionneuse
+
+Plein ecran sur fond sombre, des deux cotes :
+
+- **La date en toutes lettres** — mardi 8 septembre 2026 — l'heure, et le rang
+  dans la serie.
+- **Le glissement du doigt** pour passer d'une photo a l'autre, avec une
+  entree laterale dans le sens du geste.
+- **L'enregistrement** : le partage natif propose la pellicule, un message ou
+  un courriel ; a defaut, la photo se telecharge.
+- Les fleches se desactivent aux extremites, le bouton retour d'Android ferme
+  la visionneuse avant de quitter l'ecran.
+
+La grille est regroupee par mois des deux cotes.
+
+Teste : trois photos sur deux mois, grille et compteur corrects, ouverture,
+date, passage a la suivante, fermeture.
+
+## 1.3.5 — la notification mene ou elle annonce
+
+Toucher une banniere ouvrait l'accueil, quel qu'en soit le sujet. Chaque envoi
+transporte desormais sa destination : la fonction la transmet a Firebase dans
+les donnees du message, et l'application l'ouvre.
+
+| Notification | Ouvre |
+| --- | --- |
+| Il manque du lait, retard, message | Messages |
+| Nouvelle photo | Photos |
+| Journal de la journee | Journal |
+| Demande, reponse a une demande | Demandes |
+| Fiche d'urgence modifiee | Urgence |
+| Absence, justificatif depose | Fermetures |
+| Adaptation | Adaptation |
+| Reprise | Reprise |
+| Espace commun | Commun |
+| Remplacement | Mes nounous |
+
+Cote nounou, une notification de message ouvre **la conversation de la famille
+concernee**, pas la boite : l'identifiant du contrat voyage avec.
+
+Vingt envois passes en revue, aucun sans destination.
+
+### La galerie cote parent
+
+La meme visionneuse : plein ecran, date en toutes lettres, glissement du doigt,
+enregistrement dans la pellicule. La grille est regroupee par mois.
+
+La fonction `notifier` est a redeployer : elle transmet la destination.

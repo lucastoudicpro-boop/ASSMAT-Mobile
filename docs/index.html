@@ -714,6 +714,33 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
 .pers button{border:0;background:transparent;color:var(--danger);cursor:pointer;
   padding:8px;border-radius:8px;font-size:17px}
 .gal{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.gal img{cursor:pointer;transition:transform .12s ease}
+.gal img:active{transform:scale(.96)}
+.gal-mois{grid-column:1/-1;font:600 12px system-ui;color:var(--mut);
+  text-transform:capitalize;margin:10px 0 2px}
+.gal-mois:first-child{margin-top:0}
+.photo-cassee{aspect-ratio:1;border-radius:10px;background:var(--zebre);display:flex;
+  align-items:center;justify-content:center;font:600 10px system-ui;color:var(--mut)}
+#visionneuse{position:fixed;inset:0;z-index:120;background:#0a0f0e;
+  display:flex;flex-direction:column;animation:apparait .2s ease both}
+#visionneuse[hidden]{display:none}
+.visio-haut,.visio-bas{display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:calc(var(--safeT) + 12px) 16px 12px}
+.visio-bas{padding:12px 16px calc(var(--safeB) + 16px)}
+.visio-info{flex:1;min-width:0;text-align:center;color:#fff;line-height:1.3}
+.visio-info b{display:block;font-size:14px;text-transform:capitalize}
+.visio-info small{font-size:12px;opacity:.6}
+.visio-btn{border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:22px;
+  min-width:44px;height:44px;padding:0 14px;font:600 17px system-ui;cursor:pointer;
+  flex:0 0 auto;transition:background .15s ease,transform .1s ease}
+.visio-btn:active{transform:scale(.94);background:rgba(255,255,255,.22)}
+.visio-btn:disabled{opacity:.25}
+.visio-scene{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 8px}
+#visioImage{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+@keyframes glisse-d{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes glisse-g{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+#visioImage.entre-d{animation:glisse-d .22s cubic-bezier(.2,.8,.3,1) both}
+#visioImage.entre-g{animation:glisse-g .22s cubic-bezier(.2,.8,.3,1) both}
 .gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;background:var(--zebre)}
 .gal-mois{font-size:12px;color:var(--mut);margin:14px 0 7px;font-weight:600;text-transform:capitalize}
 
@@ -1127,6 +1154,20 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <button id="tourPasser" class="lien-discret">Passer</button>
       <button id="tourSuivant" class="btn btn-primary">Suivant</button>
     </div>
+  </div>
+</div>
+
+<div id="visionneuse" hidden>
+  <div class="visio-haut">
+    <button id="visioFermer" class="visio-btn" aria-label="Fermer">✕</button>
+    <div class="visio-info"><b id="visioDate"></b><small id="visioRang"></small></div>
+    <button id="visioEnregistrer" class="visio-btn" aria-label="Enregistrer">⤓</button>
+  </div>
+  <div class="visio-scene" id="visioScene"><img id="visioImage" alt=""></div>
+  <div class="visio-bas">
+    <button id="visioPrec" class="visio-btn" aria-label="Précédente">‹</button>
+    <span style="flex:1"></span>
+    <button id="visioSuiv" class="visio-btn" aria-label="Suivante">›</button>
   </div>
 </div>
 
@@ -1780,7 +1821,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.3.3</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.3.5</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -4070,15 +4111,17 @@ const Supa = (() => {
   /* Le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
      tables se rejouent apres rafraichissement ; celui-ci ne le faisait pas et
      partait avec un jeton perime, que la passerelle refusait en 401. */
-  /* contratId a null : mode test, la notification revient a l'appelant. */
-  async function notifier(contratId, titre, corps, urgent) {
+  /* contratId a null : mode test, la notification revient a l'appelant.
+     cible : le module a ouvrir quand on touche la banniere. */
+  async function notifier(contratId, titre, corps, urgent, cible) {
     if (!connecte()) return null;
 
     const envoyer = async () => {
       const r = await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent, test: contratId === null })
+        body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent,
+          cible: cible || null, test: contratId === null })
       });
       let corpsRep = null;
       try { corpsRep = await r.json(); } catch (e) {}
@@ -4420,7 +4463,7 @@ async function envoyerReprise() {
   if (!depuis) { toast('Date attendue au format jj/mm/aaaa'); return; }
   try {
     await Supa.ecrire('reprises', { contrat_id: id, auteur_id: Supa.moi().id, depuis, texte: t });
-    Supa.notifier(id, 'Reprise — ' + (cur.enfant.prenom || 'l\u2019enfant'), t.slice(0, 90));
+    Supa.notifier(id, 'Reprise — ' + (cur.enfant.prenom || 'l\u2019enfant'), t.slice(0, 90), false, 'reprise');
     $('#repriseTexte').value = '';
     await chargerReprises(); renderReprises();
     toast('Transmission envoyée');
@@ -4711,7 +4754,7 @@ async function envoyerRetard(dur) {
   try {
     await Supa.ecrire('messages', { contrat_id: id, auteur_id: Supa.moi().id,
       texte: 'Retard d\u2019environ ' + dur, categorie: 'retard' });
-    Supa.notifier(id, 'Retard : ' + dur, (cur.enfant.prenom || '') + ' arrivera plus tard');
+    Supa.notifier(id, 'Retard : ' + dur, (cur.enfant.prenom || '') + ' arrivera plus tard', false, 'messages');
     toast('La nounou est prévenue : ' + dur);
     await chargerMessages(); renderAccueil();
   } catch (e) { toast('Envoi impossible : ' + (e.message || e)); }
@@ -4759,7 +4802,7 @@ async function decider(id, oui) {
       decide_par: Supa.moi().id, decide_le: new Date().toISOString()
     }, 'id=eq.' + id);
     const d = demandes.find(x => x.id === id);
-    Supa.notifier(contratLie(), (oui ? 'Demande acceptée' : 'Demande refusée') + (d ? ' : ' + d.objet : ''), motif || '');
+    Supa.notifier(contratLie(), (oui ? 'Demande acceptée' : 'Demande refusée') + (d ? ' : ' + d.objet : ''), motif || '', false, 'messages');
     await chargerDemandes(); renderDemandes();
     if (vue === 'accueil') renderAccueil();
   } catch (e) { toast('Impossible : ' + (e.message || e)); }
@@ -5148,7 +5191,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.3.3';
+const VERSION = '1.3.5';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -5657,12 +5700,92 @@ function renderGalerie() {
     box.innerHTML = '<p class="hint" style="grid-column:1/-1;margin:0">Aucune photo pour le moment.</p>';
     return;
   }
-  box.innerHTML = galerie.map(p =>
-    `<img data-photo="${esc(p.chemin)}" alt="${esc(p.legende || 'Photo')}">`).join('');
-  $$('#listeGalerie [data-photo]').forEach(async img => {
-    const d = await telechargerPhoto(img.dataset.photo);
-    if (d) img.src = d; else img.remove();
-  });
+  // regroupées par mois, comme une vraie galerie
+  const mois = {};
+  for (const p of galerie) {
+    const cle = new Date(p.prise_le).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    (mois[cle] = mois[cle] || []).push(p);
+  }
+  box.innerHTML = Object.entries(mois).map(([cle, liste]) =>
+    `<div class="gal-mois">${esc(cle)}</div>` +
+    liste.map(p => `<img data-photo="${esc(p.chemin)}" data-id="${esc(p.id)}" alt="${esc(p.legende || 'Photo')}">`).join('')
+  ).join('');
+
+  (async () => {
+    let echecs = 0;
+    for (const img of $$('#listeGalerie [data-photo]')) {
+      let d = null;
+      try { d = await telechargerPhoto(img.dataset.photo); } catch (e) { d = null; }
+      if (d) { img.src = d; img.onclick = () => ouvrirVisionneuse(img.dataset.id); }
+      else { echecs++; img.replaceWith(Object.assign(document.createElement('div'),
+        { className: 'photo-cassee', textContent: 'illisible' })); }
+    }
+    if (echecs) toast(echecs + ' photo(s) illisible(s) : le stockage refuse la lecture.');
+  })();
+}
+
+/* ---------------- Visionneuse ----------------
+   Plein écran, la date en tête, le glissement, l'enregistrement. La même que
+   côté nounou : une photo se regarde de la même façon des deux côtés. */
+let visioIndex = 0, visioURL = null;
+
+async function ouvrirVisionneuse(id) {
+  const i = galerie.findIndex(p => p.id === id);
+  if (i < 0) return;
+  visioIndex = i;
+  $('#visionneuse').hidden = false;
+  document.body.style.overflow = 'hidden';
+  await montrerVisio();
+}
+
+function fermerVisionneuse() {
+  $('#visionneuse').hidden = true;
+  document.body.style.overflow = '';
+}
+
+async function montrerVisio(sens) {
+  const p = galerie[visioIndex];
+  if (!p) { fermerVisionneuse(); return; }
+  const img = $('#visioImage');
+  if (sens) {
+    img.classList.remove('entre-g', 'entre-d');
+    void img.offsetWidth;
+    img.classList.add(sens > 0 ? 'entre-d' : 'entre-g');
+  }
+  const d = new Date(p.prise_le);
+  $('#visioDate').textContent = d.toLocaleDateString('fr-FR',
+    { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  $('#visioRang').textContent = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) +
+    ' · ' + (visioIndex + 1) + ' sur ' + galerie.length;
+  $('#visioPrec').disabled = visioIndex === 0;
+  $('#visioSuiv').disabled = visioIndex === galerie.length - 1;
+  visioURL = await telechargerPhoto(p.chemin);
+  if (visioURL) img.src = visioURL;
+}
+
+async function glisserVisio(pas) {
+  const n = visioIndex + pas;
+  if (n < 0 || n >= galerie.length) return;
+  visioIndex = n;
+  await montrerVisio(pas);
+}
+
+async function enregistrerPhoto() {
+  const p = galerie[visioIndex];
+  if (!p || !visioURL) return;
+  const nom = 'cocon-' + (cur.enfant.prenom || 'photo') + '-' + String(p.prise_le).slice(0, 10) + '.jpg';
+  try {
+    const blob = await (await fetch(visioURL)).blob();
+    if (navigator.canShare) {
+      const f = new File([blob], nom, { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare({ files: [f] })) { await navigator.share({ files: [f] }); return; }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nom;
+    a.click();
+    toast('Photo enregistrée');
+  } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
 }
 
 /* ---------------- Fermetures de la salariée ---------------- */
@@ -5826,7 +5949,7 @@ async function enregistrerUrgence() {
   };
   try {
     await Supa.ecrire('fiche_urgence', [ligne], 'resolution=merge-duplicates');
-    Supa.notifier(id, 'Fiche d\u2019urgence mise à jour', (cur.enfant.prenom || '') + ' — à relire', true);
+    Supa.notifier(id, 'Fiche d\u2019urgence mise à jour', (cur.enfant.prenom || '') + ' — à relire', true, 'urgence');
     toast('Fiche enregistrée et signée');
     await chargerUrgence(); renderUrgence();
   } catch (e) { toast('Enregistrement impossible : ' + (e.message || e)); }
@@ -5989,7 +6112,7 @@ async function repondre() {
   if (!t) return;
   try {
     await Supa.ecrire('messages', { contrat_id: id, auteur_id: Supa.moi().id, texte: t, categorie: 'info' });
-    Supa.notifier(id, (cur.enfant.prenom || 'Cocon') + ' — message de la famille', t);
+    Supa.notifier(id, (cur.enfant.prenom || 'Cocon') + ' — message de la famille', t, false, 'messages');
     $('#reponse').value = '';
     await chargerMessages();
     renderMessages();
@@ -7240,6 +7363,21 @@ $('#btnAjoutEnfant').onclick = ajouterEnfant;
 $('#btnRepondre').onclick = repondre;
 $('#btnSilence').onclick = enregistrerSilence;
 $('#btnReprise').onclick = envoyerReprise;
+$('#visioFermer').onclick = fermerVisionneuse;
+$('#visioEnregistrer').onclick = enregistrerPhoto;
+$('#visioPrec').onclick = () => glisserVisio(-1);
+$('#visioSuiv').onclick = () => glisserVisio(1);
+(() => {
+  let x0 = null;
+  const sc = $('#visioScene');
+  sc.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  sc.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    x0 = null;
+    if (Math.abs(dx) > 55) glisserVisio(dx < 0 ? 1 : -1);
+  }, { passive: true });
+})();
 $('#btnArchive').onclick = preparerArchive;
 $('#btnRelancerPush').onclick = () => activerPush();
 $('#btnTestPush').onclick = testerPush;
@@ -7473,6 +7611,7 @@ function integrerAndroid() {
 
   if (C.App && C.App.addListener) {
     C.App.addListener('backButton', () => {
+      if (!$('#visionneuse').hidden) { fermerVisionneuse(); return; }
       if (!$('#porte').hidden) return;
       if (!$('#verrou').hidden) return;
       if (!$('#tour').hidden) { finirTour(); return; }
@@ -7566,7 +7705,13 @@ async function activerPush() {
       });
       P.addListener('registrationError', (e) => { etatPush.etape = 'Firebase a refusé l\u2019enregistrement : ' + JSON.stringify(e); majEtatPush(); });
       P.addListener('pushNotificationReceived', () => rafraichirTout(true));
-      P.addListener('pushNotificationActionPerformed', () => rafraichirTout(true));
+      // Toucher une bannière doit mener à ce qu'elle annonce, pas à l'accueil.
+    P.addListener('pushNotificationActionPerformed', async (ev) => {
+      await rafraichirTout(true);
+      const cible = ((ev && ev.notification && ev.notification.data) || {}).cible;
+      const m = MODULES.find(x => x.id === cible);
+      if (m) m.fn();
+    });
     }
     etatPush.etape = 'enregistrement en cours…';
     majEtatPush();
