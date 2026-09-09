@@ -1566,7 +1566,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
         <details id="reglageProjet" class="avance">
           <summary>Projet Supabase</summary>
           <label class="field"><span>Adresse du projet</span><input data-profil="cloud.url" placeholder="https://xxxx.supabase.co" inputmode="url"></label>
-          <label class="field"><span>Clé publique « anon »</span><input data-profil="cloud.cle" placeholder="eyJhbG..."></label>
+          <label class="field"><span>Clé publique (sb_publishable_…)</span><input data-profil="cloud.cle" placeholder="sb_publishable_…"></label>
         </details>
         <label class="field"><span>Adresse e-mail</span><input id="compteEmail" inputmode="email" autocomplete="username"></label>
         <label class="field"><span>Mot de passe</span><input id="compteMdp" type="password" autocomplete="current-password"></label>
@@ -1705,7 +1705,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.0.13</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.0.14</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3727,7 +3727,7 @@ async function envoyerAbsence() {
    arrete l'application, et pas proprement : c'est le processus natif qui tombe. */
 const PROJET = {
   url: "https://epixqfxqcaibxxdfujvb.supabase.co",
-  cle: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwaXhxZnhxY2FpYnh4ZGZ1anZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NjMyMjUsImV4cCI6MjEwNDQzOTIyNX0.Q-680Vy-7l23ikaByvAywXX-rlsHyloShkdEU9UYCMM",
+  cle: "sb_publishable_z3HtOQ9xSsHEgmUbVLqYZA_m1G2iu0K",
   notifications: false
 };
 
@@ -4744,7 +4744,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.0.13';
+const VERSION = '1.0.14';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {

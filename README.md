@@ -1259,3 +1259,15 @@ La fonction `notifier` est a redeployer : elle comprend desormais le mode test.
 
 Corrige au passage cote nounou : l'enregistrement etait demande avant la
 verification de session, donc parfois jamais. Il vient apres, une fois connectee.
+
+## 1.0.14 — le nouveau format de cle Supabase
+
+Le diagnostic a rendu la cause en clair : la passerelle des fonctions refuse
+l'ancienne cle `anon` (un JWT en `eyJ...`) et exige le nouveau format
+`sb_publishable_...`. La base de donnees accepte encore l'ancienne, ce qui
+expliquait que tout marche sauf les notifications.
+
+A faire : Project Settings -> API Keys -> copier la cle **publishable**, et la
+mettre a la place de l'ancienne dans `commun/projet.js` puis dans les deux
+`index.html` — ou dans le secret GitHub `SUPABASE_ANON_KEY`, que le workflow
+injecte. Elle vaut pour tout : base, authentification, fonctions.
