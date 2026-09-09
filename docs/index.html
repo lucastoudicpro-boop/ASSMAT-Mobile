@@ -780,6 +780,15 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
 .tuile-m.large>div small{line-height:1.35}
 .lien-justif{border:0;background:transparent;color:var(--acc);font:600 12.5px system-ui;
   cursor:pointer;padding:4px 0;text-align:left}
+.etape-adapt{padding:11px 0;border-bottom:1px solid var(--line)}
+.etape-adapt:last-child{border-bottom:0}
+.tete-adapt{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:3px}
+.tete-adapt b{font-size:14px}
+.tete-adapt span{font-size:12px;color:var(--mut)}
+.dit-moi,.dit-eux{border-radius:12px;padding:8px 11px;font-size:13.5px;line-height:1.4;margin-top:6px}
+.dit-moi{background:var(--acc-doux)}
+.dit-eux{background:var(--zebre)}
+.dit-moi small,.dit-eux small{display:block;font-size:11px;color:var(--mut);margin-top:3px}
 .puce-famille{display:inline-block;background:var(--acc-doux);color:var(--acc);border-radius:14px;
   padding:6px 12px;font:600 13px system-ui;margin:0 6px 6px 0}
 .choix{display:flex;gap:7px;flex-wrap:wrap}
@@ -1455,6 +1464,35 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 
 <div id="reserve" hidden>
   <details class="card">
+    <summary><svg class="ico"><use href="#i-cal"/></svg><span class="ttl">Adaptation</span><b class="tot" id="badgeAdapt"></b></summary>
+    <div class="body">
+      <div id="listeAdaptation"></div>
+      <p class="hint">La nounou note chaque étape. Tu peux ajouter ton propre ressenti sous chacune — elle ne peut pas le modifier.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-notes"/></svg><span class="ttl">Reprise après absence</span><b class="tot" id="badgeReprise"></b></summary>
+    <div class="body">
+      <div id="listeReprises"></div>
+      <div class="rub">Écrire une transmission</div>
+      <label class="field"><span>Absente depuis le</span><input id="repriseDepuis" placeholder="jj/mm/aaaa"></label>
+      <textarea id="repriseTexte" rows="4" placeholder="Nouveaux mots, nouvelles habitudes, ce qui a changé…"></textarea>
+      <button id="btnReprise" class="btn btn-primary btn-block" style="margin-top:8px">Envoyer</button>
+      <p class="hint">Après deux semaines d'absence, elle retrouve un enfant qui a changé. Ce mot lui évite de le découvrir en chemin.</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-sauve"/></svg><span class="ttl">Archive du contrat</span></summary>
+    <div class="body">
+      <div id="archiveEtat"></div>
+      <button id="btnArchive" class="btn btn-primary btn-block">Préparer l'archive</button>
+      <p class="hint">Fiches, attestations, journal et photos réunis dans un dossier à garder. Trois ans de la vie d'un enfant ne devraient pas disparaître avec un contrat.</p>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-gens"/></svg><span class="ttl">Espace commun</span><b class="tot" id="badgeCommun"></b></summary>
     <div class="body">
       <div id="communEtat"></div>
@@ -1740,7 +1778,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.2.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.3.0</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -4294,6 +4332,169 @@ function prevenirMigration() {
     ' manque. Lance le dernier fichier SQL, tout reviendra.');
 }
 
+/* ---------------- Adaptation ----------------
+   L'arrivee se fait par paliers : une visite, une heure, une matinee, un
+   repas, une sieste, une journee. Le moment le plus anxieux pour les parents,
+   et celui ou personne ne leur dit rien. */
+const PALIERS = [
+  ['visite',  '👋 Visite',        'On fait connaissance, les parents restent'],
+  ['heure',   '⏱ Une heure',      'Premier temps seul, court'],
+  ['matinee', '🌤 Une matinée',   'Sans repas'],
+  ['repas',   '🍽 Avec le repas', 'Midi compris'],
+  ['sieste',  '😴 Avec la sieste', 'Le vrai test'],
+  ['journee', '☀️ Journée entière', 'Comme les jours normaux']
+];
+let adaptation = [];
+
+function renderAdaptation() {
+  const box = $('#listeAdaptation');
+  const b = $('#badgeAdapt');
+  if (b) b.textContent = adaptation.length ? String(adaptation.length) : '';
+  if (!box) return;
+  if (!adaptation.length) {
+    box.innerHTML = '<p class="msg-vide">La nounou n\u2019a pas encore noté d\u2019étape d\u2019adaptation.</p>';
+    return;
+  }
+  box.innerHTML = adaptation.map(a => {
+    const p = PALIERS.find(x => x[0] === a.etape) || PALIERS[0];
+    const fr = iso => iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4);
+    return `<div class="etape-adapt">
+      <div class="tete-adapt"><b>${esc(p[1])}</b><span>${esc(fr(a.jour))}${a.duree && a.duree !== '—' ? ' · ' + esc(a.duree) : ''}</span></div>
+      <small style="color:var(--mut)">${esc(p[2])}</small>
+      ${a.ressenti_salariee ? `<div class="dit-eux">${esc(a.ressenti_salariee)}<small>la nounou</small></div>` : ''}
+      ${a.ressenti_parent
+        ? `<div class="dit-moi">${esc(a.ressenti_parent)}<small>vous</small></div>`
+        : `<button class="lien-justif" data-adapt="${esc(a.id)}">Ajouter mon ressenti</button>`}
+    </div>`;
+  }).join('');
+
+  $$('#listeAdaptation [data-adapt]').forEach(btn => {
+    btn.onclick = async () => {
+      const t = prompt('Comment as-tu vécu cette étape ?');
+      if (!t || !t.trim()) return;
+      try {
+        await Supa.modifier('adaptation', { ressenti_parent: t.trim() }, 'id=eq.' + btn.dataset.adapt);
+        await chargerAdaptation(); renderAdaptation();
+      } catch (e) { toast('Impossible : ' + (e.message || e)); }
+    };
+  });
+}
+
+/* ---------------- Reprise après absence ---------------- */
+let reprises = [];
+
+async function chargerReprises() {
+  reprises = [];
+  const id = contratLie();
+  if (!id || !Supa.connecte()) return;
+  try {
+    reprises = await Supa.lire('reprises',
+      'contrat_id=eq.' + id + '&select=id,auteur_id,depuis,texte,lu_le,cree_le&order=cree_le.desc&limit=20');
+  } catch (e) { reprises = []; }
+}
+
+function renderReprises() {
+  const box = $('#listeReprises');
+  const b = $('#badgeReprise');
+  const moi = (Supa.moi() || {}).id;
+  if (b) b.textContent = reprises.filter(r => r.auteur_id !== moi && !r.lu_le).length || '';
+  if (!box) return;
+  box.innerHTML = reprises.length ? reprises.map(r => {
+    const fr = iso => iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4);
+    return `<div class="jour-b">
+      <div class="date" style="text-transform:none">Depuis le ${esc(fr(r.depuis))} · ${esc(new Date(r.cree_le).toLocaleDateString('fr-FR'))}
+        ${r.lu_le ? '<span style="color:var(--acc);font-weight:500"> · lu</span>' : ''}</div>
+      <div class="mot">${esc(r.texte)}</div>
+    </div>`;
+  }).join('') : '<p class="msg-vide">Aucune transmission pour le moment.</p>';
+}
+
+async function envoyerReprise() {
+  const id = contratLie();
+  const t = $('#repriseTexte').value.trim();
+  const depuis = versISO($('#repriseDepuis').value);
+  if (!id) { toast('Publie d\u2019abord le contrat'); return; }
+  if (!t) { toast('Écris ce qui a changé'); return; }
+  if (!depuis) { toast('Date attendue au format jj/mm/aaaa'); return; }
+  try {
+    await Supa.ecrire('reprises', { contrat_id: id, auteur_id: Supa.moi().id, depuis, texte: t });
+    Supa.notifier(id, 'Reprise — ' + (cur.enfant.prenom || 'l\u2019enfant'), t.slice(0, 90));
+    $('#repriseTexte').value = '';
+    await chargerReprises(); renderReprises();
+    toast('Transmission envoyée');
+  } catch (e) { toast('Impossible : ' + (e.message || e)); }
+}
+
+/* ---------------- Archive du contrat ----------------
+   Ce qui reste quand tout s'arrête. Les photos surtout : trois ans de la vie
+   d'un enfant ne devraient pas disparaître avec un contrat. */
+function renderArchive() {
+  const box = $('#archiveEtat');
+  if (!box) return;
+  const ds = (l, v) => `<div class="ds"><span>${esc(l)}</span><b>${esc(v)}</b></div>`;
+  box.innerHTML =
+    ds('Enfant', cur.enfant.prenom || '—') +
+    ds('Journal', journal.length + ' journée(s) sur le serveur') +
+    ds('Photos', galerie.length + ' photo(s)') +
+    ds('Fiches de salaire', 'toutes, depuis ce téléphone');
+}
+
+async function preparerArchive() {
+  const nom = (cur.enfant.prenom || 'enfant').replace(/[^\w-]/g, '');
+  toast('Préparation…');
+  try {
+    const fiches = (await Store.all()).fiches;
+    const mesFiches = {};
+    for (const cle of Object.keys(fiches)) if (enfantDe(cle) === enfantActif) mesFiches[cle] = fiches[cle];
+
+    await Promise.all([chargerJournal(), chargerGalerie(), chargerAdaptation(), chargerReprises()]);
+
+    // Les photos sont téléchargées et incluses : un lien vers le serveur ne
+    // vaudrait rien le jour où le contrat n'existe plus.
+    const photos = [];
+    for (const p of galerie) {
+      const d = await telechargerPhoto(p.chemin);
+      if (!d) continue;
+      const blob = await (await fetch(d)).blob();
+      photos.push({ nom: p.chemin.split('/').pop(), prise_le: p.prise_le, blob });
+    }
+
+    const dossier = {
+      enfant: cur.enfant, salarie: cur.salarie, employeur: cur.employeur,
+      contrat: cur.contrat, fiches: mesFiches,
+      journal, adaptation, reprises,
+      photos: photos.map(p => ({ nom: p.nom, prise_le: p.prise_le })),
+      archive_le: new Date().toISOString(), version: VERSION
+    };
+
+    const zip = new Blob([JSON.stringify(dossier, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zip);
+    a.download = 'cocon-archive-' + nom + '-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+
+    // les photos partent séparément : elles ne tiennent pas dans un JSON
+    for (const p of photos) {
+      const b = document.createElement('a');
+      b.href = URL.createObjectURL(p.blob);
+      b.download = 'cocon-' + nom + '-' + String(p.prise_le).slice(0, 10) + '-' + p.nom;
+      b.click();
+      await new Promise(r => setTimeout(r, 250));
+    }
+    toast('Archive prête : 1 dossier et ' + photos.length + ' photo(s)');
+  } catch (e) { toast('Impossible : ' + (e.message || e)); }
+}
+
+async function chargerAdaptation() {
+  adaptation = [];
+  const id = contratLie();
+  if (!id || !Supa.connecte()) return;
+  try {
+    adaptation = await Supa.lire('adaptation',
+      'contrat_id=eq.' + id + '&select=id,jour,duree,etape,ressenti_salariee,ressenti_parent&order=jour');
+  } catch (e) { adaptation = []; }
+}
+
 /* ---------------- Espace commun ----------------
    La nounou l'ouvre, chaque famille décide d'y entrer. Ce qu'on y lit vient
    uniquement de ce que les membres y écrivent. */
@@ -4576,6 +4777,9 @@ const PAGES = {
   conges:     { titre: 'Congés payés',      ancres: ['congesCompteur'] },
   documents:  { titre: 'Documents',         ancres: ['btnAttEmploi', 'finResultat'] },
   commun:     { titre: 'Espace commun',     ancres: ['communEtat'] },
+  adaptation: { titre: 'Adaptation',        ancres: ['listeAdaptation'] },
+  reprise:    { titre: 'Reprise',           ancres: ['listeReprises'] },
+  archive:    { titre: 'Archive',           ancres: ['archiveEtat'] },
   fermetures: { titre: 'Fermetures',        ancres: ['listeFermetures'] }
 };
 let moduleActif = null;
@@ -4584,7 +4788,7 @@ let moduleActif = null;
    « le quotidien » et « le contrat », pas onze entrées. */
 const GROUPES = {
   quotidien: { titre: 'Au quotidien', onglets: ['journal', 'galerie', 'messages', 'demandes', 'semaine', 'commun'] },
-  contrat:   { titre: 'Le contrat',   onglets: ['nounous', 'urgence', 'fermetures', 'conges', 'documents'] }
+  contrat:   { titre: 'Le contrat',   onglets: ['nounous', 'urgence', 'adaptation', 'reprise', 'fermetures', 'conges', 'documents', 'archive'] }
 };
 const groupeDe = id => Object.keys(GROUPES).find(g => GROUPES[g].onglets.includes(id)) || null;
 
@@ -4655,7 +4859,10 @@ async function rafraichirModule(id) {
       renderSemaine();
     },
     documents:  async () => {},
-    commun:     async () => { await chargerCommun(); renderCommun(); }
+    commun:     async () => { await chargerCommun(); renderCommun(); },
+    adaptation: async () => { await chargerAdaptation(); renderAdaptation(); },
+    reprise:    async () => { await chargerReprises(); renderReprises(); },
+    archive:    async () => { renderArchive(); }
   };
   try { await (travaux[id] || (() => {}))(); } catch (e) {}
   renderBarre();
@@ -4673,6 +4880,9 @@ const MODULES = [
   { id: 'demandes',  nom: 'Demandes',     ico: 'i-ok',       fn: () => ouvrirModule('demandes') },
   { id: 'semaine',   nom: 'Ma semaine',   ico: 'i-cal',      fn: () => ouvrirModule('semaine') },
   { id: 'commun',    nom: 'Espace commun', ico: 'i-gens',    fn: () => ouvrirModule('commun') },
+  { id: 'adaptation',nom: 'Adaptation',   ico: 'i-cal',      fn: () => ouvrirModule('adaptation') },
+  { id: 'reprise',   nom: 'Reprise',      ico: 'i-notes',    fn: () => ouvrirModule('reprise') },
+  { id: 'archive',   nom: 'Archive',      ico: 'i-sauve',    fn: () => ouvrirModule('archive') },
   { id: 'nounous',   nom: 'Mes nounous',  ico: 'i-gens',     fn: () => ouvrirModule('nounous') },
   { id: 'urgence',   nom: 'Urgence',      ico: 'i-alerte',   fn: () => ouvrirModule('urgence') },
   { id: 'saisie',    nom: 'Salaire',      ico: 'i-saisie',   fn: () => showView('saisie') },
@@ -4936,7 +5146,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -7027,6 +7237,8 @@ $('#btnFinCalcul').onclick = calculFin;
 $('#btnAjoutEnfant').onclick = ajouterEnfant;
 $('#btnRepondre').onclick = repondre;
 $('#btnSilence').onclick = enregistrerSilence;
+$('#btnReprise').onclick = envoyerReprise;
+$('#btnArchive').onclick = preparerArchive;
 $('#btnRelancerPush').onclick = () => activerPush();
 $('#btnTestPush').onclick = testerPush;
 $('#tourSuivant').onclick = () => { if (tourEtape < TOUR.length - 1) { tourEtape++; renderTour(); } else finirTour(); };

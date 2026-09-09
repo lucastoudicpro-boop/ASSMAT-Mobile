@@ -1519,3 +1519,43 @@ emprunte le chemin des photos, donc les memes regles d'acces.
 Cote parent, chaque absence montre son type, son motif, le justificatif s'il
 existe, et un bouton « J'ai bien note ». Un declencheur limite le parent a ce
 seul accuse : il ne peut ni changer les dates ni retirer l'absence.
+
+## 1.3.0
+
+`016-remplacement-adaptation-reprise.sql` est a executer.
+
+### Remplacement temporaire
+
+Une nounou malade, une collegue prend le relais trois jours. Lui ouvrir le
+contrat entier serait excessif ; ne rien lui donner la laisserait aveugle.
+
+La titulaire cree un code date. Le remplacant le saisit et voit **le planning,
+la fiche d'urgence et le journal**, sur la periode seulement. Ni contrat, ni
+salaire, ni historique. L'acces expire seul : la regle d'acces verifie
+`current_date between du and au`, sans que personne ait a y penser.
+
+### Adaptation
+
+L'arrivee d'un tout-petit se fait par paliers : une visite, une heure, une
+matinee, avec le repas, avec la sieste, la journee entiere. La nounou note
+chaque etape et son ressenti ; le parent ajoute le sien dessous.
+
+**Chacun n'ecrit que le sien** : un declencheur restaure le champ de l'autre a
+chaque ecriture. On peut lire ce que l'autre a ressenti, jamais le reecrire.
+
+C'est le moment le plus anxieux pour des parents, et celui ou personne ne leur
+dit rien.
+
+### Reprise apres absence
+
+Apres deux semaines, elle retrouve un enfant qui a change. Le parent ecrit ce
+qui s'est passe — nouveaux mots, nouvelles habitudes ; la carte s'ouvre d'
+elle-meme cote nounou tant que la transmission n'est pas lue.
+
+### Archive du contrat
+
+Quand tout s'arrete, un dossier a garder : identites, contrat, fiches de
+salaire, journal, adaptation, transmissions, et **les photos telechargees**.
+Un lien vers le serveur ne vaudrait rien le jour ou le contrat n'existe plus.
+
+Trois ans de la vie d'un enfant ne devraient pas disparaitre avec un contrat.

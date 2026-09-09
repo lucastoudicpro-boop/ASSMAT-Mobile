@@ -400,6 +400,19 @@ html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#31202a 0%,va
   padding:9px 13px;font:600 13px system-ui;color:var(--txt);cursor:pointer;min-height:42px;
 }
 .choix button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.etape-adapt{padding:11px 0;border-bottom:1px solid var(--line)}
+.etape-adapt:last-child{border-bottom:0}
+.tete-adapt{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:5px}
+.tete-adapt b{font-size:14px}
+.tete-adapt span{font-size:12px;color:var(--mut)}
+.dit-moi,.dit-eux{border-radius:12px;padding:8px 11px;font-size:13.5px;line-height:1.4;margin-top:5px}
+.dit-moi{background:var(--acc-doux);color:var(--txt)}
+.dit-eux{background:var(--zebre)}
+.dit-moi small,.dit-eux small{display:block;font-size:11px;color:var(--mut);margin-top:3px}
+.champ-select{width:100%;min-height:44px;border:1px solid var(--bord);border-radius:12px;
+  padding:0 10px;background:var(--card);color:var(--txt);font:inherit}
+.code-rempl{display:inline-block;margin-top:5px;font:700 17px/1 ui-monospace,monospace;
+  letter-spacing:3px;color:var(--acc);background:var(--acc-doux);border-radius:9px;padding:6px 10px}
 .absence{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
 .absence:last-of-type{border-bottom:0}
 .absence.passee{opacity:.55}
@@ -737,6 +750,27 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       </div>
     </div>
 
+    <details class="card" id="carteReprise">
+      <summary class="tete-repli"><svg><use href="#i-notes"/></svg><span>À savoir au retour</span><b class="compteur" id="compteurReprise"></b></summary>
+      <div class="corps" id="listeReprises"></div>
+    </details>
+
+    <details class="card" id="carteAdaptation">
+      <summary class="tete-repli"><svg><use href="#i-cal"/></svg><span>Adaptation</span><b class="compteur" id="compteurAdapt"></b></summary>
+      <div class="corps">
+        <div id="listeAdaptation"></div>
+        <div class="rub">Ajouter une étape</div>
+        <div class="choix" id="choixPalier"></div>
+        <div class="deux" style="margin-top:8px">
+          <input id="adaptJour" placeholder="jj/mm/aaaa" inputmode="numeric">
+          <input id="adaptDuree" placeholder="1 h, 9h–11h…">
+        </div>
+        <textarea id="adaptRessenti" rows="2" placeholder="Comment ça s'est passé" style="margin-top:8px"></textarea>
+        <button id="btnAdaptation" class="btn btn-primary btn-block">Enregistrer</button>
+        <p class="hint">Les parents lisent ton ressenti et écrivent le leur. Chacun le sien : tu ne peux pas modifier le leur.</p>
+      </div>
+    </details>
+
     <div class="card urgence">
       <div class="tete"><svg><use href="#i-alerte"/></svg>Fiche d'urgence</div>
       <div class="corps" id="ficheUrgence"></div>
@@ -863,6 +897,28 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <div class="tete"><svg><use href="#i-gens"/></svg><span>Mes familles</span><b class="compteur" id="compteurFamilles"></b></div>
       <div class="corps" id="listeContrats"></div>
     </div>
+
+    <details class="card" id="carteRemplacement">
+      <summary class="tete-repli"><svg><use href="#i-gens"/></svg><span>Remplacements</span><b class="compteur" id="compteurRempl"></b></summary>
+      <div class="corps">
+        <div class="rub">Je suis remplacée</div>
+        <select id="remplContrat" class="champ-select"></select>
+        <div class="deux" style="margin-top:8px">
+          <input id="remplDu" placeholder="du jj/mm/aaaa" inputmode="numeric">
+          <input id="remplAu" placeholder="au jj/mm/aaaa" inputmode="numeric">
+        </div>
+        <input id="remplMotif" placeholder="Motif, facultatif" style="margin-top:8px">
+        <button id="btnRemplacement" class="btn btn-primary btn-block">Créer un code de remplacement</button>
+        <div id="listeRemplacements"></div>
+
+        <div class="rub">Je remplace quelqu'un</div>
+        <div class="deux">
+          <input id="codeRempl" placeholder="XXXXXX" autocapitalize="characters" maxlength="8">
+          <button id="btnRejoindreRempl" class="btn btn-ghost">Rejoindre</button>
+        </div>
+        <p class="hint">Le remplaçant voit le planning, la fiche d'urgence et le journal, sur la période seulement. Ni contrat, ni salaire, ni historique.</p>
+      </div>
+    </details>
 
     <details class="card" id="carteRejoindre">
       <summary class="tete-repli"><svg><use href="#i-plus"/></svg><span>Rejoindre une famille</span></summary>
@@ -1040,7 +1096,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.2.0</b></div>
+        <div class="ds"><span>Version</span><b>1.3.0</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1424,7 +1480,11 @@ function montrer(v) {
   renderChoixEnfant();
   if (v === 'journal') chargerJournal();
   if (v === 'messages') { chargerBoite().then(renderBoite); if (conversationActive) ouvrirConversation(conversationActive); }
-  if (v === 'familles') { renderContrats(); renderRegleAbsence(); chargerFermetures().then(renderFermetures); }
+  if (v === 'familles') {
+    renderContrats(); renderRegleAbsence();
+    chargerFermetures().then(renderFermetures);
+    chargerRemplacements().then(renderRemplacements);
+  }
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
   if (v === 'galerie') chargerGalerie();
   if (v === 'params') { majCompte(); majEtatPush(); }
@@ -2608,6 +2668,214 @@ async function annoncer() {
   } catch (e) { toast('Impossible : ' + (e.message || e)); }
 }
 
+/* ---------------- Adaptation ----------------
+   L'arrivee se fait par paliers : une visite, une heure, une matinee, un
+   repas, une sieste, une journee. Le moment le plus anxieux pour les parents,
+   et celui ou personne ne leur dit rien. */
+const PALIERS = [
+  ['visite',  '👋 Visite',        'On fait connaissance, les parents restent'],
+  ['heure',   '⏱ Une heure',      'Premier temps seul, court'],
+  ['matinee', '🌤 Une matinée',   'Sans repas'],
+  ['repas',   '🍽 Avec le repas', 'Midi compris'],
+  ['sieste',  '😴 Avec la sieste', 'Le vrai test'],
+  ['journee', '☀️ Journée entière', 'Comme les jours normaux']
+];
+let adaptation = [];
+
+function renderAdaptation() {
+  const box = $('#listeAdaptation');
+  const ch = $('#choixPalier');
+  if (ch && !ch.dataset.rempli) {
+    ch.dataset.rempli = '1';
+    ch.innerHTML = PALIERS.map(([v, t], i) =>
+      `<button data-palier="${v}" class="${i === 0 ? 'on' : ''}">${esc(t)}</button>`).join('');
+    $$('#choixPalier [data-palier]').forEach(b => {
+      b.onclick = () => $$('#choixPalier button').forEach(x => x.classList.toggle('on', x === b));
+    });
+  }
+  const cpt = $('#compteurAdapt');
+  if (cpt) cpt.textContent = adaptation.length ? String(adaptation.length) : '';
+  if (!box) return;
+  if (!adaptation.length) {
+    box.innerHTML = '<p class="hint" style="margin:0">Aucune étape notée. La première est souvent une visite avec les parents.</p>';
+    return;
+  }
+  box.innerHTML = adaptation.map(a => {
+    const p = PALIERS.find(x => x[0] === a.etape) || PALIERS[0];
+    return `<div class="etape-adapt">
+      <div class="tete-adapt"><b>${esc(p[1])}</b><span>${esc(versFR(a.jour))}${a.duree ? ' · ' + esc(a.duree) : ''}</span></div>
+      ${a.ressenti_salariee ? `<div class="dit-moi">${esc(a.ressenti_salariee)}<small>moi</small></div>` : ''}
+      ${a.ressenti_parent ? `<div class="dit-eux">${esc(a.ressenti_parent)}<small>la famille</small></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function enregistrerAdaptation() {
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  const jour = versISO($('#adaptJour').value);
+  const b = $('#choixPalier .on');
+  if (!jour) { toast('Date attendue au format jj/mm/aaaa'); return; }
+  try {
+    await Supa.ecrire('adaptation', [{
+      contrat_id: contratActif, jour, etape: b ? b.dataset.palier : 'visite',
+      duree: $('#adaptDuree').value.trim() || '—',
+      ressenti_salariee: $('#adaptRessenti').value.trim() || null
+    }], 'resolution=merge-duplicates');
+    const p = PALIERS.find(x => x[0] === (b ? b.dataset.palier : 'visite'));
+    Supa.notifier(contratActif, 'Adaptation — ' + (p ? p[1].replace(/^\S+\s/, '') : ''), $('#adaptRessenti').value.trim().slice(0, 90));
+    $('#adaptJour').value = ''; $('#adaptDuree').value = ''; $('#adaptRessenti').value = '';
+    await chargerAdaptation(); renderAdaptation();
+    toast('Étape enregistrée');
+  } catch (e) { toast('Impossible : ' + (e.message || e)); }
+}
+
+/* Ce que la famille a écrit pendant l'absence : à lire avant de reprendre. */
+let reprises = [];
+
+async function chargerReprises() {
+  reprises = [];
+  if (!contratActif || !Supa.connecte()) return;
+  try {
+    reprises = await Supa.lire('reprises',
+      'contrat_id=eq.' + contratActif + '&select=id,auteur_id,depuis,texte,lu_le,cree_le&order=cree_le.desc&limit=10');
+  } catch (e) { reprises = []; }
+}
+
+function renderReprises() {
+  const box = $('#listeReprises');
+  const moi = (Supa.moi() || {}).id;
+  const nonLues = reprises.filter(r => r.auteur_id !== moi && !r.lu_le);
+  const cpt = $('#compteurReprise');
+  if (cpt) cpt.textContent = nonLues.length ? String(nonLues.length) : '';
+  const carte = $('#carteReprise');
+  if (carte && nonLues.length && !carte.dataset.vu) { carte.open = true; carte.dataset.vu = '1'; }
+  if (!box) return;
+
+  box.innerHTML = reprises.length ? reprises.map(r =>
+    `<div class="jour-b">
+      <div class="date" style="text-transform:none">Absente depuis le ${esc(versFR(r.depuis))}</div>
+      <div class="mot">${esc(r.texte)}</div>
+      ${!r.lu_le && r.auteur_id !== moi ? `<button class="btn btn-ghost btn-petit" data-lu="${esc(r.id)}" style="margin-top:8px">J\u2019ai lu</button>` : ''}
+    </div>`).join('')
+    : '<p class="hint" style="margin:0">Rien à signaler pour le moment.</p>';
+
+  $$('#listeReprises [data-lu]').forEach(b => {
+    b.onclick = async () => {
+      try {
+        await Supa.modifier('reprises', { lu_le: new Date().toISOString() }, 'id=eq.' + b.dataset.lu);
+        await chargerReprises(); renderReprises();
+      } catch (e) { toast('Impossible : ' + (e.message || e)); }
+    };
+  });
+}
+
+async function chargerAdaptation() {
+  adaptation = [];
+  if (!contratActif || !Supa.connecte()) return;
+  try {
+    adaptation = await Supa.lire('adaptation',
+      'contrat_id=eq.' + contratActif + '&select=id,jour,duree,etape,ressenti_salariee,ressenti_parent&order=jour');
+  } catch (e) { adaptation = []; }
+}
+
+/* ---------------- Remplacement ----------------
+   Une collègue prend le relais trois jours. Lui ouvrir le contrat entier
+   serait excessif ; ne rien lui donner la laisserait aveugle. Un accès daté,
+   qui expire seul, sans qu'on ait à y penser. */
+let remplacements = [];
+
+/* Six caracteres sans I, O, 0 ni 1 : on dicte ces codes a voix haute. */
+function codeAleatoire(n) {
+  const lettres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const t = new Uint8Array(n);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(t);
+  else for (let i = 0; i < n; i++) t[i] = Math.random() * 256 | 0;
+  return [...t].map(x => lettres[x % lettres.length]).join('');
+}
+
+async function chargerRemplacements() {
+  remplacements = [];
+  if (!Supa.connecte()) return;
+  try {
+    remplacements = await Supa.lire('remplacements',
+      'select=id,contrat_id,titulaire_id,remplacant_id,code,du,au,motif,accepte_le&order=du.desc&limit=30');
+  } catch (e) { remplacements = []; }
+}
+
+function renderRemplacements() {
+  const sel = $('#remplContrat');
+  if (sel) sel.innerHTML = contrats.map(c =>
+    `<option value="${esc(c.id)}">${esc(c.enfant_prenom || 'Enfant')}</option>`).join('');
+
+  const moi = (Supa.moi() || {}).id;
+  const box = $('#listeRemplacements');
+  if (!box) return;
+  const auj = new Date().toISOString().slice(0, 10);
+  const cpt = $('#compteurRempl');
+  const actifs = remplacements.filter(r => r.au >= auj);
+  if (cpt) cpt.textContent = actifs.length ? String(actifs.length) : '';
+
+  box.innerHTML = remplacements.length ? remplacements.map(r => {
+    const c = contrats.find(x => x.id === r.contrat_id);
+    const mien = r.titulaire_id === moi;
+    const etat = r.au < auj ? 'terminé'
+      : r.accepte_le ? (mien ? 'accepté' : 'tu remplaces')
+      : 'code en attente';
+    return `<div class="absence ${r.au < auj ? 'passee' : ''}">
+      <span class="abs-txt">
+        <b>${esc((c && c.enfant_prenom) || 'Enfant')}</b>
+        <small>${esc(versFR(r.du))} → ${esc(versFR(r.au))}${r.motif ? ' · ' + esc(r.motif) : ''}</small>
+        <small class="${r.accepte_le ? 'ok' : 'manque'}">${esc(etat)}</small>
+        ${r.code ? `<span class="code-rempl">${esc(r.code)}</span>` : ''}
+      </span>
+      ${mien ? `<button class="abs-act" data-rempl="${esc(r.id)}" aria-label="Retirer"><svg><use href="#i-poubelle"/></svg></button>` : ''}
+    </div>`;
+  }).join('') : '';
+
+  $$('#listeRemplacements [data-rempl]').forEach(b => {
+    b.onclick = async () => {
+      if (!confirm('Annuler ce remplacement ?')) return;
+      try {
+        await Supa.supprimer('remplacements', 'id=eq.' + b.dataset.rempl);
+        await chargerRemplacements(); renderRemplacements();
+        toast('Remplacement annulé');
+      } catch (e) { toast('Impossible : ' + (e.message || e)); }
+    };
+  });
+}
+
+async function creerRemplacement() {
+  const contrat = $('#remplContrat').value;
+  const du = versISO($('#remplDu').value), au = versISO($('#remplAu').value);
+  if (!contrat) { toast('Aucune famille à faire remplacer'); return; }
+  if (!du || !au) { toast('Dates attendues au format jj/mm/aaaa'); return; }
+  if (au < du) { toast('La fin doit suivre le début'); return; }
+  try {
+    const code = codeAleatoire(6);
+    await Supa.ecrire('remplacements', {
+      contrat_id: contrat, titulaire_id: Supa.moi().id, code, du, au,
+      motif: $('#remplMotif').value.trim() || null });
+    const c = contrats.find(x => x.id === contrat);
+    Supa.notifier(contrat, 'Remplacement prévu',
+      'Du ' + versFR(du) + ' au ' + versFR(au) + (c ? ' pour ' + c.enfant_prenom : ''), true);
+    $('#remplDu').value = ''; $('#remplAu').value = ''; $('#remplMotif').value = '';
+    await chargerRemplacements(); renderRemplacements();
+    toast('Code créé : ' + code);
+  } catch (e) { toast('Impossible : ' + (e.message || e)); }
+}
+
+async function rejoindreRemplacement() {
+  const code = $('#codeRempl').value.trim().toUpperCase();
+  if (code.length < 4) { toast('Saisis le code reçu'); return; }
+  try {
+    await Supa.fonction('rejoindre_remplacement', { p_code: code });
+    $('#codeRempl').value = '';
+    await charger();
+    await chargerRemplacements(); renderRemplacements();
+    toast('Remplacement accepté');
+  } catch (e) { toast(e.message || String(e)); }
+}
+
 /* ---------------- Absences ----------------
    Toutes ne se declarent pas de la meme facon. Des conges se posent a
    l'avance ; une maladie survient et se justifie apres coup. */
@@ -3197,6 +3465,8 @@ function renderPlanning() {
   renderHorairesBase(c);
   renderInfoEnfant(c);
   chargerEmployeur().then(chargerUrgence);
+  chargerAdaptation().then(renderAdaptation);
+  chargerReprises().then(renderReprises);
   chargerGalerie();
   const d = new Date(), y = d.getFullYear(), m = d.getMonth();
   const nb = new Date(y, m + 1, 0).getDate();
@@ -3258,6 +3528,9 @@ $('#btnEnvoyer').onclick = () => (conversationActive === 'commun' ? annoncerDepu
 $('#btnDemande').onclick = envoyerDemande;
 $$('.retards [data-retard]').forEach(b => { b.onclick = () => annoncerRetard(b.dataset.retard); });
 $('#btnFermeture').onclick = ajouterFermeture;
+$('#btnAdaptation').onclick = enregistrerAdaptation;
+$('#btnRemplacement').onclick = creerRemplacement;
+$('#btnRejoindreRempl').onclick = rejoindreRemplacement;
 $('#typeAbsence').addEventListener('click', e => {
   const b = e.target.closest('[data-type]');
   if (!b) return;
