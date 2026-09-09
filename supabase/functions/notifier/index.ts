@@ -105,6 +105,8 @@ Deno.serve(async (req) => {
 
     const { contrat_id, titre, corps, urgent } = await req.json();
     if (!contrat_id || !titre) throw new Error('contrat_id et titre sont requis');
+    console.log(`demande | contrat=${contrat_id} titre="${titre}" urgent=${!!urgent}`);
+    if (!COMPTE.client_email) console.error('FCM_COMPTE_SERVICE absent ou illisible');
 
     // Première vérification : le contrat est lu avec les droits de l'appelant.
     // S'il n'y appartient pas, la règle d'accès ne renvoie rien.
@@ -120,6 +122,7 @@ Deno.serve(async (req) => {
       .eq('id', contrat_id)
       .maybeSingle();
     if (!contrat) throw new Error('Contrat inaccessible');
+    console.log(`appelant=${utilisateur.user.id} employeur=${contrat.employeur_id} coparent=${contrat.coparent_id} salariee=${contrat.salariee_id}`);
 
     // Le destinataire est l'autre partie, jamais l'expéditeur. Le co-parent
     // compte comme parent : sans cela, sa notification lui reviendrait.
@@ -127,6 +130,7 @@ Deno.serve(async (req) => {
     const coteParent = contrat.employeur_id === moi || contrat.coparent_id === moi;
     const destinataire = coteParent ? contrat.salariee_id : contrat.employeur_id;
     if (!destinataire) {
+      console.warn('aucun destinataire : le contrat n\'a pas de seconde partie');
       return new Response(JSON.stringify({ envoyes: 0, raison: 'aucun destinataire' }),
         { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
     }
@@ -150,6 +154,7 @@ Deno.serve(async (req) => {
         const weekend = pref.silence_weekend && (jour === 0 || jour === 6);
         const periode = pref.silence_du && pref.silence_au && aujourdhui >= pref.silence_du && aujourdhui <= pref.silence_au;
         if (weekend || periode) {
+          console.log(`mode silencieux actif pour ${destinataire} (weekend=${weekend} periode=${periode})`);
           return new Response(JSON.stringify({ envoyes: 0, raison: 'mode silencieux' }),
             { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
         }
@@ -161,16 +166,21 @@ Deno.serve(async (req) => {
       .eq('personne_id', destinataire);
 
     if (!jetons?.length) {
+      console.warn(`aucun jeton pour ${destinataire} : la table jetons_push est vide pour cette personne`);
       return new Response(JSON.stringify({ envoyes: 0, raison: 'aucun appareil enregistré' }),
         { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
     }
 
+    console.log(`${jetons.length} appareil(s) pour le destinataire`);
     let envoyes = 0;
     const perimes: string[] = [];
     for (const j of jetons) {
       const r = await envoyer(j.jeton, titre, corps ?? '', { contrat_id: String(contrat_id) });
-      if (r.ok) envoyes++;
-      else if (r.statut === 404 || r.statut === 400) perimes.push(j.jeton);
+      if (r.ok) { envoyes++; console.log('envoi accepté par Firebase'); }
+      else {
+        console.error(`Firebase a refusé (${r.statut}) : ${r.reponse.slice(0, 300)}`);
+        if (r.statut === 404 || r.statut === 400) perimes.push(j.jeton);
+      }
     }
 
     // Un appareil désinstallé garde un jeton mort : on le retire.
@@ -180,6 +190,7 @@ Deno.serve(async (req) => {
       { headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
 
   } catch (e) {
+    console.error('echec : ' + String((e as Error).message ?? e));
     return new Response(JSON.stringify({ erreur: String((e as Error).message ?? e) }),
       { status: 400, headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
   }

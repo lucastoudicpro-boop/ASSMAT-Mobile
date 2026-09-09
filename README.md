@@ -1184,3 +1184,47 @@ Le reste est inchange depuis 1.0.9.
    « Notifications Firebase activees »
 6. Installer, se connecter, accepter l'autorisation Android
 7. Verifier que `jetons_push` contient une ligne par appareil
+
+## 1.0.11 — il n'y avait aucune boucle de rafraichissement
+
+Les deux applications ne rechargeaient leurs donnees qu'au changement d'ecran.
+Un message envoye n'apparaissait donc chez l'autre qu'en naviguant, et une
+notification pouvait arriver sans que l'ecran derriere bouge. L'impression de
+latence venait de la : rien n'attendait les nouveautes.
+
+Trois declencheurs desormais :
+
+- **Une boucle de vingt secondes**, active seulement quand l'application est
+  visible. En arriere-plan, rien n'est interroge : pas de batterie gaspillee.
+- **Le retour au premier plan**, immediat.
+- **La reception d'une notification**, immediate elle aussi : l'ecran est a jour
+  avant meme qu'on ait fini de lire la banniere.
+
+Un verrou empeche deux rafraichissements simultanes, et un delai minimal de huit
+secondes evite de marteler le serveur quand on navigue vite.
+
+Teste : un message depose cote serveur apparait seul en moins de vingt-trois
+secondes, pastille comprise ; un second apparait en une seconde apres un retour
+au premier plan.
+
+**Ce que cela ne remplace pas.** Les notifications restent le seul moyen d'etre
+prevenu application fermee. La boucle sert a ce qu'on voie la meme chose des
+qu'on ouvre.
+
+## 1.0.12 — les notifications partaient avec un jeton perime
+
+L'onglet Invocations de la fonction montrait des `401` sur chaque POST : la
+passerelle refusait l'appel avant meme que le code s'execute.
+
+Cause : le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
+tables passent par un enveloppeur qui rafraichit et rejoue en cas de 401 ;
+l'appel a la fonction, lui, partait en `fetch` brut, sans rien de tout cela.
+Passe la premiere heure, plus aucune notification.
+
+Corrige : le jeton est rafraichi d'avance s'il arrive a echeance dans les deux
+minutes, et un 401 declenche un rafraichissement puis un second essai. Teste
+avec un serveur qui refuse le premier jeton : l'appel est rejoue et aboutit.
+
+La fonction journalise desormais chaque etape, ce qu'elle ne faisait pas :
+les logs ne montraient que des demarrages de conteneur, sans jamais dire
+pourquoi un envoi n'aboutissait pas.

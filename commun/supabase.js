@@ -178,15 +178,38 @@ const Supa = (() => {
     });
   }
 
+  /* Le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
+     tables se rejouent apres rafraichissement ; celui-ci ne le faisait pas et
+     partait avec un jeton perime, que la passerelle refusait en 401. */
   async function notifier(contratId, titre, corps, urgent) {
-    if (!connecte()) return;
-    try {
-      await fetch(base + '/functions/v1/notifier', {
+    if (!connecte()) return null;
+
+    const envoyer = async () => {
+      const r = await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent })
       });
-    } catch (e) { /* le message est déjà enregistré : la notification n'est qu'un plus */ }
+      let corpsRep = null;
+      try { corpsRep = await r.json(); } catch (e) {}
+      return { statut: r.status, corps: corpsRep };
+    };
+
+    try {
+      // on rafraichit d'avance si le jeton arrive a echeance
+      const s = await lireSession();
+      if (s && s.expire_a && s.expire_a - Date.now() < 120000) await rafraichir();
+
+      let rep = await envoyer();
+      if (rep.statut === 401) {
+        if (await rafraichir()) rep = await envoyer();
+      }
+      if (rep.statut >= 400) console.warn('notification refusee', rep.statut, rep.corps);
+      return rep;
+    } catch (e) {
+      // le message est deja enregistre : la notification n'est qu'un plus
+      return null;
+    }
   }
 
   return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse,

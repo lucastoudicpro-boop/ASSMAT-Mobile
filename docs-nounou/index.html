@@ -811,7 +811,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.0.10</b></div>
+        <div class="ds"><span>Version</span><b>1.0.12</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1038,15 +1038,38 @@ const Supa = (() => {
     });
   }
 
+  /* Le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
+     tables se rejouent apres rafraichissement ; celui-ci ne le faisait pas et
+     partait avec un jeton perime, que la passerelle refusait en 401. */
   async function notifier(contratId, titre, corps, urgent) {
-    if (!connecte()) return;
-    try {
-      await fetch(base + '/functions/v1/notifier', {
+    if (!connecte()) return null;
+
+    const envoyer = async () => {
+      const r = await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent })
       });
-    } catch (e) { /* le message est déjà enregistré : la notification n'est qu'un plus */ }
+      let corpsRep = null;
+      try { corpsRep = await r.json(); } catch (e) {}
+      return { statut: r.status, corps: corpsRep };
+    };
+
+    try {
+      // on rafraichit d'avance si le jeton arrive a echeance
+      const s = await lireSession();
+      if (s && s.expire_a && s.expire_a - Date.now() < 120000) await rafraichir();
+
+      let rep = await envoyer();
+      if (rep.statut === 401) {
+        if (await rafraichir()) rep = await envoyer();
+      }
+      if (rep.statut >= 400) console.warn('notification refusee', rep.statut, rep.corps);
+      return rep;
+    } catch (e) {
+      // le message est deja enregistre : la notification n'est qu'un plus
+      return null;
+    }
   }
 
   return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse,
@@ -1148,6 +1171,7 @@ async function fermerPorte() {
   activerPush();
   marquerConnexion();
   await charger();
+  demarrerBoucle();
   montrer('accueil');
 }
 
@@ -1612,6 +1636,39 @@ function decalerJour(n) {
 const ILLU_FAM = `<svg viewBox="0 0 64 64" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="26" cy="24" r="8" fill="var(--acc-doux)"/><circle cx="44" cy="28" r="6" fill="var(--acc-doux)"/>
   <path d="M12 50c0-8 6-13 14-13s14 5 14 13M40 46c1-6 5-9 10-9s8 3 8 9"/></svg>`;
+
+/* ---------------- Rafraîchissement ----------------
+   Le serveur est interrogé toutes les vingt secondes tant que l'application
+   est visible, et aussitôt au retour au premier plan ou sur notification. */
+const PERIODE_SYNC = 20000;
+let boucleSync = null, syncEnCours = false, dernierSync = 0;
+
+async function rafraichirTout(force) {
+  if (!Supa.connecte() || syncEnCours) return;
+  if (!force && Date.now() - dernierSync < 8000) return;
+  syncEnCours = true;
+  dernierSync = Date.now();
+  try {
+    await charger();
+    if (vue === 'messages') { await chargerMessages(); renderMessages(); await chargerDemandes(); renderDemandes(); }
+    if (vue === 'journal') await chargerJournal();
+    if (vue === 'planning') { await chargerUrgence(); await chargerGalerie(); renderPlanning(); }
+    if (vue === 'commun') { await chargerCommun(); renderCommun(); }
+  } catch (e) { /* hors ligne : on retentera */ }
+  syncEnCours = false;
+}
+
+function demarrerBoucle() {
+  arreterBoucle();
+  boucleSync = setInterval(() => {
+    if (document.visibilityState === 'visible') rafraichirTout(false);
+  }, PERIODE_SYNC);
+}
+function arreterBoucle() { if (boucleSync) clearInterval(boucleSync); boucleSync = null; }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') rafraichirTout(true);
+});
 
 /* ---------------- Aujourd'hui ----------------
    Ce qui compte le matin : qui vient, de quelle heure à quelle heure. */
@@ -2250,7 +2307,7 @@ $('#btnRefus').onclick = () => {
 
 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
   window.Capacitor.Plugins.App.addListener('pause', () => { VERROU.quitteA = Date.now(); });
-  window.Capacitor.Plugins.App.addListener('resume', verrouillerSiBesoin);
+  window.Capacitor.Plugins.App.addListener('resume', () => { verrouillerSiBesoin(); rafraichirTout(true); });
   window.Capacitor.Plugins.App.addListener('backButton', () => {
     if (!$('#porte').hidden) return;
     if (!$('#verrou').hidden) return;
@@ -2395,6 +2452,8 @@ async function activerPush() {
       try { await Supa.enregistrerJeton(t.value, 'nounou'); } catch (e) {}
     });
     P.addListener('registrationError', () => {});
+    P.addListener('pushNotificationReceived', () => rafraichirTout(true));
+    P.addListener('pushNotificationActionPerformed', () => rafraichirTout(true));
     await P.register();
   } catch (e) { /* appareil sans services Google : on continue sans push */ }
 }
@@ -2413,6 +2472,7 @@ async function activerPush() {
 
   if (Supa.connecte() && !sessionValide()) { await Supa.deconnecter(); contrats = []; jours = []; majCompte(); renderAccueil(); }
   if (!Supa.connecte()) await ouvrirPorte();
+  else demarrerBoucle();
   // l'écran de lancement se retire une fois la destination connue
   const attente = Math.max(0, (window.Capacitor ? 700 : 1200) - (Date.now() - demarreA));
   setTimeout(() => {

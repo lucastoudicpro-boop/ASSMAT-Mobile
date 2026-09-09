@@ -1694,7 +1694,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.0.10</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.0.12</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3894,15 +3894,38 @@ const Supa = (() => {
     });
   }
 
+  /* Le jeton d'acces ne vaut qu'une heure, la session huit. Les appels aux
+     tables se rejouent apres rafraichissement ; celui-ci ne le faisait pas et
+     partait avec un jeton perime, que la passerelle refusait en 401. */
   async function notifier(contratId, titre, corps, urgent) {
-    if (!connecte()) return;
-    try {
-      await fetch(base + '/functions/v1/notifier', {
+    if (!connecte()) return null;
+
+    const envoyer = async () => {
+      const r = await fetch(base + '/functions/v1/notifier', {
         method: 'POST',
         headers: { ...entetes(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ contrat_id: contratId, titre, corps, urgent: !!urgent })
       });
-    } catch (e) { /* le message est déjà enregistré : la notification n'est qu'un plus */ }
+      let corpsRep = null;
+      try { corpsRep = await r.json(); } catch (e) {}
+      return { statut: r.status, corps: corpsRep };
+    };
+
+    try {
+      // on rafraichit d'avance si le jeton arrive a echeance
+      const s = await lireSession();
+      if (s && s.expire_a && s.expire_a - Date.now() < 120000) await rafraichir();
+
+      let rep = await envoyer();
+      if (rep.statut === 401) {
+        if (await rafraichir()) rep = await envoyer();
+      }
+      if (rep.statut >= 400) console.warn('notification refusee', rep.statut, rep.corps);
+      return rep;
+    } catch (e) {
+      // le message est deja enregistre : la notification n'est qu'un plus
+      return null;
+    }
   }
 
   return { brancherStockage, configurer, configure, connecte, moi, entetes, adresse,
@@ -4561,6 +4584,7 @@ async function fermerPorte() {
   if (!profil.tourVu) setTimeout(ouvrirTour, 450);
   await assurerProfil();
   await reconcilierContrats(false);
+  demarrerBoucle();
   activerPush();
   majCompte();
   syncPlanning(true);
@@ -4702,7 +4726,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.0.10';
+const VERSION = '1.0.12';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -5712,15 +5736,41 @@ function ouvrirNotifs() {
 }
 
 /* ---------------- Accueil ---------------- */
-let accueilCharge = 0;
-async function rafraichirAccueil() {
-  if (!Supa.connecte() || !contratLie()) return;
-  if (Date.now() - accueilCharge < 30000) return;
+/* ---------------- Rafraîchissement ----------------
+   Sans boucle, rien ne se met à jour tant qu'on ne change pas d'écran : une
+   notification arrive, l'application reste figée derrière. On interroge donc
+   le serveur régulièrement tant qu'on la regarde, et immédiatement au retour
+   au premier plan ou sur réception d'une notification. */
+const PERIODE_SYNC = 20000;
+let accueilCharge = 0, boucleSync = null, syncEnCours = false;
+
+async function rafraichirTout(force) {
+  if (!Supa.connecte() || !contratLie() || syncEnCours) return;
+  if (!force && Date.now() - accueilCharge < 8000) return;
+  syncEnCours = true;
   accueilCharge = Date.now();
-  await Promise.all([chargerMessages(), chargerJournal(), chargerGalerie(), chargerDemandes()]);
-  if (vue === 'accueil') renderAccueil();
-  renderBarre();
+  try {
+    await Promise.all([chargerMessages(), chargerJournal(), chargerGalerie(), chargerDemandes()]);
+    if (vue === 'accueil') renderAccueil();
+    else if (vue === 'module') await rafraichirModule(moduleActif);
+    renderBarre();
+  } catch (e) { /* hors ligne : on retentera au prochain tour */ }
+  syncEnCours = false;
 }
+
+const rafraichirAccueil = () => rafraichirTout(false);
+
+function demarrerBoucle() {
+  arreterBoucle();
+  boucleSync = setInterval(() => {
+    if (document.visibilityState === 'visible') rafraichirTout(false);
+  }, PERIODE_SYNC);
+}
+function arreterBoucle() { if (boucleSync) clearInterval(boucleSync); boucleSync = null; }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') rafraichirTout(true);
+});
 
 async function renderAccueil() {
   rafraichirAccueil();
@@ -6856,7 +6906,12 @@ function integrerAndroid() {
       if (vue !== 'accueil') { showView('accueil'); return; }
       C.App.exitApp();
     });
-    C.App.addListener('resume', () => { if (saveTimer) doSave(); verrouillerSiBesoin(); });
+    C.App.addListener('resume', () => {
+      if (saveTimer) doSave();
+      verrouillerSiBesoin();
+      rafraichirTout(true);
+      syncPlanning(true);
+    });
     C.App.addListener('pause', () => { VERROU.quitteA = Date.now(); });
   }
 
@@ -6883,6 +6938,9 @@ async function activerPush() {
       try { await Supa.enregistrerJeton(t.value, 'parent'); } catch (e) {}
     });
     P.addListener('registrationError', () => {});
+    // une notification reçue doit se voir dans l'application, tout de suite
+    P.addListener('pushNotificationReceived', () => rafraichirTout(true));
+    P.addListener('pushNotificationActionPerformed', () => rafraichirTout(true));
     await P.register();
   } catch (e) { /* appareil sans services Google : on continue sans push */ }
 }
@@ -6917,6 +6975,7 @@ basculerVueCal('grille');
   if (Supa.configure()) await Supa.reprendre();
   if (await sessionValide()) { majCompte(); await reconcilierContrats(true); syncPlanning(true); activerPush(); }
   else await ouvrirPorte();
+  demarrerBoucle();
   const m = $('#majActuelle'); if (m) m.textContent = VERSION;
   if ((profil.maj || {}).auto) setTimeout(() => verifierMaj(true), 2500);
   programmerRappels();
