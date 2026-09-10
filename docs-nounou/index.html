@@ -1667,6 +1667,13 @@ body.barre-route>#mauvaisePorte{display:flex!important}
     <div class="card">
       <div class="tete"><svg><use href="#i-info"/></svg>Me présenter</div>
       <div class="corps">
+        <div class="deux">
+          <label class="field"><span>Prénom</span><input id="proPrenom" placeholder="Marie"></label>
+          <label class="field"><span>Nom</span><input id="proNom" placeholder="Dupont"></label>
+        </div>
+        <label class="field"><span>Téléphone</span><input id="proTel" inputmode="tel" placeholder="06 …"></label>
+        <p class="hint" style="margin-top:-2px">Saisis-les une fois : tes familles les reprennent dans leur dossier, et ils apparaissent dans la recherche. Tu n'auras plus à les redonner.</p>
+
         <textarea id="proPresentation" rows="4" placeholder="Quelques mots sur votre façon d'accueillir, ce qui vous tient à cœur…" maxlength="1500"></textarea>
         <div class="deux" style="margin-top:10px">
           <label class="field"><span>Assistante maternelle depuis</span><input id="proDepuis" placeholder="jj/mm/aaaa"></label>
@@ -1820,7 +1827,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.9.4</b></div>
+        <div class="ds"><span>Version</span><b>1.10.1</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -2193,6 +2200,7 @@ function renderChoixEnfant() {
 }
 
 function montrer(v) {
+  ecranPropre();
   vue = v;
   for (const nom of ['accueil', 'planning', 'journal', 'messages', 'galerie', 'familles', 'commun', 'profil', 'params']) {
     const el = $('#vue' + nom[0].toUpperCase() + nom.slice(1));
@@ -2294,7 +2302,9 @@ function marquerConnexion() { const r = Reglages.lire(); r.connecte_a = new Date
 function majCompte() {
   const r = Reglages.lire();
   const m = Supa.moi();
-  const nom = (m && m.email) ? m.email.split('@')[0] : 'Mon compte';
+  // Son nom, s'il est renseigne ; a defaut le debut de son adresse.
+  const complet = [identiteMoi.prenom, identiteMoi.nom].filter(Boolean).join(' ').trim();
+  const nom = complet || ((m && m.email) ? m.email.split('@')[0] : 'Mon compte');
   const av = $('#avatarInitiale'); if (av) av.textContent = nom[0].toUpperCase();
   const pn = $('#profilNom'); if (pn) pn.textContent = nom;
   const pe = $('#profilEtat');
@@ -2512,14 +2522,19 @@ function dejaListe(contacts, tel) {
   return !!n && (contacts || []).some(c => chiffres(c.tel) === n);
 }
 
-/* Le numéro de l'employeur vient de son profil : il le saisit une fois. */
+/* Le nom et le numero de l'employeur viennent de son profil : il les saisit
+   une fois dans son dossier, ils arrivent ici sans qu'elle les redemande. */
 async function chargerEmployeur() {
   telEmployeur = ''; nomEmployeur = '';
   const c = contrats.find(x => x.id === contratActif);
   if (!c || !c.employeur_id || !Supa.connecte()) return;
   try {
-    const r = await Supa.lire('profils', 'id=eq.' + c.employeur_id + '&select=nom,telephone');
-    if (r && r.length) { telEmployeur = r[0].telephone || ''; nomEmployeur = r[0].nom || ''; }
+    const r = await Supa.lire('profils',
+      'id=eq.' + c.employeur_id + '&select=prenom,nom,telephone');
+    if (r && r.length) {
+      telEmployeur = r[0].telephone || '';
+      nomEmployeur = [r[0].prenom, r[0].nom].filter(Boolean).join(' ').trim();
+    }
   } catch (e) {}
 }
 
@@ -3089,6 +3104,7 @@ async function rafraichirTout(force) {
   dernierSync = Date.now();
   try {
     await charger();
+    if (enSaisie()) { syncEnCours = false; return; }   // on n'ecrase pas la frappe
     if (vue === 'messages') {
       await chargerBoite(); renderBoite();
       if (conversationActive && conversationActive !== 'commun') { await chargerMessages(); renderMessages(); }
@@ -4043,8 +4059,37 @@ async function enregistrerVisibilite() {
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 
+/* Son nom vit dans profils, pas dans profils_pro : c'est lui que voient les
+   familles et la recherche. Il n'etait nulle part saisissable — l'application
+   affichait le debut de son adresse e-mail, et le parent le retapait. */
+let identiteMoi = {};
+
+async function chargerIdentite() {
+  identiteMoi = {};
+  if (!Supa.connecte()) return;
+  try {
+    const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=prenom,nom,telephone');
+    identiteMoi = (r && r[0]) || {};
+  } catch (e) {}
+}
+
+async function enregistrerIdentite() {
+  if (!Supa.connecte()) return;
+  const corps = {
+    prenom: $('#proPrenom').value.trim() || null,
+    nom: $('#proNom').value.trim() || null,
+    telephone: $('#proTel').value.trim() || null
+  };
+  try {
+    await Supa.modifier('profils', corps, 'id=eq.' + Supa.moi().id);
+    Object.assign(identiteMoi, corps);
+    majCompte();
+  } catch (e) {}
+}
+
 async function chargerProfilPro() {
   profilPro = null;
+  await chargerIdentite();
   if (!Supa.connecte()) return;
   try {
     const r = await Supa.lire('profils_pro',
@@ -4060,6 +4105,9 @@ function renderProfilPro() {
   if (!profilPro) return;
   const p = profilPro;
 
+  $('#proPrenom').value = identiteMoi.prenom || '';
+  $('#proNom').value = identiteMoi.nom || '';
+  $('#proTel').value = identiteMoi.telephone || '';
   $('#proPresentation').value = p.presentation || '';
   $('#proDepuis').value = p.depuis ? versFR(p.depuis) : '';
   $('#proPlaces').value = p.places || '';
@@ -4186,9 +4234,10 @@ async function enregistrerProfilPro() {
   };
   try {
     await Supa.ecrire('profils_pro', [corps], 'resolution=merge-duplicates');
+    await enregistrerIdentite();
     await chargerProfilPro();
     renderApercuPartage();
-    toast('Profil enregistré — tes familles le voient');
+    ecranPropre(); toast('Profil enregistré — tes familles le voient');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 
@@ -4985,6 +5034,14 @@ $('#btnAjoutDiplome').onclick = () => ouvrirChoixQualif('diplomes');
 $('#btnAjoutFormation').onclick = () => ouvrirChoixQualif('formations');
 $('#qualifFermer').onclick = () => { fermerFeuille('#choixQualif'); };
 $('#btnProfilEnregistrer').onclick = enregistrerProfilPro;
+// la signature reprend son nom : elle l'a deja donne une fois
+$('#nomSignature').addEventListener('focus', () => {
+  const el = $('#nomSignature');
+  if (!el.value.trim()) {
+    const complet = [identiteMoi.prenom, identiteMoi.nom].filter(Boolean).join(' ').trim();
+    if (complet) { el.value = complet; el.dispatchEvent(new Event('input', { bubbles: true })); }
+  }
+});
 $('#btnProPhoto').onclick = () => photoOuChamp('proPhotoFichier', f => envoyerPhotoPro(f));
 $('#proPhotoFichier').onchange = e => {
   const f = e.target.files && e.target.files[0];
@@ -5530,7 +5587,11 @@ function nativiser(racine) {
   (racine || document).querySelectorAll('input:not([type]), input[type=text]').forEach(txt => {
     if (txt.dataset.natif) return;
     const ph = txt.placeholder || '';
-    const genre = NATIF_HEURE.test(ph) ? 'time' : NATIF_DATE.test(ph) ? 'date' : null;
+    // On reconnait par le repere, ou par un marquage explicite : certains
+      // champs n'ont pas de repere et se voyaient oublies.
+      const marque = txt.dataset.genre;
+      const genre = marque === 'heure' ? 'time' : marque === 'date' ? 'date'
+        : NATIF_HEURE.test(ph) ? 'time' : NATIF_DATE.test(ph) ? 'date' : null;
     if (!genre) return;
     txt.dataset.natif = genre;
     txt.readOnly = true;                 // le clavier ne s'ouvre plus
@@ -6226,6 +6287,33 @@ async function annulerSuppression() {
     toast('Ton compte est conservé.');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
+
+
+/* On ne redessine jamais un ecran pendant qu'on y ecrit : la boucle de
+   rafraichissement effacait le texte en cours de frappe toutes les vingt
+   secondes. Elle attend que le champ soit quitte. */
+function enSaisie() {
+  if (ecranModifie) return true;
+  const a = document.activeElement;
+  if (!a) return false;
+  const t = (a.tagName || '').toLowerCase();
+  if (t === 'input' || t === 'textarea' || t === 'select') return true;
+  return a.isContentEditable === true;
+}
+
+
+/* Quitter un champ ne veut pas dire avoir enregistre : on peut taper trois
+   champs puis faire defiler. Tant qu'un ecran porte des modifications non
+   enregistrees, la boucle ne le redessine pas. */
+let ecranModifie = false;
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (!t || !t.matches || !t.matches('input, textarea, select')) return;
+  if (t.closest('#modulePage, #dossier, #vuePlanning, #vueJournal, #vueProfil, #vueFamilles')) ecranModifie = true;
+}, true);
+
+function ecranPropre() { ecranModifie = false; }
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;

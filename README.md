@@ -2405,3 +2405,86 @@ sans transition, et 0,2 s de nouveau apres.
 doigt pendant qu'on tirait la feuille, ce qui ajoutait un scintillement
 par-dessus le mouvement. Elle est desormais reservee au simple appui, jamais a
 l'interieur d'une feuille qu'on deplace.
+
+## 1.10.0 — la saisie ne s'efface plus, et on ne saisit plus deux fois
+
+### Ce qu'on ecrit disparaissait
+
+Le plus grave. La boucle de rafraichissement redessine l'ecran toutes les vingt
+secondes — y compris pendant qu'on ecrit. Le texte en cours de frappe etait
+efface, sans message, et cela touchait tous les modules a champs : urgence,
+dossier, journal, profil.
+
+Deux verrous :
+
+- **Pendant la frappe** : tant qu'un champ a le curseur, l'ecran n'est pas
+  redessine. Les donnees sont chargees, l'affichage attend.
+- **Tant que ce n'est pas enregistre** : quitter un champ ne veut pas dire
+  avoir enregistre — on peut remplir trois champs puis faire defiler. Un ecran
+  portant des modifications non enregistrees n'est jamais redessine.
+
+Verifie : quatre rafraichissements forces pendant la frappe, puis quatre apres
+avoir quitte le champ sans enregistrer. Le texte survit aux huit.
+
+### Cinq jours sur sept n'avaient pas le selecteur
+
+Le planning type ne reconnaissait que lundi et mardi : mercredi a dimanche
+n'avaient pas de repere dans leur champ, et mon detecteur s'appuyait dessus.
+Dix champs corriges. Le detecteur accepte aussi un marquage explicite, pour ne
+plus dependre d'un texte d'exemple.
+
+### Ne rien saisir deux fois
+
+Le nom de la salariee est dans son profil, sa commune aussi. Les redemander au
+parent, c'est lui faire refaire le travail que l'application a deja fait.
+
+Dossier → Salariee affiche ce qui est disponible et propose de le reprendre :
+« 2 informations disponibles dans son profil : Nom, Code postal et ville ».
+
+**Un champ deja rempli n'est jamais touche.** Verifie : un nom saisi a la main
+survit a une reprise ulterieure. La reprise ne remplit que le vide.
+
+### La demande d'accueil ne bloque plus
+
+Sans prenom d'enfant, elle refusait en renvoyant vers le Dossier — ce qui fait
+perdre le fil. Elle le demande sur place, et ce qui est saisi rejoint le
+dossier : ce sera repris partout ensuite.
+
+Son identifiant vient desormais de l'ecriture elle-meme, au lieu d'une relecture
+qui pouvait echouer et laisser la notification sans destinataire.
+
+## 1.10.1 — la boucle des identites
+
+Le vrai doublon n'etait pas la ou on le cherchait. **Le nom de la salariee
+n'etait saisissable nulle part.** L'application affichait le debut de son
+adresse e-mail, le parent le retapait dans son dossier, et la recherche
+l'affichait vide.
+
+### Elle le saisit une fois
+
+Mon profil porte desormais prenom, nom et telephone, avec la phrase qui dit
+pourquoi : « Saisis-les une fois : tes familles les reprennent dans leur
+dossier, et ils apparaissent dans la recherche. »
+
+Ils vont dans `profils`, la ou le parent et la recherche les lisent deja.
+
+- Son compte affiche son nom au lieu du debut de son adresse.
+- La signature du consentement se prerempli quand elle touche le champ.
+- Le parent voit « 1 information disponible dans son profil : Nom et prenom ».
+
+### Lui aussi
+
+Le nom du parent est publie comme son numero l'etait deja : la nounou voit
+« Lucas TOUDIC » dans sa fiche d'urgence au lieu de « Le parent employeur ».
+Ce qui etait deja saisi avant cette version est rattrape a la connexion.
+
+### Deux defauts trouves en verifiant
+
+- **Le nom repris etait tronque** : le champ du parent attend « Nom et prenom »,
+  la reprise n'apportait que le nom. Les deux sont assembles.
+- **Saisir le nom puis le telephone annulait la publication du nom** : un seul
+  minuteur servait aux deux champs, et le second effacait le premier. Un
+  minuteur par champ.
+
+Verifie de bout en bout : elle saisit, il reprend « Marie DUPONT », il saisit,
+elle voit « Lucas TOUDIC ».

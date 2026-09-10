@@ -752,6 +752,12 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
 .contact .two:first-child{grid-template-columns:120px 1fr}
 .contact .retirer{border:0;background:transparent;color:var(--bord);cursor:pointer;padding:9px;border-radius:9px}
 .contact .retirer svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.reprise-dispo{display:flex;align-items:center;gap:12px;background:var(--acc-doux);
+  border-radius:14px;padding:12px 14px;margin:10px 0}
+.reprise-dispo b{display:block;font-size:13.5px}
+.reprise-dispo small{display:block;font-size:12px;color:var(--mut);margin-top:2px}
+.reprise-dispo>button{flex:0 0 auto;margin:0}
+.reprise-dispo>*:first-child{flex:1;min-width:0}
 .pers{display:grid;grid-template-columns:1fr 1fr 40px;gap:7px;margin-bottom:7px;align-items:center}
 .pers input{min-height:42px}
 .pers button{border:0;background:transparent;color:var(--danger);cursor:pointer;
@@ -1942,6 +1948,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
   <details class="card">
     <summary><svg class="ico"><use href="#i-perso"/></svg><span class="ttl">Salariée</span></summary>
     <div class="body">
+      <div id="repriseInfos"></div>
       <label class="field"><span>Nom et prénom</span><input data-identite="salarie.nom"></label>
       <label class="field"><span>Adresse</span><input data-identite="salarie.adresse"></label>
       <label class="field"><span>Code postal et ville</span><input data-identite="salarie.cpVille"></label>
@@ -1977,11 +1984,11 @@ body.barre-route>#mauvaisePorte{display:flex!important}
         <div class="hor-tete"><span></span><span>arrivée</span><span>départ</span><span>durée</span></div>
         <div class="hor-l"><b>lun</b><input data-profil="horaires.d1.debut" placeholder="08:00"><input data-profil="horaires.d1.fin" placeholder="17:00"><em data-duree="d1">—</em></div>
         <div class="hor-l"><b>mar</b><input data-profil="horaires.d2.debut" placeholder="08:00"><input data-profil="horaires.d2.fin" placeholder="17:00"><em data-duree="d2">—</em></div>
-        <div class="hor-l"><b>mer</b><input data-profil="horaires.d3.debut"><input data-profil="horaires.d3.fin"><em data-duree="d3">—</em></div>
-        <div class="hor-l"><b>jeu</b><input data-profil="horaires.d4.debut"><input data-profil="horaires.d4.fin"><em data-duree="d4">—</em></div>
-        <div class="hor-l"><b>ven</b><input data-profil="horaires.d5.debut"><input data-profil="horaires.d5.fin"><em data-duree="d5">—</em></div>
-        <div class="hor-l"><b>sam</b><input data-profil="horaires.d6.debut"><input data-profil="horaires.d6.fin"><em data-duree="d6">—</em></div>
-        <div class="hor-l"><b>dim</b><input data-profil="horaires.d0.debut"><input data-profil="horaires.d0.fin"><em data-duree="d0">—</em></div>
+        <div class="hor-l"><b>mer</b><input data-profil="horaires.d3.debut" placeholder="08:00"><input data-profil="horaires.d3.fin" placeholder="17:00"><em data-duree="d3">—</em></div>
+        <div class="hor-l"><b>jeu</b><input data-profil="horaires.d4.debut" placeholder="08:00"><input data-profil="horaires.d4.fin" placeholder="17:00"><em data-duree="d4">—</em></div>
+        <div class="hor-l"><b>ven</b><input data-profil="horaires.d5.debut" placeholder="08:00"><input data-profil="horaires.d5.fin" placeholder="17:00"><em data-duree="d5">—</em></div>
+        <div class="hor-l"><b>sam</b><input data-profil="horaires.d6.debut" placeholder="08:00"><input data-profil="horaires.d6.fin" placeholder="17:00"><em data-duree="d6">—</em></div>
+        <div class="hor-l"><b>dim</b><input data-profil="horaires.d0.debut" placeholder="08:00"><input data-profil="horaires.d0.fin" placeholder="17:00"><em data-duree="d0">—</em></div>
       </div>
       <div class="ds" style="margin-top:10px"><span>Total par semaine</span><b id="totalSemaine">— h</b></div>
       <p class="hint">Les horaires convenus au contrat. Laisser vide les jours sans accueil. « Remplir le mois » s'appuie dessus, et ces horaires sont ceux que voit ta salariée dans Cocon Nounou.</p>
@@ -2391,7 +2398,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.9.4</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.10.1</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3466,6 +3473,7 @@ function renderEnfants() {
   }
 }
 let saveTimer = null, previewTimer = null, profilTimer = null, telTimer = null;
+const minuteursIdentite = {};
 let profil = {};
 let vue = 'saisie';
 let rappelTimer = null;
@@ -3943,6 +3951,7 @@ function scheduleSave() {
   planifierSync();
 }
 async function doSave() {
+  ecranPropre();
   clearTimeout(saveTimer); saveTimer = null;
   if (!cur) return;
   await API.saveFiche(cleFiche(cur.mois), cur);
@@ -4157,6 +4166,7 @@ function fitPreview() {
 }
 
 function showView(v) {
+  ecranPropre();
   vue = v;
   // l'ecran qui arrive glisse legerement : on sent le changement
   const arrivant = $('#' + ({ module: 'modulePage' }[v] || v));
@@ -4173,6 +4183,7 @@ function showView(v) {
   if (v === 'accueil') renderAccueil();
   if (v === 'apercu') { renderPreview(); fitPreview(); }
   if (v === 'dossier') renderDossier();
+  if (v === 'dossier') chercherInfosConnues().then(renderReprise);
   if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); renderModulesNatifs(); appliquerDev(); chargerEtatSuppression(); }
   prevenirMigration();
   if (v === 'annuel') renderAnnuel().then(renderRegularisation);
@@ -4786,11 +4797,16 @@ function remplirIdentites() {
 
 async function identiteModifiee(el) {
   const [bloc, champ] = el.dataset.identite.split('.');
-  // le numéro du parent est publié : la nounou doit pouvoir appeler
-  if (bloc === 'employeur' && champ === 'tel' && Supa.connecte()) {
-    clearTimeout(telTimer);
-    telTimer = setTimeout(async () => {
-      try { await Supa.modifier('profils', { telephone: el.value.trim() }, 'id=eq.' + Supa.moi().id); } catch (e) {}
+  // Le nom et le numero du parent sont publies : la nounou les voit dans sa
+  // fiche d'urgence, et n'a pas a les redemander.
+  if (bloc === 'employeur' && (champ === 'tel' || champ === 'nom') && Supa.connecte()) {
+    // Un minuteur par champ : un seul minuteur partage faisait que saisir le
+    // nom puis le telephone annulait la publication du nom.
+    clearTimeout(minuteursIdentite[champ]);
+    const valeur = el.value.trim();
+    minuteursIdentite[champ] = setTimeout(async () => {
+      const corps = champ === 'tel' ? { telephone: valeur || null } : { nom: valeur || null };
+      try { await Supa.modifier('profils', corps, 'id=eq.' + Supa.moi().id); } catch (e) {}
     }, 900);
   }
   profil.identites = identites();
@@ -5455,6 +5471,7 @@ function renderOnglets(id) {
 }
 
 async function ouvrirModule(id) {
+  ecranPropre();
   const page = PAGES[id];
   if (!page) return;
   rangerCartes();
@@ -5655,6 +5672,7 @@ async function fermerPorte() {
   if (!await verifierRole('employeur', 'Cocon Nounou')) return;
   if (!profil.tourVu) setTimeout(ouvrirTour, 450);
   await assurerProfil();
+  publierIdentite();
   await reconcilierContrats(false);
   demarrerBoucle();
   activerPush();
@@ -5749,6 +5767,23 @@ async function actionCompte(quoi) {
 }
 
 /* Crée la ligne de profil au premier accès, sans écraser une existante. */
+/* Le nom et le numero deja saisis dans le dossier rejoignent le compte : sans
+   cela, seuls ceux modifies apres cette version seraient publies. */
+async function publierIdentite() {
+  if (!Supa.connecte()) return;
+  const nom = ((cur.employeur || {}).nom || '').trim();
+  const tel = ((cur.employeur || {}).tel || '').trim();
+  if (!nom && !tel) return;
+  try {
+    const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=nom,telephone');
+    const p = (r && r[0]) || {};
+    const corps = {};
+    if (nom && !p.nom) corps.nom = nom;
+    if (tel && !p.telephone) corps.telephone = tel;
+    if (Object.keys(corps).length) await Supa.modifier('profils', corps, 'id=eq.' + Supa.moi().id);
+  } catch (e) {}
+}
+
 async function assurerProfil() {
   const m = Supa.moi();
   if (!m) return;
@@ -5798,7 +5833,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.9.4';
+const VERSION = '1.10.1';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -6346,12 +6381,23 @@ const ILLU_RECHERCHE = `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)"
 
 async function envoyerDemandeAccueil(salarieeId) {
   const e = enfantCourant() || {};
-  const prenom = e.prenom || cur.enfant.prenom || '';
-  if (!prenom) { toast('Renseigne d\u2019abord le prénom de ton enfant dans le Dossier'); return; }
+  let prenom = (e.prenom || cur.enfant.prenom || '').trim();
+  // Refuser en renvoyant ailleurs fait perdre le fil. On demande sur place, et
+  // ce qui est saisi rejoint le dossier : ce sera repris partout ensuite.
+  if (!prenom) {
+    prenom = ((await demander('Le prénom de votre enfant',
+      { aide: 'Il accompagnera votre demande, et sera repris dans votre dossier.',
+        valider: 'Continuer' })) || '').trim();
+    if (!prenom) return;
+    cur.enfant.prenom = prenom;
+    const ef = enfants().find(x => x.id === enfantActif);
+    if (ef) { ef.prenom = prenom; await doProfilSave(); }
+    await doSave();
+  }
   const mot = await demander('Un mot pour vous présenter ?', { aide: 'Ce message accompagnera votre demande.', type: 'texte-long' }) || '';
   const debut = await demander('Début souhaité ? (jj/mm/aaaa)', { type: 'date' }) || '';
   try {
-    await Supa.ecrire('demandes_accueil', [{
+    const cree = await Supa.ecrire('demandes_accueil', [{
       parent_id: Supa.moi().id, salariee_id: salarieeId,
       // cur.enfant.naissance est en jj/mm/aaaa : la colonne attend une date,
       // et Postgres refusait la ligne entiere sans que rien ne l'explique.
@@ -6359,10 +6405,12 @@ async function envoyerDemandeAccueil(salarieeId) {
       debut_souhaite: versISO(debut) || null,
       rythme: null, mot: mot.trim() || null
     }], 'resolution=merge-duplicates');
-    await chargerDemandesAccueil();
-    const envoyee = demandesAccueil.find(d => d.salariee_id === salarieeId && d.etat === 'attente');
-    if (envoyee) prevenirDemande(envoyee.id, 'Une famille vous écrit',
+    // L'ecriture renvoie la ligne creee : on tient l'identifiant sans avoir a
+    // relire, ce qui rendait la notification dependante d'un aller-retour.
+    const id = Array.isArray(cree) && cree[0] && cree[0].id;
+    if (id) prevenirDemande(id, 'Une famille vous écrit',
       prenom + (debut ? ', pour ' + debut : ''));
+    await chargerDemandesAccueil();
     renderResultats(); renderDemandesAccueil();
     toast('Demande envoyée — elle décide');
   } catch (e2) { toast('Impossible : ' + enClair(e2)); }
@@ -7737,8 +7785,12 @@ async function rafraichirTout(force) {
     await Promise.all([chargerMessages(), chargerJournal(), chargerGalerie(), chargerDemandes(),
                        chargerPortrait(), chargerFermetures(), chargerAdaptation(), chargerCommun(),
                        chargerSujets(), chargerDates()]);
-    if (vue === 'accueil') renderAccueil();
-    else if (vue === 'module') await rafraichirModule(moduleActif);
+    // Redessiner pendant la frappe effacerait ce qui est en train d'etre
+    // ecrit. Les donnees sont chargees, l'affichage attendra.
+    if (!enSaisie()) {
+      if (vue === 'accueil') renderAccueil();
+      else if (vue === 'module') await rafraichirModule(moduleActif);
+    }
     renderBarre();
     majPastille();
   } catch (e) { /* hors ligne : on retentera au prochain tour */ }
@@ -8292,6 +8344,7 @@ async function fillProfilForm() {
 }
 async function scheduleProfilSave() { setStatus('saving'); clearTimeout(profilTimer); profilTimer = setTimeout(doProfilSave, 600); }
 async function doProfilSave() {
+  ecranPropre();
   clearTimeout(profilTimer); profilTimer = null;
   await API.saveProfil(JSON.parse(JSON.stringify(profil)));
   setStatus('ok');
@@ -9179,7 +9232,11 @@ function nativiser(racine) {
   (racine || document).querySelectorAll('input:not([type]), input[type=text]').forEach(txt => {
     if (txt.dataset.natif) return;
     const ph = txt.placeholder || '';
-    const genre = NATIF_HEURE.test(ph) ? 'time' : NATIF_DATE.test(ph) ? 'date' : null;
+    // On reconnait par le repere, ou par un marquage explicite : certains
+      // champs n'ont pas de repere et se voyaient oublies.
+      const marque = txt.dataset.genre;
+      const genre = marque === 'heure' ? 'time' : marque === 'date' ? 'date'
+        : NATIF_HEURE.test(ph) ? 'time' : NATIF_DATE.test(ph) ? 'date' : null;
     if (!genre) return;
     txt.dataset.natif = genre;
     txt.readOnly = true;                 // le clavier ne s'ouvre plus
@@ -9882,6 +9939,114 @@ async function annulerSuppression() {
     toast('Ton compte est conservé.');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
+
+
+/* On ne redessine jamais un ecran pendant qu'on y ecrit : la boucle de
+   rafraichissement effacait le texte en cours de frappe toutes les vingt
+   secondes. Elle attend que le champ soit quitte. */
+function enSaisie() {
+  if (ecranModifie) return true;
+  const a = document.activeElement;
+  if (!a) return false;
+  const t = (a.tagName || '').toLowerCase();
+  if (t === 'input' || t === 'textarea' || t === 'select') return true;
+  return a.isContentEditable === true;
+}
+
+
+/* ---------------- Ne rien saisir deux fois ----------------
+   Le nom de la salariee est dans son profil, son numero d'agrement aussi. Les
+   redemander au parent, c'est lui faire faire le travail que l'application a
+   deja fait. On propose ce qu'on sait, on ne l'impose pas : un champ vide se
+   remplit tout seul, un champ rempli ne bouge jamais. */
+let infosConnues = null;
+
+async function chercherInfosConnues() {
+  infosConnues = null;
+  const id = contratLie();
+  if (!id || !Supa.connecte()) return;
+  try {
+    const c = await Supa.lire('contrats', 'id=eq.' + id + '&select=salariee_id');
+    const sid = c && c[0] && c[0].salariee_id;
+    if (!sid) return;
+    const [prof, pro] = await Promise.all([
+      Supa.lire('profils', 'id=eq.' + sid + '&select=prenom,nom,telephone'),
+      Supa.lire('profils_pro', 'id=eq.' + sid + '&select=agrement_num,commune,code_postal')
+    ]);
+    infosConnues = { ...(prof[0] || {}), ...(pro[0] || {}) };
+  } catch (e) {}
+}
+
+/* Un champ vide se remplit ; un champ deja rempli n'est jamais touche. */
+async function reprendreInfos(silencieux) {
+  if (!infosConnues) await chercherInfosConnues();
+  if (!infosConnues) { if (!silencieux) toast('Rien à reprendre : la nounou n\u2019a pas rempli son profil.'); return 0; }
+
+  const cpVille = [infosConnues.code_postal, infosConnues.commune].filter(Boolean).join(' ');
+  // Le champ attend « Nom et prénom » : on assemble ce qu'elle a saisi.
+  const complet = [infosConnues.prenom, infosConnues.nom].filter(Boolean).join(' ').trim();
+  const paires = [
+    ['salarie.nom', complet],
+    ['salarie.cpVille', cpVille]
+  ];
+  let n = 0;
+  for (const [chemin, valeur] of paires) {
+    if (!valeur) continue;
+    const [bloc, champ] = chemin.split('.');
+    if ((cur[bloc] || {})[champ]) continue;         // deja rempli : on n'y touche pas
+    cur[bloc] = cur[bloc] || {};
+    cur[bloc][champ] = valeur;
+    const el = document.querySelector(`[data-identite="${chemin}"]`);
+    if (el) {
+      el.value = valeur;
+      el.classList.add('vient-de-changer');
+      setTimeout(() => el.classList.remove('vient-de-changer'), 400);
+    }
+    n++;
+  }
+  if (n) { await doSave(); if (!silencieux) toast(n + ' information(s) reprise(s) du profil de la nounou'); }
+  else if (!silencieux) toast('Tout est déjà renseigné.');
+  return n;
+}
+
+/* Ce qu'on pourrait reprendre, dit avant de le faire. */
+function renderReprise() {
+  const box = document.getElementById('repriseInfos');
+  if (!box) return;
+  if (!infosConnues) { box.innerHTML = ''; return; }
+  const cpVille = [infosConnues.code_postal, infosConnues.commune].filter(Boolean).join(' ');
+  const complet = [infosConnues.prenom, infosConnues.nom].filter(Boolean).join(' ').trim();
+  const dispo = [
+    ['Nom et prénom', complet, (cur.salarie || {}).nom],
+    ['Code postal et ville', cpVille, (cur.salarie || {}).cpVille]
+  ].filter(([, v]) => v);
+  const aReprendre = dispo.filter(([, , actuel]) => !actuel);
+  if (!dispo.length) { box.innerHTML = ''; return; }
+
+  box.innerHTML = aReprendre.length
+    ? `<div class="reprise-dispo">
+        <b>${aReprendre.length} information(s) disponible(s) dans son profil</b>
+        <small>${esc(aReprendre.map(([n]) => n).join(', '))}</small>
+        <button id="btnReprendre" class="btn btn-ghost btn-petit">Reprendre</button>
+      </div>`
+    : '<p class="hint" style="margin:0">Les informations de la nounou sont déjà reprises.</p>';
+  const b = document.getElementById('btnReprendre');
+  if (b) b.onclick = async () => { await reprendreInfos(); renderReprise(); };
+}
+
+
+/* Quitter un champ ne veut pas dire avoir enregistre : on peut taper trois
+   champs puis faire defiler. Tant qu'un ecran porte des modifications non
+   enregistrees, la boucle ne le redessine pas. */
+let ecranModifie = false;
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (!t || !t.matches || !t.matches('input, textarea, select')) return;
+  if (t.closest('#modulePage, #dossier, #vuePlanning, #vueJournal, #vueProfil, #vueFamilles')) ecranModifie = true;
+}, true);
+
+function ecranPropre() { ecranModifie = false; }
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
