@@ -1735,3 +1735,81 @@ Le heros eclot a l'ouverture, les pastilles apparaissent par une breve
 impulsion, le bouton central respire lentement — jamais de clignotement. Les
 messages envoyes montent depuis le bas, les frimousses se posent en tournant
 legerement. Tout est desactive en mouvement reduit.
+
+## 1.4.1 — verification a fond, et le soin du detail
+
+### Ce que la verification a trouve
+
+Six controles passes sur les deux applications : syntaxe, identifiants en
+double, references vers des elements absents, fonctions mortes ou branchees
+mais absentes, chaque appel a la base contre le schema complet (vingt et une
+tables, quinze fonctions), notifications sans destination, coherence des
+versions, formulations au singulier.
+
+Un seul reste : `totalSiestes`, du code mort, retire. Le reste etait propre.
+
+### Le mobile
+
+Au-dessus du logo sur l'ecran de connexion, un mobile de berceau : une etoile,
+un nuage, une feuille, suspendus a une tige. Chacun se balance a son rythme —
+3,6 s, 4,4 s, 3,1 s — pour que l'ensemble ne soit jamais synchrone. C'est le
+premier ecran qu'on voit, il devait dire « cocon » avant le premier mot.
+
+### Le montant compte
+
+Le solde du mois et les heures de la semaine comptent jusqu'a leur valeur en
+un peu plus d'une demi-seconde, avec une deceleration cubique. Un chiffre qui
+arrive se remarque ; un chiffre pose la se lit sans y penser.
+
+### Le toucher repond
+
+- **Une onde** part du point exact ou le doigt s'est pose, sur les boutons,
+  tuiles, modules, conversations. Le retour visuel le plus lisible qui soit.
+- **Les cases a cocher** dessinent leur coche avec un leger depassement.
+- **Les cartes** s'enfoncent d'un pixel au toucher.
+
+### Illustrations dessinees
+
+Berceau sous un mobile pour la nounou sans famille, ballons pour la galerie
+vide, lune et nuage sur la tuile du journal quand rien n'est note. Elles
+flottent doucement. Tout est desactive en mouvement reduit.
+
+`build-apk.yml` n'a pas change depuis la 1.4.0.
+
+## 1.4.2
+
+### Les heures et les dates se choisissent, elles ne se tapent plus
+
+Taper « 13:00 » au clavier etait penible. Chaque champ d'heure ouvre desormais
+le selecteur d'Android — celui d'un reveil — et chaque champ de date son
+calendrier.
+
+Le format stocke ne change pas. Il traverse la fiche, le PDF, les calculs de
+duree : le modifier aurait ete un risque pour un gain d'ergonomie. Un champ
+natif invisible est pose par-dessus le champ texte : il s'ouvre au toucher, et
+son choix est recopie dans le texte au format attendu. Dix-sept champs cote
+parent, sept cote nounou, y compris ceux crees a la volee comme les siestes.
+
+Un appui long sur le champ le vide. Une petite pointe a droite signale qu'il
+s'ouvre.
+
+### Le salut du moment
+
+Le heros dit bonjour selon l'heure — bonjour, bon apres-midi, bonsoir, bonne
+nuit — avec un soleil ou une lune dessine.
+
+### Les ecrans arrivent
+
+Chaque changement d'ecran glisse legerement depuis le bas. On sent le
+changement sans qu'il ralentisse.
+
+### Le mois est plie
+
+Quand la fiche est marquee envoyee, vingt-six confettis en papier decoupe
+tombent pendant une seconde et demie. Ce n'est pas un jeu, c'est un
+soulagement — et ca n'arrive qu'une fois par mois.
+
+### Frimousse partout
+
+« Mes familles » sur l'accueil nounou affichait encore l'initiale a la place de
+la frimousse.

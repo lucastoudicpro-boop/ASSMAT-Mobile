@@ -355,6 +355,12 @@ legend{font-size:12px;font-weight:600;color:var(--mut);padding:0 5px}
 }
 html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#173330 0%,var(--bg) 40%)}
 #porte[hidden]{display:none}
+.mobile{width:200px;height:136px;display:block;margin:0 auto -30px}
+@keyframes balance{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.mobile .pend{animation:balance 3.6s ease-in-out infinite}
+.mobile .p2{animation-duration:4.4s;animation-delay:-1.2s}
+.mobile .p3{animation-duration:3.1s;animation-delay:-2.1s}
+@media (prefers-reduced-motion:reduce){.mobile .pend{animation:none}}
 .porte-haut{text-align:center;margin-bottom:26px}
 .porte-haut img{border-radius:22px;box-shadow:0 12px 28px rgba(23,64,60,.22)}
 .porte-haut h2{margin:14px 0 4px;font-size:22px;font-weight:700}
@@ -1156,6 +1162,88 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   .portrait svg,.portrait-img,.portrait-grand svg,.portrait-grand img{animation:none}
 }
 
+
+/* ---------- Toucher : une onde part du doigt ---------- */
+.btn,.tuile-m,.module,.famille,.conv,.besoin-b,.nav-item{position:relative;overflow:hidden}
+.onde{
+  position:absolute;border-radius:50%;pointer-events:none;
+  background:currentColor;opacity:.14;transform:scale(0);
+  animation:onde .5s ease-out forwards;
+}
+@keyframes onde{to{transform:scale(2.6);opacity:0}}
+
+/* ---------- La coche se dessine ---------- */
+.check input[type=checkbox]{
+  appearance:none;width:22px;height:22px;border:1.6px solid var(--bord);border-radius:7px;
+  background:var(--card);position:relative;flex:0 0 auto;transition:background .18s ease,border-color .18s ease;
+}
+.check input[type=checkbox]::after{
+  content:'';position:absolute;left:7px;top:3px;width:6px;height:11px;
+  border:solid #fff;border-width:0 2.2px 2.2px 0;transform:rotate(45deg) scale(0);
+  transform-origin:center;transition:transform .2s cubic-bezier(.3,1.5,.5,1);
+}
+.check input[type=checkbox]:checked{background:var(--acc);border-color:var(--acc)}
+.check input[type=checkbox]:checked::after{transform:rotate(45deg) scale(1)}
+
+/* ---------- Les cartes se soulevent au toucher ---------- */
+.card{transition:transform .16s ease,box-shadow .2s ease}
+.card:active{transform:translateY(1px)}
+
+/* ---------- Un fond de papier tres discret sur les fiches ---------- */
+.card.papier{background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,var(--line) 27px,var(--line) 28px)}
+
+@media (prefers-reduced-motion:reduce){.onde{animation:none;display:none}}
+
+
+.vide-doux.craft svg{width:110px;height:82px}
+.craft-mini svg{width:34px;height:26px}
+@keyframes flotte{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.vide-doux.craft svg{animation:flotte 3.2s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.vide-doux.craft svg{animation:none}}
+
+
+/* ---------- Sélecteurs natifs par-dessus les champs ---------- */
+.natif-env{position:relative;display:block;width:100%}
+.natif-env>input:first-child{width:100%;cursor:pointer}
+.natif-env>input:first-child::placeholder{color:var(--mut)}
+.natif-sur{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;
+  border:0;background:transparent;cursor:pointer;-webkit-appearance:none}
+.natif-sur::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;
+  opacity:0;cursor:pointer}
+.deux .natif-env{min-width:0}
+/* un petit repere a droite : on comprend que ca s'ouvre */
+.natif-env::after{content:'';position:absolute;right:12px;top:50%;width:7px;height:7px;
+  border-right:1.6px solid var(--mut);border-bottom:1.6px solid var(--mut);
+  transform:translateY(-60%) rotate(45deg);pointer-events:none;opacity:.6}
+
+
+/* ---------- Passer d'un ecran a l'autre ---------- */
+@keyframes arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.vue-arrive{animation:arrive .26s cubic-bezier(.2,.8,.3,1) both}
+@media (prefers-reduced-motion:reduce){.vue-arrive{animation:none}}
+
+/* ---------- Chargement : le contenu miroite au lieu de manquer ---------- */
+.miroite{position:relative;overflow:hidden;background:var(--zebre);border-radius:10px;min-height:14px}
+.miroite::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:translateX(-100%);animation:miroite 1.3s ease-in-out infinite}
+@keyframes miroite{to{transform:translateX(100%)}}
+.miroite-ligne{height:13px;margin:8px 0}
+.miroite-ligne.courte{width:55%}
+.miroite-bloc{height:64px;margin:10px 0;border-radius:14px}
+@media (prefers-reduced-motion:reduce){.miroite::after{animation:none}}
+
+.ico-salut{width:18px;height:18px;vertical-align:-3px;margin-right:6px;animation:eclot .6s ease both}
+
+
+.confettis{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.confettis i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;
+  animation:tombe 1.4s cubic-bezier(.2,.6,.4,1) forwards;opacity:.95}
+@keyframes tombe{
+  0%{transform:translateY(0) rotate(0);opacity:1}
+  100%{transform:translateY(105vh) rotate(540deg);opacity:0}
+}
+
 </style>
 </head>
 <body>
@@ -1197,6 +1285,22 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 </svg>
 <div id="porte" hidden>
   <div class="porte-haut">
+    <svg class="mobile" viewBox="0 0 220 150" aria-hidden="true">
+      <g class="tige"><path d="M110 8v22M50 30h120" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" fill="none"/></g>
+      <g class="pend p1" style="transform-origin:60px 30px">
+        <path d="M60 30v34" stroke="var(--acc)" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M60 66l5 10h-10z M60 96l-5-10h10z M45 81l10-5v10z M75 81l-10-5v10z" fill="#f5d76e"/>
+        <circle cx="60" cy="81" r="6" fill="#f0a860"/>
+      </g>
+      <g class="pend p2" style="transform-origin:110px 30px">
+        <path d="M110 30v40" stroke="var(--acc)" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M92 90c-6 0-10-5-9-10 1-6 7-8 11-6 2-8 12-11 18-6 3-4 12-3 13 3 5 0 8 4 7 8-1 5-5 8-10 8z" fill="#cfe4ee"/>
+      </g>
+      <g class="pend p3" style="transform-origin:160px 30px">
+        <path d="M160 30v30" stroke="var(--acc)" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M172 84c-8 8-22 6-27-4 8 2 16-4 16-13 6 4 10 10 11 17z" fill="#f3c9d6"/>
+      </g>
+    </svg>
     <img src="icones/icone-192.png" alt="" width="84" height="84">
     <h2>Cocon Parent</h2>
     <p>Connecte-toi pour retrouver ton espace.</p>
@@ -1889,7 +1993,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.4.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.4.2</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3655,6 +3759,9 @@ function fitPreview() {
 
 function showView(v) {
   vue = v;
+  // l'ecran qui arrive glisse legerement : on sent le changement
+  const arrivant = $('#' + ({ module: 'modulePage' }[v] || v));
+  if (arrivant) { arrivant.classList.remove('vue-arrive'); void arrivant.offsetWidth; arrivant.classList.add('vue-arrive'); }
   $('#accueil').hidden = v !== 'accueil';
   $('#saisie').hidden = v !== 'saisie';
   $('#apercu').hidden = v !== 'apercu';
@@ -3900,6 +4007,7 @@ async function marquerEnvoyee() {
   cur.envoyee = true;
   await doSave();
   programmerRappels();
+  confettis();     // le mois est plié
 }
 
 /* ---------------- Message d'absence ---------------- */
@@ -4795,7 +4903,13 @@ function portraitHTML(taille) {
 function tuileJournal() {
   const auj = new Date().toISOString().slice(0, 10);
   const j = journal.find(x => x.jour === auj) || journal[0];
-  if (!j) return `<button class="tuile-m large" data-mod="journal"><span class="rond"><svg><use href="#i-journal"/></svg></span>
+  if (!j) return `<button class="tuile-m large" data-mod="journal"><span class="rond craft-mini"><svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M58 14a16 16 0 1 0 14 24 12 12 0 0 1-14-24z" fill="#f5d76e" stroke="none"/>
+  <path d="M22 52c-7 0-11-5-10-10 1-6 8-9 12-6 3-9 15-12 21-6 4-5 14-4 15 3 6 0 9 5 8 9-1 5-6 8-11 8z" fill="var(--acc-doux)"/>
+  <circle cx="20" cy="18" r="1.6" fill="var(--acc)" stroke="none"/>
+  <circle cx="80" cy="56" r="1.6" fill="var(--acc)" stroke="none"/>
+  <circle cx="86" cy="20" r="1.2" fill="var(--acc)" stroke="none"/>
+</svg></span>
     <div><b>Journal de la journée</b><small>Rien encore aujourd'hui</small></div></button>`;
   const face = HUMEURS_FACES[j.humeur] || '';
   const quand = j.jour === auj ? 'Aujourd\u2019hui' : new Date(j.jour + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long' });
@@ -5266,7 +5380,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.4.0';
+const VERSION = '1.4.2';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -6700,8 +6814,8 @@ async function renderAccueil() {
 
   $('#accueil').innerHTML = `
     <div id="hero">
-      <div class="mois">${esc(F.labelMois(cur.mois))}${enfants().length > 1 ? ' · ' + esc(nomEnfant(enfantActif) || enfantActif) : ''}</div>
-      <div class="montant">${eur(c.solde)}</div>
+      <div class="mois">${ICO_SALUT[salutDuMoment().ico]}${esc(salutDuMoment().mot)} · ${esc(F.labelMois(cur.mois))}${enfants().length > 1 ? ' · ' + esc(nomEnfant(enfantActif) || enfantActif) : ''}</div>
+      <div class="montant" data-compte="${esc(eur(c.solde))}">${eur(c.solde)}</div>
       <div class="sous">${versement || 'à verser à ' + esc(cur.salarie.nom || 'la salariée')}</div>
       <div class="actions">
         <button class="plein" data-act="saisie">Ouvrir la saisie</button>
@@ -6774,6 +6888,9 @@ async function renderAccueil() {
     planning: () => partagerPlanning()
   };
   $$('#accueil [data-act]').forEach(b => { b.onclick = () => actions[b.dataset.act](); });
+  // le montant compte jusqu'à sa valeur
+  const mt = $('#hero .montant');
+  if (mt) { const fin = mt.dataset.compte; mt.dataset.valeur = mt.dataset.valeur || '0'; compterVers(mt, fin); }
   $$('#accueil [data-mod]').forEach(b => { b.onclick = () => MODULES.find(m => m.id === b.dataset.mod).fn(); });
   $$('#accueil [data-lien]').forEach(b => { b.onclick = () => ouvrirLien(b.dataset.lien); });
 }
@@ -7950,6 +8067,156 @@ function secouer(sel) {
   el.classList.add('secoue');
   const C = window.Capacitor && window.Capacitor.Plugins;
   if (C && C.Haptics) { try { C.Haptics.notification({ type: 'ERROR' }); } catch (e) {} }
+}
+
+
+/* Un montant qui compte jusqu'a sa valeur se remarque ; un montant qui
+   apparait d'un coup se lit sans y penser. Court, pour ne pas ralentir. */
+function compterVers(el, texteFinal) {
+  if (!el) return;
+  const cible = parseFloat(String(texteFinal).replace(/\s/g, '').replace(',', '.'));
+  if (!isFinite(cible) || el.dataset.derniere === String(cible) ||
+      (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    el.textContent = texteFinal; el.dataset.derniere = String(cible); return;
+  }
+  el.dataset.derniere = String(cible);
+  const depart = parseFloat(el.dataset.valeur || '0') || 0;
+  const t0 = performance.now(), duree = 520;
+  const suffixe = String(texteFinal).replace(/^[\d.,-]+(?=\s|$)/, '');
+  const decimales = (String(texteFinal).match(/,(\d+)/) || ['', ''])[1].length;
+  const pas = (t) => {
+    const p = Math.min(1, (t - t0) / duree);
+    const e = 1 - Math.pow(1 - p, 3);
+    const v = depart + (cible - depart) * e;
+    el.textContent = v.toLocaleString('fr-FR', { minimumFractionDigits: decimales, maximumFractionDigits: decimales }) + suffixe;
+    if (p < 1) requestAnimationFrame(pas); else { el.textContent = texteFinal; el.dataset.valeur = String(cible); }
+  };
+  requestAnimationFrame(pas);
+}
+
+
+/* Une onde qui part du point touche : le retour visuel le plus lisible. */
+document.addEventListener('pointerdown', e => {
+  const cible = e.target.closest('.btn, .tuile-m, .module, .famille, .conv, .besoin-b, .nav-item');
+  if (!cible || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  const r = cible.getBoundingClientRect();
+  const taille = Math.max(r.width, r.height);
+  const o = document.createElement('span');
+  o.className = 'onde';
+  o.style.width = o.style.height = taille + 'px';
+  o.style.left = (e.clientX - r.left - taille / 2) + 'px';
+  o.style.top = (e.clientY - r.top - taille / 2) + 'px';
+  cible.appendChild(o);
+  setTimeout(() => o.remove(), 520);
+}, { passive: true });
+
+
+/* ---------------- Sélecteurs natifs ----------------
+   Taper « 13:00 » au clavier est penible ; le selecteur d'Android, celui
+   d'un reveil, est ce qu'on attend. Mais le format stocke — jj/mm/aaaa,
+   hh:mm — traverse la fiche et le PDF : on ne le change pas. On pose donc un
+   champ natif invisible par-dessus le champ texte. Le natif s'ouvre au
+   toucher, et son choix est recopie dans le texte, au format attendu. */
+const NATIF_HEURE = /^(hh:mm|\d\d:\d\d)$/;
+const NATIF_DATE  = /jj\/mm\/aaaa/;
+
+function nativiser(racine) {
+  (racine || document).querySelectorAll('input:not([type]), input[type=text]').forEach(txt => {
+    if (txt.dataset.natif) return;
+    const ph = txt.placeholder || '';
+    const genre = NATIF_HEURE.test(ph) ? 'time' : NATIF_DATE.test(ph) ? 'date' : null;
+    if (!genre) return;
+    txt.dataset.natif = genre;
+    txt.readOnly = true;                 // le clavier ne s'ouvre plus
+    txt.inputMode = 'none';
+
+    const enveloppe = document.createElement('span');
+    enveloppe.className = 'natif-env';
+    txt.parentNode.insertBefore(enveloppe, txt);
+    enveloppe.appendChild(txt);
+
+    const natif = document.createElement('input');
+    natif.type = genre;
+    natif.className = 'natif-sur';
+    natif.tabIndex = -1;
+    natif.setAttribute('aria-hidden', 'true');
+    enveloppe.appendChild(natif);
+
+    // au toucher, le natif recoit la valeur courante du texte
+    natif.addEventListener('focus', () => {
+      const v = txt.value.trim();
+      if (genre === 'date') {
+        const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        natif.value = m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+      } else natif.value = /^\d{2}:\d{2}$/.test(v) ? v : '';
+    });
+    // son choix revient dans le texte, au format de la fiche
+    natif.addEventListener('change', () => {
+      if (!natif.value) return;
+      txt.value = genre === 'date'
+        ? natif.value.slice(8, 10) + '/' + natif.value.slice(5, 7) + '/' + natif.value.slice(0, 4)
+        : natif.value.slice(0, 5);
+      txt.dispatchEvent(new Event('input', { bubbles: true }));
+      txt.dispatchEvent(new Event('change', { bubbles: true }));
+      txt.classList.add('vient-de-changer');
+      setTimeout(() => txt.classList.remove('vient-de-changer'), 320);
+    });
+    // effacer : un appui long sur le champ vide la valeur
+    let longue = null;
+    txt.addEventListener('pointerdown', () => { longue = setTimeout(() => {
+      txt.value = ''; txt.dispatchEvent(new Event('input', { bubbles: true }));
+      txt.dispatchEvent(new Event('change', { bubbles: true })); longue = null; }, 650); });
+    txt.addEventListener('pointerup', () => clearTimeout(longue));
+    txt.addEventListener('pointercancel', () => clearTimeout(longue));
+  });
+}
+
+// les champs generes plus tard sont pris en charge aussi
+new MutationObserver(muts => {
+  for (const m of muts) for (const n of m.addedNodes) if (n.nodeType === 1) nativiser(n);
+}).observe(document.documentElement, { childList: true, subtree: true });
+nativiser(document);
+
+
+/* Le heros dit bonjour selon l'heure, avec un petit soleil ou une lune. */
+function salutDuMoment() {
+  const h = new Date().getHours();
+  if (h < 6)  return { mot: 'Bonne nuit', ico: 'lune' };
+  if (h < 12) return { mot: 'Bonjour', ico: 'soleil' };
+  if (h < 18) return { mot: 'Bon après-midi', ico: 'soleil' };
+  if (h < 22) return { mot: 'Bonsoir', ico: 'lune' };
+  return { mot: 'Bonne nuit', ico: 'lune' };
+}
+const ICO_SALUT = {
+  soleil: '<svg viewBox="0 0 24 24" class="ico-salut"><circle cx="12" cy="12" r="4.2" fill="#f5d76e"/><g stroke="#f5d76e" stroke-width="1.6" stroke-linecap="round"><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6"/></g></svg>',
+  lune:   '<svg viewBox="0 0 24 24" class="ico-salut"><path d="M14 3a9 9 0 1 0 7 14.5A8 8 0 0 1 14 3z" fill="#f5d76e"/><circle cx="6" cy="6" r=".9" fill="#f5d76e"/><circle cx="4" cy="12" r=".7" fill="#f5d76e"/></svg>'
+};
+function miroiter(n, bloc) {
+  return Array.from({ length: n }, (_, i) =>
+    `<div class="miroite ${bloc ? 'miroite-bloc' : 'miroite-ligne'} ${!bloc && i % 3 === 2 ? 'courte' : ''}"></div>`).join('');
+}
+
+
+/* Une fiche envoyee, un salaire verse : le mois est plie. Quelques confettis
+   en papier decoupe, une seconde, pas plus. Ce n'est pas un jeu, c'est un
+   soulagement. */
+function confettis() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const zone = document.createElement('div');
+  zone.className = 'confettis';
+  const teintes = ['#f5d76e', '#f3c9d6', '#cfe4ee', '#b8e0c8', '#f0a860'];
+  for (let i = 0; i < 26; i++) {
+    const c = document.createElement('i');
+    c.style.left = (8 + Math.random() * 84) + '%';
+    c.style.background = teintes[i % teintes.length];
+    c.style.animationDelay = (Math.random() * .25) + 's';
+    c.style.animationDuration = (1.1 + Math.random() * .6) + 's';
+    c.style.transform = `rotate(${Math.random() * 360}deg)`;
+    if (i % 3 === 0) c.style.borderRadius = '50%';
+    zone.appendChild(c);
+  }
+  document.body.appendChild(zone);
+  setTimeout(() => zone.remove(), 2000);
 }
 
 async function activerPush() {
