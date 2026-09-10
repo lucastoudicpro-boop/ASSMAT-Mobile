@@ -1164,7 +1164,13 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 
 
 /* ---------- Toucher : une onde part du doigt ---------- */
-.btn,.tuile-m,.module,.famille,.conv,.besoin-b,.nav-item{position:relative;overflow:hidden}
+/* L'onde a besoin d'un debordement masque — sauf sur la barre du bas, dont le
+   bouton central deborde par construction : le masquer le coupait en deux. */
+.btn,.tuile-m,.module,.famille,.conv,.besoin-b{position:relative;overflow:hidden}
+.nav-item{position:relative}
+.nav-item:not(.nav-plus){overflow:hidden}
+.nav-plus{overflow:visible}
+.nav-plus span{overflow:hidden}
 .onde{
   position:absolute;border-radius:50%;pointer-events:none;
   background:currentColor;opacity:.14;transform:scale(0);
@@ -1243,6 +1249,86 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   0%{transform:translateY(0) rotate(0);opacity:1}
   100%{transform:translateY(105vh) rotate(540deg);opacity:0}
 }
+
+
+/* ---------- Ecran de lancement : la pousse s'ouvre, deux fois ----------
+   Le natif d'Android couvre le tout premier instant ; celui-ci prend la
+   suite pendant que l'application se prepare. Deux tours suffisent : au-dela
+   on attend, on ne contemple plus. */
+#splash{opacity:1}
+@keyframes sp-anneaux{
+  0%,100%{transform:translateY(0)}
+  18%{transform:translateY(-7px)}
+  36%{transform:translateY(0)}
+}
+@keyframes sp-carte{
+  0%{transform:scale(.86);opacity:0}
+  22%{transform:scale(1.03);opacity:1}
+  32%{transform:scale(1)}
+  100%{transform:scale(1);opacity:1}
+}
+@keyframes sp-tige{
+  0%{stroke-dasharray:120;stroke-dashoffset:120}
+  40%{stroke-dashoffset:0}
+  100%{stroke-dashoffset:0}
+}
+@keyframes sp-feuille-g{
+  0%,30%{transform:scale(.2) rotate(-24deg);opacity:0}
+  52%{transform:scale(1.08) rotate(4deg);opacity:1}
+  62%,100%{transform:scale(1) rotate(0);opacity:1}
+}
+@keyframes sp-feuille-d{
+  0%,38%{transform:scale(.2) rotate(24deg);opacity:0}
+  60%{transform:scale(1.08) rotate(-4deg);opacity:1}
+  70%,100%{transform:scale(1) rotate(0);opacity:1}
+}
+@keyframes sp-mot{
+  0%,45%{opacity:0;transform:translateY(8px)}
+  62%,100%{opacity:1;transform:none}
+}
+#sp-anneaux{animation:sp-anneaux 1.6s ease-in-out 2 both;transform-origin:256px 148px}
+#sp-carte{animation:sp-carte 1.6s cubic-bezier(.2,.9,.3,1.05) 2 both;transform-origin:256px 264px}
+#sp-tige{animation:sp-tige 1.6s ease-out 2 both}
+#sp-f1{animation:sp-feuille-g 1.6s cubic-bezier(.3,1.4,.5,1) 2 both;transform-origin:248px 262px}
+#sp-f2{animation:sp-feuille-d 1.6s cubic-bezier(.3,1.4,.5,1) 2 both;transform-origin:264px 292px}
+#sp-mot,#sp-sous{animation:sp-mot 1.6s ease 2 both}
+
+/* la barre d'attente sous le mot : elle dit que ça travaille */
+#sp-barre{width:96px;height:3px;border-radius:2px;background:rgba(255,255,255,.25);
+  margin-top:20px;overflow:hidden;position:relative}
+#sp-barre::after{content:'';position:absolute;inset:0;width:40%;border-radius:2px;
+  background:rgba(255,255,255,.85);animation:sp-glisse 1.6s cubic-bezier(.5,0,.5,1) infinite}
+@keyframes sp-glisse{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+
+@media (prefers-reduced-motion:reduce){
+  #sp-anneaux,#sp-carte,#sp-tige,#sp-f1,#sp-f2,#sp-mot,#sp-sous{animation:none}
+  #sp-barre::after{animation:none;width:100%}
+}
+
+
+/* ---------- Vignettes : un fond qui miroite jusqu'a l'image ---------- */
+.vignette-cadre{position:relative;display:block;aspect-ratio:1;border-radius:10px;
+  overflow:hidden;background:var(--zebre)}
+.vignette{width:100%;height:100%;object-fit:cover;display:block;
+  opacity:0;transform:scale(1.04);transition:opacity .32s ease,transform .42s cubic-bezier(.2,.8,.3,1)}
+.vignette.vue{opacity:1;transform:none}
+.vignette-cadre.cassee{display:flex;align-items:center;justify-content:center;
+  font:600 10px system-ui;color:var(--mut)}
+.vignette-cadre.cassee .vignette{display:none}
+/* la visionneuse : meme principe, en grand */
+#visioImage{opacity:0;transition:opacity .28s ease}
+#visioImage.vue{opacity:1}
+@media (prefers-reduced-motion:reduce){.vignette{transition:none}}
+
+
+/* ---------- Poignee des feuilles ---------- */
+.poignee{width:100%;padding:9px 0 4px;display:flex;justify-content:center;
+  cursor:grab;touch-action:none;flex:0 0 auto}
+.poignee::before{content:'';width:38px;height:4px;border-radius:3px;background:var(--bord);opacity:.5}
+.poignee:active{cursor:grabbing}
+.modal-box{will-change:transform}
+.modal{transition:background .2s ease}
+@media (prefers-reduced-motion:reduce){.modal-box{transition:none!important}}
 
 </style>
 </head>
@@ -1381,6 +1467,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <path id="sp-f2" d="M264 292c10-42 40-62 78-56 4 40-30 68-78 56z" fill="#3e8a80"/>
   </svg>
   <div id="sp-mot">Cocon Parent</div>
+  <div id="sp-barre"></div>
   <div id="sp-sous">Fiches de salaire</div>
 </div>
 
@@ -1993,7 +2080,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.4.2</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.4.4</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -5380,7 +5467,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.4.2';
+const VERSION = '1.4.4';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -5900,14 +5987,14 @@ function renderGalerie() {
     liste.map(p => `<img data-photo="${esc(p.chemin)}" data-id="${esc(p.id)}" alt="${esc(p.legende || 'Photo')}">`).join('')
   ).join('');
 
+  $$('#listeGalerie [data-photo]').forEach(preparerVignette);
   (async () => {
     let echecs = 0;
     for (const img of $$('#listeGalerie [data-photo]')) {
       let d = null;
       try { d = await telechargerPhoto(img.dataset.photo); } catch (e) { d = null; }
-      if (d) { img.src = d; img.onclick = () => ouvrirVisionneuse(img.dataset.id); }
-      else { echecs++; img.replaceWith(Object.assign(document.createElement('div'),
-        { className: 'photo-cassee', textContent: 'illisible' })); }
+      if (await poserImage(img, d)) img.onclick = () => ouvrirVisionneuse(img.dataset.id);
+      else echecs++;
     }
     if (echecs) toast(echecs + ' photo(s) illisible(s) : le stockage refuse la lecture.');
   })();
@@ -5956,8 +6043,13 @@ async function montrerVisio(sens) {
     ' · ' + (visioIndex + 1) + ' sur ' + galerie.length;
   $('#visioPrec').disabled = visioIndex === 0;
   $('#visioSuiv').disabled = visioIndex === galerie.length - 1;
+  img.classList.remove('vue');
   visioURL = await telechargerPhoto(p.chemin);
-  if (visioURL) img.src = visioURL;
+  if (visioURL) {
+    img.src = visioURL;
+    try { await img.decode(); } catch (e) {}
+    img.classList.add('vue');
+  }
 }
 
 let enTransition = false;
@@ -6190,6 +6282,8 @@ const JOURNAL_HUMEUR = { joyeux:'Joyeux', calme:'Calme', fatigue:'Fatigué', gro
 let journal = [];
 
 async function chargerJournal() {
+  const zone = $('#listeJournal');
+  if (zone && !zone.children.length) zone.innerHTML = miroiter(2, true);
   const id = contratLie();
   if (!id || !Supa.connecte()) { journal = []; return; }
   try {
@@ -7847,14 +7941,15 @@ function fermerSplash() {
   const el = $('#splash');
   if (!el || el.dataset.fini) return;
   el.dataset.fini = '1';
-  const tenue = splashNatif ? 620 : 1750;
+  // deux tours de l'animation, quel que soit le contexte
+  const tenue = 3200;
   const reste = Math.max(0, tenue - (Date.now() - splashOuvertA));
   setTimeout(() => {
     el.classList.add('parti');
     setTimeout(() => el.remove(), 420);
   }, reste);
 }
-setTimeout(fermerSplash, splashNatif ? 1200 : 2400);
+setTimeout(fermerSplash, 3400);
 document.getElementById('splash').addEventListener('click', () => {
   const el = $('#splash');
   el.classList.add('parti');
@@ -8219,6 +8314,101 @@ function confettis() {
   setTimeout(() => zone.remove(), 2000);
 }
 
+
+/* Une image sans source affiche l'icone cassee du navigateur, puis saute quand
+   la source arrive. On la garde invisible sur un fond qui miroite, et on ne la
+   revele qu'une fois decodee. */
+function preparerVignette(img) {
+  img.classList.add('vignette');
+  const cadre = document.createElement('span');
+  cadre.className = 'vignette-cadre miroite';
+  img.parentNode.insertBefore(cadre, img);
+  cadre.appendChild(img);
+  return cadre;
+}
+
+async function poserImage(img, url) {
+  const cadre = img.closest('.vignette-cadre') || preparerVignette(img);
+  if (!url) { cadre.classList.remove('miroite'); cadre.classList.add('cassee'); cadre.textContent = 'illisible'; return false; }
+  img.src = url;
+  try { await img.decode(); } catch (e) { /* certaines WebViews n'ont pas decode */ }
+  cadre.classList.remove('miroite');
+  img.classList.add('vue');
+  return true;
+}
+
+
+/* ---------------- Feuilles glissables ----------------
+   Un volet qui monte du bas doit pouvoir redescendre au doigt. Le geste suit
+   le mouvement en direct ; passe le quart de la hauteur, ou lance vers le bas,
+   la feuille part. Sinon elle revient, avec un ressort. */
+function rendreGlissable(modale) {
+  const boite = modale.querySelector('.modal-box');
+  if (!boite || boite.dataset.glissable) return;
+  boite.dataset.glissable = '1';
+
+  // la poignee : on comprend que ca s'attrape
+  const poignee = document.createElement('div');
+  poignee.className = 'poignee';
+  boite.insertBefore(poignee, boite.firstChild);
+
+  let y0 = null, dy = 0, t0 = 0, depuisPoignee = false;
+
+  const debut = e => {
+    const t = e.touches ? e.touches[0] : e;
+    // depuis la poignee, ou depuis le haut quand rien n'est defile
+    depuisPoignee = e.target.closest('.poignee') || boite.scrollTop <= 0;
+    if (!depuisPoignee) return;
+    y0 = t.clientY; dy = 0; t0 = Date.now();
+    boite.style.transition = 'none';
+  };
+  const bouge = e => {
+    if (y0 === null) return;
+    const t = e.touches ? e.touches[0] : e;
+    dy = t.clientY - y0;
+    if (dy < 0) dy = dy / 4;                    // vers le haut : ca resiste
+    boite.style.transform = `translateY(${dy}px)`;
+    modale.style.background = `rgba(20,14,16,${Math.max(0, .55 - dy / 900)})`;
+  };
+  const fin = () => {
+    if (y0 === null) return;
+    // Un lancer bref ferme aussi — mais il faut avoir parcouru une distance
+    // reelle : sans ce minimum, une pichenette de trente pixels suffisait.
+    const vitesse = dy / Math.max(16, Date.now() - t0);
+    const seuil = boite.offsetHeight * 0.25;
+    y0 = null;
+    boite.style.transition = 'transform .26s cubic-bezier(.2,.8,.3,1)';
+    if (dy > seuil || (dy > 90 && vitesse > 0.55)) {
+      boite.style.transform = 'translateY(110%)';
+      modale.style.background = 'rgba(20,14,16,0)';
+      setTimeout(() => {
+        modale.hidden = true;
+        boite.style.transform = ''; boite.style.transition = ''; modale.style.background = '';
+      }, 240);
+    } else {
+      boite.style.transform = '';
+      modale.style.background = '';
+    }
+  };
+
+  boite.addEventListener('touchstart', debut, { passive: true });
+  boite.addEventListener('touchmove', bouge, { passive: true });
+  boite.addEventListener('touchend', fin, { passive: true });
+  boite.addEventListener('touchcancel', fin, { passive: true });
+  // a la souris aussi, pour l'essai sur ordinateur
+  poignee.addEventListener('pointerdown', e => { debut(e); poignee.setPointerCapture(e.pointerId); });
+  poignee.addEventListener('pointermove', bouge);
+  poignee.addEventListener('pointerup', fin);
+}
+
+/* Toutes les feuilles du bas deviennent glissables, y compris celles
+   ajoutees plus tard. */
+function glisserToutesLesFeuilles(racine) {
+  (racine || document).querySelectorAll('.modal').forEach(rendreGlissable);
+}
+new MutationObserver(() => glisserToutesLesFeuilles()).observe(document.documentElement, { childList: true, subtree: true });
+glisserToutesLesFeuilles();
+
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
   if (!PROJET.notifications) { etatPush.etape = 'Firebase absent de cette version de l\u2019application'; majEtatPush(); return; }
@@ -8310,7 +8500,10 @@ basculerVueCal('grille');
   fermerSplash();
   // Sous Android, l'écran de lancement natif couvre déjà le démarrage :
   // en afficher un second en HTML donne deux transitions au lieu d'une.
-  if (window.Capacitor) { const sp = $('#splash'); if (sp) sp.remove(); }
+  // Le natif couvre le tout premier instant ; le nôtre prend la suite et joue
+  // ses deux tours. On note l'heure de départ pour ne pas le retirer avant.
+  const C0 = window.Capacitor && window.Capacitor.Plugins;
+  if (C0 && C0.SplashScreen) { try { C0.SplashScreen.hide(); } catch (e) {} }
   Supa.brancherStockage(Store.session, Store.majSession);
   Supa.configurer((profil.cloud || {}).url || PROJET.url, (profil.cloud || {}).cle || PROJET.cle);
   if (Supa.configure()) await Supa.reprendre();

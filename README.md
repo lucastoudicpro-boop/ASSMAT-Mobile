@@ -1813,3 +1813,65 @@ soulagement — et ca n'arrive qu'une fois par mois.
 
 « Mes familles » sur l'accueil nounou affichait encore l'initiale a la place de
 la frimousse.
+
+## 1.4.3 — trois corrections
+
+### Le bouton « + » etait coupe
+
+Ma faute, en 1.4.1 : pour que l'onde du toucher reste dans les limites du
+bouton, j'avais masque le debordement sur `.nav-item`. Or le bouton central
+deborde par construction — il remonte de vingt-deux pixels au-dessus de la
+barre. Le masquer le coupait en deux.
+
+L'onde garde son debordement masque partout sauf sur ce bouton, ou elle est
+contenue par le cercle lui-meme.
+
+### L'ecran de lancement rejoue son animation
+
+En retirant le double ecran de lancement en 1.3.5, j'avais supprime le mien,
+donc l'animation avec.
+
+Il revient, et joue **deux tours** : les anneaux se soulevent, la carte
+apparait, la tige se dessine, les deux feuilles s'ouvrent l'une apres l'autre,
+le nom monte. Trois secondes deux, puis il s'efface. Une barre d'attente sous
+le nom dit que ca travaille.
+
+Cote nounou, l'ecran affichait une image fixe : il a maintenant la meme marque
+dessinee, en rose.
+
+Un ancien retrait subsistait et coupait l'animation a deux secondes et demie —
+retire.
+
+### Les photos ne clignotent plus
+
+Une image sans source affiche l'icone cassee du navigateur, puis saute quand la
+source arrive : c'est ce qu'on voyait cote parent. Cote nounou, le fond gris
+restait sans rien dire.
+
+Chaque vignette a desormais un cadre qui **miroite** pendant le chargement.
+L'image n'est revelee qu'une fois decodee, par un fondu avec un leger
+retrecissement. Une photo illisible laisse une case « illisible » plutot qu'une
+icone cassee. La visionneuse suit le meme principe.
+
+## 1.4.4 — les feuilles se referment au doigt
+
+Un volet qui monte du bas doit pouvoir redescendre de la meme facon. Toutes les
+feuilles des deux applications sont desormais glissables : le volet des
+modules, le centre de notifications, le retard, l'absence, le courrier, la
+duplication, le consentement.
+
+- Une **poignee** en tete dit que ca s'attrape.
+- Le geste suit le doigt en direct, et le fond s'eclaircit a mesure.
+- Vers le haut, ca resiste : le mouvement est divise par quatre.
+- Passe le quart de la hauteur, la feuille part. Sinon elle revient avec un
+  ressort.
+- Le geste part aussi du contenu quand rien n'est defile — mais pas si on a
+  fait defiler : sinon on fermerait la feuille en voulant remonter la liste.
+
+**Un seuil corrige au test.** J'avais ajoute un raccourci sur la vitesse pour
+qu'un lancer bref suffise. Mais la vitesse seule fermait la feuille sur trente
+pixels — une pichenette. Il faut maintenant avoir parcouru quatre-vingt-dix
+pixels pour que le lancer compte. Verifie a trois distances : 30 px et 80 px la
+laissent ouverte, 250 px la ferment.
+
+Les feuilles ajoutees plus tard deviennent glissables automatiquement.
