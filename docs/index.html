@@ -1303,15 +1303,13 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 @media (prefers-reduced-motion:reduce){.vue-arrive{animation:none}}
 
 /* ---------- Chargement : le contenu miroite au lieu de manquer ---------- */
-.miroite{position:relative;overflow:hidden;background:var(--zebre);border-radius:10px;min-height:14px}
-.miroite::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
-  transform:translateX(-100%);animation:miroite 1.3s ease-in-out infinite}
-@keyframes miroite{to{transform:translateX(100%)}}
-.miroite-ligne{height:13px;margin:8px 0}
-.miroite-ligne.courte{width:55%}
-.miroite-bloc{height:64px;margin:10px 0;border-radius:14px}
-@media (prefers-reduced-motion:reduce){.miroite::after{animation:none}}
+
+
+}
+
+
+
+@media (prefers-reduced-motion:reduce){}
 
 .ico-salut{width:18px;height:18px;vertical-align:-3px;margin-right:6px;animation:eclot .6s ease both}
 
@@ -1468,7 +1466,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 
 
 /* ---------- La mauvaise application ---------- */
-#mauvaisePorte{position:fixed;inset:0;z-index:118;background:var(--fond);
+#mauvaisePorte{position:fixed;inset:0;z-index:118;background:var(--bg);
   display:flex;align-items:center;justify-content:center;padding:24px;
   animation:apparait .3s ease both}
 #mauvaisePorte[hidden]{display:none}
@@ -1532,10 +1530,6 @@ input:focus,textarea:focus,select:focus,
 /* ---------- Le bouton qui travaille ---------- */
 .btn[disabled]{opacity:.6}
 @keyframes travaille{to{transform:translateX(100%)}}
-.btn.occupe{position:relative;overflow:hidden;pointer-events:none}
-.btn.occupe::after{content:'';position:absolute;inset:0;width:40%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
-  transform:translateX(-100%);animation:travaille 1.1s ease-in-out infinite}
 
 /* ---------- Ce qui vient d'arriver attire l'oeil une fois ---------- */
 @keyframes surligne{0%{background:var(--acc-doux)}100%{background:transparent}}
@@ -1543,7 +1537,7 @@ input:focus,textarea:focus,select:focus,
 
 @media (prefers-reduced-motion:reduce){
   .vue-arrive .card,details[open]>.body,details[open]>.corps,
-  .btn.occupe::after,.nouveau{animation:none}
+  .nouveau{animation:none}
 }
 
 
@@ -1579,6 +1573,153 @@ input:focus,textarea:focus,select:focus,
 .date-marquante.anniv::after{right:34px;background:#f5c65e;animation-delay:-1.6s;width:11px;height:14px}
 @keyframes ballon{0%,100%{transform:translateY(60px) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
 @media (prefers-reduced-motion:reduce){.date-marquante.anniv::before,.date-marquante.anniv::after{animation:none;transform:none}}
+
+
+/* ---------------- L'attente ----------------
+   L'ancienne bande blanche balayait trop vite et trop fort sur un fond clair :
+   ca clignotait au lieu de patienter. Une teinte qui respire, dans la couleur
+   de l'application, se remarque moins et fatigue moins. */
+.miroite{display:block;position:relative;overflow:hidden;border-radius:12px;min-height:14px;
+  /* Un span reste en ligne et ignore sa hauteur : d'ou des cartes ou seul le
+     rond apparaissait. Et une teinte trop pale ne dit pas qu'on attend —
+     celle-ci se voit sans agresser. */
+  background:linear-gradient(100deg,
+    var(--zebre) 0%, var(--zebre) 30%,
+    color-mix(in srgb, var(--acc) 22%, var(--zebre)) 50%,
+    var(--zebre) 70%, var(--zebre) 100%);
+  background-size:260% 100%;
+  animation:respire 1.9s cubic-bezier(.45,0,.55,1) infinite}
+.miroite::after{content:none}
+@keyframes respire{0%{background-position:120% 0}100%{background-position:-20% 0}}
+
+.miroite-ligne{height:12px;margin:9px 0}
+.miroite-ligne.courte{width:52%}
+.miroite-bloc{height:66px;margin:11px 0;border-radius:16px}
+
+/* Une carte en attente ressemble a la carte qui va venir : un rond, deux
+   lignes. On devine ce qui arrive au lieu de regarder des barres grises. */
+.miroite-carte{display:flex;align-items:center;gap:12px;padding:12px 0;
+  border-bottom:1px solid var(--line)}
+.miroite-carte:last-child{border-bottom:0}
+.miroite-carte .rond{width:44px;height:44px;border-radius:50%;flex:0 0 auto;min-height:44px}
+.miroite-carte .txt{flex:1;min-width:0}
+.miroite-carte .txt .miroite{margin:0 0 7px}
+.miroite-carte .txt .miroite:last-child{margin:0;width:60%;height:10px}
+
+/* Le petit signe d'attente en ligne : trois points qui respirent. */
+.chargeur{display:inline-flex;align-items:center;gap:5px;color:var(--mut);
+  font:500 13px system-ui}
+.chargeur i{width:6px;height:6px;border-radius:50%;background:var(--acc);
+  opacity:.35;animation:pointe 1.25s ease-in-out infinite}
+.chargeur i:nth-child(2){animation-delay:.16s}
+.chargeur i:nth-child(3){animation-delay:.32s}
+@keyframes pointe{0%,70%,100%{transform:translateY(0);opacity:.35}
+  35%{transform:translateY(-5px);opacity:1}}
+
+@media (prefers-reduced-motion:reduce){
+  .miroite{animation:none;background:var(--zebre)}
+  .chargeur i{animation:none;opacity:.6}
+}
+
+
+/* Le rond qui tourne, centre, quelle que soit la taille du bouton.
+   Le texte disparait par la couleur plutot que par une balise a ajouter :
+   ainsi tout bouton marque « occupe » se comporte bien, meme ceux ecrits
+   avant cette regle — sinon le rond se dessinait par-dessus les mots. */
+.btn.occupe{position:relative;pointer-events:none;color:transparent!important;
+  text-shadow:none}
+.btn.occupe>*{visibility:hidden}
+.btn.occupe::after{content:'';position:absolute;top:50%;left:50%;
+  width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;
+  border:2.5px solid var(--acc);border-top-color:transparent;
+  animation:tourne .7s linear infinite;visibility:visible}
+.btn-primary.occupe::after,.btn-danger.occupe::after{border-color:rgba(255,255,255,.45);border-top-color:#fff}
+@media (prefers-reduced-motion:reduce){
+  .btn.occupe::after{animation:none;border-top-color:currentColor;opacity:.5}}
+
+
+/* ---------------- Le formulaire de premiere fois ----------------
+   Tout le dossier en une fois, plutot qu'un renvoi vers un module ou l'on se
+   perd. Une etape par sujet, un dessin par etape, et rien a ressaisir apres. */
+#bienvenue{position:fixed;inset:0;z-index:125;background:var(--bg);
+  display:flex;flex-direction:column;padding:0 20px env(safe-area-inset-bottom)}
+#bienvenue[hidden]{display:none}
+
+.bv-barre{height:4px;background:var(--line);border-radius:2px;margin:14px 0 0;overflow:hidden}
+.bv-barre span{display:block;height:100%;background:var(--acc);border-radius:2px;
+  width:0;transition:width .45s cubic-bezier(.2,.8,.3,1)}
+.bv-plus-tard{align-self:flex-end;border:0;background:transparent;color:var(--mut);
+  font:500 13px system-ui;padding:10px 2px;cursor:pointer}
+
+.bv-scene{flex:1;overflow-y:auto;padding-bottom:12px}
+.bv-dessin{height:132px;display:flex;align-items:center;justify-content:center;margin:4px 0 10px}
+.bv-dessin svg{height:100%;width:auto;max-width:100%}
+.bv-scene h2{font-size:23px;line-height:1.25;margin:0 0 6px;animation:bv-monte .42s ease both}
+.bv-scene>p{color:var(--mut);line-height:1.5;margin:0 0 18px;font-size:14.5px;
+  animation:bv-monte .42s .06s ease both}
+.bv-champs{animation:bv-monte .42s .12s ease both}
+.bv-champs .field{margin-bottom:11px}
+@keyframes bv-monte{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.bv-pied{display:flex;gap:10px;padding:12px 0 18px;border-top:1px solid var(--line)}
+.bv-pied .btn{flex:1;margin:0}
+.bv-pied .btn-ghost{flex:0 0 34%}
+
+/* Un enfant de plus dans la liste */
+.bv-enfant{display:flex;align-items:center;gap:10px;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:9px;
+  animation:bv-eclot .34s cubic-bezier(.3,1.3,.5,1) both}
+@keyframes bv-eclot{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.bv-enfant b{flex:1;min-width:0;font-size:14.5px}
+.bv-enfant small{color:var(--mut);font-size:12.5px}
+.bv-enfant button{border:0;background:transparent;color:var(--mut);cursor:pointer;padding:4px}
+
+/* Les dessins de chaque etape respirent */
+@keyframes bv-flotte{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes bv-tourne-doux{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.bv-dessin .flotte{animation:bv-flotte 3.4s ease-in-out infinite}
+.bv-dessin .balance{animation:bv-tourne-doux 4s ease-in-out infinite;transform-origin:50% 20%}
+@media (prefers-reduced-motion:reduce){
+  .bv-dessin .flotte,.bv-dessin .balance{animation:none}
+  .bv-scene h2,.bv-scene>p,.bv-champs,.bv-enfant{animation:none}
+  .bv-barre span{transition:none}}
+
+
+/* ---------- La fete ---------- */
+.fete{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.fete u{position:absolute;top:38%;left:50%;width:10px;height:10px;margin:-5px 0 0 -5px;
+  border-radius:50%;border:3px solid var(--acc);opacity:.9;
+  animation:fete-onde .9s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes fete-onde{to{transform:scale(46);opacity:0;border-width:1px}}
+.fete i{position:absolute;top:38%;left:50%;width:9px;height:9px;border-radius:2px;
+  animation:fete-eclat 1.5s cubic-bezier(.15,.7,.35,1) forwards}
+@keyframes fete-eclat{
+  0%{transform:translate(0,0) rotate(0);opacity:1}
+  70%{opacity:1}
+  100%{transform:translate(var(--x),calc(var(--y) + 210px)) rotate(var(--r));opacity:0}}
+.fete b{position:absolute;bottom:-14px;width:7px;height:7px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0 30%,#f5c65e 32%,transparent 72%);
+  animation:fete-paillette 2s ease-out forwards}
+@keyframes fete-paillette{
+  0%{opacity:0;transform:translate(0,0) scale(.5)}
+  20%{opacity:1}
+  100%{opacity:0;transform:translate(var(--d),-88vh) scale(1.2)}}
+
+/* ---------- Les cases du formulaire ---------- */
+.bv-case{display:flex;align-items:flex-start;gap:12px;background:var(--card);
+  border:1.5px solid var(--line);border-radius:15px;padding:13px 14px;margin-bottom:10px;
+  cursor:pointer;transition:border-color .2s ease,background .2s ease}
+.bv-case:has(input:checked){border-color:var(--acc);background:var(--acc-doux)}
+.bv-case input{width:21px;height:21px;flex:0 0 auto;margin-top:1px;accent-color:var(--acc)}
+.bv-case span{flex:1;min-width:0;line-height:1.4}
+.bv-case b{display:block;font-size:14.5px}
+.bv-case small{display:block;font-size:12.5px;color:var(--mut);margin-top:2px}
+
+/* ---------- Le planning dans le formulaire ---------- */
+.bv-planning{margin-bottom:12px}
+.bv-jour{display:grid;grid-template-columns:74px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.bv-jour b{font-size:13.5px;color:var(--mut);font-weight:600}
+.bv-jour input{margin:0}
 
 </style>
 </head>
@@ -1813,6 +1954,24 @@ input:focus,textarea:focus,select:focus,
     <p id="mpTexte">—</p>
     <button id="mpRetour" class="btn btn-primary btn-block">Revenir à la connexion</button>
     <p class="hint" id="mpAide">—</p>
+  </div>
+</div>
+
+<div id="bienvenue" hidden>
+  <div class="bv-barre"><span id="bvProgres"></span></div>
+  <button id="bvPlusTard" class="bv-plus-tard">Plus tard</button>
+
+  <div class="bv-scene">
+    <div class="bv-dessin" id="bvDessin"></div>
+    <h2 id="bvTitre">—</h2>
+    <p id="bvSous">—</p>
+    <div class="bv-champs" id="bvChamps"></div>
+    <p class="hint" id="bvAide"></p>
+  </div>
+
+  <div class="bv-pied">
+    <button id="bvPrec" class="btn btn-ghost">Retour</button>
+    <button id="bvSuiv" class="btn btn-primary">Continuer</button>
   </div>
 </div>
 
@@ -2065,6 +2224,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-planning"/></svg><span class="ttl">Planning type</span></summary>
     <div class="body">
+      <p class="hint" style="margin-top:0">Ce planning vaut pour toute la famille : si vous avez deux enfants chez la même nounou, il s'applique aux deux.</p>
       <div class="horaires">
         <div class="hor-tete"><span></span><span>arrivée</span><span>départ</span><span>durée</span></div>
         <div class="hor-l"><b>lun</b><input data-profil="horaires.d1.debut" placeholder="08:00"><input data-profil="horaires.d1.fin" placeholder="17:00"><em data-duree="d1">—</em></div>
@@ -2486,7 +2646,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.11.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.12.1</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3575,7 +3735,11 @@ function renderEnfants() {
       ${e.id === enfantActif ? '<em>affiché</em>' : `<button class="choisir" data-enfant="${e.id}">Afficher</button>`}
       ${enfants().length > 1 ? `<button class="retirer" data-retirer="${e.id}" aria-label="Retirer"><svg><use href="#i-poubelle"/></svg></button>` : ''}
     </li>`).join('');
-    $$('#listeEnfants [data-enfant]').forEach(b => { b.onclick = () => changerEnfant(b.dataset.enfant); });
+    // Afficher un enfant, c'est vouloir sa fiche : on l'ouvre au lieu de
+    // laisser la personne sur la liste sans savoir si le changement a pris.
+    $$('#listeEnfants [data-enfant]').forEach(b => {
+      b.onclick = async () => { await changerEnfant(b.dataset.enfant); showView('saisie'); };
+    });
     $$('#listeEnfants [data-retirer]').forEach(b => { b.onclick = () => retirerEnfant(b.dataset.retirer); });
   }
   const bar = $('#barreEnfants');
@@ -5813,7 +5977,10 @@ async function fermerPorte() {
   // le role d'abord : sinon le tour guide demarre pour quelqu'un qu'on va
   // renvoyer vers l'autre application
   if (!await verifierRole('employeur', 'Cocon Nounou')) return;
-  if (!profil.tourVu) setTimeout(ouvrirTour, 450);
+  // Le dossier d'abord, le tour ensuite : expliquer ou sont les choses n'a de
+  // sens qu'une fois qu'elles y sont.
+  if (!profil.dossierFait) setTimeout(ouvrirBienvenue, 450);
+  else if (!profil.tourVu) setTimeout(ouvrirTour, 450);
   await assurerProfil();
   publierIdentite();
   await reconcilierContrats(false);
@@ -5976,7 +6143,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.11.0';
+const VERSION = '1.12.1';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -6636,7 +6803,7 @@ function ouvrirFicheTrouvee(id) {
 
 async function ouvrirFicheNounou(salarieeId, nom) {
   const box = $('#proFiche');
-  box.innerHTML = miroiter(4);
+  box.innerHTML = miroiter(4, 'carte');
   $('#ficheNounou').hidden = false;
   let p = null, portrait = null;
   try {
@@ -7222,7 +7389,27 @@ function renderFermetures() {
 const AUTORISATIONS = ['sortie', 'transport', 'photo', 'photo_groupe', 'creme', 'medicament'];
 let urgence = null, personnes = [];
 
+/* Ce qui a ete rempli dans le formulaire avant qu'un contrat existe attend
+   dans le profil. Des qu'un contrat est relie, on le pousse — sinon la
+   personne aurait rempli sa fiche d'urgence pour rien. */
+async function reprendreUrgenceEnAttente() {
+  const att = profil.urgenceEnAttente;
+  const id = contratLie();
+  if (!att || !id || !Supa.connecte()) return false;
+  try {
+    await Supa.ecrire('fiche_urgence', [{ contrat_id: id,
+      medecin: att.medecin || null, medecin_tel: att.medecin_tel || null,
+      allergies: att.allergies || null, traitements: att.traitements || null,
+      particularites: att.particularites || null,
+      autorisations: att.autorisations || {} }], 'resolution=merge-duplicates');
+    delete profil.urgenceEnAttente;
+    await doProfilSave();
+    return true;
+  } catch (e) { return false; }
+}
+
 async function chargerUrgence() {
+  await reprendreUrgenceEnAttente();
   const id = contratLie();
   urgence = null; personnes = [];
   if (!id || !Supa.connecte()) return;
@@ -8884,8 +9071,17 @@ $('#mpRetour').onclick = async () => {
 };
 $('#btnSauvegarder').onclick = () => sauvegarderDossier(false);
 $('#btnRestaurer').onclick = restaurerDossier;
-$('#btnSupprCompte').onclick = supprimerMonCompte;
-$('#btnArchiveDonnees').onclick = preparerArchive;
+$('#btnSupprCompte').onclick = () => avecAttente('#btnSupprCompte', supprimerMonCompte);
+$('#btnArchiveDonnees').onclick = () => avecAttente('#btnArchiveDonnees', preparerArchive);
+$('#bvSuiv').onclick = () => avecAttente('#bvSuiv', bvSuivant);
+$('#bvPrec').onclick = () => { if (bvEtape > 0) { bvEtape--; renderBienvenue(); } };
+$('#bvPlusTard').onclick = async () => {
+  if (!await confirmer('Remplir plus tard ?',
+    { detail: 'Vous retrouverez tout dans le Dossier, et l\u2019écran reviendra à la prochaine ouverture.',
+      oui: 'Plus tard' })) return;
+  document.getElementById('bienvenue').hidden = true;
+  showView('accueil');
+};
 $('#btnDev').onclick = demanderCodeDev;
 $('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
 $('#nouvFermer').onclick = () => { fermerFeuille('#feuilleNouveau'); };
@@ -8914,7 +9110,7 @@ $('#communCatP').addEventListener('click', e => {
   const b = e.target.closest('[data-cat]');
   if (b) $$('#communCatP button').forEach(x => x.classList.toggle('on', x === b));
 });
-$('#btnUrgence').onclick = enregistrerUrgence;
+$('#btnUrgence').onclick = () => avecAttente('#btnUrgence', enregistrerUrgence);
 $('#btnAjoutPersonne').onclick = () => { personnes.push({ nom: '', lien: '', tel: '' }); renderPersonnes(); };
 $('#btnAjoutContact').onclick = () => {
   contactsUrgence.push({ role: ROLES_CONTACT[contactsUrgence.length] || 'Autre', nom: '', tel: '' });
@@ -9472,9 +9668,24 @@ const ICO_SALUT = {
   soleil: '<svg viewBox="0 0 24 24" class="ico-salut"><circle cx="12" cy="12" r="4.2" fill="#f5d76e"/><g stroke="#f5d76e" stroke-width="1.6" stroke-linecap="round"><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6"/></g></svg>',
   lune:   '<svg viewBox="0 0 24 24" class="ico-salut"><path d="M14 3a9 9 0 1 0 7 14.5A8 8 0 0 1 14 3z" fill="#f5d76e"/><circle cx="6" cy="6" r=".9" fill="#f5d76e"/><circle cx="4" cy="12" r=".7" fill="#f5d76e"/></svg>'
 };
-function miroiter(n, bloc) {
-  return Array.from({ length: n }, (_, i) =>
-    `<div class="miroite ${bloc ? 'miroite-bloc' : 'miroite-ligne'} ${!bloc && i % 3 === 2 ? 'courte' : ''}"></div>`).join('');
+/* Trois formes d'attente, selon ce qui va s'afficher : des lignes de texte,
+   des blocs, ou des cartes avec un portrait. */
+function miroiter(n, forme) {
+  const f = forme === true ? 'bloc' : (forme || 'ligne');
+  return Array.from({ length: n }, (_, i) => {
+    if (f === 'carte') {
+      return `<div class="miroite-carte"><span class="miroite rond"></span>
+        <span class="txt"><span class="miroite miroite-ligne"></span>
+        <span class="miroite miroite-ligne"></span></span></div>`;
+    }
+    if (f === 'bloc') return '<div class="miroite miroite-bloc"></div>';
+    return `<div class="miroite miroite-ligne${i % 3 === 2 ? ' courte' : ''}"></div>`;
+  }).join('');
+}
+
+/* Pour une attente courte, en ligne dans une phrase. */
+function chargeur(texte) {
+  return `<span class="chargeur">${esc(texte || 'Chargement')}<i></i><i></i><i></i></span>`;
 }
 
 
@@ -9820,7 +10031,7 @@ async function ouvrirSujet(id) {
   document.getElementById('sujEtat').textContent = s.etat === 'regle' ? 'Réglé' : '';
 
   const fil = document.getElementById('sujFil');
-  fil.innerHTML = miroiter(2);
+  fil.innerHTML = miroiter(2, 'carte');
   document.getElementById('feuilleSujet').hidden = false;
 
   // marquer lu si l'autre l'a pose
@@ -10480,6 +10691,467 @@ function dessinerCiel(cible) {
     }
   }
   box.insertBefore(ciel, box.firstChild);
+}
+
+
+/* ---------------- Les boutons qui travaillent ----------------
+   Un bouton qui ne repond pas invite a taper une deuxieme fois. Celui-ci se
+   met en attente, refuse le second appui, et redevient lui-meme quoi qu'il
+   arrive — y compris en cas d'erreur, sinon il reste bloque pour toujours.
+   Nommee « avecAttente » parce qu'un « occuper » local existe deja dans la
+   porte d'entree, et deux noms identiques se pretent a confusion. */
+async function avecAttente(bouton, travail) {
+  const el = typeof bouton === 'string' ? document.querySelector(bouton) : bouton;
+  if (!el) return travail();
+  if (el.classList.contains('occupe')) return;      // deja en cours
+  el.classList.add('occupe');
+  el.disabled = true;
+  try { return await travail(); }
+  finally { el.classList.remove('occupe'); el.disabled = false; }
+}
+
+
+/* ---------------- Le formulaire de premiere fois ----------------
+   Renvoyer vers le module Dossier apres le tour guide laissait la personne
+   devant douze cartes repliees, sans savoir par ou commencer. Ici tout le
+   dossier se remplit une fois, une etape par sujet, et plus rien n'est
+   redemande ensuite : le taux horaire, le planning et les identites sont
+   repris de mois en mois.
+
+   Le planning type est commun a la famille : deux enfants, un seul planning. */
+let bvEtape = 0, bvEnfants = [], bvUrgence = { autorisations: {} };
+
+const BV_DESSINS = {
+  bonjour: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><circle cx="100" cy="48" r="26" fill="var(--acc-doux)"/>
+    <circle cx="91" cy="44" r="2.6" fill="var(--acc)" stroke="none"/><circle cx="109" cy="44" r="2.6" fill="var(--acc)" stroke="none"/>
+    <path d="M90 57a12 12 0 0 0 20 0"/>
+    <path d="M64 96a36 36 0 0 1 72 0z" fill="var(--acc-doux)"/></g>
+    <path d="M40 112h120" opacity=".3"/>
+    <circle cx="46" cy="34" r="4" fill="#f5c65e" stroke="none" class="flotte"/>
+    <circle cx="158" cy="26" r="3" fill="#f5c65e" stroke="none"/></svg>`,
+  nounou: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="balance"><circle cx="78" cy="42" r="20" fill="var(--acc-doux)"/>
+    <path d="M52 88a26 26 0 0 1 52 0z" fill="var(--acc-doux)"/></g>
+    <g class="flotte"><circle cx="132" cy="58" r="14" fill="#fde7c6"/>
+    <path d="M114 92a18 18 0 0 1 36 0z" fill="#fde7c6"/></g>
+    <path d="M100 66c6-6 14-6 20 0" stroke="var(--acc)" opacity=".6"/>
+    <path d="M34 108h132" opacity=".3"/></svg>`,
+  enfants: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><ellipse cx="70" cy="40" rx="15" ry="19" fill="var(--acc-doux)"/>
+    <path d="M70 59c-2 9 4 15 2 24" opacity=".5"/></g>
+    <g class="flotte" style="animation-delay:-1.4s"><ellipse cx="112" cy="32" rx="13" ry="17" fill="#f3c9d6"/>
+    <path d="M112 49c2 9-4 15-2 24" opacity=".5"/></g>
+    <g class="flotte" style="animation-delay:-2.6s"><ellipse cx="146" cy="46" rx="11" ry="14" fill="#fde7c6"/>
+    <path d="M146 60c-2 8 3 12 1 20" opacity=".5"/></g>
+    <path d="M40 112h120" opacity=".3"/></svg>`,
+  contrat: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><rect x="62" y="20" width="76" height="94" rx="8" fill="#fff"/>
+    <path d="M76 44h48M76 58h48M76 72h30" opacity=".55"/>
+    <circle cx="118" cy="92" r="13" fill="var(--acc-doux)"/>
+    <path d="M113 92l4 4 7-8"/></g>
+    <path d="M46 30l6 6M154 30l-6 6" opacity=".35"/></svg>`,
+  euro: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><circle cx="100" cy="60" r="34" fill="var(--acc-doux)"/>
+    <path d="M113 46a17 17 0 1 0 0 28M84 55h22M84 65h22" stroke-width="3"/></g>
+    <circle cx="48" cy="40" r="5" fill="#f5c65e" stroke="none" class="flotte" style="animation-delay:-1s"/>
+    <circle cx="154" cy="82" r="4" fill="#f5c65e" stroke="none" class="flotte" style="animation-delay:-2s"/>
+    <path d="M40 112h120" opacity=".3"/></svg>`,
+  horloge: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><circle cx="100" cy="60" r="34" fill="var(--acc-doux)"/>
+    <circle cx="100" cy="60" r="3" fill="var(--acc)" stroke="none"/>
+    <path d="M100 60V38" stroke-width="3"/><path d="M100 60l15 10" stroke-width="3"/>
+    <path d="M100 22v5M138 60h-5M100 98v-5M62 60h5" opacity=".55"/></g>
+    <path d="M40 114h120" opacity=".3"/>
+    <circle cx="52" cy="34" r="4" fill="#f5c65e" stroke="none" class="flotte" style="animation-delay:-1.2s"/></svg>`,
+  trousse: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><rect x="58" y="42" width="84" height="60" rx="10" fill="#fde7c6"/>
+    <path d="M82 42V32a8 8 0 0 1 8-8h20a8 8 0 0 1 8 8v10" />
+    <path d="M100 60v24M88 72h24" stroke="#c9453f" stroke-width="5"/></g>
+    <path d="M40 114h120" opacity=".3"/></svg>`,
+  accord: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><rect x="62" y="22" width="76" height="88" rx="8" fill="#fff"/>
+    <rect x="76" y="42" width="14" height="14" rx="4" fill="var(--acc-doux)"/><path d="M79 49l3 3 5-6"/>
+    <rect x="76" y="66" width="14" height="14" rx="4" fill="var(--acc-doux)"/><path d="M79 73l3 3 5-6"/>
+    <rect x="76" y="90" width="14" height="14" rx="4" fill="none"/>
+    <path d="M98 49h30M98 73h30M98 97h20" opacity=".5"/></g></svg>`,
+  pret: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><circle cx="100" cy="58" r="32" fill="var(--acc-doux)"/>
+    <path d="M86 58l10 11 20-24" stroke-width="4"/></g>
+    <path d="M52 34l4 8 8 4-8 4-4 8-4-8-8-4 8-4z" fill="#f5c65e" stroke="none"/>
+    <path d="M150 74l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="#f5c65e" stroke="none"/></svg>`
+};
+
+/* Une etape = un dessin, un titre, une phrase, des champs. */
+const BV_ETAPES = [
+  { dessin: 'bonjour', titre: 'Commençons par vous',
+    sous: 'Ces informations apparaîtront sur chaque fiche de salaire. Vous ne les redonnerez plus.',
+    champs: [
+      ['employeur.nom', 'NOM et prénom', 'text', 'Comme sur votre pièce d\u2019identité'],
+      ['employeur.adresse', 'Adresse', 'text', ''],
+      ['employeur.cpVille', 'Code postal et ville', 'text', ''],
+      ['employeur.tel', 'Téléphone', 'tel', 'Votre nounou pourra vous joindre'],
+      ['employeur.pajemploi', 'N° Pajemploi', 'text', 'Sur votre espace Pajemploi, facultatif ici']
+    ] },
+
+  { dessin: 'nounou', titre: 'Votre assistante maternelle',
+    sous: 'Si elle utilise déjà Cocon, vous pourrez reprendre son nom automatiquement plus tard.',
+    champs: [
+      ['salarie.nom', 'NOM et prénom', 'text', ''],
+      ['salarie.adresse', 'Adresse', 'text', ''],
+      ['salarie.cpVille', 'Code postal et ville', 'text', ''],
+      ['salarie.secu', 'N° de sécurité sociale', 'numeric', 'Reste sur ce téléphone, jamais envoyé']
+    ] },
+
+  { dessin: 'enfants', titre: 'Votre enfant',
+    sous: 'Vous pouvez en ajouter plusieurs : le contrat et le planning seront communs.',
+    enfants: true },
+
+  { dessin: 'contrat', titre: 'Le contrat',
+    sous: 'Ce que dit votre contrat de travail. Repris chaque mois sans rien retaper.',
+    cases: [
+      ['contrat.anneeComplete', 'Année complète',
+       '52 semaines sur 12 mois. Décochez pour une année incomplète — les semaines d\u2019accueil sont alors comptées.']
+    ],
+    champs: [
+      ['contrat.tHn', 'Tarif horaire net (€/h)', 'decimal', 'Le taux des heures normales'],
+      ['contrat.hnH', 'Heures normales par semaine', 'decimal', 'Souvent 40 ou 45'],
+      ['contrat.hnS', 'Semaines par an', 'numeric', '52 en année complète, 47 sinon'],
+      ['contrat.tHm', 'Tarif heures majorées (€/h)', 'decimal', 'Au-delà de 45 h, facultatif'],
+      ['contrat.tHc', 'Tarif heures complémentaires (€/h)', 'decimal', 'Facultatif']
+    ] },
+
+  { dessin: 'euro', titre: 'Les indemnités',
+    sous: 'Entretien, repas, trajets. Elles reviennent chaque mois, calculées sur les jours d\u2019accueil.',
+    champs: [
+      ['indemnites.e1t', 'Entretien par jour (€)', 'decimal', 'Minimum légal : 2,65 € pour 9 h'],
+      ['indemnites.rt', 'Repas par jour (€)', 'decimal', 'Si vous ne fournissez pas les repas'],
+      ['indemnites.kt', 'Kilomètre (€)', 'decimal', 'Si elle transporte votre enfant, facultatif']
+    ] },
+
+  { dessin: 'horloge', titre: 'Le planning type',
+    sous: 'Les horaires habituels. Ils remplissent le calendrier de chaque mois d\u2019un seul geste.',
+    planning: true },
+
+  { dessin: 'trousse', titre: 'En cas d\u2019urgence',
+    sous: 'Ce que votre nounou doit savoir tout de suite. Elle le verra sans avoir à chercher.',
+    urgence: true },
+
+  { dessin: 'accord', titre: 'Ce que vous autorisez',
+    sous: 'Rien n\u2019est autorisé par défaut. Vous pouvez revenir sur chacun à tout moment.',
+    autorisations: true },
+
+  { dessin: 'pret', titre: 'C\u2019est prêt',
+    sous: 'Tout est enregistré. Chaque mois, il ne restera que les jours d\u2019accueil à cocher.',
+    fin: true }
+];
+
+const BV_AUTORISATIONS = [
+  ['sortie', 'Les sorties', 'Parc, bibliothèque, promenades autour de chez elle.'],
+  ['transport', 'Le transport en voiture', 'Trajets école, sorties. Siège adapté obligatoire.'],
+  ['photo', 'Les photos', 'Elle pourra vous envoyer des photos de votre enfant.'],
+  ['photo_groupe', 'Les photos de groupe', 'Votre enfant peut apparaître sur une photo avec d\u2019autres.'],
+  ['creme', 'Crème solaire et produits de soin', 'Application en cas de besoin.'],
+  ['medicament', 'Médicaments', 'Uniquement sur ordonnance, et seulement si vous le demandez.']
+];
+
+const BV_JOURS = [['d1', 'Lundi'], ['d2', 'Mardi'], ['d3', 'Mercredi'], ['d4', 'Jeudi'],
+                  ['d5', 'Vendredi'], ['d6', 'Samedi'], ['d7', 'Dimanche']];
+
+function ouvrirBienvenue() {
+  bvEtape = 0;
+  bvUrgence = { autorisations: {} };
+  bvEnfants = (enfants() || []).map(e => ({ id: e.id, prenom: e.prenom || '', naissance: '' }));
+  if (!bvEnfants.length) bvEnfants = [{ id: 'e' + Date.now(), prenom: '', naissance: '' }];
+  document.getElementById('bienvenue').hidden = false;
+  renderBienvenue();
+}
+
+function renderBienvenue() {
+  const e = BV_ETAPES[bvEtape];
+  document.getElementById('bvProgres').style.width = Math.round((bvEtape / (BV_ETAPES.length - 1)) * 100) + '%';
+  document.getElementById('bvDessin').innerHTML = BV_DESSINS[e.dessin] || BV_DESSINS.bonjour;
+  document.getElementById('bvTitre').textContent = e.titre;
+  document.getElementById('bvSous').textContent = e.sous;
+  document.getElementById('bvPrec').hidden = bvEtape === 0;
+  document.getElementById('bvSuiv').textContent = e.fin ? 'Terminer' : 'Continuer';
+  document.getElementById('bvPlusTard').hidden = !!e.fin;
+  document.getElementById('bvAide').textContent = '';
+
+  const box = document.getElementById('bvChamps');
+  box.classList.remove('bv-champs'); void box.offsetWidth; box.classList.add('bv-champs');
+
+  if (e.fin) { box.innerHTML = ''; return; }
+  if (e.enfants) return renderBvEnfants();
+  if (e.planning) return renderBvPlanning();
+  if (e.urgence) return renderBvUrgence();
+  if (e.autorisations) return renderBvAutorisations();
+
+  // Les cases d'abord : elles changent parfois le sens des champs dessous.
+  const cases = (e.cases || []).map(([chemin, libelle, aide]) => {
+    const [bloc, champ] = chemin.split('.');
+    const coche = !!((cur[bloc] || {})[champ]);
+    return `<label class="bv-case"><input type="checkbox" data-bv-case="${chemin}" ${coche ? 'checked' : ''}>
+      <span><b>${esc(libelle)}</b>${aide ? `<small>${esc(aide)}</small>` : ''}</span></label>`;
+  }).join('');
+
+  box.innerHTML = cases + (e.champs || []).map(([chemin, libelle, genre, aide]) => {
+    const [bloc, champ] = chemin.split('.');
+    const v = ((cur[bloc] || {})[champ]);
+    const mode = genre === 'numeric' ? 'inputmode="numeric"'
+      : genre === 'decimal' ? 'inputmode="decimal"'
+      : genre === 'tel' ? 'inputmode="tel"' : '';
+    return `<label class="field" data-pour="${chemin}"><span>${esc(libelle)}</span>
+      <input data-bv="${chemin}" ${mode} value="${esc(v === undefined || v === null ? '' : String(v))}">
+      ${aide ? `<small class="hint" style="margin:3px 0 0">${esc(aide)}</small>` : ''}</label>`;
+  }).join('');
+
+  box.querySelectorAll('[data-bv]').forEach(inp => {
+    inp.oninput = () => {
+      const [bloc, champ] = inp.dataset.bv.split('.');
+      cur[bloc] = cur[bloc] || {};
+      cur[bloc][champ] = inp.value;
+    };
+  });
+  box.querySelectorAll('[data-bv-case]').forEach(inp => {
+    inp.onchange = () => {
+      const [bloc, champ] = inp.dataset.bvCase.split('.');
+      cur[bloc] = cur[bloc] || {};
+      cur[bloc][champ] = inp.checked;
+      bvAjusterAnnee();
+    };
+  });
+  bvAjusterAnnee();
+}
+
+/* En annee complete, le nombre de semaines vaut 52 et ne se discute pas : on
+   le renseigne et on le range, plutot que de laisser une question sans objet. */
+function bvAjusterAnnee() {
+  const box = document.getElementById('bvChamps');
+  const champ = box.querySelector('[data-bv="contrat.hnS"]');
+  if (!champ) return;
+  const complete = !!(cur.contrat || {}).anneeComplete;
+  const bloc = champ.closest('.field');
+  if (complete) {
+    champ.value = '52'; cur.contrat.hnS = 52;
+    bloc.style.display = 'none';
+  } else {
+    if (String(champ.value) === '52') { champ.value = ''; cur.contrat.hnS = ''; }
+    bloc.style.display = '';
+  }
+}
+
+/* Le planning type : sept lignes, deux heures chacune. On propose de recopier
+   le premier jour rempli sur les suivants — c'est le cas le plus courant. */
+function renderBvPlanning() {
+  const box = document.getElementById('bvChamps');
+  const h = profil.horaires || {};
+  box.innerHTML = `<div class="bv-planning">${BV_JOURS.map(([cle, nom]) => `
+    <div class="bv-jour">
+      <b>${esc(nom)}</b>
+      <input data-bv-h="${cle}.debut" placeholder="08:00" value="${esc((h[cle] || {}).debut || '')}">
+      <input data-bv-h="${cle}.fin" placeholder="17:00" value="${esc((h[cle] || {}).fin || '')}">
+    </div>`).join('')}</div>
+    <button id="bvRecopier" class="btn btn-ghost btn-block">Recopier sur lundi → vendredi</button>
+    <p class="hint">Un jour laissé vide n'est pas un jour d'accueil. Ce planning vaut pour tous vos enfants.</p>`;
+
+  box.querySelectorAll('[data-bv-h]').forEach(inp => {
+    inp.oninput = () => {
+      const [cle, bout] = inp.dataset.bvH.split('.');
+      profil.horaires = profil.horaires || {};
+      profil.horaires[cle] = profil.horaires[cle] || {};
+      profil.horaires[cle][bout] = inp.value;
+    };
+  });
+  document.getElementById('bvRecopier').onclick = () => {
+    const source = BV_JOURS.slice(0, 5).map(([c]) => (profil.horaires || {})[c] || {})
+      .find(x => (x.debut || '').trim());
+    if (!source) { document.getElementById('bvAide').textContent = 'Remplis d\u2019abord un jour.'; return; }
+    for (const [cle] of BV_JOURS.slice(0, 5)) {
+      profil.horaires[cle] = { debut: source.debut, fin: source.fin };
+    }
+    renderBvPlanning();
+  };
+  nativiser(box);
+}
+
+/* La fiche d'urgence : ce qui se lit en trois secondes quand il y a un souci. */
+function renderBvUrgence() {
+  const box = document.getElementById('bvChamps');
+  const u = bvUrgence;
+  box.innerHTML = `
+    <label class="field"><span>Médecin traitant</span><input data-bv-u="medecin" value="${esc(u.medecin || '')}"></label>
+    <label class="field"><span>Téléphone du médecin</span><input data-bv-u="medecin_tel" inputmode="tel" value="${esc(u.medecin_tel || '')}"></label>
+    <label class="field"><span>Allergies</span><textarea data-bv-u="allergies" rows="2" placeholder="Aucune connue">${esc(u.allergies || '')}</textarea></label>
+    <label class="field"><span>Traitements en cours</span><textarea data-bv-u="traitements" rows="2">${esc(u.traitements || '')}</textarea></label>
+    <label class="field"><span>Particularités à connaître</span><textarea data-bv-u="particularites" rows="3" placeholder="Sommeil, alimentation, peurs…">${esc(u.particularites || '')}</textarea></label>
+    <p class="hint">Les personnes à appeler s'ajoutent ensuite dans Le contrat → Urgence.</p>`;
+  box.querySelectorAll('[data-bv-u]').forEach(inp => {
+    inp.oninput = () => { bvUrgence[inp.dataset.bvU] = inp.value; };
+  });
+}
+
+/* Rien n'est autorise par defaut : chaque case est un choix, pas un oubli. */
+function renderBvAutorisations() {
+  const box = document.getElementById('bvChamps');
+  const a = bvUrgence.autorisations || {};
+  box.innerHTML = BV_AUTORISATIONS.map(([cle, titre, aide]) => `
+    <label class="bv-case"><input type="checkbox" data-bv-a="${cle}" ${a[cle] ? 'checked' : ''}>
+      <span><b>${esc(titre)}</b><small>${esc(aide)}</small></span></label>`).join('') +
+    `<p class="hint">Sans autorisation photo, votre nounou ne pourra rien vous envoyer. Vous signerez l'accord dans Le contrat → Urgence.</p>`;
+  box.querySelectorAll('[data-bv-a]').forEach(inp => {
+    inp.onchange = () => {
+      bvUrgence.autorisations = bvUrgence.autorisations || {};
+      bvUrgence.autorisations[inp.dataset.bvA] = inp.checked;
+    };
+  });
+}
+
+function renderBvEnfants() {
+  const box = document.getElementById('bvChamps');
+  box.innerHTML = bvEnfants.map((en, i) => `
+    <div class="bv-enfant">
+      <b>${esc(en.prenom || 'Enfant ' + (i + 1))}</b>
+      <small>${esc(en.naissance || 'date à venir')}</small>
+      ${bvEnfants.length > 1 ? `<button data-bv-suppr="${i}" aria-label="Retirer">✕</button>` : ''}
+    </div>
+    <label class="field"><span>Prénom</span><input data-bv-prenom="${i}" value="${esc(en.prenom)}"></label>
+    <label class="field"><span>Date de naissance</span><input data-bv-naissance="${i}" placeholder="jj/mm/aaaa" value="${esc(en.naissance)}"></label>
+  `).join('') + `<button id="bvAjoutEnfant" class="btn btn-ghost btn-block">Ajouter un enfant</button>`;
+
+  box.querySelectorAll('[data-bv-prenom]').forEach(inp => {
+    inp.oninput = () => { bvEnfants[+inp.dataset.bvPrenom].prenom = inp.value;
+      const t = box.querySelectorAll('.bv-enfant b')[+inp.dataset.bvPrenom];
+      if (t) t.textContent = inp.value || 'Enfant ' + (+inp.dataset.bvPrenom + 1); };
+  });
+  box.querySelectorAll('[data-bv-naissance]').forEach(inp => {
+    inp.oninput = () => { bvEnfants[+inp.dataset.bvNaissance].naissance = inp.value; };
+  });
+  box.querySelectorAll('[data-bv-suppr]').forEach(b => {
+    b.onclick = () => { bvEnfants.splice(+b.dataset.bvSuppr, 1); renderBvEnfants(); };
+  });
+  document.getElementById('bvAjoutEnfant').onclick = () => {
+    bvEnfants.push({ id: 'e' + Date.now(), prenom: '', naissance: '' });
+    renderBvEnfants();
+  };
+  nativiser(box);
+}
+
+/* Une etape ne se quitte que si l'essentiel est la — le reste peut attendre. */
+function bvValide() {
+  const e = BV_ETAPES[bvEtape];
+  if (e.enfants) {
+    if (!bvEnfants.some(x => (x.prenom || '').trim())) return 'Le prénom d\u2019au moins un enfant.';
+    return null;
+  }
+  if (e.planning) {
+    const un = BV_JOURS.some(([c]) => ((profil.horaires || {})[c] || {}).debut);
+    return un ? null : 'Renseigne au moins un jour d\u2019accueil.';
+  }
+  if (e.urgence || e.autorisations) return null;   // tout y est facultatif
+  const requis = { 0: ['employeur.nom'], 1: ['salarie.nom'], 3: ['contrat.tHn', 'contrat.hnH'] }[bvEtape] || [];
+  for (const chemin of requis) {
+    const [bloc, champ] = chemin.split('.');
+    if (!String((cur[bloc] || {})[champ] || '').trim()) {
+      const lib = (e.champs.find(c => c[0] === chemin) || [])[1] || 'Ce champ';
+      return lib + ' : à renseigner.';
+    }
+  }
+  return null;
+}
+
+async function bvSuivant() {
+  const souci = bvValide();
+  if (souci) { document.getElementById('bvAide').textContent = souci;
+    secouer('.bv-champs'); return; }
+
+  if (BV_ETAPES[bvEtape].enfants) {
+    profil.enfants = bvEnfants.filter(x => (x.prenom || '').trim())
+      .map(x => ({ id: x.id, prenom: x.prenom.trim(), contratId: (enfants().find(y => y.id === x.id) || {}).contratId || null }));
+    enfantActif = profil.enfants[0].id;
+    profil.enfantActif = enfantActif;
+    const premier = bvEnfants.find(x => (x.prenom || '').trim());
+    cur.enfant = { ...(cur.enfant || {}), prenom: premier.prenom.trim(), naissance: premier.naissance || '' };
+    await doProfilSave();
+  }
+  await doSave();
+
+  if (BV_ETAPES[bvEtape].fin) { await bvTerminer(); return; }
+  bvEtape++;
+  renderBienvenue();
+}
+
+async function bvTerminer() {
+  profil.dossierFait = true;
+  await doProfilSave();
+  await doSave();
+
+  // La fiche d'urgence vit sur le serveur : elle n'a de sens qu'une fois le
+  // contrat relie. Sans lien, on la garde pour plus tard plutot que de la
+  // perdre — elle sera reprise a la premiere ouverture du module.
+  const id = contratLie();
+  if (id && Supa.connecte()) {
+    try {
+      await Supa.ecrire('fiche_urgence', [{ contrat_id: id,
+        medecin: bvUrgence.medecin || null, medecin_tel: bvUrgence.medecin_tel || null,
+        allergies: bvUrgence.allergies || null, traitements: bvUrgence.traitements || null,
+        particularites: bvUrgence.particularites || null,
+        autorisations: bvUrgence.autorisations || {} }], 'resolution=merge-duplicates');
+    } catch (e) { profil.urgenceEnAttente = bvUrgence; await doProfilSave(); }
+  } else if (Object.keys(bvUrgence).length > 1) {
+    profil.urgenceEnAttente = bvUrgence;
+    await doProfilSave();
+  }
+
+  document.getElementById('bienvenue').hidden = true;
+  showView('accueil');
+  fete();
+  // Le tour vient apres : on explique ou sont les choses une fois qu'elles y sont.
+  if (!profil.tourVu) setTimeout(ouvrirTour, 1500);
+  else toast('Dossier complet — chaque mois, il ne reste que les jours à cocher.');
+}
+
+
+/* ---------------- La fete ----------------
+   Le moment ou tout est rempli merite mieux qu'un message. Trois couches : une
+   onde qui part du centre, des confettis en papier decoupe, des paillettes qui
+   montent. Une seconde et demie, puis plus rien. */
+function fete() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    toast('Dossier complet !'); return;
+  }
+  const zone = document.createElement('div');
+  zone.className = 'fete';
+  zone.setAttribute('aria-hidden', 'true');
+
+  const onde = document.createElement('u');
+  zone.appendChild(onde);
+
+  const TEINTES = ['#2f7d73', '#f5c65e', '#e8a0ae', '#7fb4c4', '#94c9a0', '#d99a3c'];
+  for (let i = 0; i < 46; i++) {
+    const c = document.createElement('i');
+    const angle = (Math.PI * 2 * i) / 46 + Math.random() * 0.3;
+    const force = 120 + Math.random() * 150;
+    c.style.setProperty('--x', Math.cos(angle) * force + 'px');
+    c.style.setProperty('--y', Math.sin(angle) * force - 60 + 'px');
+    c.style.setProperty('--r', (Math.random() * 900 - 450) + 'deg');
+    c.style.background = TEINTES[i % TEINTES.length];
+    c.style.animationDelay = (Math.random() * 0.12) + 's';
+    if (i % 3 === 0) c.style.borderRadius = '50%';
+    if (i % 4 === 0) { c.style.width = '6px'; c.style.height = '12px'; }
+    zone.appendChild(c);
+  }
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('b');
+    p.style.left = (10 + Math.random() * 80) + '%';
+    p.style.animationDelay = (Math.random() * 0.7) + 's';
+    p.style.setProperty('--d', (Math.random() * 70 - 35) + 'px');
+    zone.appendChild(p);
+  }
+  document.body.appendChild(zone);
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.Haptics) { try { C.Haptics.notification({ type: 'SUCCESS' }); } catch (e) {} }
+  setTimeout(() => zone.remove(), 2600);
 }
 
 async function activerPush() {

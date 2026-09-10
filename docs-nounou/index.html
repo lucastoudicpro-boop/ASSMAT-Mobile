@@ -838,15 +838,13 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 @media (prefers-reduced-motion:reduce){.vue-arrive{animation:none}}
 
 /* ---------- Chargement : le contenu miroite au lieu de manquer ---------- */
-.miroite{position:relative;overflow:hidden;background:var(--zebre);border-radius:10px;min-height:14px}
-.miroite::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
-  transform:translateX(-100%);animation:miroite 1.3s ease-in-out infinite}
-@keyframes miroite{to{transform:translateX(100%)}}
-.miroite-ligne{height:13px;margin:8px 0}
-.miroite-ligne.courte{width:55%}
-.miroite-bloc{height:64px;margin:10px 0;border-radius:14px}
-@media (prefers-reduced-motion:reduce){.miroite::after{animation:none}}
+
+
+}
+
+
+
+@media (prefers-reduced-motion:reduce){}
 
 .ico-salut{width:18px;height:18px;vertical-align:-3px;margin-right:6px;animation:eclot .6s ease both}
 
@@ -1022,7 +1020,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 
 
 /* ---------- La mauvaise application ---------- */
-#mauvaisePorte{position:fixed;inset:0;z-index:118;background:var(--fond);
+#mauvaisePorte{position:fixed;inset:0;z-index:118;background:var(--bg);
   display:flex;align-items:center;justify-content:center;padding:24px;
   animation:apparait .3s ease both}
 #mauvaisePorte[hidden]{display:none}
@@ -1095,10 +1093,6 @@ input:focus,textarea:focus,select:focus,
 /* ---------- Le bouton qui travaille ---------- */
 .btn[disabled]{opacity:.6}
 @keyframes travaille{to{transform:translateX(100%)}}
-.btn.occupe{position:relative;overflow:hidden;pointer-events:none}
-.btn.occupe::after{content:'';position:absolute;inset:0;width:40%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
-  transform:translateX(-100%);animation:travaille 1.1s ease-in-out infinite}
 
 /* ---------- Ce qui vient d'arriver attire l'oeil une fois ---------- */
 @keyframes surligne{0%{background:var(--acc-doux)}100%{background:transparent}}
@@ -1106,7 +1100,7 @@ input:focus,textarea:focus,select:focus,
 
 @media (prefers-reduced-motion:reduce){
   .vue-arrive .card,details[open]>.body,details[open]>.corps,
-  .btn.occupe::after,.nouveau{animation:none}
+  .nouveau{animation:none}
 }
 
 
@@ -1146,6 +1140,69 @@ input:focus,textarea:focus,select:focus,
 .date-marquante.anniv::after{right:34px;background:#f5c65e;animation-delay:-1.6s;width:11px;height:14px}
 @keyframes ballon{0%,100%{transform:translateY(60px) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
 @media (prefers-reduced-motion:reduce){.date-marquante.anniv::before,.date-marquante.anniv::after{animation:none;transform:none}}
+
+
+/* ---------------- L'attente ----------------
+   L'ancienne bande blanche balayait trop vite et trop fort sur un fond clair :
+   ca clignotait au lieu de patienter. Une teinte qui respire, dans la couleur
+   de l'application, se remarque moins et fatigue moins. */
+.miroite{display:block;position:relative;overflow:hidden;border-radius:12px;min-height:14px;
+  /* Un span reste en ligne et ignore sa hauteur : d'ou des cartes ou seul le
+     rond apparaissait. Et une teinte trop pale ne dit pas qu'on attend —
+     celle-ci se voit sans agresser. */
+  background:linear-gradient(100deg,
+    var(--zebre) 0%, var(--zebre) 30%,
+    color-mix(in srgb, var(--acc) 22%, var(--zebre)) 50%,
+    var(--zebre) 70%, var(--zebre) 100%);
+  background-size:260% 100%;
+  animation:respire 1.9s cubic-bezier(.45,0,.55,1) infinite}
+.miroite::after{content:none}
+@keyframes respire{0%{background-position:120% 0}100%{background-position:-20% 0}}
+
+.miroite-ligne{height:12px;margin:9px 0}
+.miroite-ligne.courte{width:52%}
+.miroite-bloc{height:66px;margin:11px 0;border-radius:16px}
+
+/* Une carte en attente ressemble a la carte qui va venir : un rond, deux
+   lignes. On devine ce qui arrive au lieu de regarder des barres grises. */
+.miroite-carte{display:flex;align-items:center;gap:12px;padding:12px 0;
+  border-bottom:1px solid var(--line)}
+.miroite-carte:last-child{border-bottom:0}
+.miroite-carte .rond{width:44px;height:44px;border-radius:50%;flex:0 0 auto;min-height:44px}
+.miroite-carte .txt{flex:1;min-width:0}
+.miroite-carte .txt .miroite{margin:0 0 7px}
+.miroite-carte .txt .miroite:last-child{margin:0;width:60%;height:10px}
+
+/* Le petit signe d'attente en ligne : trois points qui respirent. */
+.chargeur{display:inline-flex;align-items:center;gap:5px;color:var(--mut);
+  font:500 13px system-ui}
+.chargeur i{width:6px;height:6px;border-radius:50%;background:var(--acc);
+  opacity:.35;animation:pointe 1.25s ease-in-out infinite}
+.chargeur i:nth-child(2){animation-delay:.16s}
+.chargeur i:nth-child(3){animation-delay:.32s}
+@keyframes pointe{0%,70%,100%{transform:translateY(0);opacity:.35}
+  35%{transform:translateY(-5px);opacity:1}}
+
+@media (prefers-reduced-motion:reduce){
+  .miroite{animation:none;background:var(--zebre)}
+  .chargeur i{animation:none;opacity:.6}
+}
+
+
+/* Le rond qui tourne, centre, quelle que soit la taille du bouton.
+   Le texte disparait par la couleur plutot que par une balise a ajouter :
+   ainsi tout bouton marque « occupe » se comporte bien, meme ceux ecrits
+   avant cette regle — sinon le rond se dessinait par-dessus les mots. */
+.btn.occupe{position:relative;pointer-events:none;color:transparent!important;
+  text-shadow:none}
+.btn.occupe>*{visibility:hidden}
+.btn.occupe::after{content:'';position:absolute;top:50%;left:50%;
+  width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;
+  border:2.5px solid var(--acc);border-top-color:transparent;
+  animation:tourne .7s linear infinite;visibility:visible}
+.btn-primary.occupe::after,.btn-danger.occupe::after{border-color:rgba(255,255,255,.45);border-top-color:#fff}
+@media (prefers-reduced-motion:reduce){
+  .btn.occupe::after{animation:none;border-top-color:currentColor;opacity:.5}}
 
 </style>
 </head>
@@ -1920,7 +1977,7 @@ input:focus,textarea:focus,select:focus,
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b id="versionApp">1.11.0</b></div>
+        <div class="ds"><span>Version</span><b id="versionApp">1.12.1</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -3207,7 +3264,7 @@ function decalerJour(n) {
   // vide immediatement, sinon on croit voir les donnees du nouveau jour.
   entree = {};
   renderJournal();
-  $('#journalEtat').textContent = 'Chargement…';
+  $('#journalEtat').innerHTML = chargeur('Chargement');
   chargerJournal();
 }
 
@@ -3519,7 +3576,7 @@ async function marquerMessagesLus() {
 
 async function chargerBoite() {
   const box = $('#listeConversations');
-  if (box && !box.children.length) box.innerHTML = miroiter(3);
+  if (box && !box.children.length) box.innerHTML = miroiter(3, 'carte');
   messagesParFamille = {};
   if (!Supa.connecte() || !contrats.length) return;
   // l'espace commun est une conversation comme une autre : il doit être chargé
@@ -5208,7 +5265,7 @@ $('#mpRetour').onclick = async () => {
 };
 $('#btnSauvegarder').onclick = () => sauvegarderReglages(false);
 $('#btnRestaurer').onclick = restaurerReglages;
-$('#btnSupprCompte').onclick = supprimerMonCompte;
+$('#btnSupprCompte').onclick = () => avecAttente('#btnSupprCompte', supprimerMonCompte);
 $('#btnDev').onclick = demanderCodeDev;
 $('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
 $('#nouvFermer').onclick = () => { fermerFeuille('#feuilleNouveau'); };
@@ -5803,9 +5860,24 @@ const ICO_SALUT = {
   soleil: '<svg viewBox="0 0 24 24" class="ico-salut"><circle cx="12" cy="12" r="4.2" fill="#f5d76e"/><g stroke="#f5d76e" stroke-width="1.6" stroke-linecap="round"><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6"/></g></svg>',
   lune:   '<svg viewBox="0 0 24 24" class="ico-salut"><path d="M14 3a9 9 0 1 0 7 14.5A8 8 0 0 1 14 3z" fill="#f5d76e"/><circle cx="6" cy="6" r=".9" fill="#f5d76e"/><circle cx="4" cy="12" r=".7" fill="#f5d76e"/></svg>'
 };
-function miroiter(n, bloc) {
-  return Array.from({ length: n }, (_, i) =>
-    `<div class="miroite ${bloc ? 'miroite-bloc' : 'miroite-ligne'} ${!bloc && i % 3 === 2 ? 'courte' : ''}"></div>`).join('');
+/* Trois formes d'attente, selon ce qui va s'afficher : des lignes de texte,
+   des blocs, ou des cartes avec un portrait. */
+function miroiter(n, forme) {
+  const f = forme === true ? 'bloc' : (forme || 'ligne');
+  return Array.from({ length: n }, (_, i) => {
+    if (f === 'carte') {
+      return `<div class="miroite-carte"><span class="miroite rond"></span>
+        <span class="txt"><span class="miroite miroite-ligne"></span>
+        <span class="miroite miroite-ligne"></span></span></div>`;
+    }
+    if (f === 'bloc') return '<div class="miroite miroite-bloc"></div>';
+    return `<div class="miroite miroite-ligne${i % 3 === 2 ? ' courte' : ''}"></div>`;
+  }).join('');
+}
+
+/* Pour une attente courte, en ligne dans une phrase. */
+function chargeur(texte) {
+  return `<span class="chargeur">${esc(texte || 'Chargement')}<i></i><i></i><i></i></span>`;
 }
 
 
@@ -6144,7 +6216,7 @@ async function ouvrirSujet(id) {
   document.getElementById('sujEtat').textContent = s.etat === 'regle' ? 'Réglé' : '';
 
   const fil = document.getElementById('sujFil');
-  fil.innerHTML = miroiter(2);
+  fil.innerHTML = miroiter(2, 'carte');
   document.getElementById('feuilleSujet').hidden = false;
 
   // marquer lu si l'autre l'a pose
@@ -6665,6 +6737,23 @@ function dessinerCiel(cible) {
     }
   }
   box.insertBefore(ciel, box.firstChild);
+}
+
+
+/* ---------------- Les boutons qui travaillent ----------------
+   Un bouton qui ne repond pas invite a taper une deuxieme fois. Celui-ci se
+   met en attente, refuse le second appui, et redevient lui-meme quoi qu'il
+   arrive — y compris en cas d'erreur, sinon il reste bloque pour toujours.
+   Nommee « avecAttente » parce qu'un « occuper » local existe deja dans la
+   porte d'entree, et deux noms identiques se pretent a confusion. */
+async function avecAttente(bouton, travail) {
+  const el = typeof bouton === 'string' ? document.querySelector(bouton) : bouton;
+  if (!el) return travail();
+  if (el.classList.contains('occupe')) return;      // deja en cours
+  el.classList.add('occupe');
+  el.disabled = true;
+  try { return await travail(); }
+  finally { el.classList.remove('occupe'); el.disabled = false; }
 }
 
 async function activerPush() {

@@ -2712,3 +2712,144 @@ verifie avant correction. Second passage : tout passe.
 La section G dit ce qui n'est pas couvert : pas d'audit externe, pas de
 limitation de debit, pas de journal d'acces, pas de chiffrement de bout en
 bout, pas de double authentification. Chacun est un chantier, pas une case.
+
+## 1.11.1 — l'attente
+
+Une bande blanche balayait des barres grises, vite et fort. Sur fond clair ca
+clignotait au lieu de patienter.
+
+- La bande disparait au profit d'une **teinte qui respire**, dans la couleur de
+  l'application. Elle se voit sans agresser.
+- **Trois formes selon ce qui va venir** : des lignes pour du texte, des blocs
+  pour des cartes, et une forme « carte » — un rond et deux lignes — pour les
+  listes de personnes. On devine ce qui arrive au lieu de regarder des barres.
+- **Trois points qui respirent** pour les attentes courtes en ligne, la ou il
+  n'y avait qu'un « Chargement… » plat.
+
+**Deux defauts corriges apres capture.** Les lignes des cartes n'apparaissaient
+pas : ce sont des `span`, restes en ligne, donc sans hauteur. Et la teinte
+etait si pale qu'on ne voyait pas qu'il se passait quelque chose — neuf pour
+cent d'accent, portes a vingt-deux.
+
+## 1.11.2 — le bouton qui travaille
+
+**Deux regles se contredisaient.** `.btn.occupe::after` etait defini deux fois :
+l'une dessinait un rond qui tourne, l'autre une bande blanche qui balaie. La
+seconde ecrasait la premiere, et ses dimensions se melangeaient a celles de la
+premiere. La bande est retiree, le rond reste.
+
+**Le rond se dessinait par-dessus les mots.** Il n'effacait le texte que si le
+bouton portait une balise `.etiquette` — ce que la porte d'entree ne faisait
+pas. Le texte disparait desormais par la couleur, donc tout bouton marque
+« occupe » se comporte bien, meme ceux ecrits avant cette regle.
+
+**Cinq boutons lents montrent enfin leur attente** : enregistrer le profil, la
+fiche d'urgence, le journal, l'archive, la recherche, la suppression du compte.
+Un bouton qui ne repond pas invite a taper une deuxieme fois.
+
+Verifie sur une connexion ralentie a quatre secondes : classe posee, texte
+masque, rond de dix-huit pixels qui tourne, second appui refuse, bouton rendu
+apres coup — y compris en cas d'erreur.
+
+### Les informations non recuperees : rien trouve
+
+Deux verifications, sur les deux applications :
+
+- **Chaque colonne lue existe-t-elle en base ?** Quarante-sept lectures
+  distinctes confrontees au schema complet. Aucune colonne absente.
+- **Un rendu utilise-t-il un champ que son propre `select=` n'a pas demande ?**
+  C'est le piege classique : le champ vaut `undefined` sans aucune erreur. Neuf
+  signalements, tous faux — `json`, `ok` et `status` sont des proprietes de
+  `fetch`, pas des colonnes.
+
+Si tu vois encore une information manquante, dis-moi laquelle et sur quel
+ecran : ces deux filets ne l'attrapent pas, il faut la chercher autrement.
+
+## 1.12.0 — tout le dossier, une seule fois
+
+### Le formulaire de premiere fois
+
+Apres le tour guide, la personne se retrouvait devant douze cartes repliees
+sans savoir par ou commencer. D'ou les informations ressaisies mois apres mois.
+
+Un ecran dedie, six etapes, un dessin anime par etape :
+
+1. **Vous** — nom, adresse, telephone, numero Pajemploi
+2. **Votre assistante maternelle** — nom, adresse, numero de securite sociale
+   (qui reste sur le telephone)
+3. **Vos enfants** — autant qu'on veut, avec ajout et retrait
+4. **Le contrat** — tarif horaire, heures et semaines, tarifs majores
+5. **Les indemnites** — entretien, repas, kilometre
+6. **C'est pret** — confettis
+
+Chaque champ porte son aide sous la ligne : « Souvent 40 ou 45 »,
+« Minimum legal : 2,65 € pour 9 h », « 47 en annee incomplete ». Une etape ne
+se quitte pas sans l'essentiel, et le reste peut attendre. « Plus tard » revient
+a la prochaine ouverture.
+
+Tout est enregistre a chaque etape : fermer l'application ne perd rien.
+
+### Ce qui ne se redemande plus
+
+Le tarif horaire, les heures, les indemnites, les identites et le planning type
+sont **repris de mois en mois**. Un nouveau mois n'a plus que ses jours
+d'accueil a cocher. Une revalorisation ou un mois particulier se modifient sur
+ce mois-la seulement.
+
+### Le planning type est commun a la famille
+
+Il l'etait deja — il vit dans le profil, pas dans la fiche — mais rien ne le
+disait. La carte le precise maintenant : deux enfants chez la meme nounou,
+un seul planning.
+
+### « Afficher » ouvre la fiche
+
+Choisir un enfant dans la liste changeait bien d'enfant, mais laissait sur la
+liste : on ne savait pas si le changement avait pris. La saisie s'ouvre
+maintenant sur l'enfant choisi.
+
+### Une variable qui n'existait pas
+
+`--fond` n'est definie dans aucune des deux applications — la couleur de fond
+s'appelle `--bg`. Trois ecrans posaient donc un fond transparent : le formulaire
+de bienvenue laissait voir l'accueil au travers, et l'ecran de mauvaise
+application aussi. Corrige aux trois endroits.
+
+## 1.12.1 — le dossier entier, et la fete
+
+### Neuf etapes au lieu de six
+
+Le formulaire couvre maintenant tout ce qui se remplit une fois :
+
+1. Vous · 2. Votre assistante maternelle · 3. Vos enfants · 4. **Le contrat**
+avec la case *annee complete* · 5. Les indemnites · 6. **Le planning type**,
+sept jours et un bouton « recopier sur lundi → vendredi » · 7. **La fiche
+d'urgence** — medecin, allergies, traitements, particularites ·
+8. **Ce que vous autorisez** — six cases · 9. C'est pret.
+
+**La case « annee complete » agit sur ce qui suit** : cochee, le nombre de
+semaines vaut 52 et le champ disparait ; decochee, il revient vide. Une
+question sans objet ne devrait pas rester a l'ecran.
+
+**Rien n'est autorise par defaut.** Les six autorisations sont vides au depart :
+chaque case est un choix, pas un oubli. La phrase le dit — sans autorisation
+photo, la nounou ne pourra rien envoyer.
+
+**La fiche d'urgence attend s'il le faut.** Elle vit sur le serveur et n'a de
+sens qu'avec un contrat relie. Sans lien, elle est gardee dans le profil et
+poussee des que le contrat existe, plutot que perdue.
+
+### Le tour vient apres
+
+Expliquer ou sont les choses n'a de sens qu'une fois qu'elles y sont. Le
+formulaire s'ouvre a la premiere connexion, le tour guide le suit une seconde
+et demie apres la fete.
+
+### La fete
+
+Trois couches, une seconde et demie : une onde qui part du centre, quarante-six
+confettis en papier decoupe — carres, ronds, rectangles, six teintes, chacun sa
+trajectoire et sa rotation — et vingt-deux paillettes qui montent en ondulant.
+Plus une vibration de reussite sur le telephone.
+
+Coupee si la personne a demande moins de mouvement : un simple message.
