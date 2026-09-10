@@ -1014,6 +1014,33 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 .dm-txt small{font-size:12.5px;color:var(--mut)}
 @media (prefers-reduced-motion:reduce){.dm-dessin svg{animation:none}}
 
+
+/* ---------- La mauvaise application ---------- */
+#mauvaisePorte{position:fixed;inset:0;z-index:118;background:var(--fond);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:apparait .3s ease both}
+#mauvaisePorte[hidden]{display:none}
+/* Tout est masque sauf l'ecran lui-meme : enumerer les elements laissait
+   toujours passer quelque chose — un tour guide, un bandeau. */
+body.barre-route>*{display:none!important}
+body.barre-route>#mauvaisePorte{display:flex!important}
+.mp-scene{max-width:340px;width:100%;text-align:center}
+.mp-dessin{width:100%;height:auto;margin-bottom:20px}
+.mp-scene h2{font-size:21px;line-height:1.3;margin:0 0 10px}
+.mp-scene p{color:var(--mut);line-height:1.55;margin:0 0 22px;font-size:14.5px}
+.mp-scene .hint{margin-top:14px}
+@keyframes mp-refus{0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-7px)}40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes mp-invite{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes mp-file{0%{opacity:0;transform:translateX(-8px)}
+  40%{opacity:1}100%{opacity:0;transform:translateX(8px)}}
+.mp-gauche{animation:mp-refus .55s .25s ease-in-out both;transform-origin:49px 76px}
+.mp-droite{animation:mp-invite 2.4s .9s ease-in-out infinite;transform-origin:151px 76px}
+.mp-fleche{animation:mp-file 1.8s .8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+  .mp-gauche,.mp-droite,.mp-fleche{animation:none}}
+
 </style>
 </head>
 <body>
@@ -1179,6 +1206,62 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <button id="sujRegler" class="btn btn-primary">C'est réglé</button>
     </div>
     <p class="hint" id="sujEtat"></p>
+  </div>
+</div>
+
+<div id="feuilleDemande" class="modal" hidden>
+  <div class="modal-box">
+    <h3 id="dmdQuestion">—</h3>
+    <p class="hint" id="dmdAide" hidden></p>
+    <div id="dmdZone"></div>
+    <div class="modal-actions">
+      <button id="dmdAnnuler" class="btn btn-ghost">Annuler</button>
+      <button id="dmdValider" class="btn btn-primary">Valider</button>
+    </div>
+  </div>
+</div>
+
+<div id="feuilleConfirme" class="modal" hidden>
+  <div class="modal-box">
+    <h3 id="cfmQuestion">—</h3>
+    <p class="hint" id="cfmDetail" hidden></p>
+    <div class="modal-actions">
+      <button id="cfmNon" class="btn btn-ghost">Annuler</button>
+      <button id="cfmOui" class="btn btn-primary">Continuer</button>
+    </div>
+  </div>
+</div>
+
+<div id="mauvaisePorte" hidden>
+  <div class="mp-scene">
+    <svg class="mp-dessin" viewBox="0 0 200 150" aria-hidden="true">
+      <g class="mp-droite">
+        <rect x="18" y="34" width="62" height="86" rx="10" fill="#fff" opacity=".95"/>
+        <rect x="30" y="26" width="7" height="16" rx="3.5" fill="#bfe3da"/>
+        <rect x="61" y="26" width="7" height="16" rx="3.5" fill="#bfe3da"/>
+        <path d="M49 96V72" stroke="#2f7d73" stroke-width="6" stroke-linecap="round"/>
+        <path d="M47 76c-3-12-11-17-22-16-1 11 8 19 22 16z" fill="#d99a3c"/>
+        <path d="M51 84c3-11 10-16 20-14 1 10-8 17-20 14z" fill="#3e8a80"/>
+        <text x="49" y="134" font-size="11" fill="#2f7d73" text-anchor="middle" font-weight="600">Parent</text>
+      </g>
+      <g class="mp-gauche">
+        <rect x="120" y="34" width="62" height="86" rx="10" fill="#fff" opacity=".95"/>
+        <rect x="132" y="26" width="7" height="16" rx="3.5" fill="#f3c9d6"/>
+        <rect x="163" y="26" width="7" height="16" rx="3.5" fill="#f3c9d6"/>
+        <path d="M151 96V72" stroke="#b8556e" stroke-width="6" stroke-linecap="round"/>
+        <path d="M149 76c-3-12-11-17-22-16-1 11 8 19 22 16z" fill="#e8a0ae"/>
+        <path d="M153 84c3-11 10-16 20-14 1 10-8 17-20 14z" fill="#b8556e"/>
+        <text x="151" y="134" font-size="11" fill="#b8556e" text-anchor="middle" font-weight="600">Nounou</text>
+      </g>
+      <g class="mp-fleche">
+        <path d="M114 76H88" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M94 70l-7 6 7 6" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </g>
+    </svg>
+    <h2 id="mpTitre">Ce n'est pas la bonne application</h2>
+    <p id="mpTexte">—</p>
+    <button id="mpRetour" class="btn btn-primary btn-block">Revenir à la connexion</button>
+    <p class="hint" id="mpAide">—</p>
   </div>
 </div>
 
@@ -1702,7 +1785,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.8.0</b></div>
+        <div class="ds"><span>Version</span><b>1.8.1</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -2127,8 +2210,8 @@ async function ouvrirPorte() {
 
 async function fermerPorte() {
   $('#porte').hidden = true;
+  if (!await verifierRole('salariee', 'Cocon Parent')) return;
   await assurerProfil();
-  if (!await verifierRole('salariee', 'Cocon Parent')) { await Supa.deconnecter(); await ouvrirPorte(); return; }
   activerPush();
   marquerConnexion();
   await charger();
@@ -2297,7 +2380,9 @@ async function rejoindre() {
 async function quitterFamille(id) {
   const c = contrats.find(x => x.id === id);
   const nom = (c && c.enfant_prenom) || 'cette famille';
-  if (!confirm('Quitter l\u2019accueil de ' + nom + ' ?\n\nTu ne verras plus son planning ni ses messages. La famille pourra inviter quelqu\u2019un d\u2019autre. Rien n\u2019est effacé.')) return;
+  if (!await confirmer('Quitter l\u2019accueil de ' + nom + ' ?',
+    { detail: 'Tu ne verras plus son planning ni ses messages. La famille pourra inviter quelqu\u2019un d\u2019autre. Rien n\u2019est effacé.',
+      danger: true, oui: 'Quitter' })) return;
   try {
     await Supa.fonction('quitter_contrat', { p_contrat: id });
     if (contratActif === id) contratActif = null;
@@ -2346,7 +2431,7 @@ async function signer() {
       version_texte: VERSION_CONSENTEMENT,
       nom_saisi: nom
     });
-    $('#consentModal').hidden = true;
+    fermerFeuille('#consentModal');
     $('#codeInvit').value = '';
     contratActif = enAttenteConsentement;
     enAttenteConsentement = null;
@@ -2497,7 +2582,8 @@ async function rattacherOrphelines() {
 }
 
 async function jeterOrphelines() {
-  if (!confirm('Supprimer ' + photosOrphelines.length + ' photo(s) définitivement ?')) return;
+  if (!await confirmer('Supprimer ' + photosOrphelines.length + ' photo(s) ?',
+    { detail: 'Définitivement.', danger: true, oui: 'Supprimer' })) return;
   for (const p of photosOrphelines) await nettoyerPhoto(p.id, p.chemin);
   await chercherOrphelines(); renderOrphelines();
   toast('Photos supprimées');
@@ -2618,7 +2704,7 @@ async function montrerVisio(sens) {
 async function supprimerPhoto() {
   const p = galerie[visioIndex];
   if (!p) return;
-  if (!confirm('Supprimer cette photo ? La famille ne la verra plus.')) return;
+  if (!await confirmer('Supprimer cette photo ?', { detail: 'La famille ne la verra plus.', danger: true, oui: 'Supprimer' })) return;
   try {
     await Supa.supprimer('photos', 'id=eq.' + p.id);
     galerie.splice(visioIndex, 1);
@@ -2715,8 +2801,9 @@ async function envoyerGalerie(fichier, depuisLeFil) {
   let groupe = false;
   if (autres.length) {
     const noms = autres.map(c => c.enfant_prenom).join(', ');
-    if (confirm('Photo de groupe ?\n\nAjouter aussi : ' + noms +
-                '\n\nCes familles ont autorisé les photos de groupe.')) {
+    if (await confirmer('Photo de groupe ?',
+        { detail: 'Ajouter aussi : ' + noms + '. Ces familles ont autorisé les photos de groupe.',
+          oui: 'Partager' })) {
       concernes = concernes.concat(autres.map(c => c.id));
       groupe = true;
     }
@@ -3172,7 +3259,7 @@ function ouvrirVolet() {
     b.onpointerup = () => {
       if (long === 'fait') { long = null; return; }
       clearTimeout(long); long = null;
-      $('#volet').hidden = true;
+      fermerFeuille('#volet');
       montrer(b.dataset.ecran);
     };
     b.onpointercancel = () => { clearTimeout(long); long = null; };
@@ -3400,7 +3487,7 @@ function ouvrirCentreNotif() {
     </div>`).join('')
     : '<p class="hint" style="margin:0">Rien à signaler. Tout est à jour.</p>';
   $$('#listeNotif [data-alerte]').forEach(b => {
-    b.onclick = () => { $('#centreNotif').hidden = true; liste[+b.dataset.alerte].fn(); };
+    b.onclick = () => { fermerFeuille('#centreNotif'); liste[+b.dataset.alerte].fn(); };
   });
   $('#centreNotif').hidden = false;
 }
@@ -3671,7 +3758,7 @@ function renderPremieres() {
   }).join('');
   $$('#listePremieres [data-suppr-prem]').forEach(b => {
     b.onclick = async () => {
-      if (!confirm('Retirer cette première fois ?')) return;
+      if (!await confirmer('Retirer cette première fois ?', { danger: true, oui: 'Retirer' })) return;
       try { await Supa.supprimer('premieres_fois', 'id=eq.' + b.dataset.supprPrem);
         await chargerPremieres(); renderPremieres(); } catch (e) { toast(enClair(e)); }
     };
@@ -3689,7 +3776,7 @@ function ouvrirChoixPremiere() {
     `<button data-p="${c}"><span>${dessinPremiere(c, 40)}</span>${esc(PREMIERES[c].nom)}</button>`).join('');
   $$('#premieresGrille [data-p]').forEach(b => {
     b.onclick = () => {
-      $('#choixPremiere').hidden = true;
+      fermerFeuille('#choixPremiere');
       premiereChoisie = b.dataset.p;
       $('#ditDessin').innerHTML = dessinPremiere(premiereChoisie, 46);
       $('#ditNom').textContent = PREMIERES[premiereChoisie].nom;
@@ -3716,7 +3803,7 @@ async function noterPremiere(facon) {
       facon === 'devine' ? prenom + ' — quelque chose de beau' : prenom + ' — ' + info.nom,
       facon === 'devine' ? 'Il s\u2019est passé quelque chose aujourd\u2019hui.' : ($('#ditMot').value.trim().slice(0, 90) || ''),
       false, 'premieres');
-    $('#ditPremiere').hidden = true;
+    fermerFeuille('#ditPremiere');
     premiereChoisie = null;
     await chargerPremieres(); renderPremieres();
     toast(facon === 'devine' ? 'Prévenus, sans le détail' : 'Raconté à la famille');
@@ -3830,7 +3917,8 @@ function ilYA(iso) {
 }
 
 async function repondreDemandeAccueil(id, oui) {
-  const motif = oui ? null : (prompt('Un mot pour expliquer ? (facultatif)') || '').trim() || null;
+  const motif = oui ? null : await demander('Un mot pour expliquer ?',
+    { type: 'texte-long', aide: 'Facultatif, mais toujours mieux qu\u2019un refus sec.', valider: 'Refuser' });
   try {
     await Supa.modifier('demandes_accueil',
       { etat: oui ? 'acceptee' : 'refusee', motif_refus: motif }, 'id=eq.' + id);
@@ -3953,14 +4041,20 @@ function ouvrirChoixQualif(champ) {
   modale.hidden = false;
 }
 
-function ajouterQualif(champ, type) {
+async function ajouterQualif(champ, type) {
   const info = QUALIFS[type];
-  const intitule = type === 'autre' ? (prompt('Intitulé de la qualification ?') || '').trim() : info.nom;
-  if (type === 'autre' && !intitule) return;
-  const annee = (prompt('Année d\u2019obtention ?', String(new Date().getFullYear())) || '').trim();
+  let intitule = info.nom;
+  if (type === 'autre') {
+    intitule = await demander('Quelle qualification ?', { exemple: 'Intitulé', valider: 'Suivant' });
+    if (!intitule) return;
+  }
+  const annee = await demander('Année d\u2019obtention', {
+    type: 'nombre', max: 4, valeur: String(new Date().getFullYear()),
+    aide: intitule, valider: ['psc1', 'haccp'].includes(type) ? 'Suivant' : 'Ajouter' });
   const q = { type, intitule, annee: annee ? Number(annee) : null };
   if (champ === 'formations' && ['psc1', 'haccp'].includes(type)) {
-    const j = (prompt('Valable jusqu\u2019au ? (jj/mm/aaaa, laissez vide si sans limite)') || '').trim();
+    const j = await demander('Valable jusqu\u2019au', {
+      type: 'date', aide: 'Laissez vide si sans limite', valider: 'Ajouter' });
     if (j) q.jusqu = versISO(j);
   }
   profilPro[champ] = [...(profilPro[champ] || []), q];
@@ -4065,7 +4159,7 @@ function renderRemplacements() {
 
   $$('#listeRemplacements [data-rempl]').forEach(b => {
     b.onclick = async () => {
-      if (!confirm('Annuler ce remplacement ?')) return;
+      if (!await confirmer('Annuler ce remplacement ?', { danger: true, oui: 'Annuler le remplacement', non: 'Garder' })) return;
       try {
         await Supa.supprimer('remplacements', 'id=eq.' + b.dataset.rempl);
         await chargerRemplacements(); renderRemplacements();
@@ -4227,10 +4321,9 @@ async function ajouterFermeture() {
   // verrou, et une absence tardive reste parfois inévitable.
   if (t.preavis) {
     const jours = Math.round((new Date(du) - new Date(new Date().toISOString().slice(0, 10))) / 86400000);
-    if (jours < t.preavis && !confirm(
+    if (jours < t.preavis && !await confirmer(
       t.nom + ' : ' + (jours < 0 ? 'ces dates sont passées' : 'il reste ' + jours + ' jour(s)') +
-      ', alors que ' + t.preavis + ' jours de prévenance sont attendus.\n\n' +
-      'Déclarer quand même ? Tes familles verront la date de déclaration.')) return;
+      ', alors que ' + t.preavis + ' jours de prévenance sont attendus.', { detail: 'Déclarer quand même ? Tes familles verront la date de déclaration.' })) return;
   }
 
   try {
@@ -4258,7 +4351,7 @@ async function ajouterFermeture() {
 }
 
 async function retirerFermeture(id) {
-  if (!confirm('Retirer cette fermeture ?')) return;
+  if (!await confirmer('Retirer cette fermeture ?', { danger: true })) return;
   try {
     await Supa.supprimer('fermetures', 'id=eq.' + id);
     await chargerFermetures(); renderFermetures();
@@ -4755,7 +4848,7 @@ $('#carteRejoindre').addEventListener('toggle', () => {
   if (!rejoindreAuto) rejoindreTouche = true;
 });
 $('#btnPlus').onclick = ouvrirVolet;
-$('#volet').addEventListener('click', e => { if (e.target === e.currentTarget) $('#volet').hidden = true; });
+$('#volet').addEventListener('click', e => { if (e.target === e.currentTarget) fermerFeuille('#volet'); });
 $('#convRetour').onclick = fermerConversation;
 $('#ouvrirBesoins').onclick = () => basculerVolet('volBesoins');
 $('#ouvrirDemande').onclick = () => basculerVolet('volDemande');
@@ -4785,7 +4878,7 @@ $('#proCommune').onchange = enregistrerVisibilite;
 $('#proCP').onchange = enregistrerVisibilite;
 $('#btnAjoutDiplome').onclick = () => ouvrirChoixQualif('diplomes');
 $('#btnAjoutFormation').onclick = () => ouvrirChoixQualif('formations');
-$('#qualifFermer').onclick = () => { $('#choixQualif').hidden = true; };
+$('#qualifFermer').onclick = () => { fermerFeuille('#choixQualif'); };
 $('#btnProfilEnregistrer').onclick = enregistrerProfilPro;
 $('#btnProPhoto').onclick = () => photoOuChamp('proPhotoFichier', f => envoyerPhotoPro(f));
 $('#proPhotoFichier').onchange = e => {
@@ -4801,13 +4894,18 @@ $('#photoPortrait').onchange = e => {
   e.target.value = '';
 };
 $('#btnNotif').onclick = ouvrirCentreNotif;
-$('#notifFermer').onclick = () => { $('#centreNotif').hidden = true; };
-$('#centreNotif').addEventListener('click', e => { if (e.target === e.currentTarget) $('#centreNotif').hidden = true; });
+$('#notifFermer').onclick = () => { fermerFeuille('#centreNotif'); };
+$('#centreNotif').addEventListener('click', e => { if (e.target === e.currentTarget) fermerFeuille('#centreNotif'); });
+$('#mpRetour').onclick = async () => {
+  document.getElementById('mauvaisePorte').hidden = true;
+  document.body.classList.remove('barre-route');
+  await ouvrirPorte();
+};
 $('#btnDev').onclick = demanderCodeDev;
 $('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
-$('#nouvFermer').onclick = () => { $('#feuilleNouveau').hidden = true; };
+$('#nouvFermer').onclick = () => { fermerFeuille('#feuilleNouveau'); };
 $('#nouvPoser').onclick = poserSujet;
-$('#sujFermer').onclick = () => { $('#feuilleSujet').hidden = true; sujetOuvert = null; };
+$('#sujFermer').onclick = () => { fermerFeuille('#feuilleSujet'); sujetOuvert = null; };
 $('#sujEnvoyer').onclick = repondreSujet;
 $('#sujRegler').onclick = reglerSujet;
 $('#btnRelancerPush').onclick = () => activerPush();
@@ -4856,8 +4954,8 @@ $('#btnMdpOublie').onclick = async () => {
 $('#btnJournal').onclick = enregistrerJournal;
 $('#btnAjoutSieste').onclick = () => { siestes.push({ debut: '', fin: '' }); renderSiestes(); };
 $('#btnPremiere').onclick = ouvrirChoixPremiere;
-$('#premiereFermer').onclick = () => { $('#choixPremiere').hidden = true; };
-$('#ditFermer').onclick = () => { $('#ditPremiere').hidden = true; premiereChoisie = null; };
+$('#premiereFermer').onclick = () => { fermerFeuille('#choixPremiere'); };
+$('#ditFermer').onclick = () => { fermerFeuille('#ditPremiere'); premiereChoisie = null; };
 $$('#ditPremiere .facon').forEach(b => { b.onclick = () => noterPremiere(b.dataset.facon); });
 $('#btnComptine').onclick = () => {
   const t = $('#comptineTexte').value.trim();
@@ -4916,7 +5014,7 @@ $('#fichierPhoto').onchange = e => {
 };
 $('#btnSigner').onclick = signer;
 $('#btnRefus').onclick = () => {
-  $('#consentModal').hidden = true;
+  fermerFeuille('#consentModal');
   enAttenteConsentement = null;
   toast('Partage refusé. Rien n\u2019a été enregistré.');
 };
@@ -4926,12 +5024,12 @@ if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App
   window.Capacitor.Plugins.App.addListener('resume', () => { verrouillerSiBesoin(); rafraichirTout(true); viderNotifications(); });
   window.Capacitor.Plugins.App.addListener('backButton', () => {
     if (!$('#porte').hidden) return;
-    if (!$('#volet').hidden) { $('#volet').hidden = true; return; }
+    if (!$('#volet').hidden) { fermerFeuille('#volet'); return; }
     if (vue === 'messages' && conversationActive) { fermerConversation(); return; }
     if (!$('#visionneuse').hidden) { fermerVisionneuse(); return; }
-    if (!$('#centreNotif').hidden) { $('#centreNotif').hidden = true; return; }
+    if (!$('#centreNotif').hidden) { fermerFeuille('#centreNotif'); return; }
     if (!$('#verrou').hidden) return;
-    if (!$('#consentModal').hidden) { $('#consentModal').hidden = true; return; }
+    if (!$('#consentModal').hidden) { fermerFeuille('#consentModal'); return; }
     if (vue !== 'accueil') { montrer('accueil'); return; }
     window.Capacitor.Plugins.App.exitApp();
   });
@@ -5154,17 +5252,40 @@ function enClair(e) {
 
 /* Une nounou qui se connecte dans Cocon Parent verrait un ecran vide sans
    comprendre pourquoi. Son profil porte son role : on le lui dit. */
+/* ---------------- La mauvaise application ----------------
+   Une nounou qui se connecte dans Cocon Parent ne doit pas entrer : elle
+   verrait un espace vide sans comprendre. On l'arrete a la porte, on lui dit
+   ou aller, et on la deconnecte — sinon elle resterait connectee a un compte
+   qui n'a rien a faire ici. */
 async function verifierRole(attendu, autre) {
   if (!Supa.connecte()) return true;
+  let role = null;
   try {
     const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=role');
-    const role = r && r.length ? r[0].role : null;
-    if (!role || role === attendu) return true;
-    alert('Ce compte est un compte ' + (role === 'salariee' ? 'assistante maternelle' : 'parent') +
-      '.\n\nTu es dans ' + (attendu === 'employeur' ? 'Cocon Parent' : 'Cocon Nounou') +
-      ', il te faut ' + autre + '.\n\nDéconnecte-toi et ouvre l\u2019autre application.');
-    return false;
-  } catch (e) { return true; }
+    role = r && r.length ? r[0].role : null;
+  } catch (e) { return true; }        // hors ligne : on ne bloque pas
+  if (!role || role === attendu) return true;
+
+  const suisNounou = role === 'salariee';
+  document.getElementById('mpTitre').textContent =
+    suisNounou ? 'Vous êtes assistante maternelle' : 'Vous êtes parent';
+  document.getElementById('mpTexte').textContent =
+    'Ce compte est un compte ' + (suisNounou ? 'assistante maternelle' : 'parent') +
+    '. Cette application-ci est faite pour ' + (attendu === 'employeur' ? 'les parents employeurs' : 'les assistantes maternelles') +
+    '. Ouvrez ' + autre + ' avec la même adresse et le même mot de passe : vous y retrouverez tout.';
+  document.getElementById('mpAide').textContent =
+    'Vous avez été déconnecté ici, rien n\u2019a été modifié.';
+  // on masque vraiment l'application derriere : la recouvrir ne suffit pas,
+  // le contenu resterait accessible au defilement et aux lecteurs d'ecran
+  document.body.classList.add('barre-route');
+  document.getElementById('mauvaisePorte').hidden = false;
+  secouer('.mp-scene');
+
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.Haptics) { try { C.Haptics.notification({ type: 'WARNING' }); } catch (e) {} }
+
+  await Supa.deconnecter();
+  return false;
 }
 
 /* Le doigt entraine l'image en direct plutot que d'attendre le relachement :
@@ -5534,10 +5655,11 @@ function appliquerDev() {
 
 async function demanderCodeDev() {
   if (modeDev()) {
-    if (confirm('Désactiver le mode développeur ?\n\nLes fonctions en préparation seront de nouveau masquées.')) basculerDev(false);
+    if (await confirmer('Désactiver le mode développeur ?',
+      { detail: 'Les fonctions en préparation seront de nouveau masquées.', oui: 'Désactiver' })) basculerDev(false);
     return;
   }
-  const c = (prompt('Code de maintenance') || '').trim().toUpperCase();
+  const c = ((await demander('Code de maintenance', { majuscules: true, max: 20, valider: 'Activer' })) || '').trim().toUpperCase();
   if (!c) return;
   if (c !== CODE_MAINTENANCE) { toast('Code incorrect'); secouer('.card'); return; }
   basculerDev(true);
@@ -5715,7 +5837,7 @@ async function repondreSujet() {
 
 async function reglerSujet() {
   if (!sujetOuvert) return;
-  if (!confirm('Marquer ce sujet comme réglé ?\n\nIl restera consultable.')) return;
+  if (!await confirmer('Marquer ce sujet comme réglé ?', { detail: 'Il restera consultable.', oui: 'C\u2019est réglé' })) return;
   try {
     await Supa.modifier('sujets', { etat: 'regle' }, 'id=eq.' + sujetOuvert.id);
     document.getElementById('feuilleSujet').hidden = true;
@@ -5815,6 +5937,90 @@ const MAINS = `<svg viewBox="0 0 64 64" aria-hidden="true">
   <path d="M26 50V28a4 4 0 0 1 8 0v-8a4 4 0 0 1 8 0v8a4 4 0 0 1 8 0v14c0 7-5 12-12 12h-4c-5 0-8-3-8-6z" fill="#94c9a0"/>
   <path d="M24 34l-8-8a4 4 0 0 1 6-6l6 6" fill="#b3dcbc"/>
   <circle cx="18" cy="16" r="3" fill="#f5d76e"/></svg>`;
+
+
+/* Une feuille qui disparait d'un coup n'a pas ferme : elle a saute. On la fait
+   redescendre, comme le doigt l'aurait fait. */
+function fermerFeuille(sel) {
+  const modale = typeof sel === 'string' ? document.querySelector(sel) : sel;
+  if (!modale || modale.hidden) return;
+  const boite = modale.querySelector('.modal-box');
+  if (!boite || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    modale.hidden = true; return;
+  }
+  boite.style.transition = 'transform .24s cubic-bezier(.4,0,.6,1)';
+  boite.style.transform = 'translateY(110%)';
+  modale.style.background = 'rgba(20,14,16,0)';
+  setTimeout(() => {
+    modale.hidden = true;
+    boite.style.transition = ''; boite.style.transform = '';
+    modale.style.background = '';
+  }, 230);
+}
+
+
+/* ---------------- Demander quelque chose ----------------
+   La boite du navigateur est laide et hors sujet : police du systeme, boutons
+   en anglais, aucun rapport avec l'application. Celle-ci monte du bas comme
+   les autres feuilles, et se referme au doigt. */
+function demander(question, options) {
+  const o = options || {};
+  return new Promise(resolve => {
+    const modale = document.getElementById('feuilleDemande');
+    const boite = modale.querySelector('.modal-box');
+    document.getElementById('dmdQuestion').textContent = question;
+    const aide = document.getElementById('dmdAide');
+    aide.textContent = o.aide || '';
+    aide.hidden = !o.aide;
+
+    const zone = document.getElementById('dmdZone');
+    const long = o.type === 'texte-long';
+    zone.innerHTML = long
+      ? `<textarea id="dmdChamp" rows="4" maxlength="${o.max || 1000}"></textarea>`
+      : `<input id="dmdChamp" ${o.type === 'nombre' ? 'inputmode="numeric"' : ''}
+           ${o.type === 'date' ? 'placeholder="jj/mm/aaaa"' : `placeholder="${esc(o.exemple || '')}"`}
+           ${o.majuscules ? 'autocapitalize="characters"' : ''} maxlength="${o.max || 140}">`;
+    const champ = document.getElementById('dmdChamp');
+    champ.value = o.valeur || '';
+    document.getElementById('dmdValider').textContent = o.valider || 'Valider';
+
+    const fermer = (v) => {
+      document.getElementById('dmdValider').onclick = null;
+      document.getElementById('dmdAnnuler').onclick = null;
+      champ.onkeydown = null;
+      fermerFeuille(modale);
+      resolve(v);
+    };
+    document.getElementById('dmdValider').onclick = () => fermer(champ.value.trim() || null);
+    document.getElementById('dmdAnnuler').onclick = () => fermer(null);
+    if (!long) champ.onkeydown = e => { if (e.key === 'Enter') fermer(champ.value.trim() || null); };
+
+    modale.hidden = false;
+    if (o.type === 'date') nativiser(zone);
+    setTimeout(() => champ.focus(), 260);
+  });
+}
+
+/* Le pendant de await confirmer(), pour les questions qui n'attendent qu'un oui. */
+function confirmer(question, options) {
+  const o = options || {};
+  return new Promise(resolve => {
+    const modale = document.getElementById('feuilleConfirme');
+    document.getElementById('cfmQuestion').textContent = question;
+    const d = document.getElementById('cfmDetail');
+    d.textContent = o.detail || '';
+    d.hidden = !o.detail;
+    const ok = document.getElementById('cfmOui');
+    ok.textContent = o.oui || 'Continuer';
+    ok.className = 'btn ' + (o.danger ? 'btn-danger' : 'btn-primary');
+    document.getElementById('cfmNon').textContent = o.non || 'Annuler';
+
+    const fermer = (v) => { ok.onclick = null; fermerFeuille(modale); resolve(v); };
+    ok.onclick = () => fermer(true);
+    document.getElementById('cfmNon').onclick = () => fermer(false);
+    modale.hidden = false;
+  });
+}
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;

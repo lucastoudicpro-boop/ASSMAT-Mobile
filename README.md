@@ -2117,3 +2117,45 @@ Un bouton produit le carnet en PDF, mis en page comme un livre.
 d'animation montaient jusqu'a trente-trois secondes — les fleurs des autres
 mois attendaient encore quand on regardait deja ailleurs. Le retard total tient
 maintenant sous une demi-seconde, verifie a 0,41 s.
+
+## 1.8.1 — quatre corrections
+
+### Les boites du navigateur
+
+`prompt` et `confirm` affichent une boite du systeme : police etrangere,
+boutons en anglais, aucun rapport avec l'application. Seize dialogues cote
+parent, neuf cote nounou.
+
+Ils passent tous par une feuille qui monte du bas comme les autres, avec le
+champ adapte — texte, nombre, date avec le selecteur natif, texte long — et un
+libelle de bouton qui dit ce qu'il fait : « Ajouter », « Refuser »,
+« C'est regle », plutot qu'un OK.
+
+Les fonctions concernees sont devenues asynchrones, une par une, jusqu'a ce que
+tout compile.
+
+### Le logo du parent ne s'animait plus
+
+Une regle heritee de l'epoque du double ecran de lancement coupait l'animation
+quand l'application tournait sous Android. Elle n'a plus lieu d'etre : le natif
+ne dure qu'un instant. Le sous-titre « Fiches de salaire » devient « Le
+quotidien, au meme endroit » — l'application ne se limite plus a cela depuis
+longtemps.
+
+### Les feuilles se refermaient d'un coup
+
+Elles disparaissaient sans transition alors qu'elles s'ouvrent en montant.
+Quarante-quatre fermetures passent par une descente de deux cent trente
+millisecondes, dans les deux applications.
+
+### La mauvaise application
+
+Une nounou qui se connectait dans Cocon Parent entrait, voyait un ecran vide,
+puis une alerte. Elle est maintenant **arretee a la porte** : un ecran dedie,
+deux logos cote a cote dont celui qui refuse tremble et celui qui accueille
+respire, une fleche qui file de l'un a l'autre.
+
+Le texte dit quoi faire — ouvrir l'autre application avec la meme adresse — et
+que rien n'a ete modifie. Le compte est deconnecte, et **toute l'application est
+masquee** : la recouvrir ne suffisait pas, le contenu restait accessible au
+defilement.

@@ -460,13 +460,8 @@ html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#173330 0%,va
 /* Android 12 et plus affiche deja l'icone sur fond colore avant que la WebView
    existe. Rejouer l'animation ferait un second ecran : on reprend donc le
    logo la ou le systeme l'a laisse, et seul le nom apparait. */
-#splash.natif #sp-carte,
-#splash.natif #sp-anneaux,
-#splash.natif #sp-f1,
-#splash.natif #sp-f2{animation:none;opacity:1;transform:none}
-#splash.natif #sp-tige{animation:none;stroke-dashoffset:0}
-#splash.natif #sp-mot{animation:sp-monte .3s .05s ease-out forwards}
-#splash.natif #sp-sous{animation:sp-monte .3s .14s ease-out forwards}
+/* L'ecran natif d'Android ne dure plus qu'un instant : le notre rejoue
+   l'animation complete, comme cote nounou. */
 
 @media (prefers-reduced-motion:reduce){
   #sp-carte,#sp-anneaux,#sp-f1,#sp-f2,#sp-mot,#sp-sous{animation:none;opacity:1;transform:none}
@@ -1459,6 +1454,33 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 .dm-txt small{font-size:12.5px;color:var(--mut)}
 @media (prefers-reduced-motion:reduce){.dm-dessin svg{animation:none}}
 
+
+/* ---------- La mauvaise application ---------- */
+#mauvaisePorte{position:fixed;inset:0;z-index:118;background:var(--fond);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:apparait .3s ease both}
+#mauvaisePorte[hidden]{display:none}
+/* Tout est masque sauf l'ecran lui-meme : enumerer les elements laissait
+   toujours passer quelque chose — un tour guide, un bandeau. */
+body.barre-route>*{display:none!important}
+body.barre-route>#mauvaisePorte{display:flex!important}
+.mp-scene{max-width:340px;width:100%;text-align:center}
+.mp-dessin{width:100%;height:auto;margin-bottom:20px}
+.mp-scene h2{font-size:21px;line-height:1.3;margin:0 0 10px}
+.mp-scene p{color:var(--mut);line-height:1.55;margin:0 0 22px;font-size:14.5px}
+.mp-scene .hint{margin-top:14px}
+@keyframes mp-refus{0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-7px)}40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes mp-invite{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes mp-file{0%{opacity:0;transform:translateX(-8px)}
+  40%{opacity:1}100%{opacity:0;transform:translateX(8px)}}
+.mp-gauche{animation:mp-refus .55s .25s ease-in-out both;transform-origin:49px 76px}
+.mp-droite{animation:mp-invite 2.4s .9s ease-in-out infinite;transform-origin:151px 76px}
+.mp-fleche{animation:mp-file 1.8s .8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+  .mp-gauche,.mp-droite,.mp-fleche{animation:none}}
+
 </style>
 </head>
 <body>
@@ -1604,7 +1626,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   </svg>
   <div id="sp-mot">Cocon Parent</div>
   <div id="sp-barre"></div>
-  <div id="sp-sous">Fiches de salaire</div>
+  <div id="sp-sous">Le quotidien, au même endroit</div>
 </div>
 
 <div id="feuilleNouveau" class="modal" hidden>
@@ -1636,6 +1658,62 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <button id="sujRegler" class="btn btn-primary">C'est réglé</button>
     </div>
     <p class="hint" id="sujEtat"></p>
+  </div>
+</div>
+
+<div id="feuilleDemande" class="modal" hidden>
+  <div class="modal-box">
+    <h3 id="dmdQuestion">—</h3>
+    <p class="hint" id="dmdAide" hidden></p>
+    <div id="dmdZone"></div>
+    <div class="modal-actions">
+      <button id="dmdAnnuler" class="btn btn-ghost">Annuler</button>
+      <button id="dmdValider" class="btn btn-primary">Valider</button>
+    </div>
+  </div>
+</div>
+
+<div id="feuilleConfirme" class="modal" hidden>
+  <div class="modal-box">
+    <h3 id="cfmQuestion">—</h3>
+    <p class="hint" id="cfmDetail" hidden></p>
+    <div class="modal-actions">
+      <button id="cfmNon" class="btn btn-ghost">Annuler</button>
+      <button id="cfmOui" class="btn btn-primary">Continuer</button>
+    </div>
+  </div>
+</div>
+
+<div id="mauvaisePorte" hidden>
+  <div class="mp-scene">
+    <svg class="mp-dessin" viewBox="0 0 200 150" aria-hidden="true">
+      <g class="mp-gauche">
+        <rect x="18" y="34" width="62" height="86" rx="10" fill="#fff" opacity=".95"/>
+        <rect x="30" y="26" width="7" height="16" rx="3.5" fill="#bfe3da"/>
+        <rect x="61" y="26" width="7" height="16" rx="3.5" fill="#bfe3da"/>
+        <path d="M49 96V72" stroke="#2f7d73" stroke-width="6" stroke-linecap="round"/>
+        <path d="M47 76c-3-12-11-17-22-16-1 11 8 19 22 16z" fill="#d99a3c"/>
+        <path d="M51 84c3-11 10-16 20-14 1 10-8 17-20 14z" fill="#3e8a80"/>
+        <text x="49" y="134" font-size="11" fill="#2f7d73" text-anchor="middle" font-weight="600">Parent</text>
+      </g>
+      <g class="mp-droite">
+        <rect x="120" y="34" width="62" height="86" rx="10" fill="#fff" opacity=".95"/>
+        <rect x="132" y="26" width="7" height="16" rx="3.5" fill="#f3c9d6"/>
+        <rect x="163" y="26" width="7" height="16" rx="3.5" fill="#f3c9d6"/>
+        <path d="M151 96V72" stroke="#b8556e" stroke-width="6" stroke-linecap="round"/>
+        <path d="M149 76c-3-12-11-17-22-16-1 11 8 19 22 16z" fill="#e8a0ae"/>
+        <path d="M153 84c3-11 10-16 20-14 1 10-8 17-20 14z" fill="#b8556e"/>
+        <text x="151" y="134" font-size="11" fill="#b8556e" text-anchor="middle" font-weight="600">Nounou</text>
+      </g>
+      <g class="mp-fleche">
+        <path d="M86 76h26" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M106 70l7 6-7 6" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </g>
+    </svg>
+    <h2 id="mpTitre">Ce n'est pas la bonne application</h2>
+    <p id="mpTexte">—</p>
+    <button id="mpRetour" class="btn btn-primary btn-block">Revenir à la connexion</button>
+    <p class="hint" id="mpAide">—</p>
   </div>
 </div>
 
@@ -2294,7 +2372,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.8.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.8.1</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3293,18 +3371,19 @@ async function retirerEnfant(id) {
   }
 
   if (etat && etat.salariee_id) {
-    if (!confirm('Une nounou est reliée au contrat de ' + nom + '.\n\n' +
-        'Retirer l\u2019enfant sans plus la laisserait avec un accès à un contrat que tu ne verrais plus.\n\n' +
-        'Retirer son accès, supprimer le contrat en ligne, puis retirer l\u2019enfant ?')) return;
+    if (!await confirmer('Une nounou est reliée au contrat de ' + nom + '.', { detail: 'Retirer l\u2019enfant sans plus la laisserait avec un accès à un contrat que tu ne verrais plus. ' +
+        'Retirer son accès, supprimer le contrat en ligne, puis retirer l\u2019enfant ?', danger: true })) return;
   } else if (etat) {
-    if (!confirm('Le contrat en ligne de ' + nom + ' sera supprimé avec lui.\n\nContinuer ?')) return;
+    if (!await confirmer('Retirer ' + nom + ' ?',
+      { detail: 'Le contrat en ligne sera supprimé avec lui.', danger: true, oui: 'Retirer' })) return;
   }
 
   const list = (await API.listFiches()).filter(f => f.enfantId === id);
   const combien = list.length
     ? '\n\n' + list.length + (list.length > 1 ? ' fiches seront supprimées' : ' fiche sera supprimée') + ' avec lui.'
     : '';
-  if (!confirm('Retirer ' + nom + ' ?' + combien + '\n\nCette action ne peut pas être annulée.')) return;
+  if (!await confirmer('Retirer ' + nom + ' ?',
+    { detail: combien.trim() + ' Cette action ne peut pas être annulée.', danger: true, oui: 'Retirer' })) return;
 
   // Dans l'ordre : l'accès de la nounou, le contrat, puis l'enfant. L'inverse
   // laisserait un contrat orphelin, visible d'elle et inaccessible de toi.
@@ -3488,7 +3567,7 @@ function renderHoraires() {
   if (t) t.textContent = total > 0 ? F.f2(total) + ' h' : '— h';
 }
 
-function remplirSemaine() {
+async function remplirSemaine() {
   const per = F.periodeFromMois(cur.mois);
   const [y, mo] = cur.mois.split('-').map(Number);
 
@@ -3499,7 +3578,7 @@ function remplirSemaine() {
     return;
   }
   if (cur.calendrier.some(r => r.p || r.c || r.m) &&
-      !confirm('Remplacer les valeurs déjà saisies ?')) return;
+      !await confirmer('Remplacer les valeurs déjà saisies ?')) return;
 
   const sv = F.num(cur.calAide.seuil);
   const seuil = sv > 0 ? sv : Infinity;
@@ -3520,8 +3599,8 @@ function remplirSemaine() {
     (sautes ? ' — ' + sautes + (sautes > 1 ? ' jours fériés laissés vides' : ' jour férié laissé vide') : ''));
 }
 
-function viderCalendrier() {
-  if (!confirm('Vider tout le calendrier de présence ?')) return;
+async function viderCalendrier() {
+  if (!await confirmer('Vider tout le calendrier de présence ?')) return;
   cur.calendrier = Array.from({ length: 31 }, () => ({ p: '', c: '', m: '', abs: '', motif: '' }));
   syncCalInputs(); renderGrille(); recalc(); scheduleSave();
 }
@@ -3652,7 +3731,7 @@ function validerJour() {
   r.abs = choix ? (choix.dataset.abs2 || '') : '';
   const m = $('#choixMotif .on');
   r.motif = r.abs && m ? m.dataset.motif : '';
-  $('#jourModal').hidden = true;
+  fermerFeuille('#jourModal');
   jourEdite = null;
   syncCalInputs(); refreshCalendrierMeta(); renderGrille();
   recalc(); scheduleSave();
@@ -3930,7 +4009,7 @@ async function nouveauMois() {
 
 async function supprimer() {
   if (!cur) return;
-  if (!confirm('Supprimer la fiche ' + deMois(cur.mois) + ' ?')) return;
+  if (!await confirmer('Supprimer la fiche ' + deMois(cur.mois) + ' ?', { danger: true })) return;
   clearTimeout(saveTimer); saveTimer = null;
   await API.deleteFiche(cleFiche(cur.mois));
   cur = null; moisOnDisk = null;
@@ -4343,7 +4422,7 @@ async function envoyerAbsence() {
   const to = $('#absTo').value.trim();
   const texte = $('#absBody').value;
   const sujet = 'Absence — ' + (cur.enfant.prenom || 'accueil') + ' — ' + F.labelMois(cur.mois);
-  $('#absModal').hidden = true;
+  fermerFeuille('#absModal');
 
   const P = natif();
   if (P && P.shareText) {
@@ -4892,7 +4971,7 @@ function renderAdaptation() {
 
   $$('#listeAdaptation [data-adapt]').forEach(btn => {
     btn.onclick = async () => {
-      const t = prompt('Comment as-tu vécu cette étape ?');
+      const t = await demander('Comment as-tu vécu cette étape ?');
       if (!t || !t.trim()) return;
       try {
         await Supa.modifier('adaptation', { ressenti_parent: t.trim() }, 'id=eq.' + btn.dataset.adapt);
@@ -5233,7 +5312,7 @@ function ouvrirRetard() {
 
 async function envoyerRetard(dur) {
   const id = contratLie();
-  $('#retardModal').hidden = true;
+  fermerFeuille('#retardModal');
   try {
     await Supa.ecrire('messages', { contrat_id: id, auteur_id: Supa.moi().id,
       texte: 'Retard d\u2019environ ' + dur, categorie: 'retard' });
@@ -5276,7 +5355,7 @@ function renderDemandes() {
 async function decider(id, oui) {
   let motif = null;
   if (!oui) {
-    motif = prompt('Pourquoi ? La nounou verra ce motif.');
+    motif = await demander('Pourquoi ? La nounou verra ce motif.', { type: 'texte-long' });
     if (motif === null) return;
   }
   try {
@@ -5517,7 +5596,7 @@ function ouvrirVolet() {
   });
   $('#volet').hidden = false;
 }
-function fermerVolet() { $('#volet').hidden = true; }
+function fermerVolet() { fermerFeuille('#volet'); }
 
 /* Appui long : le module entre dans la barre à la place du plus ancien. */
 async function epingler(id) {
@@ -5553,8 +5632,8 @@ async function ouvrirPorte() {
 async function fermerPorte() {
   $('#porte').hidden = true;
   if (!profil.tourVu) setTimeout(ouvrirTour, 450);
+  if (!await verifierRole('employeur', 'Cocon Nounou')) return;
   await assurerProfil();
-  if (!await verifierRole('employeur', 'Cocon Nounou')) { await Supa.deconnecter(); await ouvrirPorte(); return; }
   await reconcilierContrats(false);
   demarrerBoucle();
   activerPush();
@@ -5698,7 +5777,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.8.0';
+const VERSION = '1.8.1';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -5848,7 +5927,8 @@ async function publierContrat() {
     renderPartage();
     return;
   }
-  if (!confirm('Accord de partage\n\n' + TEXTE_CONSENTEMENT + '\n\nEn validant, tu signes cet accord.')) return;
+  if (!await confirmer('Accord de partage',
+    { detail: TEXTE_CONSENTEMENT + ' En validant, tu signes cet accord.', oui: 'Je signe' })) return;
 
   try {
     await assurerProfil();
@@ -6118,7 +6198,7 @@ function renderPremieres() {
 
   $$('#listePremieres [data-devoiler]').forEach(x => {
     x.onclick = async () => {
-      if (!confirm('Découvrir ce qui s\u2019est passé ?\n\nVotre nounou vous laissait la surprise. Vous pouvez aussi attendre de le voir vous-même.')) return;
+      if (!await confirmer('Découvrir ce qui s\u2019est passé ?', { detail: 'Votre nounou vous laissait la surprise. Vous pouvez aussi attendre de le voir vous-même.' })) return;
       try {
         await Supa.modifier('premieres_fois',
           { devoile_le: new Date().toISOString(), vu_le: new Date().toISOString() }, 'id=eq.' + x.dataset.devoiler);
@@ -6241,8 +6321,8 @@ async function envoyerDemandeAccueil(salarieeId) {
   const e = enfantCourant() || {};
   const prenom = e.prenom || cur.enfant.prenom || '';
   if (!prenom) { toast('Renseigne d\u2019abord le prénom de ton enfant dans le Dossier'); return; }
-  const mot = prompt('Un mot pour vous présenter ?\n\nCe message accompagnera votre demande.') || '';
-  const debut = prompt('Début souhaité ? (jj/mm/aaaa)') || '';
+  const mot = await demander('Un mot pour vous présenter ?', { aide: 'Ce message accompagnera votre demande.', type: 'texte-long' }) || '';
+  const debut = await demander('Début souhaité ? (jj/mm/aaaa)', { type: 'date' }) || '';
   try {
     await Supa.ecrire('demandes_accueil', [{
       parent_id: Supa.moi().id, salariee_id: salarieeId,
@@ -6383,8 +6463,9 @@ async function chercherOrphelins() {
 async function nettoyerOrphelins() {
   if (!contratsOrphelins.length) return;
   const noms = contratsOrphelins.map(c => c.enfant_prenom || '?').join(', ');
-  if (!confirm('Supprimer ' + contratsOrphelins.length + ' contrat(s) en ligne : ' + noms +
-      '\n\nLa nounou perdra l\u2019accès. Tes fiches ne sont pas touchées.')) return;
+  if (!await confirmer('Supprimer ' + contratsOrphelins.length + ' contrat(s) en ligne ?',
+    { detail: noms + ' — la nounou perdra l\u2019accès. Tes fiches ne sont pas touchées.',
+      danger: true, oui: 'Supprimer' })) return;
   let faits = 0;
   for (const c of contratsOrphelins) {
     try {
@@ -6403,10 +6484,9 @@ async function supprimerContrat() {
   if (!id) { toast('Aucun contrat en ligne'); return; }
   const nom = nomEnfant(enfantActif) || 'cet enfant';
 
-  if (!confirm('Supprimer le contrat en ligne de ' + nom + ' ?\n\n' +
-      'Le journal, les photos, les messages et la fiche d\u2019urgence seront effacés du serveur, pour toi comme pour la nounou.\n\n' +
-      'Tes fiches de salaire restent sur ce téléphone.')) return;
-  if (!confirm('Dernière vérification : cette suppression est définitive.\n\nSi le contrat s\u2019achève réellement, utilise plutôt Documents → Fin de contrat.')) return;
+  if (!await confirmer('Supprimer le contrat en ligne de ' + nom + ' ?', { detail: 'Le journal, les photos, les messages et la fiche d\u2019urgence seront effacés du serveur, pour toi comme pour la nounou. ' +
+      'Tes fiches de salaire restent sur ce téléphone.', danger: true })) return;
+  if (!await confirmer('Dernière vérification : cette suppression est définitive.', { detail: 'Si le contrat s\u2019achève réellement, utilise plutôt Documents → Fin de contrat.', danger: true })) return;
 
   try {
     const r = await Supa.supprimer('contrats', 'id=eq.' + id);
@@ -6434,7 +6514,7 @@ async function genererInvitation() {
 
   const v = await verifierContrat();
   if (v.etat === 'fantome') {
-    if (confirm('Ton compte ne voit pas ce contrat.\n\nIl a disparu, ou il appartient à une autre adresse e-mail. Oublier ce lien pour pouvoir republier ?')) await oublierContrat();
+    if (await confirmer('Ton compte ne voit pas ce contrat.', { detail: 'Il a disparu, ou il appartient à une autre adresse e-mail. Oublier ce lien pour pouvoir republier ?' })) await oublierContrat();
     return;
   }
   if (v.etat === 'injoignable') { toast('Serveur injoignable : ' + v.message); return; }
@@ -6459,7 +6539,7 @@ async function genererInvitation() {
 async function retirerAcces() {
   const id = contratLie();
   if (!id) return;
-  if (!confirm('Retirer l\u2019accès de la nounou à ce contrat ?\n\nElle ne verra plus le planning ni les messages. Tes fiches ne sont pas touchées, et tu pourras inviter quelqu\u2019un d\u2019autre.')) return;
+  if (!await confirmer('Retirer l\u2019accès de la nounou à ce contrat ?', { detail: 'Elle ne verra plus le planning ni les messages. Tes fiches ne sont pas touchées, et tu pourras inviter quelqu\u2019un d\u2019autre.', danger: true })) return;
   try {
     // Le contrat revient en attente : une nouvelle invitation reste possible.
     const r = await Supa.modifier('contrats', { salariee_id: null, statut: 'invitation' }, 'id=eq.' + id);
@@ -6641,7 +6721,7 @@ async function reprendreMois(cle) {
   const src = await API.loadFiche(cle);
   if (!src) { toast('Mois introuvable'); return; }
   const avecCal = $('#dupliCal').checked;
-  if (!confirm('Remplacer les données de ' + F.labelMois(cur.mois) +
+  if (!await confirmer('Remplacer les données de ' + F.labelMois(cur.mois) +
                ' par celles de ' + F.labelMois(moisDe(cle)) + ' ?')) return;
 
   const base = F.normalizeFiche(JSON.parse(JSON.stringify(src)));
@@ -6655,7 +6735,7 @@ async function reprendreMois(cle) {
   cur.envoyee = false;
   cur.paye = { fait: false, date: '', moyen: '' };
 
-  $('#dupliModal').hidden = true;
+  fermerFeuille('#dupliModal');
   fillForm();
   await doSave();
   toast('Données de ' + F.labelMois(moisDe(cle)) + ' reprises' +
@@ -7074,7 +7154,7 @@ async function aimerJournee(jour, bouton) {
 }
 
 async function repondreJournee(jour) {
-  const t = (prompt('Votre mot du soir\n\nElle le lira demain matin.') || '').trim();
+  const t = (await demander('Votre mot du soir', { aide: 'Elle le lira demain matin.', type: 'texte-long' }) || '').trim();
   if (!t) return;
   try {
     await Supa.modifier('journal', { reponse_parent: t },
@@ -7246,7 +7326,7 @@ async function ajouterAvenant() {
 }
 
 async function retirerAvenant(date) {
-  if (!confirm('Retirer la version du ' + date + ' ?')) return;
+  if (!await confirmer('Retirer la version du ' + date + ' ?', { danger: true })) return;
   profil.contrats = (profil.contrats || []).filter(x => x.debut !== date);
   await doProfilSave();
   renderAvenants();
@@ -7566,7 +7646,7 @@ function ouvrirNotifs() {
     : '<li class="o"><svg><use href="#i-ok"/></svg><span><b>Rien à signaler</b><small>La fiche du mois est complète.</small></span></li>';
 
   $$('#notifListe [data-notif]').forEach(b => {
-    b.onclick = () => { $('#notifModal').hidden = true; liste[+b.dataset.notif].fn(); };
+    b.onclick = () => { fermerFeuille('#notifModal'); liste[+b.dataset.notif].fn(); };
   });
   $('#notifModal').hidden = false;
 }
@@ -8137,14 +8217,14 @@ function tplRender(t) {
     .split('{employeur}').join(cur.employeur.nom || '');
 }
 
-function fillProfilForm() {
+async function fillProfilForm() {
   $$('[data-profil]').forEach(el => {
     const v = getPath(profil, el.dataset.profil);
     if (el.type === 'checkbox') el.checked = !!v;
     else el.value = v == null ? '' : v;
   });
 }
-function scheduleProfilSave() { setStatus('saving'); clearTimeout(profilTimer); profilTimer = setTimeout(doProfilSave, 600); }
+async function scheduleProfilSave() { setStatus('saving'); clearTimeout(profilTimer); profilTimer = setTimeout(doProfilSave, 600); }
 async function doProfilSave() {
   clearTimeout(profilTimer); profilTimer = null;
   await API.saveProfil(JSON.parse(JSON.stringify(profil)));
@@ -8169,7 +8249,7 @@ async function renderDossier() {
 }
 
 /* ---------------- Envoi ---------------- */
-function openMailModal() {
+async function openMailModal() {
   const P = natif();
   $('#mailTo').value = (profil.salarie && profil.salarie.email) || '';
   $('#mailSubject').value = tplRender((profil.mailTpl && profil.mailTpl.subject) || MAIL_SUBJECT_DEFAUT);
@@ -8195,7 +8275,7 @@ async function envoyerMail() {
     try {
       await P.sharePdf({ html: F.buildSheetHTML(cur), name: pdfName(), to, subject, body });
       btn.disabled = false; btn.textContent = 'Envoyer';
-      $('#mailModal').hidden = true;
+      fermerFeuille('#mailModal');
       marquerEnvoyee();
       return;
     } catch (e) {
@@ -8204,7 +8284,7 @@ async function envoyerMail() {
   }
 
   btn.disabled = false; btn.textContent = 'Envoyer';
-  $('#mailModal').hidden = true;
+  fermerFeuille('#mailModal');
   marquerEnvoyee();
   location.href = 'mailto:' + encodeURIComponent(to) +
     '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
@@ -8242,13 +8322,13 @@ async function marquerSauvegarde() {
   toast('Sauvegarde effectuée');
 }
 
-function joursDepuisSauvegarde() {
+async function joursDepuisSauvegarde() {
   const d = (profil.sauvegarde || {}).dernier;
   if (!d) return null;
   return Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
 }
 
-function majSauvegarde() {
+async function majSauvegarde() {
   const el = $('#sauvegardeEtat');
   if (!el) return;
   const j = joursDepuisSauvegarde();
@@ -8291,13 +8371,13 @@ async function importJson(file) {
 }
 
 /* ---------------- Tiroir, feuille d'actions, toast ---------------- */
-function openDrawer() { $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); }
-function closeDrawer() { $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
-function openSheet() { $('#sheet').classList.add('on'); $('#scrim').classList.add('on'); }
-function closeSheet() { $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
+async function openDrawer() { $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); }
+async function closeDrawer() { $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
+async function openSheet() { $('#sheet').classList.add('on'); $('#scrim').classList.add('on'); }
+async function closeSheet() { $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
 
 let toastTimer;
-function toast(msg, action) {
+async function toast(msg, action) {
   const t = $('#toast');
   t.innerHTML = esc(msg) + (action ? `<button id="toastBtn">${esc(action.label)}</button>` : '');
   if (action) $('#toastBtn').onclick = action.fn;
@@ -8402,7 +8482,7 @@ $('#btnJourVider').onclick = () => {
   $$('#jourAbs button').forEach(x => x.classList.toggle('on', !x.dataset.abs2));
   validerJour();
 };
-$('#jourModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#jourModal').hidden = true; });
+$('#jourModal').addEventListener('click', e => { if (e.target === e.currentTarget) fermerFeuille('#jourModal'); });
 
 $('#calendrier').addEventListener('click', e => {
   const b = e.target.closest('[data-abs]');
@@ -8420,8 +8500,8 @@ $('#dedApply').addEventListener('click', () => {
 $('#btnMenu').onclick = openDrawer;
 $('#btnParams').onclick = () => showView('parametres');
 $('#btnNotif').onclick = ouvrirNotifs;
-$('#btnNotifClose').onclick = () => { $('#notifModal').hidden = true; };
-$('#notifModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#notifModal').hidden = true; });
+$('#btnNotifClose').onclick = () => { fermerFeuille('#notifModal'); };
+$('#notifModal').addEventListener('click', e => { if (e.target === e.currentTarget) fermerFeuille('#notifModal'); });
 $('#btnFermer').onclick = closeDrawer;
 $('#btnMore').onclick = openSheet;
 $('#scrim').onclick = () => { closeDrawer(); closeSheet(); };
@@ -8430,8 +8510,8 @@ $('#calClear').onclick = viderCalendrier;
 $('#btnNouveau').onclick = () => { closeDrawer(); nouveauMois(); };
 $('#btnPlus').onclick = ouvrirVolet;
 $$('#retardModal [data-retard]').forEach(b => { b.onclick = () => envoyerRetard(b.dataset.retard); });
-$('#retardAnnuler').onclick = () => { $('#retardModal').hidden = true; };
-$('#retardModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#retardModal').hidden = true; });
+$('#retardAnnuler').onclick = () => { fermerFeuille('#retardModal'); };
+$('#retardModal').addEventListener('click', e => { if (e.target === e.currentTarget) fermerFeuille('#retardModal'); });
 $('#volet').addEventListener('click', e => { if (e.target === e.currentTarget) fermerVolet(); });
 $('#btnZoom').onclick = () => {
   zoom1 = !zoom1;
@@ -8444,18 +8524,18 @@ $('#heuresApply').onclick = reprendreHeures;
 $('#actPdf').onclick = () => { closeSheet(); exporterPdf(); };
 $('#actPrint').onclick = () => { closeSheet(); imprimer(); };
 $('#actDupli').onclick = () => { closeSheet(); ouvrirDuplication(); };
-$('#btnDupliCancel').onclick = () => { $('#dupliModal').hidden = true; };
-$('#dupliModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#dupliModal').hidden = true; });
+$('#btnDupliCancel').onclick = () => { fermerFeuille('#dupliModal'); };
+$('#dupliModal').addEventListener('click', e => { if (e.target === e.currentTarget) fermerFeuille('#dupliModal'); });
 $('#actMail').onclick = () => { closeSheet(); openMailModal(); };
 $('#actPlanning').onclick = () => { closeSheet(); partagerPlanning(); };
 $('#actAbsence').onclick = () => { closeSheet(); openAbsModal(); };
-$('#btnAbsCancel').onclick = () => { $('#absModal').hidden = true; };
+$('#btnAbsCancel').onclick = () => { fermerFeuille('#absModal'); };
 $('#btnAbsSend').onclick = envoyerAbsence;
-$('#absModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#absModal').hidden = true; });
+$('#absModal').addEventListener('click', e => { if (e.target === e.currentTarget) fermerFeuille('#absModal'); });
 $('#actSuppr').onclick = () => { closeSheet(); supprimer(); };
-$('#btnMailCancel').onclick = () => { $('#mailModal').hidden = true; };
+$('#btnMailCancel').onclick = () => { fermerFeuille('#mailModal'); };
 $('#btnMailSend').onclick = envoyerMail;
-$('#mailModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#mailModal').hidden = true; });
+$('#mailModal').addEventListener('click', e => { if (e.target === e.currentTarget) fermerFeuille('#mailModal'); });
 $$('[data-lien]').forEach(a => { a.onclick = e => { e.preventDefault(); ouvrirLien(a.dataset.lien); }; });
 $('#segTheme').addEventListener('click', e => {
   const b = e.target.closest('[data-theme]');
@@ -8511,11 +8591,16 @@ $('#btnFinCalcul').onclick = calculFin;
 $('#btnAjoutEnfant').onclick = ajouterEnfant;
 $('#btnRepondre').onclick = repondre;
 $('#btnSilence').onclick = enregistrerSilence;
+$('#mpRetour').onclick = async () => {
+  document.getElementById('mauvaisePorte').hidden = true;
+  document.body.classList.remove('barre-route');
+  await ouvrirPorte();
+};
 $('#btnDev').onclick = demanderCodeDev;
 $('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
-$('#nouvFermer').onclick = () => { $('#feuilleNouveau').hidden = true; };
+$('#nouvFermer').onclick = () => { fermerFeuille('#feuilleNouveau'); };
 $('#nouvPoser').onclick = poserSujet;
-$('#sujFermer').onclick = () => { $('#feuilleSujet').hidden = true; sujetOuvert = null; };
+$('#sujFermer').onclick = () => { fermerFeuille('#feuilleSujet'); sujetOuvert = null; };
 $('#sujEnvoyer').onclick = repondreSujet;
 $('#sujRegler').onclick = reglerSujet;
 $('#btnReprise').onclick = envoyerReprise;
@@ -8525,13 +8610,16 @@ $('#visioPrec').onclick = () => glisserVisio(-1);
 $('#visioSuiv').onclick = () => glisserVisio(1);
 brancherGestes($('#visioScene'), glisserVisio, fermerVisionneuse);
 $('#btnArchive').onclick = preparerArchive;
-$('#proFermer').onclick = () => { $('#ficheNounou').hidden = true; };
+$('#proFermer').onclick = () => { fermerFeuille('#ficheNounou'); };
 $('#btnRecherche').onclick = lancerRecherche;
 $('#btnRelancerPush').onclick = () => activerPush();
 $('#btnTestPush').onclick = testerPush;
 $('#tourSuivant').onclick = () => { if (tourEtape < TOUR.length - 1) { tourEtape++; renderTour(); } else finirTour(); };
 $('#btnAnnoncerP').onclick = annoncerParent;
-$('#btnQuitterCommun').onclick = () => { if (confirm('Quitter l\u2019espace commun ? Tes annonces seront retirées.')) repondreCommun(false); };
+$('#btnQuitterCommun').onclick = async () => {
+  if (await confirmer('Quitter l\u2019espace commun ?',
+    { detail: 'Tes annonces seront retirées.', danger: true, oui: 'Quitter' })) repondreCommun(false);
+};
 $('#communCatP').addEventListener('click', e => {
   const b = e.target.closest('[data-cat]');
   if (b) $$('#communCatP button').forEach(x => x.classList.toggle('on', x === b));
@@ -8765,12 +8853,12 @@ function integrerAndroid() {
       if (!$('#verrou').hidden) return;
       if (!$('#tour').hidden) { finirTour(); return; }
       if (!$('#volet').hidden) { fermerVolet(); return; }
-      if (!$('#retardModal').hidden) { $('#retardModal').hidden = true; return; }
-      if (!$('#dupliModal').hidden) { $('#dupliModal').hidden = true; return; }
-      if (!$('#jourModal').hidden) { $('#jourModal').hidden = true; return; }
-      if (!$('#notifModal').hidden) { $('#notifModal').hidden = true; return; }
-      if (!$('#absModal').hidden) { $('#absModal').hidden = true; return; }
-      if (!$('#mailModal').hidden) { $('#mailModal').hidden = true; return; }
+      if (!$('#retardModal').hidden) { fermerFeuille('#retardModal'); return; }
+      if (!$('#dupliModal').hidden) { fermerFeuille('#dupliModal'); return; }
+      if (!$('#jourModal').hidden) { fermerFeuille('#jourModal'); return; }
+      if (!$('#notifModal').hidden) { fermerFeuille('#notifModal'); return; }
+      if (!$('#absModal').hidden) { fermerFeuille('#absModal'); return; }
+      if (!$('#mailModal').hidden) { fermerFeuille('#mailModal'); return; }
       if ($('#sheet').classList.contains('on')) { closeSheet(); return; }
       if ($('#drawer').classList.contains('on')) { closeDrawer(); return; }
       if (vue !== 'accueil') { showView('accueil'); return; }
@@ -8855,17 +8943,40 @@ function enClair(e) {
 
 /* Une nounou qui se connecte dans Cocon Parent verrait un ecran vide sans
    comprendre pourquoi. Son profil porte son role : on le lui dit. */
+/* ---------------- La mauvaise application ----------------
+   Une nounou qui se connecte dans Cocon Parent ne doit pas entrer : elle
+   verrait un espace vide sans comprendre. On l'arrete a la porte, on lui dit
+   ou aller, et on la deconnecte — sinon elle resterait connectee a un compte
+   qui n'a rien a faire ici. */
 async function verifierRole(attendu, autre) {
   if (!Supa.connecte()) return true;
+  let role = null;
   try {
     const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=role');
-    const role = r && r.length ? r[0].role : null;
-    if (!role || role === attendu) return true;
-    alert('Ce compte est un compte ' + (role === 'salariee' ? 'assistante maternelle' : 'parent') +
-      '.\n\nTu es dans ' + (attendu === 'employeur' ? 'Cocon Parent' : 'Cocon Nounou') +
-      ', il te faut ' + autre + '.\n\nDéconnecte-toi et ouvre l\u2019autre application.');
-    return false;
-  } catch (e) { return true; }
+    role = r && r.length ? r[0].role : null;
+  } catch (e) { return true; }        // hors ligne : on ne bloque pas
+  if (!role || role === attendu) return true;
+
+  const suisNounou = role === 'salariee';
+  document.getElementById('mpTitre').textContent =
+    suisNounou ? 'Vous êtes assistante maternelle' : 'Vous êtes parent';
+  document.getElementById('mpTexte').textContent =
+    'Ce compte est un compte ' + (suisNounou ? 'assistante maternelle' : 'parent') +
+    '. Cette application-ci est faite pour ' + (attendu === 'employeur' ? 'les parents employeurs' : 'les assistantes maternelles') +
+    '. Ouvrez ' + autre + ' avec la même adresse et le même mot de passe : vous y retrouverez tout.';
+  document.getElementById('mpAide').textContent =
+    'Vous avez été déconnecté ici, rien n\u2019a été modifié.';
+  // on masque vraiment l'application derriere : la recouvrir ne suffit pas,
+  // le contenu resterait accessible au defilement et aux lecteurs d'ecran
+  document.body.classList.add('barre-route');
+  document.getElementById('mauvaisePorte').hidden = false;
+  secouer('.mp-scene');
+
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.Haptics) { try { C.Haptics.notification({ type: 'WARNING' }); } catch (e) {} }
+
+  await Supa.deconnecter();
+  return false;
 }
 
 /* Le doigt entraine l'image en direct plutot que d'attendre le relachement :
@@ -9243,10 +9354,10 @@ function appliquerDev() {
 
 async function demanderCodeDev() {
   if (modeDev()) {
-    if (confirm('Désactiver le mode développeur ?\n\nLes fonctions en préparation seront de nouveau masquées.')) basculerDev(false);
+    if (await confirmer('Désactiver le mode développeur ?', { detail: 'Les fonctions en préparation seront de nouveau masquées.' })) basculerDev(false);
     return;
   }
-  const c = (prompt('Code de maintenance') || '').trim().toUpperCase();
+  const c = (await demander('Code de maintenance') || '').trim().toUpperCase();
   if (!c) return;
   if (c !== CODE_MAINTENANCE) { toast('Code incorrect'); secouer('.card'); return; }
   basculerDev(true);
@@ -9424,7 +9535,7 @@ async function repondreSujet() {
 
 async function reglerSujet() {
   if (!sujetOuvert) return;
-  if (!confirm('Marquer ce sujet comme réglé ?\n\nIl restera consultable.')) return;
+  if (!await confirmer('Marquer ce sujet comme réglé ?', { detail: 'Il restera consultable.' })) return;
   try {
     await Supa.modifier('sujets', { etat: 'regle' }, 'id=eq.' + sujetOuvert.id);
     document.getElementById('feuilleSujet').hidden = true;
@@ -9524,6 +9635,90 @@ const MAINS = `<svg viewBox="0 0 64 64" aria-hidden="true">
   <path d="M26 50V28a4 4 0 0 1 8 0v-8a4 4 0 0 1 8 0v8a4 4 0 0 1 8 0v14c0 7-5 12-12 12h-4c-5 0-8-3-8-6z" fill="#94c9a0"/>
   <path d="M24 34l-8-8a4 4 0 0 1 6-6l6 6" fill="#b3dcbc"/>
   <circle cx="18" cy="16" r="3" fill="#f5d76e"/></svg>`;
+
+
+/* Une feuille qui disparait d'un coup n'a pas ferme : elle a saute. On la fait
+   redescendre, comme le doigt l'aurait fait. */
+function fermerFeuille(sel) {
+  const modale = typeof sel === 'string' ? document.querySelector(sel) : sel;
+  if (!modale || modale.hidden) return;
+  const boite = modale.querySelector('.modal-box');
+  if (!boite || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    modale.hidden = true; return;
+  }
+  boite.style.transition = 'transform .24s cubic-bezier(.4,0,.6,1)';
+  boite.style.transform = 'translateY(110%)';
+  modale.style.background = 'rgba(20,14,16,0)';
+  setTimeout(() => {
+    modale.hidden = true;
+    boite.style.transition = ''; boite.style.transform = '';
+    modale.style.background = '';
+  }, 230);
+}
+
+
+/* ---------------- Demander quelque chose ----------------
+   La boite du navigateur est laide et hors sujet : police du systeme, boutons
+   en anglais, aucun rapport avec l'application. Celle-ci monte du bas comme
+   les autres feuilles, et se referme au doigt. */
+function demander(question, options) {
+  const o = options || {};
+  return new Promise(resolve => {
+    const modale = document.getElementById('feuilleDemande');
+    const boite = modale.querySelector('.modal-box');
+    document.getElementById('dmdQuestion').textContent = question;
+    const aide = document.getElementById('dmdAide');
+    aide.textContent = o.aide || '';
+    aide.hidden = !o.aide;
+
+    const zone = document.getElementById('dmdZone');
+    const long = o.type === 'texte-long';
+    zone.innerHTML = long
+      ? `<textarea id="dmdChamp" rows="4" maxlength="${o.max || 1000}"></textarea>`
+      : `<input id="dmdChamp" ${o.type === 'nombre' ? 'inputmode="numeric"' : ''}
+           ${o.type === 'date' ? 'placeholder="jj/mm/aaaa"' : `placeholder="${esc(o.exemple || '')}"`}
+           ${o.majuscules ? 'autocapitalize="characters"' : ''} maxlength="${o.max || 140}">`;
+    const champ = document.getElementById('dmdChamp');
+    champ.value = o.valeur || '';
+    document.getElementById('dmdValider').textContent = o.valider || 'Valider';
+
+    const fermer = (v) => {
+      document.getElementById('dmdValider').onclick = null;
+      document.getElementById('dmdAnnuler').onclick = null;
+      champ.onkeydown = null;
+      fermerFeuille(modale);
+      resolve(v);
+    };
+    document.getElementById('dmdValider').onclick = () => fermer(champ.value.trim() || null);
+    document.getElementById('dmdAnnuler').onclick = () => fermer(null);
+    if (!long) champ.onkeydown = e => { if (e.key === 'Enter') fermer(champ.value.trim() || null); };
+
+    modale.hidden = false;
+    if (o.type === 'date') nativiser(zone);
+    setTimeout(() => champ.focus(), 260);
+  });
+}
+
+/* Le pendant de await confirmer(), pour les questions qui n'attendent qu'un oui. */
+function confirmer(question, options) {
+  const o = options || {};
+  return new Promise(resolve => {
+    const modale = document.getElementById('feuilleConfirme');
+    document.getElementById('cfmQuestion').textContent = question;
+    const d = document.getElementById('cfmDetail');
+    d.textContent = o.detail || '';
+    d.hidden = !o.detail;
+    const ok = document.getElementById('cfmOui');
+    ok.textContent = o.oui || 'Continuer';
+    ok.className = 'btn ' + (o.danger ? 'btn-danger' : 'btn-primary');
+    document.getElementById('cfmNon').textContent = o.non || 'Annuler';
+
+    const fermer = (v) => { ok.onclick = null; fermerFeuille(modale); resolve(v); };
+    ok.onclick = () => fermer(true);
+    document.getElementById('cfmNon').onclick = () => fermer(false);
+    modale.hidden = false;
+  });
+}
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
