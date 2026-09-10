@@ -2488,3 +2488,227 @@ Ce qui etait deja saisi avant cette version est rattrape a la connexion.
 
 Verifie de bout en bout : elle saisit, il reprend « Marie DUPONT », il saisit,
 elle voit « Lucas TOUDIC ».
+
+## 1.11.0 — la sauvegarde, et deux bugs
+
+`023-sauvegarde.sql` est a executer.
+
+### L'espace commun refusait de s'ouvrir
+
+« new row violates row-level security policy for table espaces ». La regle de
+lecture appelle `est_membre_espace(id)`, une fonction **stable** qui interroge
+la table `espaces`. Pendant l'insertion, la ligne nouvelle n'est pas dans
+l'instantane de cette fonction : la relecture qui suit l'ecriture echouait, et
+l'erreur remontait comme un refus d'insertion.
+
+La regle compare desormais la colonne directement — une comparaison sur la
+ligne elle-meme voit la ligne en cours d'insertion.
+
+### Le journal gardait le jour precedent
+
+Deux chargements se chevauchaient : la boucle demandait aujourd'hui, on passait
+a hier, et la reponse d'aujourd'hui arrivait apres celle d'hier et l'ecrasait.
+
+Chaque chargement porte maintenant le jour qu'il a demande, et une reponse qui
+ne correspond plus au jour affiche est jetee. L'enregistrement vise le jour
+affiche, pas un autre.
+
+### Desinstaller ne fait plus tout perdre
+
+Le dossier, les contrats, le taux horaire, le planning type et les fiches deja
+etablies sont sauvegardes en ligne. La sauvegarde se declenche seule quatre
+secondes apres chaque enregistrement, et se lance ou se restaure a la main
+depuis Reglages → Mes donnees.
+
+**Trois informations n'y figurent jamais** : numero de securite sociale, IBAN,
+adresse precise. Elles sont retirees avant l'envoi, et un declencheur refuse la
+ligne si elles s'y trouvaient malgre tout — deux barrieres plutot qu'une.
+
+Verifie sur une sauvegarde reelle : 2,5 kilooctets, les trois secrets absents,
+le nom, le taux et les horaires presents.
+
+**La restauration ne les efface pas non plus** : ce qui est sur l'appareil et
+absent de la sauvegarde est conserve. Reinstaller redemande le numero de
+securite sociale ; restaurer par-dessus un dossier existant ne le perd pas.
+
+Cote nounou, ses contrats et son profil vivent deja en ligne. La sauvegarde ne
+porte que ses reglages locaux — barre du bas, theme, preferences — qui
+repartaient de zero.
+
+La politique de confidentialite decrit cette sauvegarde en section 3.
+
+## 1.10.2 — le fil des messages etait bloque, par ma faute
+
+Le verrou de la 1.10.0 empeche de redessiner un ecran tant qu'on y ecrit, pour
+ne plus effacer la frappe. Il s'appliquait aussi aux conversations.
+
+Or une conversation n'est pas un formulaire : on y tape en permanence, et le
+champ de saisie n'a rien a voir avec le fil au-dessus. Resultat, les nouveaux
+messages n'arrivaient plus des qu'on avait commence a ecrire — alors que la
+notification, elle, passait.
+
+Les zones de discussion sont exclues du verrou : le fil, la boite de reception,
+l'espace commun et les sujets a mettre au clair. Verifie des deux cotes : on
+tape, un message arrive, il s'affiche, et ce qu'on ecrivait est intact.
+
+### Deux fichiers portaient le numero 023
+
+`023-justificatifs.sql` et `023-sauvegarde.sql` coexistaient, ce qui rendait
+l'ordre d'execution ambigu. Le second devient **`024-sauvegarde.sql`**.
+
+Ordre a respecter : 023-justificatifs, puis 024-sauvegarde.
+
+## 1.10.3 — l'archive contenait un depot Git
+
+L'extraction a echoue avec un code 128. La cause est de mon fait : j'avais
+lance un `git init` dans le dossier du projet pendant une verification. Le zip
+emportait donc un depot Git vide, qui a remplace celui du runner — plus de
+remote, plus d'historique, le push echoue.
+
+Rien n'a ete perdu cote GitHub : le push ayant echoue, le depot est intact.
+
+Deux protections dans `extraire-archive.yml`, a recopier a la main :
+
+- **Un `.git` present dans l'archive est jete** avant meme la comparaison. Il
+  n'apparait plus dans la liste des fichiers remplaces.
+- **`.git` rejoint `.github`** dans les entrees jamais remplacees, avec un
+  avertissement quand cela se produit.
+
+Le zip est aussi produit en excluant explicitement tout ce qui touche a Git.
+
+## 1.10.4 — le journal gardait le jour precedent
+
+Trouve en ralentissant le reseau a neuf cents millisecondes, ce qu'une 5G
+faible fait sans peine.
+
+`decalerJour` changeait le jour puis lancait la lecture — sans rien redessiner.
+**Pendant toute la duree de la lecture, l'ecran montrait encore le jour
+precedent** : ses repas, son humeur, ses siestes, son mot. Avec un reseau
+rapide la fenetre est invisible ; avec un reseau lent elle dure une seconde, et
+on croit voir les donnees du jour demande.
+
+Le changement de jour vide desormais l'ecran immediatement et affiche
+« Chargement… ». Verifie a neuf cents millisecondes : cent vingt millisecondes
+apres le clic, tout est deja vide et l'etat annonce le chargement.
+
+### Deux corrections trouvees en cherchant
+
+- **Les champs « comptine » et « livre » non valides suivaient d'un jour a
+  l'autre.** Une comptine tapee sans avoir touche « Ajouter » restait dans le
+  champ et semblait appartenir au jour suivant. Ils sont vides a chaque
+  chargement.
+- **La date exacte s'affiche sous le libelle** : « Hier · mer. 9 sept. ». Quand
+  on navigue vite, « Hier » seul laisse un doute sur ce qu'on regarde.
+
+## 1.10.5 — la sauvegarde, verifiee de bout en bout
+
+### Ce qui monte, cote parent
+
+Tout le dossier : taux horaire, planning type, identites, numero Pajemploi,
+enfants, et l'ensemble des fiches mensuelles deja faites.
+
+### Ce qui ne monte jamais
+
+Verifie en peuplant un dossier complet puis en inspectant l'envoi reel :
+numero de securite sociale, IBAN, adresse de la salariee, adresse de
+l'employeur — aucun des quatre n'apparait. Le filet cote base refuserait la
+ligne si l'un d'eux passait malgre tout.
+
+### Cote nounou
+
+Ses reglages : theme, barre du bas, preferences. Le reste — contrats, journal,
+messages, photos, profil professionnel — vit deja sur le serveur et revient
+seul a la reconnexion. Restauration verifiee : reglages vides, puis rendus a
+l'identique.
+
+### Deux defauts trouves en verifiant
+
+- **Le profil ne declenchait pas de sauvegarde.** Seules les fiches le
+  faisaient. Changer le planning type ou ajouter un enfant ne montait nulle
+  part jusqu'a la fiche suivante.
+- **La nounou annoncait la version 1.11.0**, qui n'existe pas — une constante
+  oubliee. Puis, apres correction, « desactive » : mon selecteur attrapait la
+  ligne du mode developpeur. La version a maintenant son propre identifiant.
+
+## 1.10.6 — la desinstallation, jouee pour de vrai
+
+Verifie par le seul essai qui compte : un appareil qui pose tout, un second
+appareil vierge, et le serveur entre les deux.
+
+**Ce qui revient**
+
+Les quatre mois de fiches, les deux enfants, le planning type sur ses trois
+jours, le taux horaire, le mensualise, l'indemnite d'entretien, les conges
+acquis, les acomptes avec leur date, le numero Pajemploi, le nom de la
+salariee, sa ville, et le marquage « envoyee » du bon mois — juin oui, juillet
+non.
+
+**Ce qui reste a ressaisir**
+
+Numero de securite sociale, IBAN, adresse de la salariee, adresse de
+l'employeur. Absents de ce qui part, verifie sur le contenu reellement transmis
+et non sur l'intention du code.
+
+### Un defaut serieux trouve en chemin
+
+`saveFiche` rangeait la fiche **par reference**, pas par copie. Toutes les
+fiches enregistrees depuis le meme objet restaient donc liees : modifier le
+mois courant modifiait aussi les mois deja enregistres. Dans mon essai,
+enregistrer juillet effacait le marquage « envoyee » de juin.
+
+En usage normal le piege ne se declenche pas — changer de mois recharge un
+objet neuf — mais il suffisait d'un chemin de code oublieux pour perdre
+silencieusement l'etat de plusieurs mois. La fiche est desormais copiee avant
+d'etre rangee.
+
+### Trois fois de suite, mon banc d'essai m'a menti
+
+Un gabarit JavaScript reduit `\d` a `d` ; `exposeFunction` renvoie une promesse
+qu'il faut attendre ; une lecture juste apres `location.reload()` tombe entre
+deux etats. Chaque fois j'ai cru a un defaut de l'application avant de trouver
+le defaut du test. La regle que j'en tire : verifier sur ce qui part
+reellement, pas sur ce que le test croit voir.
+
+## 1.11.0 — verification complete, embellissement, protocole
+
+### Les notifications menaient a moitie quelque part
+
+Cote nounou, le routeur n'acceptait que neuf ecrans. Une notification de
+sujet, de reprise, d'urgence, de premiere fois ou d'adaptation ouvrait
+l'application sur l'accueil, et il fallait chercher ce qui venait d'arriver.
+
+Une table de cibles ramene chacune a l'entree qui la porte : les cinq ci-dessus
+vont sur l'ecran de l'enfant, carte depliee. Cote parent, trois cibles portaient
+le nom du module emetteur plutot que du module a ouvrir : ramenees aussi.
+Verifie : douze cibles de chaque cote, toutes ouvrent le bon ecran.
+
+### Les dessins
+
+Une bibliotheque de dix dessins craft — ourson, biberon, nuage, livre,
+enveloppe, ballon, lune, soleil, cle, mains — et un etat vide qui en porte un
+au lieu d'une ligne grise. Sept etats vides nus habilles cote parent.
+
+Le heros a un ciel : trois nuages qui derivent le jour, neuf etoiles qui
+scintillent la nuit. Ca ne sert a rien, et c'est exactement pour ca que ca
+fait sourire. Un ancien ciel statique existait des deux cotes et stylisait ses
+elements en nuages la ou le nouveau les stylisait en etoiles : retire.
+
+Les cartes d'un ecran arrivent en cascade, l'une apres l'autre. La carte
+d'anniversaire a deux ballons qui montent.
+
+Tout se coupe si la personne a demande moins de mouvement.
+
+### Le protocole de securite
+
+`PROTOCOLE-SECURITE.md` : trente-deux points de A a G, chacun avec sa commande
+et son resultat attendu. `verifier-securite.py` joue les vingt-deux
+automatisables en une commande et sort en erreur si un point bloquant echoue.
+
+Premier passage : cinq echecs, tous des defauts du script — une fonction lue
+dans sa premiere version au lieu de la derniere, un mot dans un commentaire pris
+pour une cle, du HTML de l'application pris pour un texte d'autrui. Chacun
+verifie avant correction. Second passage : tout passe.
+
+La section G dit ce qui n'est pas couvert : pas d'audit externe, pas de
+limitation de debit, pas de journal d'acces, pas de chiffrement de bout en
+bout, pas de double authentification. Chacun est un chantier, pas une case.

@@ -472,7 +472,7 @@ html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#173330 0%,va
 #hero{
   background:linear-gradient(150deg,#2f7d73,#1f5b53);color:#fff;
   border-radius:20px;padding:18px;margin-bottom:12px;
-}
+;position:relative;overflow:hidden}
 #hero .mois{font-size:13px;opacity:.82;text-transform:capitalize}
 #hero .montant{font-size:34px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;margin:2px 0 4px}
 #hero .sous{font-size:12.5px;opacity:.82}
@@ -1405,7 +1405,9 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 /* Pendant le geste, le fond suit le doigt : aucune transition, sinon chaque
    mouvement relance la precedente et le fond bat. */
 .modal.en-glissement{transition:none!important}
-.modal.en-glissement .modal-box{will-change:transform}
+/* Pendant le geste, le navigateur ne doit pas defiler : sinon son
+   defilement et notre deplacement se superposent, et l'image tremble. */
+.modal.en-glissement .modal-box{will-change:transform;touch-action:none;overflow:hidden}
 @media (prefers-reduced-motion:reduce){.modal-box{transition:none!important}}
 
 
@@ -1494,6 +1496,89 @@ body.barre-route>#mauvaisePorte{display:flex!important}
 .mp-fleche{animation:mp-file 1.8s .8s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){
   .mp-gauche,.mp-droite,.mp-fleche{animation:none}}
+
+
+/* ============================================================
+   Dessins et mouvements — la douceur qui manque encore
+   ============================================================ */
+
+/* ---------- Le ciel de l'accueil : trois nuages tres lents ---------- */
+
+
+/* ---------- Les cartes montent l'une apres l'autre ---------- */
+@keyframes carte-arrive{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.vue-arrive .card,.vue-arrive details.card{animation:carte-arrive .38s cubic-bezier(.2,.8,.3,1) both}
+.vue-arrive .card:nth-child(1){animation-delay:.02s}
+.vue-arrive .card:nth-child(2){animation-delay:.06s}
+.vue-arrive .card:nth-child(3){animation-delay:.10s}
+.vue-arrive .card:nth-child(4){animation-delay:.14s}
+.vue-arrive .card:nth-child(n+5){animation-delay:.17s}
+
+/* ---------- Une carte qu'on deplie s'ouvre, ne saute pas ---------- */
+@keyframes deplie{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+details[open]>.body,details[open]>.corps{animation:deplie .26s cubic-bezier(.2,.8,.3,1) both}
+details>summary{transition:background .16s ease}
+details>summary::-webkit-details-marker{display:none}
+
+/* ---------- Le champ actif se signale ----------
+   Un halo plutot que color-mix : toutes les WebViews ne le rendent pas, et
+   sans lui le champ actif ne se distinguait pas. */
+input:focus,textarea:focus,select:focus,
+.field input:focus,.field textarea:focus{
+  outline:none!important;border-color:var(--acc)!important;
+  box-shadow:0 0 0 3px var(--acc-doux)!important;
+  transition:border-color .16s ease,box-shadow .16s ease}
+
+/* ---------- Le bouton qui travaille ---------- */
+.btn[disabled]{opacity:.6}
+@keyframes travaille{to{transform:translateX(100%)}}
+.btn.occupe{position:relative;overflow:hidden;pointer-events:none}
+.btn.occupe::after{content:'';position:absolute;inset:0;width:40%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  transform:translateX(-100%);animation:travaille 1.1s ease-in-out infinite}
+
+/* ---------- Ce qui vient d'arriver attire l'oeil une fois ---------- */
+@keyframes surligne{0%{background:var(--acc-doux)}100%{background:transparent}}
+.nouveau{animation:surligne 1.6s ease-out both}
+
+@media (prefers-reduced-motion:reduce){
+  .vue-arrive .card,details[open]>.body,details[open]>.corps,
+  .btn.occupe::after,.nouveau{animation:none}
+}
+
+
+/* ---------- Le ciel du heros ---------- */
+.ciel{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit}
+.ciel b{position:absolute;left:-30%;width:64px;height:24px;border-radius:24px;
+  background:rgba(255,255,255,.16);animation:derive linear infinite}
+.ciel b::before,.ciel b::after{content:'';position:absolute;background:inherit;border-radius:50%}
+.ciel b::before{width:28px;height:28px;left:10px;top:-14px}
+.ciel b::after{width:20px;height:20px;left:32px;top:-9px}
+@keyframes derive{from{transform:translateX(0) var(--s,scale(1))}to{transform:translateX(160vw) var(--s,scale(1))}}
+.ciel i{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;
+  animation:scintille 2.6s ease-in-out infinite}
+.ciel i::after{content:'';position:absolute;inset:-3px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.5),transparent 70%)}
+@keyframes scintille{0%,100%{opacity:.25}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.ciel b,.ciel i{animation:none}}
+
+/* ---------- Les cartes arrivent en cascade ---------- */
+@keyframes cascade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.cascade>.card,.cascade>.tuile-m,.cascade>details,.cascade>.module{animation:cascade .38s cubic-bezier(.2,.8,.3,1) both}
+.cascade>*:nth-child(1){animation-delay:.02s}.cascade>*:nth-child(2){animation-delay:.06s}
+.cascade>*:nth-child(3){animation-delay:.10s}.cascade>*:nth-child(4){animation-delay:.14s}
+.cascade>*:nth-child(5){animation-delay:.18s}.cascade>*:nth-child(6){animation-delay:.22s}
+.cascade>*:nth-child(n+7){animation-delay:.26s}
+@media (prefers-reduced-motion:reduce){.cascade>*{animation:none}}
+
+/* ---------- Les ballons de l'anniversaire ---------- */
+.date-marquante.anniv{position:relative;overflow:hidden}
+.date-marquante.anniv::before,.date-marquante.anniv::after{content:'';position:absolute;right:14px;
+  width:14px;height:18px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:#e8a0ae;animation:ballon 4s ease-in-out infinite;opacity:.85}
+.date-marquante.anniv::after{right:34px;background:#f5c65e;animation-delay:-1.6s;width:11px;height:14px}
+@keyframes ballon{0%,100%{transform:translateY(60px) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.date-marquante.anniv::before,.date-marquante.anniv::after{animation:none;transform:none}}
 
 </style>
 </head>
@@ -2260,7 +2345,10 @@ body.barre-route>#mauvaisePorte{display:flex!important}
   <details class="card">
     <summary><svg class="ico"><use href="#i-poubelle"/></svg><span class="ttl">Mes données</span></summary>
     <div class="body">
-      <p class="hint" style="margin-top:0">Tes fiches de salaire, tes montants et ton IBAN ne sont que sur ce téléphone : ils disparaissent avec l'application.</p>
+      <div id="etatSauvegarde"></div>
+      <button id="btnSauvegarder" class="btn btn-primary btn-block">Sauvegarder maintenant</button>
+      <button id="btnRestaurer" class="btn btn-ghost btn-block">Restaurer une sauvegarde</button>
+      <p class="hint">La sauvegarde reprend ton dossier, tes contrats, ton planning type et tes fiches. <b>Ni le numéro de sécurité sociale, ni l'IBAN, ni l'adresse précise</b> : ceux-là ne quittent jamais ce téléphone, et seront à ressaisir après une réinstallation.</p>
       <button id="btnArchiveDonnees" class="btn btn-ghost btn-block">Télécharger mes données</button>
       <div id="etatSuppression"></div>
       <button id="btnSupprCompte" class="btn btn-danger btn-block">Supprimer mon compte</button>
@@ -2398,7 +2486,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.10.1</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.11.0</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3299,7 +3387,10 @@ const API = {
       });
   },
   async loadFiche(m) { return (await Store.all()).fiches[m] || null; },
-  async saveFiche(m, d) { (await Store.all()).fiches[m] = d; await Store.flush(); return true; },
+  // Une copie, jamais la reference : sinon la fiche rangee reste liee a l'objet
+  // courant, et toute modification ulterieure la change aussi — y compris celle
+  // d'un mois deja enregistre.
+  async saveFiche(m, d) { (await Store.all()).fiches[m] = JSON.parse(JSON.stringify(d)); await Store.flush(); return true; },
   async deleteFiche(m) { delete (await Store.all()).fiches[m]; await Store.flush(); return true; },
   async existsFiche(m) { return !!(await Store.all()).fiches[m]; },
   async renameFiche(o0, n, d) {
@@ -3350,12 +3441,18 @@ async function initEnfants() {
 
 /* Recopie prénom, nom et date de naissance de la fiche vers la liste des
    enfants : le sélecteur affiche un prénom plutôt qu'un identifiant. */
+/* Depuis la fiche, ou les trois champs sont saisis ensemble : on ne recopie
+   que ce qui est renseigne, pour ne jamais effacer ce qui vient d'ailleurs. */
 function synchroniserEnfant() {
   const l = enfants().slice();
   const i = l.findIndex(e => e.id === enfantActif);
   if (i < 0) return;
   const avant = l[i].prenom + '|' + l[i].nom;
-  l[i] = { ...l[i], prenom: cur.enfant.prenom || '', nom: cur.enfant.nom || '', naissance: cur.enfant.naissance || '' };
+  const garde = (nouveau, ancien) => (nouveau && nouveau.trim()) ? nouveau : (ancien || '');
+  l[i] = { ...l[i],
+    prenom: garde(cur.enfant.prenom, l[i].prenom),
+    nom: garde(cur.enfant.nom, l[i].nom),
+    naissance: garde(cur.enfant.naissance, l[i].naissance) };
   if (avant === l[i].prenom + '|' + l[i].nom) return;
   profil.enfants = l;
   scheduleProfilSave();
@@ -3446,8 +3543,28 @@ async function changerEnfant(id) {
   const sien = list.filter(f => f.enfantId === id);
   if (sien.length) await openFiche(sien[0].cle);
   else await nouveauMois();
+  reprendreEnfantDuProfil();
   await refreshList();
   renderEnfants();
+  // Les champs du dossier doivent suivre le changement, sinon on voit encore
+  // ceux du precedent. On les remplit sans condition : ouvrir une fiche bascule
+  // sur l'ecran de saisie, donc tester la vue ne servait a rien.
+  remplirIdentites();
+}
+
+/* Une fiche creee avant que l'enfant soit nomme garde des champs vides. On
+   les complete depuis son entree — sans jamais ecraser ce que la fiche
+   contient deja. */
+function reprendreEnfantDuProfil() {
+  const e = enfants().find(x => x.id === enfantActif);
+  if (!e || !cur) return;
+  let change = false;
+  for (const champ of ['prenom', 'nom', 'naissance']) {
+    if (!(cur.enfant[champ] || '').trim() && (e[champ] || '').trim()) {
+      cur.enfant[champ] = e[champ]; change = true;
+    }
+  }
+  if (change) { recalc(); scheduleSave(); }
 }
 
 function renderEnfants() {
@@ -3952,6 +4069,7 @@ function scheduleSave() {
 }
 async function doSave() {
   ecranPropre();
+  planifierSauvegarde();
   clearTimeout(saveTimer); saveTimer = null;
   if (!cur) return;
   await API.saveFiche(cleFiche(cur.mois), cur);
@@ -3989,6 +4107,7 @@ async function openFiche(cle) {
   fillForm();
   window.scrollTo(0, 0);
   await refreshList();
+  reprendreEnfantDuProfil();
 }
 
 async function nouveauMois() {
@@ -4168,6 +4287,9 @@ function fitPreview() {
 function showView(v) {
   ecranPropre();
   vue = v;
+  // les cartes de l'ecran qui s'ouvre arrivent l'une apres l'autre
+  const zone = document.getElementById(v);
+  if (zone) { zone.classList.remove('cascade'); void zone.offsetWidth; zone.classList.add('cascade'); }
   // l'ecran qui arrive glisse legerement : on sent le changement
   const arrivant = $('#' + ({ module: 'modulePage' }[v] || v));
   if (arrivant) { arrivant.classList.remove('vue-arrive'); void arrivant.offsetWidth; arrivant.classList.add('vue-arrive'); }
@@ -4184,7 +4306,8 @@ function showView(v) {
   if (v === 'apercu') { renderPreview(); fitPreview(); }
   if (v === 'dossier') renderDossier();
   if (v === 'dossier') chercherInfosConnues().then(renderReprise);
-  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); renderModulesNatifs(); appliquerDev(); chargerEtatSuppression(); }
+  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); renderModulesNatifs(); appliquerDev();
+    chargerEtatSuppression(); majEtatSauvegarde(); }
   prevenirMigration();
   if (v === 'annuel') renderAnnuel().then(renderRegularisation);
   renderTitle();
@@ -4787,10 +4910,15 @@ const IDENTITES = ['salarie', 'employeur', 'enfant'];
 function identites() { return profil.identites || {}; }
 
 function remplirIdentites() {
+  const enf = enfants().find(e => e.id === enfantActif) || {};
   $$('[data-identite]').forEach(el => {
     const [bloc, champ] = el.dataset.identite.split('.');
-    // la fiche affichee fait foi si le profil est vide : migration douce
-    const v = ((identites()[bloc] || {})[champ]) ?? ((cur && cur[bloc] || {})[champ]) ?? '';
+    // Le bloc « enfant » appartient a l'enfant affiche, pas a un reglage
+    // commun : avec deux enfants, la valeur commune montrait celui saisi en
+    // dernier, et l'ecraser changeait les deux.
+    const v = bloc === 'enfant'
+      ? (enf[champ] ?? ((cur && cur.enfant || {})[champ]) ?? '')
+      : (((identites()[bloc] || {})[champ]) ?? ((cur && cur[bloc] || {})[champ]) ?? '');
     el.value = v;
   });
 }
@@ -4809,14 +4937,29 @@ async function identiteModifiee(el) {
       try { await Supa.modifier('profils', corps, 'id=eq.' + Supa.moi().id); } catch (e) {}
     }, 900);
   }
-  profil.identites = identites();
-  profil.identites[bloc] = { ...(profil.identites[bloc] || {}), [champ]: el.value };
-  scheduleProfilSave();
+  if (bloc === 'enfant') {
+    // On ecrit le seul champ modifie dans l'entree de cet enfant. Passer par
+    // cur.enfant recopiait des valeurs vides : nommer un enfant effacait son
+    // prenom.
+    const l = enfants().slice();
+    const i = l.findIndex(x => x.id === enfantActif);
+    if (i >= 0) {
+      l[i] = { ...l[i], [champ]: el.value };
+      profil.enfants = l;
+      scheduleProfilSave();
+      clearTimeout(enfantTimer);
+      enfantTimer = setTimeout(renderEnfants, 400);
+    }
+  } else {
+    profil.identites = identites();
+    profil.identites[bloc] = { ...(profil.identites[bloc] || {}), [champ]: el.value };
+    scheduleProfilSave();
+  }
   if (cur) {
     cur[bloc] = { ...(cur[bloc] || {}), [champ]: el.value };
     const ec = $('[data-bind="' + bloc + '.' + champ + '"]');
     if (ec) ec.value = el.value;
-    if (bloc === 'enfant') synchroniserEnfant();
+    // synchroniserEnfant n'a plus a recopier : l'entree est deja a jour.
     recalc(); scheduleSave();
   }
 }
@@ -4988,7 +5131,7 @@ function renderAdaptation() {
   if (b) b.textContent = adaptation.length ? String(adaptation.length) : '';
   if (!box) return;
   if (!adaptation.length) {
-    box.innerHTML = '<p class="msg-vide">La nounou n\u2019a pas encore noté d\u2019étape d\u2019adaptation.</p>';
+    box.innerHTML = vide('ourson', 'Adaptation pas commencée', 'La nounou notera chaque palier ici.');
     return;
   }
   box.innerHTML = adaptation.map(a => {
@@ -5042,7 +5185,7 @@ function renderReprises() {
         ${r.lu_le ? '<span style="color:var(--acc);font-weight:500"> · lu</span>' : ''}</div>
       <div class="mot">${esc(r.texte)}</div>
     </div>`;
-  }).join('') : '<p class="msg-vide">Aucune transmission pour le moment.</p>';
+  }).join('') : vide('livre', 'Aucune transmission', 'Le journal de la journée arrivera ici, le soir.');
 }
 
 async function envoyerReprise() {
@@ -5166,7 +5309,7 @@ function renderCommun() {
   bloc.hidden = !membre;
 
   if (!adhesion) {
-    etat.innerHTML = '<p class="msg-vide">Ta nounou n\u2019a pas encore ouvert d\u2019espace commun, ou ne t\u2019y a pas invité.</p>';
+    etat.innerHTML = vide('mains', 'Pas encore d\u2019espace commun', 'Ta nounou pourra l\u2019ouvrir pour toutes ses familles.');
     return;
   }
   if (invite) {
@@ -5198,7 +5341,7 @@ function renderCommun() {
     return `<div class="msg cat-${esc(a.categorie)}"><span class="rond">${emoji}</span>
       <span class="txt${a.auteur_id === moi ? ' mien' : ''}"><i class="etiq">${esc(lib)}</i><b>${esc(a.texte)}</b>
       <small>${a.auteur_id === moi ? 'vous' : 'la nounou ou une autre famille'} · ${esc(q)}</small></span></div>`;
-  }).join('') : '<p class="msg-vide">Aucune annonce pour le moment.</p>';
+  }).join('') : vide('enveloppe', 'Aucune annonce', 'Une maladie qui circule, une sortie : ça s\u2019affichera ici.');
 }
 
 async function repondreCommun(oui) {
@@ -5373,7 +5516,7 @@ async function chargerDemandes() {
 function renderDemandes() {
   const box = $('#listeDemandes');
   if (!box) return;
-  if (!demandes.length) { box.innerHTML = '<p class="msg-vide">Aucune demande pour le moment.</p>'; return; }
+  if (!demandes.length) { box.innerHTML = vide('ourson', 'Aucune demande', 'Les couches, les vêtements de rechange, le doudou oublié.'); return; }
   const etiq = { attente: 'à traiter', acceptee: 'acceptée', refusee: 'refusée' };
   box.innerHTML = demandes.map(d => `<div class="jour-b">
     <div class="date" style="text-transform:none">${esc(d.objet)} <span style="font-weight:500;color:var(--mut)">· ${etiq[d.etat]}</span></div>
@@ -5833,7 +5976,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.10.1';
+const VERSION = '1.11.0';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -6459,7 +6602,7 @@ function renderDemandesAccueil() {
       ${d.etat === 'acceptee' ? '<small style="color:var(--acc)">Publie ton contrat et envoie-lui le code d\u2019invitation.</small>' : ''}
       ${d.etat === 'attente' ? `<button class="lien-justif" data-retirer-dem="${esc(d.id)}">Retirer ma demande</button>` : ''}
     </div>`;
-  }).join('') : '<p class="msg-vide">Aucune demande envoyée.</p>';
+  }).join('') : vide('cle', 'Aucune demande envoyée', 'Cherche une nounou et écris-lui.');
 
   $$('#listeDemAccueil [data-retirer-dem]').forEach(x => {
     x.onclick = async () => {
@@ -6763,6 +6906,7 @@ async function renderPartage() {
           '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>' +
           '<button class="btn btn-danger btn-block" data-part="retirer">Retirer l\u2019accès de la nounou</button>'
         : '<button class="btn btn-primary btn-block" data-part="code">Nouveau code d\u2019invitation</button>' +
+          (e.code ? '<button class="btn btn-ghost btn-block" data-part="partager">Envoyer le code à la nounou</button>' : '') +
           '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>') +
       '<div class="rub">Fin de la relation</div>' +
       (contratsOrphelins.length
@@ -6801,6 +6945,15 @@ async function renderPartage() {
       ouvrirFicheNounou(sid, nom);
     },
     nettoyer: nettoyerOrphelins,
+    partager: async () => {
+      const e = enfantCourant() || {};
+      if (!e.code) { toast('Crée d\u2019abord un code'); return; }
+      const texte = 'Bonjour,\n\nVoici le code pour rejoindre le suivi de ' +
+        (cur.enfant.prenom || 'notre enfant') + ' dans Cocon Nounou : ' + e.code +
+        '\n\nIl est valable sept jours.';
+      const ok = await partagerTexte('Code d\u2019invitation', texte);
+      if (!ok) toast('Partage impossible sur ce téléphone.');
+    },
     oublier: oublierContrat,
     publier: publierContrat,
     code: genererInvitation,
@@ -7213,7 +7366,7 @@ function renderJournal() {
   const box = $('#listeJournal');
   if (!box) return;
   if (!journal.length) {
-    box.innerHTML = '<p class="msg-vide">Aucune transmission pour le moment.</p>';
+    box.innerHTML = vide('livre', 'Aucune transmission', 'Le journal de la journée arrivera ici, le soir.');
     return;
   }
   box.innerHTML = journal.map(j => {
@@ -7329,7 +7482,7 @@ function renderMessages() {
   const box = $('#listeMessages');
   if (!box) return;
   const moi = (Supa.moi() || {}).id;
-  if (!messages.length) { box.innerHTML = '<p class="msg-vide">Aucun message pour le moment.</p>'; return; }
+  if (!messages.length) { box.innerHTML = vide('enveloppe', 'Aucun message', 'Écris le premier mot.'); return; }
 
   const ordre = [...messages].sort((a, b) => new Date(a.cree_le) - new Date(b.cree_le));
   let jour = '', html = '';
@@ -7946,6 +8099,7 @@ async function renderAccueil() {
   $$('#accueil [data-act]').forEach(b => { b.onclick = () => actions[b.dataset.act](); });
   // le montant compte jusqu'à sa valeur
   renderDates('#datesMarquantes', cur.enfant.prenom);
+  dessinerCiel('#hero');
   const mt = $('#hero .montant');
   if (mt) { const fin = mt.dataset.compte; mt.dataset.valeur = mt.dataset.valeur || '0'; compterVers(mt, fin); }
   $$('#accueil [data-mod]').forEach(b => { b.onclick = () => MODULES.find(m => m.id === b.dataset.mod).fn(); });
@@ -8344,6 +8498,7 @@ async function fillProfilForm() {
 }
 async function scheduleProfilSave() { setStatus('saving'); clearTimeout(profilTimer); profilTimer = setTimeout(doProfilSave, 600); }
 async function doProfilSave() {
+  planifierSauvegarde();   // le planning type et les enfants comptent autant que les fiches
   ecranPropre();
   clearTimeout(profilTimer); profilTimer = null;
   await API.saveProfil(JSON.parse(JSON.stringify(profil)));
@@ -8402,11 +8557,23 @@ async function envoyerMail() {
     }
   }
 
-  btn.disabled = false; btn.textContent = 'Envoyer';
-  fermerFeuille('#mailModal');
-  marquerEnvoyee();
-  location.href = 'mailto:' + encodeURIComponent(to) +
+  // On n'annonce l'envoi qu'une fois le courrielleur reellement ouvert :
+  // avant, la feuille se fermait et rien ne partait.
+  const lien = 'mailto:' + encodeURIComponent(to) +
     '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  const ouvert = await ouvrirLienSysteme(lien);
+  btn.disabled = false; btn.textContent = 'Envoyer';
+
+  if (ouvert) {
+    fermerFeuille('#mailModal');
+    marquerEnvoyee();
+    return;
+  }
+  // Aucune application de courrier : on ne fait pas semblant.
+  const copie = await partagerTexte('Fiche de salaire', subject + '\n\n' + body + '\n\n' + to);
+  toast(copie
+    ? 'Aucune application de courrier : le message a été partagé.'
+    : 'Aucune application de courrier sur ce téléphone.');
 }
 
 /* ---------------- Sauvegarde / reprise des données ---------------- */
@@ -8715,6 +8882,8 @@ $('#mpRetour').onclick = async () => {
   document.body.classList.remove('barre-route');
   await ouvrirPorte();
 };
+$('#btnSauvegarder').onclick = () => sauvegarderDossier(false);
+$('#btnRestaurer').onclick = restaurerDossier;
 $('#btnSupprCompte').onclick = supprimerMonCompte;
 $('#btnArchiveDonnees').onclick = preparerArchive;
 $('#btnDev').onclick = demanderCodeDev;
@@ -8730,9 +8899,9 @@ $('#visioEnregistrer').onclick = enregistrerPhoto;
 $('#visioPrec').onclick = () => glisserVisio(-1);
 $('#visioSuiv').onclick = () => glisserVisio(1);
 brancherGestes($('#visioScene'), glisserVisio, fermerVisionneuse);
-$('#btnArchive').onclick = preparerArchive;
+$('#btnArchive').onclick = () => avecAttente('#btnArchive', preparerArchive);
 $('#proFermer').onclick = () => { fermerFeuille('#ficheNounou'); };
-$('#btnRecherche').onclick = lancerRecherche;
+$('#btnRecherche').onclick = () => avecAttente('#btnRecherche', lancerRecherche);
 $('#btnRelancerPush').onclick = () => activerPush();
 $('#btnTestPush').onclick = testerPush;
 $('#tourSuivant').onclick = () => { if (tourEtape < TOUR.length - 1) { tourEtape++; renderTour(); } else finirTour(); };
@@ -9941,12 +10110,23 @@ async function annulerSuppression() {
 }
 
 
-/* On ne redessine jamais un ecran pendant qu'on y ecrit : la boucle de
-   rafraichissement effacait le texte en cours de frappe toutes les vingt
-   secondes. Elle attend que le champ soit quitte. */
+/* On ne redessine jamais un ecran pendant qu'on y ecrit : la boucle effacait
+   le texte en cours de frappe.
+
+   Mais une conversation n'est pas un formulaire. On y tape en permanence, et
+   le champ de saisie n'a rien a voir avec le fil au-dessus : le bloquer
+   empechait les nouveaux messages d'arriver alors que la notification, elle,
+   passait. Les zones de discussion sont donc exclues du verrou. */
+const ZONES_LIBRES = '#listeMessages, #carteMessages, #sujFil, #feuilleSujet, #communParent, #communTexteP';
+
+function champLibre(el) {
+  return !!(el && el.closest && el.closest(ZONES_LIBRES));
+}
+
 function enSaisie() {
-  if (ecranModifie) return true;
   const a = document.activeElement;
+  if (champLibre(a)) return false;              // on tape un message : le fil vit
+  if (ecranModifie) return true;
   if (!a) return false;
   const t = (a.tagName || '').toLowerCase();
   if (t === 'input' || t === 'textarea' || t === 'select') return true;
@@ -10043,10 +10223,264 @@ let ecranModifie = false;
 document.addEventListener('input', e => {
   const t = e.target;
   if (!t || !t.matches || !t.matches('input, textarea, select')) return;
+  if (champLibre(t)) return;                    // un message en cours n'est pas un formulaire
   if (t.closest('#modulePage, #dossier, #vuePlanning, #vueJournal, #vueProfil, #vueFamilles')) ecranModifie = true;
 }, true);
 
 function ecranPropre() { ecranModifie = false; }
+
+
+/* Un lien mailto: ou tel: ne fait rien dans une WebView Android : la page ne
+   navigue pas, et aucune erreur n'est levee. On passe par le systeme, et on le
+   dit si rien ne s'ouvre — mieux vaut un message qu'un silence. */
+async function ouvrirLienSysteme(url) {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.App && C.App.openUrl) {
+    try { const r = await C.App.openUrl({ url }); if (r && r.completed !== false) return true; } catch (e) {}
+  }
+  if (C && C.Browser && !/^(mailto|tel|sms):/i.test(url)) {
+    try { await C.Browser.open({ url }); return true; } catch (e) {}
+  }
+  try {
+    const f = window.open(url, '_system') || window.open(url, '_blank');
+    if (f) return true;
+  } catch (e) {}
+  try { location.href = url; return true; } catch (e) {}
+  return false;
+}
+
+/* Partager un texte : le code d'invitation se transmet mieux par la feuille
+   du systeme que par un courriel prerempli. */
+async function partagerTexte(titre, texte) {
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.Share) {
+    try { await C.Share.share({ title: titre, text: texte, dialogTitle: titre }); return true; } catch (e) { return false; }
+  }
+  if (navigator.share) {
+    try { await navigator.share({ title: titre, text: texte }); return true; } catch (e) { return false; }
+  }
+  try { await navigator.clipboard.writeText(texte); toast('Copié dans le presse-papiers'); return true; } catch (e) {}
+  return false;
+}
+
+
+/* Un bouton qui ne repond pas laisse croire que le geste n'a pas ete pris.
+   Celui-ci se strie doucement le temps de l'operation. */
+async function avecAttente(bouton, tache) {
+  const b = typeof bouton === 'string' ? document.querySelector(bouton) : bouton;
+  if (b) b.classList.add('occupe');
+  try { return await tache(); }
+  finally { if (b) b.classList.remove('occupe'); }
+}
+
+
+/* Les liens tel: et mailto: passent par le systeme. Dans une WebView, un clic
+   direct ne fait parfois rien du tout — et sans message, on croit avoir mal
+   appuye. Ici, si rien ne s'ouvre, le numero est au moins copie. */
+document.addEventListener('click', async e => {
+  const a = e.target.closest('a[href^="tel:"], a[href^="mailto:"], a[href^="sms:"]');
+  if (!a) return;
+  e.preventDefault();
+  const url = a.getAttribute('href');
+  if (await ouvrirLienSysteme(url)) return;
+  const valeur = decodeURIComponent(url.replace(/^[a-z]+:/i, '').split('?')[0]);
+  const copie = await partagerTexte('Contact', valeur);
+  toast(copie ? 'Copié : ' + valeur : 'Impossible d\u2019ouvrir : ' + valeur);
+}, true);
+
+
+/* ---------------- Sauvegarde du dossier ----------------
+   Desinstaller perdait tout : contrat, taux horaire, planning type, fiches
+   deja faites. Repartir de zero apres un changement de telephone est
+   inacceptable.
+
+   Ce qui monte : ce qu'il faut pour reprendre ou on s'est arrete.
+   Ce qui ne monte JAMAIS : numero de securite sociale, IBAN, adresse precise.
+   Ils sont retires ici, avant l'envoi — la base ne les voit pas passer. */
+const JAMAIS_EN_LIGNE = ['secu', 'iban', 'bic', 'nir', 'adresse'];
+
+function sansSecrets(objet) {
+  if (Array.isArray(objet)) return objet.map(sansSecrets);
+  if (!objet || typeof objet !== 'object') return objet;
+  const propre = {};
+  for (const [cle, valeur] of Object.entries(objet)) {
+    if (JAMAIS_EN_LIGNE.includes(cle)) continue;
+    propre[cle] = sansSecrets(valeur);
+  }
+  return propre;
+}
+
+let minuteurSauvegarde = null;
+
+/* Appelee apres chaque enregistrement, mais espacee : on ne sauvegarde pas a
+   chaque caractere. */
+function planifierSauvegarde() {
+  clearTimeout(minuteurSauvegarde);
+  minuteurSauvegarde = setTimeout(() => sauvegarderDossier(true), 4000);
+}
+
+async function sauvegarderDossier(silencieux) {
+  if (!Supa.connecte()) { if (!silencieux) toast('Connecte-toi pour sauvegarder'); return; }
+  try {
+    // Store.all() renvoie l'ensemble { profil, fiches } tel qu'il est ecrit
+    // sur l'appareil : c'est exactement ce qu'il faut pouvoir retrouver.
+    const tout = await Store.all();
+    const contenu = sansSecrets({ version: VERSION, donnees: tout, le: new Date().toISOString() });
+    await Supa.ecrire('sauvegardes',
+      [{ id: Supa.moi().id, contenu, version: VERSION, appareil: navigator.platform || null }],
+      'resolution=merge-duplicates');
+    if (!silencieux) toast('Dossier sauvegardé');
+    majEtatSauvegarde();
+  } catch (e) { if (!silencieux) toast('Impossible : ' + enClair(e)); }
+}
+
+async function etatSauvegarde() {
+  if (!Supa.connecte()) return null;
+  try {
+    const r = await Supa.lire('sauvegardes',
+      'id=eq.' + Supa.moi().id + '&select=maj_le,version,taille');
+    return (r && r[0]) || null;
+  } catch (e) { return null; }
+}
+
+async function majEtatSauvegarde() {
+  const box = document.getElementById('etatSauvegarde');
+  if (!box) return;
+  const s = await etatSauvegarde();
+  box.innerHTML = s
+    ? `<div class="ds"><span>Dernière sauvegarde</span><b>${esc(new Date(s.maj_le).toLocaleString('fr-FR'))}</b></div>
+       <div class="ds"><span>Taille</span><b>${Math.round((s.taille || 0) / 1024)} Ko</b></div>`
+    : '<p class="hint" style="margin:0">Aucune sauvegarde. Ton dossier n\u2019existe que sur ce téléphone.</p>';
+}
+
+/* La restauration ne remplace rien sans le dire : elle montre ce qu'elle a
+   trouve et ce qu'elle va ecraser. */
+async function restaurerDossier() {
+  const s = await etatSauvegarde();
+  if (!s) { toast('Aucune sauvegarde trouvée pour ce compte'); return; }
+  let contenu = null;
+  try {
+    const r = await Supa.lire('sauvegardes', 'id=eq.' + Supa.moi().id + '&select=contenu');
+    contenu = r && r[0] && r[0].contenu;
+  } catch (e) {}
+  if (!contenu) { toast('Sauvegarde illisible'); return; }
+
+  const nbFiches = Object.keys((contenu.donnees || {}).fiches || {}).length;
+  const local = Object.keys((await Store.all()).fiches || {}).length;
+  if (!await confirmer('Restaurer le dossier du ' +
+      new Date(s.maj_le).toLocaleDateString('fr-FR') + ' ?',
+    { detail: nbFiches + ' fiche(s) et le dossier seront repris.' +
+        (local ? ' Les ' + local + ' fiche(s) de ce téléphone seront remplacées.' : '') +
+        ' Le numéro de sécurité sociale, l\u2019IBAN et l\u2019adresse ne sont pas dans la sauvegarde : à ressaisir.',
+      danger: local > 0, oui: 'Restaurer' })) return;
+
+  try {
+    // Ce qui est sur l'appareil et absent de la sauvegarde est conserve : le
+    // numero de securite sociale et l'IBAN n'ont jamais ete envoyes, ils ne
+    // doivent pas disparaitre pour autant.
+    const actuel = await Store.all();
+    const restaure = contenu.donnees || {};
+    const fusion = {
+      ...actuel, ...restaure,
+      profil: { ...(actuel.profil || {}), ...(restaure.profil || {}) },
+      fiches: { ...(actuel.fiches || {}), ...(restaure.fiches || {}) }
+    };
+    // les champs jamais envoyes reprennent leur valeur locale
+    for (const bloc of ['salarie', 'employeur']) {
+      if (!fusion.profil[bloc] || !(actuel.profil || {})[bloc]) continue;
+      for (const cle of JAMAIS_EN_LIGNE) {
+        const v = actuel.profil[bloc][cle];
+        if (v) fusion.profil[bloc][cle] = v;
+      }
+    }
+    await Store.replaceAll(fusion);
+    toast(nbFiches + ' fiche(s) restaurée(s)');
+    setTimeout(() => location.reload(), 1400);
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+
+/* ---------------- Les dessins ----------------
+   Chaque etat vide a le sien : un ecran qui dit « rien » avec un dessin dit
+   « pas encore », et c'est plus doux. Traits ronds, deux teintes, jamais de
+   texte dans le dessin. */
+const DESSINS = {
+  ourson: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="30" cy="22" r="7" fill="var(--acc-doux)"/><circle cx="66" cy="22" r="7" fill="var(--acc-doux)"/>
+    <circle cx="48" cy="34" r="18" fill="var(--acc-doux)"/><circle cx="48" cy="40" r="7" fill="#fff"/>
+    <circle cx="41" cy="31" r="1.6" fill="var(--acc)"/><circle cx="55" cy="31" r="1.6" fill="var(--acc)"/>
+    <path d="M45 39a3 3 0 0 0 6 0" fill="var(--acc)"/><path d="M40 60a8 8 0 0 1 16 0"/></svg>`,
+  biberon: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M38 22h20v34a6 6 0 0 1-6 6H44a6 6 0 0 1-6-6z" fill="var(--acc-doux)"/>
+    <rect x="42" y="14" width="12" height="8" rx="3" fill="#fff"/><path d="M45 9c0-3 6-3 6 0v5h-6z" fill="var(--acc-doux)"/>
+    <path d="M42 36h12M42 44h12M42 52h12" opacity=".5"/></svg>`,
+  nuage: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 48a10 10 0 0 1 2-19 14 14 0 0 1 27-3 9 9 0 0 1 12 8 8 8 0 0 1-1 14z" fill="var(--acc-doux)"/>
+    <path d="M22 58h8M34 62h14M52 58h10" opacity=".45"/></svg>`,
+  livre: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 18h22a6 6 0 0 1 4 2v36a6 6 0 0 0-4-2H22z" fill="var(--acc-doux)"/>
+    <path d="M74 18H52a6 6 0 0 0-4 2v36a6 6 0 0 1 4-2h22z" fill="#fff"/>
+    <path d="M28 28h12M28 36h10M56 28h12M56 36h10" opacity=".5"/></svg>`,
+  enveloppe: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="18" y="20" width="60" height="38" rx="6" fill="var(--acc-doux)"/>
+    <path d="M18 26l30 20 30-20" fill="#fff"/><circle cx="70" cy="22" r="7" fill="#f5c65e" stroke="none"/></svg>`,
+  ballon: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="38" cy="28" rx="12" ry="15" fill="var(--acc-doux)"/><ellipse cx="60" cy="24" rx="11" ry="14" fill="#fde7c6"/>
+    <path d="M38 43c-2 8 4 14 2 22M60 38c2 8-4 14-2 22"/><path d="M42 18a4 5 0 0 1 2 6" stroke="#fff" opacity=".8"/></svg>`,
+  lune: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M56 14a22 22 0 1 0 18 34 18 18 0 0 1-18-34z" fill="var(--acc-doux)"/>
+    <path d="M24 22l1.5 3 3 .5-2 2 .5 3-3-1.5-3 1.5.5-3-2-2 3-.5z" fill="#f5c65e" stroke="none"/>
+    <circle cx="20" cy="46" r="1.6" fill="var(--acc)" stroke="none"/><circle cx="82" cy="18" r="1.4" fill="var(--acc)" stroke="none"/></svg>`,
+  soleil: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="48" cy="36" r="13" fill="#fde7c6"/>
+    <path d="M48 12v6M48 54v6M24 36h6M66 36h6M31 19l4 4M61 49l4 4M31 53l4-4M61 23l4-4"/></svg>`,
+  cle: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="36" cy="32" r="12" fill="var(--acc-doux)"/><circle cx="36" cy="32" r="4" fill="#fff"/>
+    <path d="M46 40l24 18M62 52l4-5M68 57l4-5"/></svg>`,
+  mains: `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M30 56V34a4 4 0 0 1 8 0v-8a4 4 0 0 1 8 0v8a4 4 0 0 1 8 0v14c0 8-6 14-14 14h-2c-4 0-8-3-8-6z" fill="var(--acc-doux)"/>
+    <path d="M30 40l-7-7a4 4 0 0 1 6-6l5 5" fill="#fff"/><path d="M62 20l3 3M70 16l1 4M66 12v4" stroke="#f5c65e"/></svg>`
+};
+
+/* Un etat vide avec son dessin, en une ligne. */
+function vide(dessin, titre, sous) {
+  return `<div class="vide-doux craft">${DESSINS[dessin] || DESSINS.nuage}<b>${esc(titre)}</b>${sous ? `<small>${esc(sous)}</small>` : ''}</div>`;
+}
+
+
+/* ---------------- Le ciel du heros ----------------
+   Trois nuages qui derivent le jour, des etoiles qui scintillent la nuit. Ca
+   ne sert a rien, et c'est exactement pour ca que ca fait sourire. Coupe si
+   la personne a demande moins de mouvement. */
+function dessinerCiel(cible) {
+  const box = typeof cible === 'string' ? document.querySelector(cible) : cible;
+  if (!box || box.querySelector('.ciel')) return;
+  const h = new Date().getHours();
+  const nuit = h < 7 || h >= 20;
+  const ciel = document.createElement('div');
+  ciel.className = 'ciel ' + (nuit ? 'nuit' : 'jour');
+  ciel.setAttribute('aria-hidden', 'true');
+  if (nuit) {
+    for (let i = 0; i < 9; i++) {
+      const e = document.createElement('i');
+      e.style.left = (6 + Math.random() * 88) + '%';
+      e.style.top = (8 + Math.random() * 60) + '%';
+      e.style.animationDelay = (Math.random() * 3) + 's';
+      e.style.transform = 'scale(' + (0.6 + Math.random() * 0.8) + ')';
+      ciel.appendChild(e);
+    }
+  } else {
+    for (let i = 0; i < 3; i++) {
+      const n = document.createElement('b');
+      n.style.top = (10 + i * 22) + '%';
+      n.style.animationDuration = (34 + i * 11) + 's';
+      n.style.animationDelay = (-i * 13) + 's';
+      n.style.transform = 'scale(' + (0.7 + i * 0.25) + ')';
+      ciel.appendChild(n);
+    }
+  }
+  box.insertBefore(ciel, box.firstChild);
+}
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
@@ -10076,8 +10510,11 @@ async function activerPush() {
     P.addListener('pushNotificationActionPerformed', async (ev) => {
       await rafraichirTout(true);
       const cible = ((ev && ev.notification && ev.notification.data) || {}).cible;
-      const m = MODULES.find(x => x.id === cible);
-      if (m) m.fn();
+      // quelques cibles portent le nom du module emetteur, pas du module a
+      // ouvrir : on les ramene au bon endroit
+      const EQUIV = { familles: 'nounous', absences: 'fermetures', profil: 'nounous' };
+      const m = MODULES.find(x => x.id === (EQUIV[cible] || cible));
+      if (m) m.fn(); else showView('accueil');
     });
     }
     etatPush.etape = 'enregistrement en cours…';

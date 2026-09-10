@@ -58,6 +58,13 @@ jobs:
             mv /tmp/extrait /tmp/contenu
           fi
 
+          # Un depot Git dans l'archive n'a rien a y faire : on le jette avant
+          # meme la comparaison, pour qu'il n'apparaisse nulle part.
+          if [ -e /tmp/contenu/.git ]; then
+            echo "::warning::L'archive contenait un dossier .git — retiré."
+            rm -rf /tmp/contenu/.git
+          fi
+
           echo "--- contenu de l'archive ---"
           ls -A /tmp/contenu
 
@@ -104,12 +111,25 @@ jobs:
         run: |
           set -e
           REMPLACES=""
+          IGNORES=""
           for ENTREE in $(ls -A /tmp/contenu); do
-            if [ "$ENTREE" = ".github" ]; then continue; fi
+            # .github : le jeton n'a pas le droit d'y toucher, on depose a part.
+            # .git : une archive ne doit jamais remplacer le depot lui-meme.
+            #        Un « git init » malencontreux dans le dossier source suffit
+            #        a le glisser dans le zip, et tout casse avec un code 128.
+            case "$ENTREE" in
+              .github|.git|.git/*)
+                IGNORES="$IGNORES $ENTREE"
+                continue ;;
+            esac
             rm -rf "./$ENTREE"
             cp -r "/tmp/contenu/$ENTREE" "./$ENTREE"
             REMPLACES="$REMPLACES $ENTREE"
           done
+
+          if [ -n "$IGNORES" ]; then
+            echo "::warning::Ignorés (jamais remplacés) :$IGNORES"
+          fi
 
           if [ "${{ inputs.garder_archive }}" != "true" ]; then
             rm -f "${{ steps.archive.outputs.zip }}"
