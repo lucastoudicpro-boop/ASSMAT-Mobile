@@ -1394,7 +1394,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   cursor:grab;touch-action:none;flex:0 0 auto}
 .poignee::before{content:'';width:38px;height:4px;border-radius:3px;background:var(--bord);opacity:.5}
 .poignee:active{cursor:grabbing}
-.modal-box{will-change:transform}
+.modal-box{will-change:transform;overscroll-behavior:contain}
 .modal{transition:background .2s ease}
 @media (prefers-reduced-motion:reduce){.modal-box{transition:none!important}}
 
@@ -1462,6 +1462,10 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 #mauvaisePorte[hidden]{display:none}
 /* Tout est masque sauf l'ecran lui-meme : enumerer les elements laissait
    toujours passer quelque chose — un tour guide, un bandeau. */
+/* Pendant la verification du role, l'application n'est pas montee du tout :
+   la masquer par visibility laissait passer des elements qui la redefinissent. */
+body.verif-role>*{display:none!important}
+body.verif-role>#splash,body.verif-role>#porte{display:flex!important}
 body.barre-route>*{display:none!important}
 body.barre-route>#mauvaisePorte{display:flex!important}
 .mp-scene{max-width:340px;width:100%;text-align:center}
@@ -2243,6 +2247,16 @@ body.barre-route>#mauvaisePorte{display:flex!important}
     </div>
   </details>
   <details class="card">
+    <summary><svg class="ico"><use href="#i-poubelle"/></svg><span class="ttl">Mes données</span></summary>
+    <div class="body">
+      <p class="hint" style="margin-top:0">Tes fiches de salaire, tes montants et ton IBAN ne sont que sur ce téléphone : ils disparaissent avec l'application.</p>
+      <button id="btnArchiveDonnees" class="btn btn-ghost btn-block">Télécharger mes données</button>
+      <button id="btnSupprCompte" class="btn btn-danger btn-block">Supprimer mon compte</button>
+      <p class="hint">La suppression efface le profil et les contrats en ligne dont tu es l'employeur. Elle est définitive.</p>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-reglages"/></svg><span class="ttl">Maintenance</span></summary>
     <div class="body">
       <div class="ds"><span>Mode développeur</span><b id="etatDev">désactivé</b></div>
@@ -2372,7 +2386,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.8.1</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.9.0</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -5631,8 +5645,10 @@ async function ouvrirPorte() {
 
 async function fermerPorte() {
   $('#porte').hidden = true;
-  if (!profil.tourVu) setTimeout(ouvrirTour, 450);
+  // le role d'abord : sinon le tour guide demarre pour quelqu'un qu'on va
+  // renvoyer vers l'autre application
   if (!await verifierRole('employeur', 'Cocon Nounou')) return;
+  if (!profil.tourVu) setTimeout(ouvrirTour, 450);
   await assurerProfil();
   await reconcilierContrats(false);
   demarrerBoucle();
@@ -5777,7 +5793,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.8.1';
+const VERSION = '1.9.0';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -6118,7 +6134,7 @@ function imprimerCarnet(d) {
   f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
   document.body.appendChild(f);
   f.contentDocument.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8">
-    <title>Carnet ${anneeCarnet} — ${prenom}</title><style>
+    <title>Carnet ${anneeCarnet} — ${esc(prenom)}</title><style>
     @page{size:A4;margin:18mm}
     body{font:12pt/1.6 Georgia,'Times New Roman',serif;color:#22302c}
     h1{font-size:26pt;margin:0 0 4pt;font-weight:400}
@@ -6130,14 +6146,14 @@ function imprimerCarnet(d) {
     .jour p{margin:2pt 0 0}
     .fin{margin-top:30pt;color:#6a7d78;font-size:10pt;text-align:center}
     </style></head><body>
-    <h1>${prenom}</h1><p class="sous">Carnet de l'année ${anneeCarnet}</p>
+    <h1>${esc(prenom)}</h1><p class="sous">Carnet de l'année ${anneeCarnet}</p>
     <p>${d.journal.length} journées racontées, ${visibles.length} premières fois, ${d.photos} photos.</p>
     ${visibles.length ? `<h2>Les grands moments</h2><ul>${visibles.map(p =>
-      `<li><b>${(PREMIERES[p.type] || PREMIERES.autre).nom}</b> — ${fr(p.jour)}${p.mot ? ' · ' + p.mot : ''}</li>`).join('')}</ul>` : ''}
-    ${comptines.length ? `<h2>Les comptines</h2><ul>${comptines.map(c => '<li>' + c + '</li>').join('')}</ul>` : ''}
-    ${livres.length ? `<h2>Les livres</h2><ul>${livres.map(l => '<li>' + l + '</li>').join('')}</ul>` : ''}
+      `<li><b>${esc((PREMIERES[p.type] || PREMIERES.autre).nom)}</b> — ${esc(fr(p.jour))}${p.mot ? ' · ' + esc(p.mot) : ''}</li>`).join('')}</ul>` : ''}
+    ${comptines.length ? `<h2>Les comptines</h2><ul>${comptines.map(c => '<li>' + esc(c) + '</li>').join('')}</ul>` : ''}
+    ${livres.length ? `<h2>Les livres</h2><ul>${livres.map(l => '<li>' + esc(l) + '</li>').join('')}</ul>` : ''}
     ${mots.length ? `<h2>Les mots de la journée</h2>${mots.map(m =>
-      `<div class="jour"><b>${fr(m.jour)}</b><p>${m.mot}</p></div>`).join('')}` : ''}
+      `<div class="jour"><b>${esc(fr(m.jour))}</b><p>${esc(m.mot)}</p></div>`).join('')}` : ''}
     <p class="fin">Carnet établi avec Cocon</p>
     </body></html>`);
   f.contentDocument.close();
@@ -8596,6 +8612,8 @@ $('#mpRetour').onclick = async () => {
   document.body.classList.remove('barre-route');
   await ouvrirPorte();
 };
+$('#btnSupprCompte').onclick = supprimerMonCompte;
+$('#btnArchiveDonnees').onclick = preparerArchive;
 $('#btnDev').onclick = demanderCodeDev;
 $('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
 $('#nouvFermer').onclick = () => { fermerFeuille('#feuilleNouveau'); };
@@ -8950,12 +8968,15 @@ function enClair(e) {
    qui n'a rien a faire ici. */
 async function verifierRole(attendu, autre) {
   if (!Supa.connecte()) return true;
+  // On masque d'abord, on verifie ensuite : sinon l'application s'affiche une
+  // seconde — assez pour que le tour guide demarre.
+  document.body.classList.add('verif-role');
   let role = null;
   try {
     const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=role');
     role = r && r.length ? r[0].role : null;
-  } catch (e) { return true; }        // hors ligne : on ne bloque pas
-  if (!role || role === attendu) return true;
+  } catch (e) { document.body.classList.remove('verif-role'); return true; }
+  if (!role || role === attendu) { document.body.classList.remove('verif-role'); return true; }
 
   const suisNounou = role === 'salariee';
   document.getElementById('mpTitre').textContent =
@@ -8968,6 +8989,7 @@ async function verifierRole(attendu, autre) {
     'Vous avez été déconnecté ici, rien n\u2019a été modifié.';
   // on masque vraiment l'application derriere : la recouvrir ne suffit pas,
   // le contenu resterait accessible au defilement et aux lecteurs d'ecran
+  document.body.classList.remove('verif-role');
   document.body.classList.add('barre-route');
   document.getElementById('mauvaisePorte').hidden = false;
   secouer('.mp-scene');
@@ -9237,28 +9259,36 @@ function rendreGlissable(modale) {
   poignee.className = 'poignee';
   boite.insertBefore(poignee, boite.firstChild);
 
-  let y0 = null, dy = 0, t0 = 0, depuisPoignee = false;
+  let y0 = null, dy = 0, t0 = 0, tire = false;
 
   const debut = e => {
     const t = e.touches ? e.touches[0] : e;
     // depuis la poignee, ou depuis le haut quand rien n'est defile
-    depuisPoignee = e.target.closest('.poignee') || boite.scrollTop <= 0;
-    if (!depuisPoignee) return;
+    tire = !!e.target.closest('.poignee') || boite.scrollTop <= 0;
+    if (!tire) return;
     y0 = t.clientY; dy = 0; t0 = Date.now();
+    // L'animation d'ouverture porte « both » : sa transformation finale
+    // ecrase toute transformation en ligne. Il faut la retirer, sinon le
+    // doigt n'a aucun effet.
+    boite.style.animation = 'none';
     boite.style.transition = 'none';
   };
+
   const bouge = e => {
     if (y0 === null) return;
     const t = e.touches ? e.touches[0] : e;
     dy = t.clientY - y0;
     if (dy < 0) dy = dy / 4;                    // vers le haut : ca resiste
+    // on empeche le defilement tant qu'on tire vers le bas
+    if (dy > 4 && e.cancelable) e.preventDefault();
     boite.style.transform = `translateY(${dy}px)`;
-    modale.style.background = `rgba(20,14,16,${Math.max(0, .55 - dy / 900)})`;
+    modale.style.background = `rgba(20,14,16,${Math.max(0, .5 - dy / 900)})`;
   };
+
   const fin = () => {
     if (y0 === null) return;
-    // Un lancer bref ferme aussi — mais il faut avoir parcouru une distance
-    // reelle : sans ce minimum, une pichenette de trente pixels suffisait.
+    // Un lancer bref ferme aussi — mais il faut une distance reelle : sans ce
+    // minimum, une pichenette de trente pixels suffisait.
     const vitesse = dy / Math.max(16, Date.now() - t0);
     const seuil = boite.offsetHeight * 0.25;
     y0 = null;
@@ -9268,16 +9298,18 @@ function rendreGlissable(modale) {
       modale.style.background = 'rgba(20,14,16,0)';
       setTimeout(() => {
         modale.hidden = true;
-        boite.style.transform = ''; boite.style.transition = ''; modale.style.background = '';
-      }, 240);
+        boite.style.transform = ''; boite.style.transition = '';
+        boite.style.animation = ''; modale.style.background = '';
+      }, 250);
     } else {
       boite.style.transform = '';
       modale.style.background = '';
+      setTimeout(() => { boite.style.transition = ''; boite.style.animation = ''; }, 280);
     }
   };
 
   boite.addEventListener('touchstart', debut, { passive: true });
-  boite.addEventListener('touchmove', bouge, { passive: true });
+  boite.addEventListener('touchmove', bouge, { passive: false });
   boite.addEventListener('touchend', fin, { passive: true });
   boite.addEventListener('touchcancel', fin, { passive: true });
   // a la souris aussi, pour l'essai sur ordinateur
@@ -9646,14 +9678,16 @@ function fermerFeuille(sel) {
   if (!boite || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
     modale.hidden = true; return;
   }
+  // meme raison qu'au glissement : l'animation d'ouverture doit ceder la place
+  boite.style.animation = 'none';
   boite.style.transition = 'transform .24s cubic-bezier(.4,0,.6,1)';
   boite.style.transform = 'translateY(110%)';
   modale.style.background = 'rgba(20,14,16,0)';
   setTimeout(() => {
     modale.hidden = true;
     boite.style.transition = ''; boite.style.transform = '';
-    modale.style.background = '';
-  }, 230);
+    boite.style.animation = ''; modale.style.background = '';
+  }, 240);
 }
 
 
@@ -9718,6 +9752,30 @@ function confirmer(question, options) {
     document.getElementById('cfmNon').onclick = () => fermer(false);
     modale.hidden = false;
   });
+}
+
+
+/* ---------------- Supprimer son compte ----------------
+   Le RGPD donne un droit d'effacement, et notre politique le promet. Il faut
+   donc qu'il existe, et qu'il soit clair sur ce qu'il emporte. */
+async function supprimerMonCompte() {
+  if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord'); return; }
+  if (!await confirmer('Supprimer définitivement ton compte ?',
+    { detail: 'Tes contrats en ligne, le journal, les messages, les photos et les fiches d\u2019urgence seront effacés, pour toi comme pour l\u2019autre partie. Cette action est irréversible.',
+      danger: true, oui: 'Continuer' })) return;
+
+  const mot = await demander('Écris SUPPRIMER pour confirmer',
+    { majuscules: true, max: 12, aide: 'Cette précaution évite les gestes involontaires.', valider: 'Supprimer mon compte' });
+  if ((mot || '').trim().toUpperCase() !== 'SUPPRIMER') { toast('Suppression annulée'); return; }
+
+  try {
+    const r = await Supa.fonction('supprimer_mon_compte', {});
+    const d = Array.isArray(r) ? r[0] : r;
+    await Supa.deconnecter();
+    toast((d && d.contrats_supprimes ? d.contrats_supprimes + ' contrat(s) supprimé(s). ' : '') +
+      'Compte effacé.');
+    setTimeout(() => location.reload(), 1800);
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 
 async function activerPush() {

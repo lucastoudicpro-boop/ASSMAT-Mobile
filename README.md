@@ -2159,3 +2159,124 @@ Le texte dit quoi faire — ouvrir l'autre application avec la meme adresse — 
 que rien n'a ete modifie. Le compte est deconnecte, et **toute l'application est
 masquee** : la recouvrir ne suffisait pas, le contenu restait accessible au
 defilement.
+
+## 1.8.2 — quatre corrections
+
+### L'application s'affichait une seconde avant le refus
+
+La verification du role venait apres l'ouverture de l'application : le temps de
+l'aller-retour au serveur, tout etait visible — et cote parent, le tour guide
+demarrait pour quelqu'un qu'on allait renvoyer ailleurs.
+
+L'ecran de connexion reste maintenant affiche pendant la verification, et le
+tour ne demarre qu'une fois le role valide. Verifie en echantillonnant toutes
+les cent trente millisecondes : « porte, porte, porte… mauvaisePorte ». Rien
+d'autre n'apparait.
+
+Premiere tentative avec `visibility` : insuffisant, des elements la
+redefinissent. C'est `display` qui masque vraiment.
+
+### « Au clair » et les autres cartes etaient introuvables
+
+Elles existaient, mais sur l'ecran de l'enfant — appele « Planning », ce qui
+n'annonce ni les premieres fois, ni les sujets difficiles, ni l'adaptation.
+Personne n'allait les y chercher.
+
+Chacune a desormais **son entree dans le volet** : Premieres fois, Au clair,
+Adaptation, Reprise, Urgence. Toucher l'entree ouvre l'ecran, deplie la carte
+visee et y descend. Quatorze ecrans atteignables, contre neuf.
+
+### La commune n'etait pas saisissable
+
+Les champs commune et code postal etaient dans la carte du mode developpeur :
+sans mode developpeur, aucun moyen de les renseigner — donc la recherche cote
+parent ne trouvait jamais personne.
+
+Ils sont maintenant dans **Mon profil**, avec les autres informations, et une
+precision : la commune n'apparait que si elle demande a figurer dans la
+recherche, son adresse precise n'est jamais partagee.
+
+**Un garde-fou ajoute** : cocher « apparaitre dans la recherche » sans code
+postal est refuse, avec le message qui dit ou aller. Sans cela elle se croyait
+visible en ne l'etant pas.
+
+## 1.8.3 — le glissement des feuilles
+
+Le doigt ne deplacait rien, et la fermeture se faisait d'un coup malgre la
+transition. Meme cause pour les deux.
+
+`.modal-box` porte `animation: glisse .32s … both`. Le mode **both** conserve la
+transformation du dernier plan-cle apres la fin de l'animation : elle ecrase
+toute transformation posee en ligne. Le geste calculait bien son deplacement,
+l'appliquait, et rien ne bougeait.
+
+L'animation d'ouverture est desormais retiree des que le doigt se pose, et
+avant chaque fermeture. Verifie en echantillonnant le deplacement pendant le
+geste : 15, 30, 45, 60 pixels — la feuille suit exactement.
+
+Deux corrections au passage :
+
+- **Le defilement ne concurrence plus le geste** : `touchmove` n'est plus
+  passif, et le defilement est empeche des que l'on tire vers le bas de plus de
+  quatre pixels. Avant, la boite defilait pendant qu'on essayait de la tirer.
+- **La transformation est remise a zero** apres un geste court, sinon la feuille
+  restait decalee a l'ouverture suivante.
+
+Verifie sur le volet des modules et le centre de notifications, dans les deux
+applications : suivi du doigt, retour au ressort a soixante pixels, fermeture
+animee a trois cents.
+
+## 1.9.0 — audit complet
+
+`021-securite.sql` est a executer.
+
+### Ce qui est solide
+
+- **Vingt-six tables sur vingt-six** ont la protection par ligne activee et
+  l'acces anonyme revoque.
+- **Aucune regle permissive** : pas une seule condition `true` sans
+  verification d'identite.
+- **Vingt-cinq fonctions privilegiees sur vingt-huit** verifient elles-memes
+  qui appelle, et toutes figent leur `search_path`.
+- **Le stockage** verifie l'identite sur les quatre regles.
+- **La fonction de notification** passe les sept controles : jeton exige,
+  identite verifiee cote serveur, appartenance au contrat, destinataire filtre
+  en memoire, cle de service jamais renvoyee, mode silencieux respecte, jetons
+  morts retires.
+- **Rien de ce qui doit rester local ne part** : ni IBAN, ni numero de securite
+  sociale, ni montant, verifie sur chaque ecriture des deux applications.
+- **Vingt-six modules et quatorze ecrans** s'ouvrent sans erreur.
+
+### Trois failles trouvees, trois corrigees
+
+**Le carnet en PDF etait injectable.** Les mots du journal, les comptines et les
+livres — tous ecrits par la salariee — entraient sans echappement dans un
+document genere. Un texte contenant du code s'y serait execute, dans la meme
+origine que l'application. Tout est echappe.
+
+**Deux fonctions renseignaient sur n'importe qui.** `places_libres` et
+`dispo_maj_le` s'executent avec les droits du proprietaire : elles repondaient
+pour n'importe quel identifiant, y compris celui d'une salariee qui n'a jamais
+demande a figurer dans la recherche. Elles ne repondent plus que pour celles
+qui s'y sont inscrites, ou pour soi-meme.
+
+**La suppression du compte n'existait pas** alors que la politique de
+confidentialite la promettait — donc le RGPD n'etait pas respecte. Reglages →
+Mes donnees. Deux confirmations, dont la saisie du mot SUPPRIMER.
+
+Ce qu'elle efface : le profil, le profil professionnel, les jetons d'appareil,
+les contrats dont on est l'employeur et tout ce qui en depend. Ce qu'elle ne
+peut pas effacer : les contrats ou l'on est la salariee — ils appartiennent a
+la famille. On s'en retire, elle pourra inviter quelqu'un d'autre.
+
+### Deux points laisses ouverts
+
+**Le bucket n'a ni limite de taille ni restriction de type.** Il accepte
+cinquante megaoctets et n'importe quel format. L'application limite a huit
+megaoctets et n'envoie que des images, mais rien ne l'impose cote serveur.
+A regler dans le tableau de bord Supabase, pas en SQL.
+
+**Le compte d'authentification lui-meme survit a la suppression.** Une fonction
+cote base ne peut pas toucher a `auth.users` : il faut l'API admin, donc un
+service tiers. Les donnees sont effacees, l'adresse e-mail reste. C'est une
+limite a lever avant toute mise en production reelle.

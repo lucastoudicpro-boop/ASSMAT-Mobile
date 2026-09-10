@@ -926,7 +926,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   cursor:grab;touch-action:none;flex:0 0 auto}
 .poignee::before{content:'';width:38px;height:4px;border-radius:3px;background:var(--bord);opacity:.5}
 .poignee:active{cursor:grabbing}
-.modal-box{will-change:transform}
+.modal-box{will-change:transform;overscroll-behavior:contain}
 .modal{transition:background .2s ease}
 @media (prefers-reduced-motion:reduce){.modal-box{transition:none!important}}
 
@@ -1022,6 +1022,10 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 #mauvaisePorte[hidden]{display:none}
 /* Tout est masque sauf l'ecran lui-meme : enumerer les elements laissait
    toujours passer quelque chose — un tour guide, un bandeau. */
+/* Pendant la verification du role, l'application n'est pas montee du tout :
+   la masquer par visibility laissait passer des elements qui la redefinissent. */
+body.verif-role>*{display:none!important}
+body.verif-role>#splash,body.verif-role>#porte{display:flex!important}
 body.barre-route>*{display:none!important}
 body.barre-route>#mauvaisePorte{display:flex!important}
 .mp-scene{max-width:340px;width:100%;text-align:center}
@@ -1360,7 +1364,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
       </div>
     </details>
 
-    <div class="card urgence">
+    <div class="card urgence" id="carteUrgence">
       <div class="tete"><svg><use href="#i-alerte"/></svg>Fiche d'urgence</div>
       <div class="corps" id="ficheUrgence"></div>
     </div>
@@ -1504,11 +1508,6 @@ body.barre-route>#mauvaisePorte{display:flex!important}
             <small>Les familles du secteur peuvent te trouver et t'écrire.</small></span>
           <input id="proVisible" type="checkbox">
         </label>
-
-        <div class="deux" style="margin-top:10px">
-          <label class="field"><span>Commune</span><input id="proCommune" placeholder="Nantes"></label>
-          <label class="field"><span>Code postal</span><input id="proCP" inputmode="numeric" maxlength="5" placeholder="44000"></label>
-        </div>
 
         <div id="placesLibres" class="places-libres"></div>
 
@@ -1672,6 +1671,11 @@ body.barre-route>#mauvaisePorte{display:flex!important}
           <label class="field"><span>N° d'agrément</span><input id="proAgrement" placeholder="Facultatif"></label>
           <label class="field"><span>Valable jusqu'au</span><input id="proAgrementJusqu" placeholder="jj/mm/aaaa"></label>
         </div>
+        <div class="deux">
+          <label class="field"><span>Commune</span><input id="proCommune" placeholder="Nantes"></label>
+          <label class="field"><span>Code postal</span><input id="proCP" inputmode="numeric" maxlength="5" placeholder="44000"></label>
+        </div>
+        <p class="hint">La commune n'apparaît que si tu demandes à figurer dans la recherche. Ton adresse précise n'est jamais partagée.</p>
       </div>
     </div>
 
@@ -1732,6 +1736,14 @@ body.barre-route>#mauvaisePorte{display:flex!important}
     </div>
 
     <div class="card">
+      <div class="tete"><svg><use href="#i-poubelle"/></svg>Mes données</div>
+      <div class="corps">
+        <button id="btnSupprCompte" class="btn btn-danger btn-block">Supprimer mon compte</button>
+        <p class="hint">Efface ton profil, ton profil professionnel et tes jetons d'appareil. Tu es retirée des contrats de tes familles, qui pourront inviter quelqu'un d'autre. Définitif.</p>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="tete"><svg><use href="#i-reglages"/></svg>Maintenance</div>
       <div class="corps">
         <div class="ds"><span>Mode développeur</span><b id="etatDev">désactivé</b></div>
@@ -1785,7 +1797,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.8.1</b></div>
+        <div class="ds"><span>Version</span><b>1.9.0</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -3209,9 +3221,17 @@ function frimousseParDefaut(cle) {
 
 /* ---------------- Barre du bas ----------------
    Sept entrées ne tiennent pas. Quatre au choix, le reste derrière le « + ». */
+/* L'ecran de l'enfant porte plusieurs cartes : planning, urgence, adaptation,
+   premieres fois, sujets. Les atteindre demandait de savoir qu'elles y sont.
+   Chacune a donc son entree, qui ouvre l'ecran et descend jusqu'a elle. */
 const ECRANS = [
   { id: 'accueil',  nom: 'Accueil',   ico: 'i-accueil' },
   { id: 'planning', nom: 'Planning',  ico: 'i-cal' },
+  { id: 'premieres', nom: 'Premières fois', ico: 'i-ok',    vers: 'planning', carte: 'cartePremieres' },
+  { id: 'clair',    nom: 'Au clair',  ico: 'i-mail',        vers: 'planning', carte: 'carteSujets' },
+  { id: 'adaptation', nom: 'Adaptation', ico: 'i-cal',      vers: 'planning', carte: 'carteAdaptation' },
+  { id: 'reprise',  nom: 'Reprise',   ico: 'i-notes',       vers: 'planning', carte: 'carteReprise' },
+  { id: 'urgence',  nom: 'Urgence',   ico: 'i-alerte',      vers: 'planning', carte: 'carteUrgence' },
   { id: 'journal',  nom: 'Journal',   ico: 'i-journal' },
   { id: 'messages', nom: 'Messages',  ico: 'i-mail' },
   { id: 'galerie',  nom: 'Photos',    ico: 'i-image' },
@@ -3241,13 +3261,13 @@ function renderBarre() {
     b.innerHTML = `<svg><use href="#${e.ico}"/></svg><span>${esc(e.nom)}</span>` +
       (n ? `<i class="nav-pastille">${n}</i>` : '');
     b.dataset.vue = e.id;
-    b.classList.toggle('active', vue === e.id);
+    b.classList.toggle('active', vue === (e.vers || e.id));
   });
 }
 
 function ouvrirVolet() {
   const ids = barre();
-  $('#voletGrille').innerHTML = ECRANS.map(e => {
+  $('#voletGrille').innerHTML = ECRANS.filter(e => !e.dev || modeDev()).map(e => {
     const n = badgeEcran(e.id);
     return `<button class="module ${ids.includes(e.id) ? 'epingle' : ''}" data-ecran="${e.id}">
       <span class="rond"><svg><use href="#${e.ico}"/></svg></span>${esc(e.nom)}
@@ -3260,12 +3280,28 @@ function ouvrirVolet() {
       if (long === 'fait') { long = null; return; }
       clearTimeout(long); long = null;
       fermerFeuille('#volet');
-      montrer(b.dataset.ecran);
+      allerVers(b.dataset.ecran);
     };
     b.onpointercancel = () => { clearTimeout(long); long = null; };
     b.oncontextmenu = ev => ev.preventDefault();
   });
   $('#volet').hidden = false;
+}
+
+/* Ouvrir l'ecran, puis deplier la carte visee et y descendre. */
+function allerVers(id) {
+  const e = ECRANS.find(x => x.id === id);
+  if (!e) return;
+  montrer(e.vers || e.id);
+  if (!e.carte) return;
+  setTimeout(() => {
+    const c = document.getElementById(e.carte);
+    if (!c) return;
+    if (c.tagName === 'DETAILS') c.open = true;
+    c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    c.classList.add('vient-de-changer');
+    setTimeout(() => c.classList.remove('vient-de-changer'), 400);
+  }, 220);
 }
 
 function epingler(id) {
@@ -3856,10 +3892,6 @@ function placesLibres() {
 function renderVisibilite() {
   const v = $('#proVisible');
   if (v && profilPro) v.checked = !!profilPro.visible_recherche;
-  if (profilPro) {
-    $('#proCommune').value = profilPro.commune || '';
-    $('#proCP').value = profilPro.code_postal || '';
-  }
   const box = $('#placesLibres');
   if (box) {
     const libres = placesLibres();
@@ -3929,15 +3961,19 @@ async function repondreDemandeAccueil(id, oui) {
 
 async function enregistrerVisibilite() {
   if (!profilPro) return;
+  const veut = $('#proVisible').checked;
+  // Sans commune ni code postal, personne ne peut la trouver : on le dit
+  // plutot que de la laisser croire qu'elle est visible.
+  if (veut && !(profilPro.code_postal || '').trim()) {
+    $('#proVisible').checked = false;
+    toast('Renseigne d\u2019abord ta commune et ton code postal dans Mon profil.');
+    return;
+  }
   try {
-    await Supa.ecrire('profils_pro', [{
-      id: Supa.moi().id,
-      visible_recherche: $('#proVisible').checked,
-      commune: $('#proCommune').value.trim() || null,
-      code_postal: $('#proCP').value.trim() || null
-    }], 'resolution=merge-duplicates');
-    profilPro.visible_recherche = $('#proVisible').checked;
-    toast($('#proVisible').checked ? 'Tu apparais dans la recherche' : 'Tu n\u2019apparais plus');
+    await Supa.ecrire('profils_pro', [{ id: Supa.moi().id, visible_recherche: veut }],
+      'resolution=merge-duplicates');
+    profilPro.visible_recherche = veut;
+    toast(veut ? 'Tu apparais dans la recherche' : 'Tu n\u2019apparais plus');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 
@@ -3964,6 +4000,8 @@ function renderProfilPro() {
   $('#proAgrement').value = p.agrement_num || '';
   $('#proAgrementJusqu').value = p.agrement_jusqu ? versFR(p.agrement_jusqu) : '';
   $('#proAnimaux').value = (p.accueil || {}).animaux || '';
+  $('#proCommune').value = p.commune || '';
+  $('#proCP').value = p.code_postal || '';
   $('#proLangues').value = (p.langues || []).join(', ');
 
   // le portrait
@@ -4073,6 +4111,8 @@ async function enregistrerProfilPro() {
     agrement_num: $('#proAgrement').value.trim() || null,
     agrement_jusqu: versISO($('#proAgrementJusqu').value) || null,
     places: isFinite(places) && places >= 1 && places <= 6 ? places : null,
+    commune: $('#proCommune').value.trim() || null,
+    code_postal: $('#proCP').value.trim() || null,
     diplomes: profilPro.diplomes || [],
     formations: profilPro.formations || [],
     langues,
@@ -4827,7 +4867,7 @@ function renderPlanning() {
 // les emplacements sont remplis par renderBarre : on délègue au conteneur
 $('#nav').addEventListener('click', e => {
   const b = e.target.closest('[data-slot]');
-  if (b && b.dataset.vue) montrer(b.dataset.vue);
+  if (b && b.dataset.vue) allerVers(b.dataset.vue);
 });
 $('#btnParams').onclick = () => montrer('params');
 $('#porteConnexion').onclick = () => passerPorte(false);
@@ -4874,8 +4914,6 @@ $('#fichierJustif').onchange = e => {
 };
 $('#btnFrimousse').onclick = ouvrirFrimousses;
 $('#proVisible').onchange = enregistrerVisibilite;
-$('#proCommune').onchange = enregistrerVisibilite;
-$('#proCP').onchange = enregistrerVisibilite;
 $('#btnAjoutDiplome').onclick = () => ouvrirChoixQualif('diplomes');
 $('#btnAjoutFormation').onclick = () => ouvrirChoixQualif('formations');
 $('#qualifFermer').onclick = () => { fermerFeuille('#choixQualif'); };
@@ -4901,6 +4939,7 @@ $('#mpRetour').onclick = async () => {
   document.body.classList.remove('barre-route');
   await ouvrirPorte();
 };
+$('#btnSupprCompte').onclick = supprimerMonCompte;
 $('#btnDev').onclick = demanderCodeDev;
 $('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
 $('#nouvFermer').onclick = () => { fermerFeuille('#feuilleNouveau'); };
@@ -5259,12 +5298,15 @@ function enClair(e) {
    qui n'a rien a faire ici. */
 async function verifierRole(attendu, autre) {
   if (!Supa.connecte()) return true;
+  // On masque d'abord, on verifie ensuite : sinon l'application s'affiche une
+  // seconde — assez pour que le tour guide demarre.
+  document.body.classList.add('verif-role');
   let role = null;
   try {
     const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=role');
     role = r && r.length ? r[0].role : null;
-  } catch (e) { return true; }        // hors ligne : on ne bloque pas
-  if (!role || role === attendu) return true;
+  } catch (e) { document.body.classList.remove('verif-role'); return true; }
+  if (!role || role === attendu) { document.body.classList.remove('verif-role'); return true; }
 
   const suisNounou = role === 'salariee';
   document.getElementById('mpTitre').textContent =
@@ -5277,6 +5319,7 @@ async function verifierRole(attendu, autre) {
     'Vous avez été déconnecté ici, rien n\u2019a été modifié.';
   // on masque vraiment l'application derriere : la recouvrir ne suffit pas,
   // le contenu resterait accessible au defilement et aux lecteurs d'ecran
+  document.body.classList.remove('verif-role');
   document.body.classList.add('barre-route');
   document.getElementById('mauvaisePorte').hidden = false;
   secouer('.mp-scene');
@@ -5538,28 +5581,36 @@ function rendreGlissable(modale) {
   poignee.className = 'poignee';
   boite.insertBefore(poignee, boite.firstChild);
 
-  let y0 = null, dy = 0, t0 = 0, depuisPoignee = false;
+  let y0 = null, dy = 0, t0 = 0, tire = false;
 
   const debut = e => {
     const t = e.touches ? e.touches[0] : e;
     // depuis la poignee, ou depuis le haut quand rien n'est defile
-    depuisPoignee = e.target.closest('.poignee') || boite.scrollTop <= 0;
-    if (!depuisPoignee) return;
+    tire = !!e.target.closest('.poignee') || boite.scrollTop <= 0;
+    if (!tire) return;
     y0 = t.clientY; dy = 0; t0 = Date.now();
+    // L'animation d'ouverture porte « both » : sa transformation finale
+    // ecrase toute transformation en ligne. Il faut la retirer, sinon le
+    // doigt n'a aucun effet.
+    boite.style.animation = 'none';
     boite.style.transition = 'none';
   };
+
   const bouge = e => {
     if (y0 === null) return;
     const t = e.touches ? e.touches[0] : e;
     dy = t.clientY - y0;
     if (dy < 0) dy = dy / 4;                    // vers le haut : ca resiste
+    // on empeche le defilement tant qu'on tire vers le bas
+    if (dy > 4 && e.cancelable) e.preventDefault();
     boite.style.transform = `translateY(${dy}px)`;
-    modale.style.background = `rgba(20,14,16,${Math.max(0, .55 - dy / 900)})`;
+    modale.style.background = `rgba(20,14,16,${Math.max(0, .5 - dy / 900)})`;
   };
+
   const fin = () => {
     if (y0 === null) return;
-    // Un lancer bref ferme aussi — mais il faut avoir parcouru une distance
-    // reelle : sans ce minimum, une pichenette de trente pixels suffisait.
+    // Un lancer bref ferme aussi — mais il faut une distance reelle : sans ce
+    // minimum, une pichenette de trente pixels suffisait.
     const vitesse = dy / Math.max(16, Date.now() - t0);
     const seuil = boite.offsetHeight * 0.25;
     y0 = null;
@@ -5569,16 +5620,18 @@ function rendreGlissable(modale) {
       modale.style.background = 'rgba(20,14,16,0)';
       setTimeout(() => {
         modale.hidden = true;
-        boite.style.transform = ''; boite.style.transition = ''; modale.style.background = '';
-      }, 240);
+        boite.style.transform = ''; boite.style.transition = '';
+        boite.style.animation = ''; modale.style.background = '';
+      }, 250);
     } else {
       boite.style.transform = '';
       modale.style.background = '';
+      setTimeout(() => { boite.style.transition = ''; boite.style.animation = ''; }, 280);
     }
   };
 
   boite.addEventListener('touchstart', debut, { passive: true });
-  boite.addEventListener('touchmove', bouge, { passive: true });
+  boite.addEventListener('touchmove', bouge, { passive: false });
   boite.addEventListener('touchend', fin, { passive: true });
   boite.addEventListener('touchcancel', fin, { passive: true });
   // a la souris aussi, pour l'essai sur ordinateur
@@ -5948,14 +6001,16 @@ function fermerFeuille(sel) {
   if (!boite || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
     modale.hidden = true; return;
   }
+  // meme raison qu'au glissement : l'animation d'ouverture doit ceder la place
+  boite.style.animation = 'none';
   boite.style.transition = 'transform .24s cubic-bezier(.4,0,.6,1)';
   boite.style.transform = 'translateY(110%)';
   modale.style.background = 'rgba(20,14,16,0)';
   setTimeout(() => {
     modale.hidden = true;
     boite.style.transition = ''; boite.style.transform = '';
-    modale.style.background = '';
-  }, 230);
+    boite.style.animation = ''; modale.style.background = '';
+  }, 240);
 }
 
 
@@ -6020,6 +6075,30 @@ function confirmer(question, options) {
     document.getElementById('cfmNon').onclick = () => fermer(false);
     modale.hidden = false;
   });
+}
+
+
+/* ---------------- Supprimer son compte ----------------
+   Le RGPD donne un droit d'effacement, et notre politique le promet. Il faut
+   donc qu'il existe, et qu'il soit clair sur ce qu'il emporte. */
+async function supprimerMonCompte() {
+  if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord'); return; }
+  if (!await confirmer('Supprimer définitivement ton compte ?',
+    { detail: 'Tes contrats en ligne, le journal, les messages, les photos et les fiches d\u2019urgence seront effacés, pour toi comme pour l\u2019autre partie. Cette action est irréversible.',
+      danger: true, oui: 'Continuer' })) return;
+
+  const mot = await demander('Écris SUPPRIMER pour confirmer',
+    { majuscules: true, max: 12, aide: 'Cette précaution évite les gestes involontaires.', valider: 'Supprimer mon compte' });
+  if ((mot || '').trim().toUpperCase() !== 'SUPPRIMER') { toast('Suppression annulée'); return; }
+
+  try {
+    const r = await Supa.fonction('supprimer_mon_compte', {});
+    const d = Array.isArray(r) ? r[0] : r;
+    await Supa.deconnecter();
+    toast((d && d.contrats_supprimes ? d.contrats_supprimes + ' contrat(s) supprimé(s). ' : '') +
+      'Compte effacé.');
+    setTimeout(() => location.reload(), 1800);
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 
 async function activerPush() {
