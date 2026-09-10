@@ -2280,3 +2280,128 @@ A regler dans le tableau de bord Supabase, pas en SQL.
 cote base ne peut pas toucher a `auth.users` : il faut l'API admin, donc un
 service tiers. Les donnees sont effacees, l'adresse e-mail reste. C'est une
 limite a lever avant toute mise en production reelle.
+
+## 1.9.1 — suppression differee et compression
+
+`022-suppression-differee.sql` est a executer.
+
+### Quinze jours pour changer d'avis
+
+Effacer tout de suite est brutal : quelqu'un qui supprime un soir de fatigue,
+ou qui oublie de telecharger son archive, n'a aucun recours.
+
+La demande programme l'effacement a quinze jours. Pendant ce delai, un
+avertissement compte les jours restants et un bouton permet de revenir en
+arriere. Le bouton de suppression disparait tant que la demande est en cours.
+
+**Rien n'est visible pendant ce delai.** Le compte est retire des contrats des
+la demande, la salariee cesse d'apparaitre dans la recherche, les jetons
+d'appareil partent. Le delai sert a se retracter, pas a continuer d'utiliser
+l'application.
+
+Trois barrieres avant la demande : confirmer, confirmer qu'on a telecharge son
+archive, puis ecrire SUPPRIMER.
+
+Une tache quotidienne a 3 h 30 purge ce qui a depasse le delai. Elle exige
+`pg_cron` : Database → Extensions. Le fichier previent si l'extension manque.
+
+### Les photos pesent moitie moins
+
+L'appareil produisait du 1600 pixels a qualite 82, soit 340 kilooctets par
+photo. Passe a 1280 pixels qualite 75 : 170 kilooctets, sans difference visible
+sur un ecran de telephone ni a l'impression du carnet.
+
+Sur trois ans, une nounou avec trois enfants a deux photos par jour :
+**0,37 Go au lieu de 0,75**. La difference decide si l'offre gratuite suffit.
+
+### Les courriels
+
+`EMAILS.md` : ce qu'il faut pour envoyer depuis son propre domaine — service
+d'envoi, SPF, DKIM, DMARC, adresses a creer, modeles a reecrire. Et les deux
+courriels qui manquent encore a la suppression differee.
+
+## 1.9.2 — le partage du profil, la ou on le cherche
+
+Aucune nounou n'apparaissait dans la recherche, et pour une raison
+d'organisation, pas de code : l'interrupteur « apparaitre dans la recherche »
+etait dans **Mes familles**, alors que la commune et le code postal etaient
+dans **Mon profil**. Elle remplissait son profil, ne voyait rien qui parle de
+recherche, et personne ne la trouvait.
+
+Tout est desormais au meme endroit, dans Mon profil, juste sous la commune :
+une carte **Partager mon profil** avec l'interrupteur et le compte de places
+libres.
+
+### Ce que les familles voient, dit avant de cocher
+
+Sous l'interrupteur, la liste de ce qui sera visible, ligne par ligne, avec une
+coche ou un tiret selon que c'est renseigne :
+
+- Ton nom et ta photo
+- Ta commune — ou « non renseignee »
+- Tes places libres, calculees seules
+- Ta presentation
+- Tes diplomes et formations, comptes
+- Ton cadre d'accueil
+
+Et quand il manque quelque chose d'indispensable, la phrase le dit : « Il
+manque le code postal pour que les familles puissent te trouver. » Personne ne
+devrait avoir a deviner ce qu'il partage, ni pourquoi ca ne marche pas.
+
+Verifie de bout en bout : profil incomplet, l'avertissement s'affiche ; commune
+et code postal renseignes, il disparait ; interrupteur coche ; le parent la
+trouve avec ses deux places libres.
+
+## 1.9.3 — la demande d'accueil, de bout en bout
+
+Tes trois observations etaient justes. La fonction `notifier` est a
+redeployer : elle apprend a notifier sans contrat.
+
+### La demande echouait en silence
+
+`cur.enfant.naissance` est stocke en `jj/mm/aaaa` ; la colonne attend une date.
+Postgres refusait la ligne entiere, et le message anglais n'expliquait rien.
+La date est convertie avant l'envoi. Verifie sur le corps reellement transmis :
+`enfant_naissance: "2025-03-15"`, `debut_souhaite: "2027-01-05"`.
+
+### On ne pouvait pas ouvrir le profil depuis un resultat
+
+Une famille qui cherche n'est pas encore reliee : elle ne peut pas lire
+`profils_pro`, et c'est voulu. Mais la recherche lui a deja tout renvoye — on
+affiche ce qu'on a, sans redemander.
+
+Chaque resultat porte desormais **Voir le profil** a cote d'**Envoyer une
+demande**. La fiche montre l'anciennete, la commune, les places libres, la
+presentation, les diplomes et le cadre d'accueil. Le meme affichage sert aux
+deux entrees : par la recherche, ou depuis Mes nounous une fois reliee.
+
+### Aucune notification ne partait
+
+Une demande d'accueil precede le contrat : la fonction `notifier` verifiait
+l'appartenance a un contrat qui n'existe pas encore, donc elle ne pouvait rien
+envoyer.
+
+Elle accepte maintenant un `demande_id`. Elle lit la demande **avec les droits
+de l'appelant** — ses regles d'acces disent deja qui a le droit de la voir — et
+envoie a l'autre partie. Aucune verification supplementaire n'etait necessaire,
+et aucune n'a ete affaiblie.
+
+Trois notifications ajoutees : la salariee est prevenue d'une demande, la
+famille de son acceptation ou de son refus, avec le motif.
+
+## 1.9.4 — le fond battait pendant le geste
+
+`.modal` porte `transition: background .2s ease`, et le geste modifie le fond a
+chaque mouvement du doigt. Chaque modification relancait la transition
+precedente avant qu'elle finisse : le fond se mettait a battre au lieu de
+suivre.
+
+Pendant le geste, la transition est coupee — le fond suit le doigt exactement —
+puis retablie au relachement, pour que la fermeture reste douce. Verifie en
+relevant l'opacite a chaque pas : 0,486 · 0,475 · 0,46 · 0,447 · 0,435 · 0,42,
+sans transition, et 0,2 s de nouveau apres.
+
+**Une seconde source, corrigee aussi** : l'onde du toucher s'etalait sous le
+doigt pendant qu'on tirait la feuille, ce qui ajoutait un scintillement
+par-dessus le mouvement. Elle est desormais reservee au simple appui, jamais a
+l'interieur d'une feuille qu'on deplace.

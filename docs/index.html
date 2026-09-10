@@ -1396,6 +1396,10 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 .poignee:active{cursor:grabbing}
 .modal-box{will-change:transform;overscroll-behavior:contain}
 .modal{transition:background .2s ease}
+/* Pendant le geste, le fond suit le doigt : aucune transition, sinon chaque
+   mouvement relance la precedente et le fond bat. */
+.modal.en-glissement{transition:none!important}
+.modal.en-glissement .modal-box{will-change:transform}
 @media (prefers-reduced-motion:reduce){.modal-box{transition:none!important}}
 
 
@@ -2251,8 +2255,9 @@ body.barre-route>#mauvaisePorte{display:flex!important}
     <div class="body">
       <p class="hint" style="margin-top:0">Tes fiches de salaire, tes montants et ton IBAN ne sont que sur ce téléphone : ils disparaissent avec l'application.</p>
       <button id="btnArchiveDonnees" class="btn btn-ghost btn-block">Télécharger mes données</button>
+      <div id="etatSuppression"></div>
       <button id="btnSupprCompte" class="btn btn-danger btn-block">Supprimer mon compte</button>
-      <p class="hint">La suppression efface le profil et les contrats en ligne dont tu es l'employeur. Elle est définitive.</p>
+      <p class="hint">Quinze jours de délai avant l'effacement, pour changer d'avis. Passé ce délai, plus rien n'est récupérable.</p>
     </div>
   </details>
 
@@ -2386,7 +2391,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.9.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.9.4</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -4168,7 +4173,7 @@ function showView(v) {
   if (v === 'accueil') renderAccueil();
   if (v === 'apercu') { renderPreview(); fitPreview(); }
   if (v === 'dossier') renderDossier();
-  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); renderModulesNatifs(); appliquerDev(); }
+  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); renderModulesNatifs(); appliquerDev(); chargerEtatSuppression(); }
   prevenirMigration();
   if (v === 'annuel') renderAnnuel().then(renderRegularisation);
   renderTitle();
@@ -5793,7 +5798,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.9.0';
+const VERSION = '1.9.4';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -6319,13 +6324,19 @@ function renderResultats() {
       ${annees !== null ? `<small class="maj">${annees} an${annees > 1 ? 's' : ''} d\u2019expérience</small>` : ''}
       ${n.presentation ? `<p class="trouvee-mot">${esc(n.presentation.slice(0, 180))}${n.presentation.length > 180 ? '…' : ''}</p>` : ''}
       ${badges ? `<div class="trouvee-badges">${badges}</div>` : ''}
-      <button class="btn ${dejaDemande ? 'btn-ghost' : 'btn-primary'} btn-block" data-demander="${esc(n.id)}" ${dejaDemande ? 'disabled' : ''}>
-        ${dejaDemande ? 'Demande envoyée' : 'Envoyer une demande'}</button>
+      <div class="deux" style="margin-top:10px">
+        <button class="btn btn-ghost" data-voir="${esc(n.id)}">Voir le profil</button>
+        <button class="btn ${dejaDemande ? 'btn-ghost' : 'btn-primary'}" data-demander="${esc(n.id)}" ${dejaDemande ? 'disabled' : ''}>
+          ${dejaDemande ? 'Demande envoyée' : 'Envoyer une demande'}</button>
+      </div>
     </div>`;
   }).join('');
 
   $$('#resultatsRecherche [data-demander]').forEach(b => {
     b.onclick = () => envoyerDemandeAccueil(b.dataset.demander);
+  });
+  $$('#resultatsRecherche [data-voir]').forEach(b => {
+    b.onclick = () => ouvrirFicheTrouvee(b.dataset.voir);
   });
 }
 
@@ -6342,14 +6353,34 @@ async function envoyerDemandeAccueil(salarieeId) {
   try {
     await Supa.ecrire('demandes_accueil', [{
       parent_id: Supa.moi().id, salariee_id: salarieeId,
-      enfant_prenom: prenom, enfant_naissance: cur.enfant.naissance || null,
+      // cur.enfant.naissance est en jj/mm/aaaa : la colonne attend une date,
+      // et Postgres refusait la ligne entiere sans que rien ne l'explique.
+      enfant_prenom: prenom, enfant_naissance: versISO(cur.enfant.naissance || '') || null,
       debut_souhaite: versISO(debut) || null,
       rythme: null, mot: mot.trim() || null
     }], 'resolution=merge-duplicates');
     await chargerDemandesAccueil();
+    const envoyee = demandesAccueil.find(d => d.salariee_id === salarieeId && d.etat === 'attente');
+    if (envoyee) prevenirDemande(envoyee.id, 'Une famille vous écrit',
+      prenom + (debut ? ', pour ' + debut : ''));
     renderResultats(); renderDemandesAccueil();
     toast('Demande envoyée — elle décide');
   } catch (e2) { toast('Impossible : ' + enClair(e2)); }
+}
+
+/* Une demande d'accueil n'a pas encore de contrat : la fonction de
+   notification ne peut donc pas verifier l'appartenance comme d'habitude. Elle
+   part sur l'identifiant de la demande, dont les regles d'acces disent deja
+   qui a le droit de la lire. */
+async function prevenirDemande(id, titre, corps) {
+  if (!Supa.connecte()) return;
+  try {
+    await fetch(Supa.adresse() + '/functions/v1/notifier', {
+      method: 'POST',
+      headers: { ...Supa.entetes(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ demande_id: id, titre, corps, cible: 'recherche' })
+    });
+  } catch (e) {}
 }
 
 async function chargerDemandesAccueil() {
@@ -6402,6 +6433,16 @@ const CADRES = {
   sorties: ['🚶', 'Sorties régulières'], bio: ['🥕', 'Repas maison']
 };
 
+/* Une famille qui cherche n'est pas encore reliee : elle ne peut pas lire
+   profils_pro directement, et c'est voulu. La recherche a deja tout renvoye —
+   on affiche ce qu'on a, sans redemander. */
+function ouvrirFicheTrouvee(id) {
+  const n = resultatsRecherche.find(x => x.id === id);
+  if (!n) return;
+  afficherFiche(n, n.nom, null);
+  $('#ficheNounou').hidden = false;
+}
+
 async function ouvrirFicheNounou(salarieeId, nom) {
   const box = $('#proFiche');
   box.innerHTML = miroiter(4);
@@ -6413,7 +6454,14 @@ async function ouvrirFicheNounou(salarieeId, nom) {
     p = r && r[0];
     if (p && p.photo) portrait = await telechargerPhoto(p.photo);
   } catch (e) {}
+  afficherFiche(p, nom, portrait);
+}
 
+/* Le meme affichage, que la fiche vienne de la base ou d'un resultat de
+   recherche : une famille non reliee ne peut pas lire profils_pro, et c'est
+   voulu — mais la recherche lui a deja tout renvoye. */
+function afficherFiche(p, nom, portrait) {
+  const box = $('#proFiche');
   if (!p) {
     box.innerHTML = `<h3>${esc(nom || 'La salariée')}</h3>
       <p class="hint" style="margin:0">Elle n\u2019a pas encore rempli son profil professionnel.
@@ -6428,14 +6476,14 @@ async function ouvrirFicheNounou(salarieeId, nom) {
     .map(([, [emoji, t]]) => `<span class="cadre-vu">${emoji} ${esc(t)}</span>`).join('');
 
   const groupe = (titre, liste) => !liste || !liste.length ? '' :
-    `<div class="rub">${titre}</div>` + liste.map(q => {
+    `<div class="rub">${esc(titre)}</div>` + liste.map(q => {
       const info = QUALIFS[q.type] || QUALIFS.autre;
       const perime = q.jusqu && q.jusqu < new Date().toISOString().slice(0, 10);
       return `<div class="qualif">
         <span class="qualif-badge">${badgeQualif(q.type, 38)}</span>
         <span class="qualif-txt"><b>${esc(q.intitule || info.nom)}</b>
           <small>${q.annee ? esc(String(q.annee)) : ''}${q.organisme ? ' · ' + esc(q.organisme) : ''}</small>
-          ${q.jusqu && !perime ? `<small class="ok">à jour</small>` : ''}
+          ${q.jusqu && !perime ? '<small class="ok">à jour</small>' : ''}
         </span></div>`;
     }).join('');
 
@@ -6449,6 +6497,8 @@ async function ouvrirFicheNounou(salarieeId, nom) {
         <b>${esc(nom || 'Votre assistante maternelle')}</b>
         ${annees !== null ? `<small>${annees} an${annees > 1 ? 's' : ''} d\u2019expérience</small>` : ''}
         ${p.places ? `<small>Agréée pour ${p.places} place${p.places > 1 ? 's' : ''}</small>` : ''}
+        ${p.commune ? `<small>${esc(p.commune)}</small>` : ''}
+        ${typeof p.libres === 'number' ? `<small class="ok">${p.libres} place${p.libres > 1 ? 's' : ''} libre${p.libres > 1 ? 's' : ''}</small>` : ''}
       </div>
     </div>
     ${p.presentation ? `<p class="pro-mot">${esc(p.presentation)}</p>` : ''}
@@ -9101,6 +9151,9 @@ function compterVers(el, texteFinal) {
 document.addEventListener('pointerdown', e => {
   const cible = e.target.closest('.btn, .tuile-m, .module, .famille, .conv, .besoin-b, .nav-item');
   if (!cible || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  // Une onde qui s'etale pendant qu'on tire la feuille ajoute un scintillement
+  // par-dessus le mouvement : on la laisse au simple appui.
+  if (cible.closest('.modal-box')) return;
   const r = cible.getBoundingClientRect();
   const taille = Math.max(r.width, r.height);
   const o = document.createElement('span');
@@ -9272,6 +9325,11 @@ function rendreGlissable(modale) {
     // doigt n'a aucun effet.
     boite.style.animation = 'none';
     boite.style.transition = 'none';
+    // Le fond a une transition de deux cents millisecondes. Le modifier a
+    // chaque mouvement relance la precedente avant qu'elle finisse : le fond
+    // se met a battre. Pendant le geste, il suit le doigt sans transition.
+    modale.style.transition = 'none';
+    modale.classList.add('en-glissement');
   };
 
   const bouge = e => {
@@ -9292,6 +9350,8 @@ function rendreGlissable(modale) {
     const vitesse = dy / Math.max(16, Date.now() - t0);
     const seuil = boite.offsetHeight * 0.25;
     y0 = null;
+    modale.classList.remove('en-glissement');
+    modale.style.transition = '';
     boite.style.transition = 'transform .26s cubic-bezier(.2,.8,.3,1)';
     if (dy > seuil || (dy > 90 && vitesse > 0.55)) {
       boite.style.transform = 'translateY(110%)';
@@ -9756,25 +9816,70 @@ function confirmer(question, options) {
 
 
 /* ---------------- Supprimer son compte ----------------
-   Le RGPD donne un droit d'effacement, et notre politique le promet. Il faut
-   donc qu'il existe, et qu'il soit clair sur ce qu'il emporte. */
+   Effacer tout de suite est brutal : quelqu'un qui supprime un soir de
+   fatigue, ou qui oublie de telecharger son archive, n'a aucun recours.
+   Quinze jours de delai coutent peu et evitent l'irreparable.
+
+   Rien n'est visible pendant ce delai — le compte est retire de la vue de
+   l'autre partie des la demande. Le delai sert a se retracter, pas a
+   continuer d'utiliser l'application. */
+let suppressionPrevue = null;
+
+async function chargerEtatSuppression() {
+  suppressionPrevue = null;
+  if (!Supa.connecte()) return;
+  try {
+    const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=suppression_prevue_le');
+    suppressionPrevue = r && r[0] && r[0].suppression_prevue_le;
+  } catch (e) {}
+  renderEtatSuppression();
+}
+
+function renderEtatSuppression() {
+  const box = document.getElementById('etatSuppression');
+  const bouton = document.getElementById('btnSupprCompte');
+  if (!box) return;
+  if (!suppressionPrevue) { box.innerHTML = ''; if (bouton) bouton.hidden = false; return; }
+  if (bouton) bouton.hidden = true;
+  const jours = Math.max(0, Math.ceil((new Date(suppressionPrevue) - Date.now()) / 86400000));
+  box.innerHTML = `<div class="avertissement">
+      Ton compte sera effacé dans ${jours} jour${jours > 1 ? 's' : ''}, le
+      ${esc(new Date(suppressionPrevue).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }))}.
+      Tu peux encore revenir en arrière.</div>
+    <button id="btnAnnulerSuppr" class="btn btn-primary btn-block">Annuler la suppression</button>`;
+  document.getElementById('btnAnnulerSuppr').onclick = annulerSuppression;
+}
+
 async function supprimerMonCompte() {
   if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord'); return; }
-  if (!await confirmer('Supprimer définitivement ton compte ?',
-    { detail: 'Tes contrats en ligne, le journal, les messages, les photos et les fiches d\u2019urgence seront effacés, pour toi comme pour l\u2019autre partie. Cette action est irréversible.',
+  if (!await confirmer('Supprimer ton compte ?',
+    { detail: 'Tes contrats en ligne, le journal, les messages, les photos et les fiches d\u2019urgence seront effacés, pour toi comme pour l\u2019autre partie. Tu auras quinze jours pour changer d\u2019avis.',
       danger: true, oui: 'Continuer' })) return;
 
+  if (!await confirmer('As-tu téléchargé tes données ?',
+    { detail: 'L\u2019archive contient tes fiches, le journal et les photos. Après quinze jours, plus rien n\u2019est récupérable.',
+      oui: 'Oui, continuer', non: 'Pas encore' })) return;
+
   const mot = await demander('Écris SUPPRIMER pour confirmer',
-    { majuscules: true, max: 12, aide: 'Cette précaution évite les gestes involontaires.', valider: 'Supprimer mon compte' });
+    { majuscules: true, max: 12, aide: 'Cette précaution évite les gestes involontaires.',
+      valider: 'Demander la suppression' });
   if ((mot || '').trim().toUpperCase() !== 'SUPPRIMER') { toast('Suppression annulée'); return; }
 
   try {
-    const r = await Supa.fonction('supprimer_mon_compte', {});
+    const r = await Supa.fonction('demander_suppression', {});
     const d = Array.isArray(r) ? r[0] : r;
-    await Supa.deconnecter();
-    toast((d && d.contrats_supprimes ? d.contrats_supprimes + ' contrat(s) supprimé(s). ' : '') +
-      'Compte effacé.');
-    setTimeout(() => location.reload(), 1800);
+    suppressionPrevue = d && d.prevue_le;
+    renderEtatSuppression();
+    toast('Suppression programmée. Tu as quinze jours pour revenir en arrière.');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+async function annulerSuppression() {
+  try {
+    await Supa.fonction('annuler_suppression', {});
+    suppressionPrevue = null;
+    renderEtatSuppression();
+    toast('Ton compte est conservé.');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 

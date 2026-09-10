@@ -928,6 +928,10 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 .poignee:active{cursor:grabbing}
 .modal-box{will-change:transform;overscroll-behavior:contain}
 .modal{transition:background .2s ease}
+/* Pendant le geste, le fond suit le doigt : aucune transition, sinon chaque
+   mouvement relance la precedente et le fond bat. */
+.modal.en-glissement{transition:none!important}
+.modal.en-glissement .modal-box{will-change:transform}
 @media (prefers-reduced-motion:reduce){.modal-box{transition:none!important}}
 
 
@@ -1044,6 +1048,15 @@ body.barre-route>#mauvaisePorte{display:flex!important}
 .mp-fleche{animation:mp-file 1.8s .8s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){
   .mp-gauche,.mp-droite,.mp-fleche{animation:none}}
+
+
+.apercu-partage{margin-top:4px}
+.ap-l{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:13.5px;line-height:1.35}
+.ap-l span{width:20px;height:20px;border-radius:10px;flex:0 0 auto;display:flex;
+  align-items:center;justify-content:center;font:700 12px system-ui}
+.ap-l.oui span{background:var(--acc-doux);color:var(--acc)}
+.ap-l.non span{background:var(--zebre);color:var(--mut)}
+.ap-l.non{color:var(--mut)}
 
 </style>
 </head>
@@ -1502,15 +1515,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
       <summary class="tete-repli"><svg><use href="#i-gens"/></svg><span>Nouvelles familles</span><b class="compteur" id="cptDemAcc"></b></summary>
       <div class="corps">
         <div class="avertissement">Fonction en préparation. Elle n'a de sens que lorsque assez de familles utilisent Cocon.</div>
-
-        <label class="bascule">
-          <span><b>Apparaître dans la recherche</b>
-            <small>Les familles du secteur peuvent te trouver et t'écrire.</small></span>
-          <input id="proVisible" type="checkbox">
-        </label>
-
-        <div id="placesLibres" class="places-libres"></div>
-
+        <p class="hint">L'interrupteur pour apparaître dans la recherche est dans <b>Mon profil</b>, avec le reste de tes informations.</p>
         <div class="rub">Demandes reçues</div>
         <div id="listeDemAccueil"></div>
       </div>
@@ -1675,7 +1680,24 @@ body.barre-route>#mauvaisePorte{display:flex!important}
           <label class="field"><span>Commune</span><input id="proCommune" placeholder="Nantes"></label>
           <label class="field"><span>Code postal</span><input id="proCP" inputmode="numeric" maxlength="5" placeholder="44000"></label>
         </div>
-        <p class="hint">La commune n'apparaît que si tu demandes à figurer dans la recherche. Ton adresse précise n'est jamais partagée.</p>
+        <p class="hint">Ton adresse précise n'est jamais partagée : seule la commune apparaît, et seulement si tu le demandes ci-dessous.</p>
+      </div>
+    </div>
+
+    <div class="card" id="cartePartage" data-dev hidden>
+      <div class="tete"><svg><use href="#i-gens"/></svg>Partager mon profil</div>
+      <div class="corps">
+        <label class="bascule">
+          <span><b>Apparaître dans la recherche</b>
+            <small>Les familles de ton secteur peuvent te trouver et t'écrire. Tu décides ensuite qui tu acceptes.</small></span>
+          <input id="proVisible" type="checkbox">
+        </label>
+
+        <div id="placesLibres" class="places-libres"></div>
+
+        <div class="rub">Ce que les familles voient</div>
+        <div id="apercuPartage" class="apercu-partage"></div>
+        <p class="hint">Ni salaire, ni numéro de sécurité sociale, ni adresse. Tu peux te retirer à tout moment : personne ne te retrouve plus.</p>
       </div>
     </div>
 
@@ -1738,8 +1760,9 @@ body.barre-route>#mauvaisePorte{display:flex!important}
     <div class="card">
       <div class="tete"><svg><use href="#i-poubelle"/></svg>Mes données</div>
       <div class="corps">
+        <div id="etatSuppression"></div>
         <button id="btnSupprCompte" class="btn btn-danger btn-block">Supprimer mon compte</button>
-        <p class="hint">Efface ton profil, ton profil professionnel et tes jetons d'appareil. Tu es retirée des contrats de tes familles, qui pourront inviter quelqu'un d'autre. Définitif.</p>
+        <p class="hint">Quinze jours de délai avant l'effacement, pour changer d'avis. Tu es retirée des contrats de tes familles dès la demande.</p>
       </div>
     </div>
 
@@ -1797,7 +1820,7 @@ body.barre-route>#mauvaisePorte{display:flex!important}
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.9.0</b></div>
+        <div class="ds"><span>Version</span><b>1.9.4</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -2199,8 +2222,8 @@ function montrer(v) {
   }
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
   if (v === 'galerie') chargerGalerie().then(() => chercherOrphelines().then(renderOrphelines));
-  if (v === 'profil') chargerProfilPro().then(renderProfilPro);
-  if (v === 'params') { majCompte(); majEtatPush(); renderModulesNatifs(); appliquerDev(); }
+  if (v === 'profil') chargerProfilPro().then(() => { renderProfilPro(); renderVisibilite(); });
+  if (v === 'params') { majCompte(); majEtatPush(); renderModulesNatifs(); appliquerDev(); chargerEtatSuppression(); }
   prevenirMigration();
 }
 
@@ -3892,6 +3915,7 @@ function placesLibres() {
 function renderVisibilite() {
   const v = $('#proVisible');
   if (v && profilPro) v.checked = !!profilPro.visible_recherche;
+  renderApercuPartage();
   const box = $('#placesLibres');
   if (box) {
     const libres = placesLibres();
@@ -3902,6 +3926,31 @@ function renderVisibilite() {
          <small>${places} agréée${places > 1 ? 's' : ''}, ${places - libres} occupée${places - libres > 1 ? 's' : ''}</small></span></div>
          <p class="hint" style="margin:8px 0 0">Ce chiffre se met à jour seul quand un contrat commence ou se termine. Rien à saisir.</p>`;
   }
+}
+
+/* Ce que la famille verra, dit avant de cocher : personne ne devrait avoir a
+   deviner ce qu'il partage. */
+function renderApercuPartage() {
+  const box = $('#apercuPartage');
+  if (!box || !profilPro) return;
+  const p = profilPro;
+  const manque = [];
+  if (!(p.code_postal || '').trim()) manque.push('le code postal');
+  if (!p.places) manque.push('les places d\u2019agrément');
+
+  const ligne = (ok, quoi) =>
+    `<div class="ap-l ${ok ? 'oui' : 'non'}"><span>${ok ? '✓' : '—'}</span>${esc(quoi)}</div>`;
+
+  box.innerHTML =
+    ligne(true, 'Ton nom et ta photo') +
+    ligne(!!(p.commune || '').trim(), 'Ta commune' + (p.commune ? ' : ' + p.commune : ' — non renseignée')) +
+    ligne(!!p.places, 'Tes places libres, calculées seules') +
+    ligne(!!(p.presentation || '').trim(), 'Ta présentation') +
+    ligne((p.diplomes || []).length > 0, (p.diplomes || []).length + ' diplôme(s) et ' + (p.formations || []).length + ' formation(s)') +
+    ligne(Object.values(p.accueil || {}).some(x => x === true), 'Ton cadre d\u2019accueil') +
+    (manque.length
+      ? `<div class="avertissement" style="margin-top:10px">Il manque ${esc(manque.join(' et '))} pour que les familles puissent te trouver.</div>`
+      : '');
 }
 
 async function chargerDemandesAccueil() {
@@ -3948,12 +3997,29 @@ function ilYA(iso) {
   return 'il y a ' + Math.floor(j / 30) + ' mois';
 }
 
+/* Une demande d'accueil precede le contrat : la notification part sur
+   l'identifiant de la demande, dont les regles disent deja qui peut la lire. */
+async function prevenirDemande(id, titre, corps) {
+  if (!Supa.connecte()) return;
+  try {
+    await fetch(Supa.adresse() + '/functions/v1/notifier', {
+      method: 'POST',
+      headers: { ...Supa.entetes(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ demande_id: id, titre, corps, cible: 'familles' })
+    });
+  } catch (e) {}
+}
+
 async function repondreDemandeAccueil(id, oui) {
   const motif = oui ? null : await demander('Un mot pour expliquer ?',
     { type: 'texte-long', aide: 'Facultatif, mais toujours mieux qu\u2019un refus sec.', valider: 'Refuser' });
   try {
     await Supa.modifier('demandes_accueil',
       { etat: oui ? 'acceptee' : 'refusee', motif_refus: motif }, 'id=eq.' + id);
+    prevenirDemande(id,
+      oui ? 'Votre demande est acceptée' : 'Votre demande n\u2019a pas abouti',
+      oui ? 'Publiez votre contrat et envoyez-lui le code d\u2019invitation.'
+          : (motif || 'Elle n\u2019a pas de place pour le moment.'));
     await chargerDemandesAccueil(); renderDemandesAccueil();
     toast(oui ? 'Acceptée — la famille va publier son contrat' : 'Refusée');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
@@ -4121,6 +4187,7 @@ async function enregistrerProfilPro() {
   try {
     await Supa.ecrire('profils_pro', [corps], 'resolution=merge-duplicates');
     await chargerProfilPro();
+    renderApercuPartage();
     toast('Profil enregistré — tes familles le voient');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
@@ -5212,9 +5279,13 @@ async function prendreUnePhoto() {
   const C = window.Capacitor && window.Capacitor.Plugins;
   if (!C || !C.Camera) return null;
   try {
+    // 1280 px suffit largement pour un ecran de telephone et pour une
+    // impression de carnet. Le poids passe de 340 a 170 kilooctets : sur trois
+    // ans de garde, c'est la moitie du stockage economisee sans que personne
+    // ne voie la difference.
     const p = await C.Camera.getPhoto({
-      quality: 82, allowEditing: false, resultType: 'base64',
-      source: 'CAMERA', saveToGallery: false, width: 1600
+      quality: 75, allowEditing: false, resultType: 'base64',
+      source: 'CAMERA', saveToGallery: false, width: 1280
     });
     if (!p || !p.base64String) return null;
     const bin = atob(p.base64String);
@@ -5431,6 +5502,9 @@ function compterVers(el, texteFinal) {
 document.addEventListener('pointerdown', e => {
   const cible = e.target.closest('.btn, .tuile-m, .module, .famille, .conv, .besoin-b, .nav-item');
   if (!cible || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  // Une onde qui s'etale pendant qu'on tire la feuille ajoute un scintillement
+  // par-dessus le mouvement : on la laisse au simple appui.
+  if (cible.closest('.modal-box')) return;
   const r = cible.getBoundingClientRect();
   const taille = Math.max(r.width, r.height);
   const o = document.createElement('span');
@@ -5594,6 +5668,11 @@ function rendreGlissable(modale) {
     // doigt n'a aucun effet.
     boite.style.animation = 'none';
     boite.style.transition = 'none';
+    // Le fond a une transition de deux cents millisecondes. Le modifier a
+    // chaque mouvement relance la precedente avant qu'elle finisse : le fond
+    // se met a battre. Pendant le geste, il suit le doigt sans transition.
+    modale.style.transition = 'none';
+    modale.classList.add('en-glissement');
   };
 
   const bouge = e => {
@@ -5614,6 +5693,8 @@ function rendreGlissable(modale) {
     const vitesse = dy / Math.max(16, Date.now() - t0);
     const seuil = boite.offsetHeight * 0.25;
     y0 = null;
+    modale.classList.remove('en-glissement');
+    modale.style.transition = '';
     boite.style.transition = 'transform .26s cubic-bezier(.2,.8,.3,1)';
     if (dy > seuil || (dy > 90 && vitesse > 0.55)) {
       boite.style.transform = 'translateY(110%)';
@@ -6079,25 +6160,70 @@ function confirmer(question, options) {
 
 
 /* ---------------- Supprimer son compte ----------------
-   Le RGPD donne un droit d'effacement, et notre politique le promet. Il faut
-   donc qu'il existe, et qu'il soit clair sur ce qu'il emporte. */
+   Effacer tout de suite est brutal : quelqu'un qui supprime un soir de
+   fatigue, ou qui oublie de telecharger son archive, n'a aucun recours.
+   Quinze jours de delai coutent peu et evitent l'irreparable.
+
+   Rien n'est visible pendant ce delai — le compte est retire de la vue de
+   l'autre partie des la demande. Le delai sert a se retracter, pas a
+   continuer d'utiliser l'application. */
+let suppressionPrevue = null;
+
+async function chargerEtatSuppression() {
+  suppressionPrevue = null;
+  if (!Supa.connecte()) return;
+  try {
+    const r = await Supa.lire('profils', 'id=eq.' + Supa.moi().id + '&select=suppression_prevue_le');
+    suppressionPrevue = r && r[0] && r[0].suppression_prevue_le;
+  } catch (e) {}
+  renderEtatSuppression();
+}
+
+function renderEtatSuppression() {
+  const box = document.getElementById('etatSuppression');
+  const bouton = document.getElementById('btnSupprCompte');
+  if (!box) return;
+  if (!suppressionPrevue) { box.innerHTML = ''; if (bouton) bouton.hidden = false; return; }
+  if (bouton) bouton.hidden = true;
+  const jours = Math.max(0, Math.ceil((new Date(suppressionPrevue) - Date.now()) / 86400000));
+  box.innerHTML = `<div class="avertissement">
+      Ton compte sera effacé dans ${jours} jour${jours > 1 ? 's' : ''}, le
+      ${esc(new Date(suppressionPrevue).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }))}.
+      Tu peux encore revenir en arrière.</div>
+    <button id="btnAnnulerSuppr" class="btn btn-primary btn-block">Annuler la suppression</button>`;
+  document.getElementById('btnAnnulerSuppr').onclick = annulerSuppression;
+}
+
 async function supprimerMonCompte() {
   if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord'); return; }
-  if (!await confirmer('Supprimer définitivement ton compte ?',
-    { detail: 'Tes contrats en ligne, le journal, les messages, les photos et les fiches d\u2019urgence seront effacés, pour toi comme pour l\u2019autre partie. Cette action est irréversible.',
+  if (!await confirmer('Supprimer ton compte ?',
+    { detail: 'Tes contrats en ligne, le journal, les messages, les photos et les fiches d\u2019urgence seront effacés, pour toi comme pour l\u2019autre partie. Tu auras quinze jours pour changer d\u2019avis.',
       danger: true, oui: 'Continuer' })) return;
 
+  if (!await confirmer('As-tu téléchargé tes données ?',
+    { detail: 'L\u2019archive contient tes fiches, le journal et les photos. Après quinze jours, plus rien n\u2019est récupérable.',
+      oui: 'Oui, continuer', non: 'Pas encore' })) return;
+
   const mot = await demander('Écris SUPPRIMER pour confirmer',
-    { majuscules: true, max: 12, aide: 'Cette précaution évite les gestes involontaires.', valider: 'Supprimer mon compte' });
+    { majuscules: true, max: 12, aide: 'Cette précaution évite les gestes involontaires.',
+      valider: 'Demander la suppression' });
   if ((mot || '').trim().toUpperCase() !== 'SUPPRIMER') { toast('Suppression annulée'); return; }
 
   try {
-    const r = await Supa.fonction('supprimer_mon_compte', {});
+    const r = await Supa.fonction('demander_suppression', {});
     const d = Array.isArray(r) ? r[0] : r;
-    await Supa.deconnecter();
-    toast((d && d.contrats_supprimes ? d.contrats_supprimes + ' contrat(s) supprimé(s). ' : '') +
-      'Compte effacé.');
-    setTimeout(() => location.reload(), 1800);
+    suppressionPrevue = d && d.prevue_le;
+    renderEtatSuppression();
+    toast('Suppression programmée. Tu as quinze jours pour revenir en arrière.');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+async function annulerSuppression() {
+  try {
+    await Supa.fonction('annuler_suppression', {});
+    suppressionPrevue = null;
+    renderEtatSuppression();
+    toast('Ton compte est conservé.');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 

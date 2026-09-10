@@ -102,9 +102,9 @@ Deno.serve(async (req) => {
         { status: 401, headers: { ...entetesCORS, 'Content-Type': 'application/json' } });
     }
 
-    const { contrat_id, titre, corps, urgent, test, cible } = await req.json();
+    const { contrat_id, titre, corps, urgent, test, cible, demande_id } = await req.json();
     if (!titre) throw new Error('titre requis');
-    if (!contrat_id && !test) throw new Error('contrat_id requis');
+    if (!contrat_id && !test && !demande_id) throw new Error('contrat_id ou demande_id requis');
     console.log(`demande | contrat=${contrat_id ?? '(test)'} titre="${titre}" urgent=${!!urgent} test=${!!test}`);
     if (!COMPTE.client_email) console.error('FCM_COMPTE_SERVICE absent ou illisible');
 
@@ -129,12 +129,28 @@ Deno.serve(async (req) => {
       console.log('mode test : destinataire = appelant');
     }
 
-    const { data: contrat } = test ? { data: null } : await commeUtilisateur
+    // Une demande d'accueil precede le contrat : il n'y a rien dont verifier
+    // l'appartenance. On lit la demande avec les droits de l'appelant — ses
+    // regles d'acces disent deja qui a le droit de la voir — et on envoie a
+    // l'autre partie.
+    if (demande_id && !test) {
+      const { data: dem } = await commeUtilisateur
+        .from('demandes_accueil')
+        .select('parent_id, salariee_id')
+        .eq('id', demande_id)
+        .maybeSingle();
+      if (!dem) throw new Error('Demande inaccessible');
+      const moi = utilisateur.user.id;
+      destinataire = dem.parent_id === moi ? dem.salariee_id : dem.parent_id;
+      console.log(`demande d'accueil ${demande_id} : ${moi} -> ${destinataire}`);
+    }
+
+    const { data: contrat } = (test || demande_id) ? { data: null } : await commeUtilisateur
       .from('contrats')
       .select('id, employeur_id, coparent_id, salariee_id')
       .eq('id', contrat_id)
       .maybeSingle();
-    if (!test) {
+    if (!test && !demande_id) {
       if (!contrat) throw new Error('Contrat inaccessible');
       console.log(`appelant=${utilisateur.user.id} employeur=${contrat.employeur_id} coparent=${contrat.coparent_id} salariee=${contrat.salariee_id}`);
 
@@ -157,7 +173,7 @@ Deno.serve(async (req) => {
     });
 
     // Mode silencieux du destinataire. L'urgent passe toujours, le test aussi.
-    if (!urgent && !test) {
+    if (!urgent && !test && !demande_id) {
       const { data: pref } = await commeService
         .from('profils')
         .select('silence_weekend, silence_du, silence_au')
