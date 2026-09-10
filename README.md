@@ -1875,3 +1875,201 @@ pixels pour que le lancer compte. Verifie a trois distances : 30 px et 80 px la
 laissent ouverte, 250 px la ferment.
 
 Les feuilles ajoutees plus tard deviennent glissables automatiquement.
+
+## 1.5.0 — preparation Google Play
+
+### Le format attendu
+
+Google Play n'accepte pas un APK : il veut un **AAB**. Le workflow produit
+desormais les deux — l'APK pour l'installation directe, l'AAB pour la
+publication. Les deux sont dans les artefacts et dans la version publiee.
+
+### Le numero de version
+
+Play refuse un depot dont le numero n'a pas augmente. Il est calcule a partir
+de la version du projet et du numero de compilation : 1.4.4 compilation 12
+donne 1040412, la suivante 1040413. Verifie sur cinq combinaisons — jamais deux
+fois le meme, toujours croissant.
+
+### La politique de confidentialite
+
+`docs/confidentialite.html`, publiee par GitHub Pages, en version verte et
+rose. Elle dit ce que Cocon fait vraiment : ce qui reste sur le telephone —
+salaires, IBAN, numero de securite sociale — ce qui transite pour etre partage,
+ou c'est heberge, combien de temps, et comment exercer ses droits.
+
+Elle est ecrite pour etre lue, pas pour couvrir juridiquement : chaque section
+dit d'abord la chose, ensuite la regle.
+
+### La liste des etapes
+
+`CHECKLIST-PLAY.md` : compte developpeur, deux fiches, images, formulaire de
+securite des donnees rempli ligne par ligne avec les reponses vraies pour
+Cocon, classification du contenu, et les cinq motifs de refus les plus
+frequents.
+
+### Les images de la fiche
+
+Bandeaux 1024 x 500 et icones 512 x 512 pour les deux applications, generes aux
+couleurs de chacune.
+
+## 1.5.1 — le profil professionnel
+
+`017-profil-pro.sql` est a executer.
+
+Une famille choisit son assistante maternelle sur un annuaire, echange deux
+messages, puis n'en sait plus rien. Ses diplomes, ses formations, sa facon de
+faire : rien n'est visible nulle part. Elle a pourtant tout cela.
+
+### Ce qu'elle remplit
+
+**Mon profil**, dans le volet des ecrans. Une photo, quelques mots sur sa facon
+d'accueillir, la date de debut — l'anciennete se calcule seule —, les places
+d'agrement et son numero.
+
+**Onze qualifications**, chacune avec son dessin : CAP AEPE, auxiliaire de
+puericulture, EJE, bac pro ASSP, formation initiale obligatoire, premiers
+secours, hygiene alimentaire, Montessori, langue des signes bebe, formation
+continue, autre. Un badge se reconnait d'un coup d'oeil la ou une ligne de
+texte se lit.
+
+Les premiers secours et l'hygiene se renouvellent : la date de fin est demandee,
+et « a renouveler » s'affiche en orange une fois passee.
+
+**Le cadre d'accueil** en huit cases a cocher — jardin, espace de jeu dehors,
+non-fumeur, de plain-pied, ascenseur, poussette acceptee, sorties regulieres,
+repas maison — plus les animaux et les langues parlees.
+
+### Ce que la famille voit
+
+Mes nounous → **Voir le profil de la nounou**. Photo, anciennete calculee,
+presentation, diplomes et formations avec leurs badges, langues, cadre
+d'accueil. Une formation encore valable porte « a jour ».
+
+### Ce qui n'y figure jamais
+
+Ni salaire, ni taux horaire, ni numero de securite sociale, ni adresse precise.
+Le profil rassure une famille ; il n'a pas a la renseigner sur le reste.
+
+Une famille qui a quitte le contrat ne voit plus le profil : la regle d'acces
+verifie un contrat actif, pas un historique.
+
+## 1.6.0 — la recherche, en preparation
+
+`018-recherche.sql` est a executer.
+
+### Le mode developpeur
+
+Reglages -> Maintenance -> code `COCON-2026`, dans les deux applications.
+
+Certaines fonctions sont ecrites mais pas mures. Plutot que de les livrer a
+moitie ou de les garder hors du code, elles restent la, eteintes. Le mode se
+retient d'un lancement a l'autre et se coupe par le meme bouton.
+
+### Ce que la recherche apporte
+
+Les annuaires existants — `monenfant.fr` compris — affichent des disponibilites
+**saisies a la main**, donc fausses : une assistante maternelle doit s'y
+connecter pour les mettre a jour, et personne ne le fait. Des parents appellent
+des numeros qui n'ont plus de place depuis deux ans.
+
+Ici la disponibilite **se calcule** : places d'agrement moins contrats actifs.
+Elle n'a rien a tenir a jour. Et la date de derniere evolution est affichee —
+« disponibilite a jour il y a 3 jours » — pour qu'on sache ce qu'on lit.
+
+### Cote nounou : presque rien a faire
+
+Mes familles -> **Nouvelles familles**. Un interrupteur pour apparaitre, une
+commune, un code postal. Le compte de places libres s'affiche et se met a jour
+seul. C'est tout.
+
+Elle voit les demandes recues, les accepte ou les refuse avec un mot. Un
+declencheur limite chacun a son role : elle repond sans pouvoir reecrire la
+demande, le parent retire la sienne sans pouvoir la marquer acceptee.
+
+### Cote parent : chercher et demander
+
+Le contrat -> **Chercher une nounou**, ou dans le volet sous « En preparation ».
+Code postal, places voulues. Chaque resultat montre les places libres, la
+fraicheur de l'information, l'anciennete, un extrait de presentation et les
+badges des qualifications.
+
+Une demande porte le prenom de l'enfant, la date souhaitee et un mot. Une fois
+acceptee, le parent publie son contrat et envoie le code : le circuit existant
+reprend la main.
+
+### Ce qui protege
+
+- **Rien n'est visible par defaut.** `visible_recherche` est faux : la salariee
+  demande a apparaitre, personne ne l'y met.
+- **Aucune lecture directe de la table.** La recherche passe par une fonction
+  qui ne renvoie que les profils volontaires, quarante au maximum, et tronque
+  la presentation. Sans cela, un parent curieux lirait tous les profils du pays.
+- **Un parent ne peut ecrire** qu'a une salariee qui s'est rendue visible.
+
+## 1.7.0 — la relation
+
+`019-relation.sql` est a executer.
+
+### Les premieres fois, et le tact qu'elles demandent
+
+Un premier pas chez la nounou est le sujet le plus delicat du metier. Beaucoup
+d'assistantes maternelles se taisent pour laisser aux parents la joie de la
+decouverte ; d'autres racontent tout de suite. Aucune des deux facons n'a
+raison, alors l'application ne tranche pas : **elle demande a chaque fois**.
+
+- **« Je raconte »** — les parents lisent tout de suite.
+- **« Je previens sans dire quoi »** — ils voient « Quelque chose de beau »,
+  une etoile qui respire, et un bouton « Je veux savoir ». La notification
+  elle-meme ne trahit rien : son titre dit « quelque chose de beau », pas
+  « premiers pas ».
+
+Le parent qui devoile est prevenu qu'il peut aussi attendre de le voir
+lui-meme. Et il peut repondre **« Je l'ai vu a la maison aussi »** — ce qui
+apaise la question de savoir qui l'a vu en premier, en disant qu'ils l'ont vu
+tous les deux.
+
+Douze premieres fois dessinees : sourire, dent, assis, quatre pattes, debout,
+premiers pas, premier mot, cuillere, le pot, un copain, premier dessin, autre.
+
+### Le fil entre les deux maisons
+
+Le journal porte desormais **ce qu'on a fait** — douze activites en pastilles —
+**les comptines chantees** et **les livres lus**. Une comptine reprise le soir
+a la maison, c'est un fil qui relie les deux endroits. Personne ne le
+transmettait.
+
+### Le mot du soir
+
+Le journal n'allait que dans un sens : elle raconte, ils lisent. Deux facons de
+refermer la boucle :
+
+- **Un coeur**, qui bat quand on le touche. Un geste bref, sans obligation
+  d'ecrire — le soir, on n'a pas toujours le temps.
+- **Un mot**, qu'elle lit en ouvrant le journal le lendemain matin.
+
+Un declencheur garantit que chacun n'ecrit que sa part : le parent repond sans
+pouvoir modifier la journee, elle raconte sans pouvoir reecrire leur reponse.
+
+### Des etoiles, pas des confettis
+
+Devoiler une premiere fois fait monter quatorze petites etoiles. Plus discretes
+que les confettis du mois plie : le moment est intime, pas festif.
+
+## 1.7.1 — une colonne que j'avais supposee
+
+`018-recherche.sql` refusait de s'executer : `column "maj_le" does not exist`.
+
+`dispo_maj_le` datait la disponibilite en prenant la plus recente des dates de
+modification des contrats. Or la table `contrats` ne porte que `cree_le` : je
+l'ai ecrit sans verifier le schema.
+
+La fonction ne prend plus que `cree_le` des contrats et `maj_le` du profil. Le
+sens reste : la disponibilite a bouge quand un contrat a ete cree ou quand la
+salariee a change ses places.
+
+**Ce que ce controle a manque.** Mon verificateur compare les appels des
+applications au schema, mais pas le SQL a lui-meme. J'ai ajoute cette
+verification : chaque colonne citee dans les declencheurs et les fonctions est
+desormais confrontee au schema complet. Les trois autres fichiers sont propres,
+et les quatre declencheurs ne citent aucune colonne inexistante.

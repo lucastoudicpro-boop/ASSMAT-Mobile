@@ -659,6 +659,48 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
   align-items:center;justify-content:center;background:var(--acc-doux)}
 .msg .rond svg{width:17px;height:17px;fill:none;stroke:var(--acc);stroke-width:1.8;
   stroke-linecap:round;stroke-linejoin:round}
+/* ---------- Les premières fois ---------- */
+.premiere{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.premiere:last-of-type{border-bottom:0}
+.premiere.cachee{background:linear-gradient(120deg,var(--acc-doux),transparent);
+  border-radius:14px;padding:12px;margin-bottom:6px;border-bottom:0}
+.premiere-rond{width:52px;height:52px;border-radius:18px;flex:0 0 auto;background:var(--zebre);
+  display:flex;align-items:center;justify-content:center}
+.premiere.cachee .premiere-rond{background:transparent;animation:souffle-etoile 2.8s ease-in-out infinite}
+@keyframes souffle-etoile{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+.premiere-txt{flex:1;min-width:0;line-height:1.4}
+.premiere-txt b{display:block;font-size:14.5px}
+.premiere-txt small{display:block;font-size:12.5px;color:var(--mut)}
+.premiere-txt .dit{color:var(--txt);margin-top:3px}
+.premiere-txt .ok{color:var(--acc)}
+
+/* ---------- Le mot du soir ---------- */
+.jour-b .date{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.coeur{border:0;background:transparent;cursor:pointer;padding:4px;flex:0 0 auto;line-height:0}
+.coeur svg{width:20px;height:20px;fill:none;stroke:var(--bord);stroke-width:1.8;
+  transition:fill .2s ease,stroke .2s ease,transform .2s ease}
+.coeur.on svg{fill:#e0687a;stroke:#e0687a}
+@keyframes bat{0%,100%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(.94)}}
+.coeur.bat svg{animation:bat .42s cubic-bezier(.3,1.4,.5,1)}
+.puces .act{background:var(--acc-doux);color:var(--acc)}
+.fils{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.fil{background:var(--zebre);border-radius:11px;padding:5px 10px;font:500 12.5px system-ui}
+.reponse{background:var(--acc-doux);border-radius:13px;padding:10px 12px;margin-top:9px;
+  font-size:13.5px;line-height:1.45;white-space:pre-wrap}
+.reponse small{display:block;font-size:11px;color:var(--mut);margin-top:4px}
+
+/* ---------- Petites étoiles ---------- */
+.etoiles{position:fixed;inset:0;pointer-events:none;z-index:200}
+.etoiles i{position:absolute;width:14px;height:14px;
+  background:radial-gradient(circle,#f5d76e 0 32%,transparent 33%);
+  animation:monte-etoile 1.9s cubic-bezier(.2,.7,.3,1) forwards}
+.etoiles i::after{content:'';position:absolute;inset:0;
+  background:conic-gradient(from 0deg,transparent 0 20%,#f5d76e 25%,transparent 30% 45%,#f5d76e 50%,transparent 55% 70%,#f5d76e 75%,transparent 80%)}
+@keyframes monte-etoile{
+  0%{opacity:0;transform:translate(0,0) scale(.3) rotate(0)}
+  25%{opacity:1}
+  100%{opacity:0;transform:translate(var(--d),-90px) scale(1.1) rotate(180deg)}
+}
 .jour-sep{display:flex;align-items:center;gap:10px;margin:14px 0 10px;
   font:600 11.5px system-ui;color:var(--mut);text-transform:capitalize}
 .jour-sep::before,.jour-sep::after{content:'';flex:1;height:1px;background:var(--line)}
@@ -811,6 +853,37 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
 .tuile-m.large>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .tuile-m.large>div b{line-height:1.3}
 .tuile-m.large>div small{line-height:1.35}
+/* ---------- Fiche de la salariée ---------- */
+/* ---------- Résultats de recherche ---------- */
+.trouvee{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:14px;margin-bottom:10px;box-shadow:0 1px 2px var(--ombre)}
+.trouvee-haut{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.trouvee-haut b{font-size:15.5px}
+.trouvee .dispo{background:var(--acc-doux);color:var(--acc);border-radius:10px;
+  padding:4px 9px;font:700 12px system-ui;flex:0 0 auto}
+.trouvee .maj{display:block;font-size:12px;color:var(--mut);margin-top:2px}
+.trouvee-mot{font-size:13.5px;line-height:1.45;margin:9px 0 0;color:var(--txt)}
+.trouvee-badges{display:flex;gap:6px;margin:10px 0 4px}
+.trouvee .btn{margin-top:10px}
+.pro-tete{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.pro-portrait{width:78px;height:78px;border-radius:39px;flex:0 0 auto;overflow:hidden;
+  background:var(--zebre);display:flex;align-items:center;justify-content:center}
+.pro-portrait svg,.pro-portrait img{width:100%;height:100%;object-fit:cover}
+.pro-qui{flex:1;min-width:0;line-height:1.4}
+.pro-qui b{display:block;font-size:17px}
+.pro-qui small{display:block;font-size:12.5px;color:var(--mut)}
+.pro-mot{background:var(--acc-doux);border-radius:14px;padding:12px 14px;
+  font-size:14px;line-height:1.5;margin:0 0 6px;white-space:pre-wrap}
+.qualif{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.qualif:last-of-type{border-bottom:0}
+.qualif-badge{width:44px;height:44px;border-radius:14px;flex:0 0 auto;background:var(--zebre);
+  display:flex;align-items:center;justify-content:center}
+.qualif-txt{flex:1;min-width:0;line-height:1.35}
+.qualif-txt b{display:block;font-size:14px}
+.qualif-txt small{display:block;font-size:12px;color:var(--mut)}
+.qualif-txt .ok{color:var(--acc)}
+.cadres-vus{display:flex;flex-wrap:wrap;gap:6px}
+.cadre-vu{background:var(--zebre);border-radius:11px;padding:6px 10px;font:500 12.5px system-ui}
 .lien-justif{border:0;background:transparent;color:var(--acc);font:600 12.5px system-ui;
   cursor:pointer;padding:4px 0;text-align:left}
 .etape-adapt{padding:11px 0;border-bottom:1px solid var(--line)}
@@ -1429,6 +1502,13 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   </div>
 </div>
 
+<div id="ficheNounou" class="modal" hidden>
+  <div class="modal-box">
+    <div id="proFiche"></div>
+    <div class="modal-actions"><button id="proFermer" class="btn btn-ghost">Fermer</button></div>
+  </div>
+</div>
+
 <div id="verrou" hidden>
   <svg class="cadenas" viewBox="0 0 24 24" aria-hidden="true">
     <rect x="4.5" y="10.5" width="15" height="10" rx="2.4"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>
@@ -1764,6 +1844,29 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 
 <div id="reserve" hidden>
   <details class="card">
+    <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">Les premières fois</span><b class="tot" id="badgePremieres"></b></summary>
+    <div class="body"><div id="listePremieres"></div></div>
+  </details>
+
+  <details class="card" data-dev hidden>
+    <summary><svg class="ico"><use href="#i-gens"/></svg><span class="ttl">Chercher une nounou</span><b class="tot">essai</b></summary>
+    <div class="body">
+      <div class="avertissement">Fonction en préparation. Elle ne montre que les assistantes maternelles qui utilisent Cocon et ont demandé à y figurer.</div>
+      <div class="deux">
+        <label class="field"><span>Code postal</span><input id="rechCP" inputmode="numeric" placeholder="44000" maxlength="5"></label>
+        <label class="field"><span>Places voulues</span><input id="rechPlaces" inputmode="numeric" placeholder="1" maxlength="1"></label>
+      </div>
+      <button id="btnRecherche" class="btn btn-primary btn-block">Chercher</button>
+      <div id="resultatsRecherche"></div>
+    </div>
+  </details>
+
+  <details class="card" data-dev hidden>
+    <summary><svg class="ico"><use href="#i-mail"/></svg><span class="ttl">Mes demandes d'accueil</span><b class="tot" id="badgeDemAcc"></b></summary>
+    <div class="body"><div id="listeDemAccueil"></div></div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-cal"/></svg><span class="ttl">Adaptation</span><b class="tot" id="badgeAdapt"></b></summary>
     <div class="body">
       <div id="listeAdaptation"></div>
@@ -1960,6 +2063,15 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     </div>
   </details>
   <details class="card">
+    <summary><svg class="ico"><use href="#i-reglages"/></svg><span class="ttl">Maintenance</span></summary>
+    <div class="body">
+      <div class="ds"><span>Mode développeur</span><b id="etatDev">désactivé</b></div>
+      <button id="btnDev" class="btn btn-ghost btn-block">Saisir le code de maintenance</button>
+      <p class="hint">Ce mode révèle des fonctions en préparation, incomplètes et susceptibles de changer. Il ne sert à rien au quotidien.</p>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-cloche"/></svg><span class="ttl">Notifications</span></summary>
     <div class="body">
       <div id="etatPush"></div>
@@ -2080,7 +2192,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.4.4</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.7.1</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3861,7 +3973,7 @@ function showView(v) {
   if (v === 'accueil') renderAccueil();
   if (v === 'apercu') { renderPreview(); fitPreview(); }
   if (v === 'dossier') renderDossier();
-  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); renderModulesNatifs(); }
+  if (v === 'parametres') { majSecurite(); majSauvegarde(); renderBanniere(); majCompte(); chargerSilence(); majEtatPush(); renderModulesNatifs(); appliquerDev(); }
   prevenirMigration();
   if (v === 'annuel') renderAnnuel().then(renderRegularisation);
   renderTitle();
@@ -5092,6 +5204,8 @@ const PAGES = {
   documents:  { titre: 'Documents',         ancres: ['btnAttEmploi', 'finResultat'] },
   commun:     { titre: 'Espace commun',     ancres: ['communEtat'] },
   adaptation: { titre: 'Adaptation',        ancres: ['listeAdaptation'] },
+  premieres:  { titre: 'Premières fois',    ancres: ['listePremieres'] },
+  recherche:  { titre: 'Chercher',          ancres: ['resultatsRecherche'] },
   reprise:    { titre: 'Reprise',           ancres: ['listeReprises'] },
   archive:    { titre: 'Archive',           ancres: ['archiveEtat'] },
   fermetures: { titre: 'Fermetures',        ancres: ['listeFermetures'] }
@@ -5101,7 +5215,7 @@ let moduleActif = null;
 /* Deux familles de modules, chacune une page à onglets. Un parent retient
    « le quotidien » et « le contrat », pas onze entrées. */
 const GROUPES = {
-  quotidien: { titre: 'Au quotidien', onglets: ['journal', 'galerie', 'messages', 'demandes', 'semaine', 'commun'] },
+  quotidien: { titre: 'Au quotidien', onglets: ['journal', 'galerie', 'premieres', 'messages', 'demandes', 'semaine', 'commun'] },
   contrat:   { titre: 'Le contrat',   onglets: ['nounous', 'urgence', 'adaptation', 'reprise', 'fermetures', 'conges', 'documents', 'archive'] }
 };
 const groupeDe = id => Object.keys(GROUPES).find(g => GROUPES[g].onglets.includes(id)) || null;
@@ -5181,6 +5295,8 @@ async function rafraichirModule(id) {
     documents:  async () => {},
     commun:     async () => { await chargerCommun(); renderCommun(); },
     adaptation: async () => { await chargerAdaptation(); renderAdaptation(); },
+    premieres:  async () => { await chargerPremieres(); renderPremieres(); },
+    recherche:  async () => { await chargerDemandesAccueil(); renderDemandesAccueil(); },
     reprise:    async () => { await chargerReprises(); renderReprises(); },
     archive:    async () => { renderArchive(); }
   };
@@ -5201,6 +5317,8 @@ const MODULES = [
   { id: 'semaine',   nom: 'Ma semaine',   ico: 'i-cal',      fn: () => ouvrirModule('semaine') },
   { id: 'commun',    nom: 'Espace commun', ico: 'i-gens',    fn: () => ouvrirModule('commun') },
   { id: 'adaptation',nom: 'Adaptation',   ico: 'i-cal',      fn: () => ouvrirModule('adaptation') },
+  { id: 'premieres', nom: 'Premières fois', ico: 'i-ok',      fn: () => ouvrirModule('premieres') },
+  { id: 'recherche', nom: 'Chercher',     ico: 'i-gens',     fn: () => ouvrirModule('recherche'), dev: true },
   { id: 'reprise',   nom: 'Reprise',      ico: 'i-notes',    fn: () => ouvrirModule('reprise') },
   { id: 'archive',   nom: 'Archive',      ico: 'i-sauve',    fn: () => ouvrirModule('archive') },
   { id: 'nounous',   nom: 'Mes nounous',  ico: 'i-gens',     fn: () => ouvrirModule('nounous') },
@@ -5261,14 +5379,19 @@ function ouvrirVolet() {
       <span class="rond"><svg><use href="#${m.ico}"/></svg></span>${esc(m.nom)}
       ${n ? `<i class="pastille">${n}</i>` : ''}</button>`;
   };
-  const section = (titre, liste) => liste.length
-    ? `<div class="volet-titre">${esc(titre)}</div><div class="volet-grille">${liste.map(carte).join('')}</div>` : '';
+  // les fonctions en preparation n'apparaissent qu'en mode developpeur
+  const section = (titre, liste) => {
+    const l = liste.filter(m => m && (!m.dev || modeDev()));
+    return l.length
+      ? `<div class="volet-titre">${esc(titre)}</div><div class="volet-grille">${l.map(carte).join('')}</div>` : '';
+  };
   const par = id => MODULES.find(m => m.id === id);
   const groupes = Object.values(GROUPES).flatMap(g => g.onglets);
   $('#voletGrille').innerHTML =
     section('Au quotidien', GROUPES.quotidien.onglets.map(par).concat([par('retard')])) +
     section('Le salaire', ['saisie', 'fiche', 'bilan', 'planning'].map(par)) +
     section('Le contrat', GROUPES.contrat.onglets.map(par).concat([par('dossier')])) +
+    section('En préparation', [par('recherche')]) +
     section('Application', ['accueil', 'reglages'].map(par));
   $$('#voletGrille [data-module]').forEach(b => {
     let long = null;
@@ -5467,7 +5590,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.4.4';
+const VERSION = '1.7.1';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -5667,6 +5790,308 @@ async function verifierContrat() {
    nounou le voit toujours, le parent n'y accède plus. */
 let contratsOrphelins = [];
 
+/* ---------------- Les premières fois, côté famille ----------------
+   Elle a vu le premier pas. Le dire tout de suite, c'est priver les parents de
+   la decouverte ; se taire, c'est leur cacher quelque chose. Elle choisit, et
+   quand elle a choisi de se taire, l'application respecte ce choix jusqu'au
+   moment ou la famille demande a savoir. */
+let premieres = [];
+
+async function chargerPremieres() {
+  premieres = [];
+  const id = contratLie();
+  if (!id || !Supa.connecte()) return;
+  try {
+    premieres = await Supa.lire('premieres_fois',
+      'contrat_id=eq.' + id + '&select=id,type,jour,mot,facon,devoile_le,vu_le,aussi_maison,cree_le&order=jour.desc&limit=40');
+  } catch (e) {}
+}
+
+function renderPremieres() {
+  const b = $('#badgePremieres');
+  const nouvelles = premieres.filter(p => !p.vu_le).length;
+  if (b) b.textContent = nouvelles || '';
+  const box = $('#listePremieres');
+  if (!box) return;
+
+  if (!premieres.length) {
+    box.innerHTML = `<div class="vide-doux craft">${ILLU_PREMIERE}<b>Rien encore</b>
+      <small>Les grands moments seront gardés ici.</small></div>`;
+    return;
+  }
+
+  box.innerHTML = premieres.map(p => {
+    const info = PREMIERES[p.type] || PREMIERES.autre;
+    const cache = p.facon === 'devine' && !p.devoile_le;
+    return `<div class="premiere ${cache ? 'cachee' : ''}">
+      <span class="premiere-rond">${cache
+        ? '<svg viewBox="0 0 64 64" style="color:var(--acc)"><path d="M32 12l7 14 15 2-11 11 3 15-14-8-14 8 3-15-11-11 15-2z" fill="currentColor" opacity=".3"/></svg>'
+        : dessinPremiere(p.type, 40)}</span>
+      <span class="premiere-txt">
+        ${cache
+          ? `<b>Quelque chose de beau</b><small>${esc(fr(p.jour))}</small>
+             <small class="dit">Votre nounou l\u2019a vu et vous laisse la surprise.</small>
+             <button class="lien-justif" data-devoiler="${esc(p.id)}">Je veux savoir</button>`
+          : `<b>${esc(info.nom)}</b><small>${esc(fr(p.jour))}</small>
+             ${p.mot ? `<small class="dit">${esc(p.mot)}</small>` : ''}
+             ${p.aussi_maison
+               ? '<small class="ok">💛 vous l\u2019avez vu à la maison aussi</small>'
+               : `<button class="lien-justif" data-maison="${esc(p.id)}">Je l\u2019ai vu à la maison aussi</button>`}`}
+      </span>
+    </div>`;
+  }).join('');
+
+  $$('#listePremieres [data-devoiler]').forEach(x => {
+    x.onclick = async () => {
+      if (!confirm('Découvrir ce qui s\u2019est passé ?\n\nVotre nounou vous laissait la surprise. Vous pouvez aussi attendre de le voir vous-même.')) return;
+      try {
+        await Supa.modifier('premieres_fois',
+          { devoile_le: new Date().toISOString(), vu_le: new Date().toISOString() }, 'id=eq.' + x.dataset.devoiler);
+        await chargerPremieres(); renderPremieres();
+        petitesEtoiles();
+      } catch (e) { toast(enClair(e)); }
+    };
+  });
+  $$('#listePremieres [data-maison]').forEach(x => {
+    x.onclick = async () => {
+      try {
+        await Supa.modifier('premieres_fois', { aussi_maison: true, vu_le: new Date().toISOString() }, 'id=eq.' + x.dataset.maison);
+        await chargerPremieres(); renderPremieres();
+        petitesEtoiles();
+      } catch (e) { toast(enClair(e)); }
+    };
+  });
+
+  // ce qui est lu ne clignote plus
+  const aVoir = premieres.filter(p => !p.vu_le && !(p.facon === 'devine' && !p.devoile_le));
+  if (aVoir.length) {
+    Supa.modifier('premieres_fois', { vu_le: new Date().toISOString() },
+      'id=in.(' + aVoir.map(p => p.id).join(',') + ')').catch(() => {});
+    aVoir.forEach(p => { p.vu_le = new Date().toISOString(); });
+  }
+}
+
+const fr = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '';
+
+const ILLU_PREMIERE = `<svg viewBox="0 0 96 72" fill="none" aria-hidden="true">
+  <path d="M48 12l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z" fill="var(--acc-doux)" stroke="var(--acc)" stroke-width="1.6" stroke-linejoin="round"/>
+  <circle cx="20" cy="52" r="4" fill="var(--acc-doux)"/><circle cx="76" cy="46" r="3" fill="var(--acc-doux)"/>
+  <path d="M30 60h36" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" opacity=".4"/></svg>`;
+
+/* Quelques etoiles, plus discretes que des confettis : le moment est intime. */
+function petitesEtoiles() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const z = document.createElement('div');
+  z.className = 'etoiles';
+  for (let i = 0; i < 14; i++) {
+    const e = document.createElement('i');
+    e.style.left = (20 + Math.random() * 60) + '%';
+    e.style.top = (25 + Math.random() * 45) + '%';
+    e.style.animationDelay = (Math.random() * .5) + 's';
+    e.style.setProperty('--d', (Math.random() * 60 - 30) + 'px');
+    z.appendChild(e);
+  }
+  document.body.appendChild(z);
+  setTimeout(() => z.remove(), 2200);
+}
+
+/* ---------------- Chercher une assistante maternelle ----------------
+   Les annuaires existants affichent des disponibilites saisies a la main, donc
+   fausses : personne ne les met a jour. Ici elle se calcule — places
+   d'agrement moins contrats actifs — et la date de derniere evolution est
+   affichee, pour qu'on sache ce qu'on lit.
+
+   Fonction en preparation : elle n'a de sens qu'avec assez de monde inscrit. */
+let resultatsRecherche = [], demandesAccueil = [];
+
+async function lancerRecherche() {
+  const cp = $('#rechCP').value.trim();
+  const places = parseInt($('#rechPlaces').value, 10) || 1;
+  const box = $('#resultatsRecherche');
+  if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord'); return; }
+  box.innerHTML = miroiter(3, true);
+  try {
+    resultatsRecherche = await Supa.fonction('rechercher_nounous',
+      { p_code_postal: cp || null, p_places: places });
+  } catch (e) { box.innerHTML = `<p class="hint">Recherche impossible : ${esc(enClair(e))}</p>`; return; }
+  renderResultats();
+}
+
+function ilYA(iso) {
+  const j = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (j <= 0) return "aujourd'hui";
+  if (j === 1) return 'hier';
+  if (j < 7) return 'il y a ' + j + ' jours';
+  if (j < 31) return 'il y a ' + Math.floor(j / 7) + ' semaine' + (j >= 14 ? 's' : '');
+  return 'il y a ' + Math.floor(j / 30) + ' mois';
+}
+
+function renderResultats() {
+  const box = $('#resultatsRecherche');
+  if (!box) return;
+  if (!resultatsRecherche.length) {
+    box.innerHTML = `<div class="vide-doux craft">${ILLU_RECHERCHE}<b>Aucune assistante maternelle</b>
+      <small>Personne n\u2019utilise encore Cocon dans ce secteur.</small></div>`;
+    return;
+  }
+  box.innerHTML = resultatsRecherche.map(n => {
+    const dejaDemande = demandesAccueil.some(d => d.salariee_id === n.id && d.etat === 'attente');
+    const annees = n.depuis ? Math.floor((Date.now() - new Date(n.depuis).getTime()) / 31557600000) : null;
+    const badges = [...(n.diplomes || []), ...(n.formations || [])].slice(0, 4)
+      .map(q => badgeQualif(q.type, 26)).join('');
+    return `<div class="trouvee">
+      <div class="trouvee-haut">
+        <b>${esc(n.nom || 'Assistante maternelle')}</b>
+        <span class="dispo">${n.libres} place${n.libres > 1 ? 's' : ''}</span>
+      </div>
+      <small class="maj">${esc(n.commune || n.code_postal || '')} · disponibilité à jour ${esc(ilYA(n.maj_le))}</small>
+      ${annees !== null ? `<small class="maj">${annees} an${annees > 1 ? 's' : ''} d\u2019expérience</small>` : ''}
+      ${n.presentation ? `<p class="trouvee-mot">${esc(n.presentation.slice(0, 180))}${n.presentation.length > 180 ? '…' : ''}</p>` : ''}
+      ${badges ? `<div class="trouvee-badges">${badges}</div>` : ''}
+      <button class="btn ${dejaDemande ? 'btn-ghost' : 'btn-primary'} btn-block" data-demander="${esc(n.id)}" ${dejaDemande ? 'disabled' : ''}>
+        ${dejaDemande ? 'Demande envoyée' : 'Envoyer une demande'}</button>
+    </div>`;
+  }).join('');
+
+  $$('#resultatsRecherche [data-demander]').forEach(b => {
+    b.onclick = () => envoyerDemandeAccueil(b.dataset.demander);
+  });
+}
+
+const ILLU_RECHERCHE = `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="42" cy="32" r="18" fill="var(--acc-doux)"/><path d="M55 45l14 14"/>
+  <path d="M35 30a7 7 0 0 1 14 0M36 38c3 3 9 3 12 0"/></svg>`;
+
+async function envoyerDemandeAccueil(salarieeId) {
+  const e = enfantCourant() || {};
+  const prenom = e.prenom || cur.enfant.prenom || '';
+  if (!prenom) { toast('Renseigne d\u2019abord le prénom de ton enfant dans le Dossier'); return; }
+  const mot = prompt('Un mot pour vous présenter ?\n\nCe message accompagnera votre demande.') || '';
+  const debut = prompt('Début souhaité ? (jj/mm/aaaa)') || '';
+  try {
+    await Supa.ecrire('demandes_accueil', [{
+      parent_id: Supa.moi().id, salariee_id: salarieeId,
+      enfant_prenom: prenom, enfant_naissance: cur.enfant.naissance || null,
+      debut_souhaite: versISO(debut) || null,
+      rythme: null, mot: mot.trim() || null
+    }], 'resolution=merge-duplicates');
+    await chargerDemandesAccueil();
+    renderResultats(); renderDemandesAccueil();
+    toast('Demande envoyée — elle décide');
+  } catch (e2) { toast('Impossible : ' + enClair(e2)); }
+}
+
+async function chargerDemandesAccueil() {
+  demandesAccueil = [];
+  if (!Supa.connecte()) return;
+  try {
+    demandesAccueil = await Supa.lire('demandes_accueil',
+      'parent_id=eq.' + Supa.moi().id + '&select=id,salariee_id,enfant_prenom,debut_souhaite,etat,motif_refus,cree_le,repondu_le&order=cree_le.desc&limit=20');
+  } catch (e) {}
+}
+
+function renderDemandesAccueil() {
+  const box = $('#listeDemAccueil');
+  const b = $('#badgeDemAcc');
+  const rep = demandesAccueil.filter(d => d.etat === 'acceptee').length;
+  if (b) b.textContent = rep || '';
+  if (!box) return;
+  const ETATS = { attente: ['⏳', 'en attente'], acceptee: ['✓', 'acceptée'],
+                  refusee: ['✕', 'refusée'], retiree: ['—', 'retirée'] };
+  box.innerHTML = demandesAccueil.length ? demandesAccueil.map(d => {
+    const [ico, lib] = ETATS[d.etat] || ETATS.attente;
+    return `<div class="ds" style="flex-direction:column;align-items:stretch;gap:3px">
+      <div style="display:flex;justify-content:space-between;gap:10px">
+        <b>${esc(d.enfant_prenom || '')}</b><span>${ico} ${esc(lib)}</span>
+      </div>
+      <small style="color:var(--mut)">envoyée ${esc(ilYA(d.cree_le))}</small>
+      ${d.motif_refus ? `<small style="color:var(--danger)">${esc(d.motif_refus)}</small>` : ''}
+      ${d.etat === 'acceptee' ? '<small style="color:var(--acc)">Publie ton contrat et envoie-lui le code d\u2019invitation.</small>' : ''}
+      ${d.etat === 'attente' ? `<button class="lien-justif" data-retirer-dem="${esc(d.id)}">Retirer ma demande</button>` : ''}
+    </div>`;
+  }).join('') : '<p class="msg-vide">Aucune demande envoyée.</p>';
+
+  $$('#listeDemAccueil [data-retirer-dem]').forEach(x => {
+    x.onclick = async () => {
+      try {
+        await Supa.modifier('demandes_accueil', { etat: 'retiree' }, 'id=eq.' + x.dataset.retirerDem);
+        await chargerDemandesAccueil(); renderDemandesAccueil(); renderResultats();
+      } catch (e) { toast('Impossible : ' + enClair(e)); }
+    };
+  });
+}
+
+/* ---------------- Le profil de la nounou ----------------
+   Une famille choisit son assistante maternelle sur un annuaire, puis n'en
+   sait plus rien. Ici elle voit ses diplomes, son experience, son cadre. */
+const CADRES = {
+  jardin: ['🌳', 'Jardin'], exterieur: ['🛝', 'Espace de jeu dehors'],
+  non_fumeur: ['🚭', 'Non-fumeur'], plain_pied: ['🏠', 'De plain-pied'],
+  ascenseur: ['🛗', 'Ascenseur'], poussette: ['👶', 'Poussette acceptée'],
+  sorties: ['🚶', 'Sorties régulières'], bio: ['🥕', 'Repas maison']
+};
+
+async function ouvrirFicheNounou(salarieeId, nom) {
+  const box = $('#proFiche');
+  box.innerHTML = miroiter(4);
+  $('#ficheNounou').hidden = false;
+  let p = null, portrait = null;
+  try {
+    const r = await Supa.lire('profils_pro',
+      'id=eq.' + salarieeId + '&select=photo,presentation,depuis,agrement_num,agrement_jusqu,places,diplomes,formations,langues,accueil');
+    p = r && r[0];
+    if (p && p.photo) portrait = await telechargerPhoto(p.photo);
+  } catch (e) {}
+
+  if (!p) {
+    box.innerHTML = `<h3>${esc(nom || 'La salariée')}</h3>
+      <p class="hint" style="margin:0">Elle n\u2019a pas encore rempli son profil professionnel.
+      Il apparaîtra ici dès qu\u2019elle l\u2019aura fait.</p>`;
+    return;
+  }
+
+  const annees = p.depuis
+    ? Math.floor((Date.now() - new Date(p.depuis).getTime()) / 31557600000) : null;
+  const acc = p.accueil || {};
+  const cadres = Object.entries(CADRES).filter(([c]) => acc[c])
+    .map(([, [emoji, t]]) => `<span class="cadre-vu">${emoji} ${esc(t)}</span>`).join('');
+
+  const groupe = (titre, liste) => !liste || !liste.length ? '' :
+    `<div class="rub">${titre}</div>` + liste.map(q => {
+      const info = QUALIFS[q.type] || QUALIFS.autre;
+      const perime = q.jusqu && q.jusqu < new Date().toISOString().slice(0, 10);
+      return `<div class="qualif">
+        <span class="qualif-badge">${badgeQualif(q.type, 38)}</span>
+        <span class="qualif-txt"><b>${esc(q.intitule || info.nom)}</b>
+          <small>${q.annee ? esc(String(q.annee)) : ''}${q.organisme ? ' · ' + esc(q.organisme) : ''}</small>
+          ${q.jusqu && !perime ? `<small class="ok">à jour</small>` : ''}
+        </span></div>`;
+    }).join('');
+
+  box.innerHTML = `
+    <div class="pro-tete">
+      <div class="pro-portrait">${portrait
+        ? `<img src="${portrait}" alt="">`
+        : `<svg viewBox="0 0 64 64"><circle cx="32" cy="25" r="12" fill="var(--acc-doux)"/>
+             <path d="M11 56c0-11 9-19 21-19s21 8 21 19z" fill="var(--acc-doux)"/></svg>`}</div>
+      <div class="pro-qui">
+        <b>${esc(nom || 'Votre assistante maternelle')}</b>
+        ${annees !== null ? `<small>${annees} an${annees > 1 ? 's' : ''} d\u2019expérience</small>` : ''}
+        ${p.places ? `<small>Agréée pour ${p.places} place${p.places > 1 ? 's' : ''}</small>` : ''}
+      </div>
+    </div>
+    ${p.presentation ? `<p class="pro-mot">${esc(p.presentation)}</p>` : ''}
+    ${groupe('Diplômes', p.diplomes)}
+    ${groupe('Formations', p.formations)}
+    ${(p.langues || []).length ? `<div class="rub">Langues</div><p style="margin:0 0 10px">${esc((p.langues || []).join(', '))}</p>` : ''}
+    ${cadres || acc.animaux ? `<div class="rub">Le cadre d\u2019accueil</div>
+      <div class="cadres-vus">${cadres}</div>
+      ${acc.animaux ? `<p class="hint" style="margin:8px 0 0">Animaux : ${esc(acc.animaux)}</p>` : ''}` : ''}
+    ${p.agrement_num ? `<p class="hint" style="margin-top:12px">Agrément n° ${esc(p.agrement_num)}${
+      p.agrement_jusqu ? `, valable jusqu\u2019au ${esc(p.agrement_jusqu.slice(8,10) + '/' + p.agrement_jusqu.slice(5,7) + '/' + p.agrement_jusqu.slice(0,4))}` : ''}</p>` : ''}
+  `;
+}
+
 async function chercherOrphelins() {
   contratsOrphelins = [];
   if (!Supa.connecte()) return;
@@ -5865,7 +6290,8 @@ async function renderPartage() {
     zoneAct.innerHTML =
       (etatLien.etat === 'fantome' ? '<button class="btn btn-danger btn-block" data-part="oublier">Oublier ce lien et republier</button>' : '') +
       (etatLien.nounou
-        ? '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>' +
+        ? '<button class="btn btn-primary btn-block" data-part="profil">Voir le profil de la nounou</button>' +
+          '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>' +
           '<button class="btn btn-danger btn-block" data-part="retirer">Retirer l\u2019accès de la nounou</button>'
         : '<button class="btn btn-primary btn-block" data-part="code">Nouveau code d\u2019invitation</button>' +
           '<button class="btn btn-ghost btn-block" data-part="sync">Synchroniser maintenant</button>') +
@@ -5894,6 +6320,17 @@ async function renderPartage() {
   const actions = {
     compte: () => showView('parametres'),
     supprimer: supprimerContrat,
+    profil: async () => {
+      const c = await Supa.lire('contrats', 'id=eq.' + contratLie() + '&select=salariee_id');
+      const sid = c && c[0] && c[0].salariee_id;
+      if (!sid) { toast('Aucune nounou reliée'); return; }
+      let nom = cur.salarie.nom || '';
+      if (!nom) {
+        try { const r = await Supa.lire('profils', 'id=eq.' + sid + '&select=nom'); nom = (r[0] || {}).nom || ''; }
+        catch (e) {}
+      }
+      ouvrirFicheNounou(sid, nom);
+    },
     nettoyer: nettoyerOrphelins,
     oublier: oublierContrat,
     publier: publierContrat,
@@ -6288,7 +6725,7 @@ async function chargerJournal() {
   if (!id || !Supa.connecte()) { journal = []; return; }
   try {
     journal = await Supa.lire('journal',
-      'contrat_id=eq.' + id + '&select=jour,repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le&order=jour.desc&limit=14');
+      'contrat_id=eq.' + id + '&select=jour,repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le,activites,comptines,livres,reponse_parent,repondu_le,coeur&order=jour.desc&limit=14');
   } catch (e) { journal = []; }
 }
 
@@ -6317,12 +6754,62 @@ function renderJournal() {
     if (j.humeur) puces.push(JOURNAL_HUMEUR[j.humeur] || j.humeur);
     for (const p of siestesDe(j)) puces.push(p);
     if (j.couches) puces.push(j.couches + (j.couches > 1 ? ' changes' : ' change'));
+
+    // Ce qui relie les deux maisons : la comptine qu'on peut reprendre le soir,
+    // le livre qu'on peut redemander.
+    const act = (j.activites || []).map(a => `<i class="act">${esc(a)}</i>`).join('');
+    const comp = (j.comptines || []).map(c => `<span class="fil">🎵 ${esc(c)}</span>`).join('');
+    const liv = (j.livres || []).map(l => `<span class="fil">📖 ${esc(l)}</span>`).join('');
+
     return `<div class="jour-b">
-      <div class="date">${esc(d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }))}</div>
-      <div class="puces">${puces.map(p => '<i>' + esc(p) + '</i>').join('')}</div>
+      <div class="date">${esc(d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }))}
+        <button class="coeur ${j.coeur ? 'on' : ''}" data-coeur="${esc(j.jour)}" aria-label="J'aime">
+          <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.6A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 7 3.4c0 5-7 9.6-7 9.6z"/></svg>
+        </button>
+      </div>
+      <div class="puces">${puces.map(p => '<i>' + esc(p) + '</i>').join('')}${act}</div>
       ${j.mot ? '<div class="mot">' + esc(j.mot) + '</div>' : ''}
+      ${comp || liv ? `<div class="fils">${comp}${liv}</div>` : ''}
+      ${j.reponse_parent
+        ? `<div class="reponse">${esc(j.reponse_parent)}<small>votre mot</small></div>`
+        : `<button class="lien-justif" data-repondre="${esc(j.jour)}">Répondre un mot</button>`}
     </div>`;
   }).join('');
+
+  $$('#listeJournal [data-coeur]').forEach(b => { b.onclick = () => aimerJournee(b.dataset.coeur, b); });
+  $$('#listeJournal [data-repondre]').forEach(b => { b.onclick = () => repondreJournee(b.dataset.repondre); });
+}
+
+/* Un coeur suffit souvent. Ecrire demande du temps qu'on n'a pas toujours le
+   soir, et ne rien dire du tout laisse la nounou sans reponse. */
+async function aimerJournee(jour, bouton) {
+  const j = journal.find(x => x.jour === jour);
+  if (!j) return;
+  const nouveau = !j.coeur;
+  bouton.classList.toggle('on', nouveau);
+  if (nouveau) bouton.classList.add('bat');
+  setTimeout(() => bouton.classList.remove('bat'), 420);
+  try {
+    await Supa.modifier('journal', { coeur: nouveau },
+      'contrat_id=eq.' + contratLie() + '&jour=eq.' + jour);
+    j.coeur = nouveau;
+    if (nouveau) Supa.notifier(contratLie(), (cur.enfant.prenom || '') + ' — merci',
+      'Votre journée a touché la famille.', false, 'journal');
+  } catch (e) { bouton.classList.toggle('on', !nouveau); }
+}
+
+async function repondreJournee(jour) {
+  const t = (prompt('Votre mot du soir\n\nElle le lira demain matin.') || '').trim();
+  if (!t) return;
+  try {
+    await Supa.modifier('journal', { reponse_parent: t },
+      'contrat_id=eq.' + contratLie() + '&jour=eq.' + jour);
+    const j = journal.find(x => x.jour === jour);
+    if (j) j.reponse_parent = t;
+    Supa.notifier(contratLie(), (cur.enfant.prenom || '') + ' — mot des parents', t.slice(0, 90), false, 'journal');
+    renderJournal();
+    toast('Envoyé');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 
 /* Une allure par catégorie : un besoin se repère d'un coup d'œil, un retard
@@ -7746,6 +8233,7 @@ $('#btnFinCalcul').onclick = calculFin;
 $('#btnAjoutEnfant').onclick = ajouterEnfant;
 $('#btnRepondre').onclick = repondre;
 $('#btnSilence').onclick = enregistrerSilence;
+$('#btnDev').onclick = demanderCodeDev;
 $('#btnReprise').onclick = envoyerReprise;
 $('#visioFermer').onclick = fermerVisionneuse;
 $('#visioEnregistrer').onclick = enregistrerPhoto;
@@ -7753,6 +8241,8 @@ $('#visioPrec').onclick = () => glisserVisio(-1);
 $('#visioSuiv').onclick = () => glisserVisio(1);
 brancherGestes($('#visioScene'), glisserVisio, fermerVisionneuse);
 $('#btnArchive').onclick = preparerArchive;
+$('#proFermer').onclick = () => { $('#ficheNounou').hidden = true; };
+$('#btnRecherche').onclick = lancerRecherche;
 $('#btnRelancerPush').onclick = () => activerPush();
 $('#btnTestPush').onclick = testerPush;
 $('#tourSuivant').onclick = () => { if (tourEtape < TOUR.length - 1) { tourEtape++; renderTour(); } else finirTour(); };
@@ -8408,6 +8898,115 @@ function glisserToutesLesFeuilles(racine) {
 }
 new MutationObserver(() => glisserToutesLesFeuilles()).observe(document.documentElement, { childList: true, subtree: true });
 glisserToutesLesFeuilles();
+
+/* ---------------- Diplômes et formations ----------------
+   Chacun a son dessin : un badge se reconnait d'un coup d'oeil, une ligne de
+   texte se lit. Les couleurs distinguent les familles de qualification. */
+const QUALIFS = {
+  cap_aepe: { nom: 'CAP Accompagnant éducatif petite enfance', court: 'CAP AEPE', ton: '#2f7d73',
+    dessin: '<path d="M32 10L6 23l26 13 26-13z" fill="currentColor"/><path d="M16 30v13c0 5 7 9 16 9s16-4 16-9V30" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M56 24v14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>' },
+  auxi_puer: { nom: 'Auxiliaire de puériculture', court: 'Auxiliaire puéri.', ton: '#d1698a',
+    dessin: '<circle cx="32" cy="24" r="11" fill="currentColor"/><path d="M13 54c0-10 8-17 19-17s19 7 19 17z" fill="currentColor" opacity=".55"/><path d="M32 15v8M28 19h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>' },
+  eje: { nom: 'Éducateur de jeunes enfants', court: 'EJE', ton: '#7a5cc4',
+    dessin: '<path d="M12 44V18a4 4 0 0 1 4-4h13a5 5 0 0 1 3 1v33a5 5 0 0 0-3-1H16a4 4 0 0 0-4 4z" fill="currentColor"/><path d="M52 44V18a4 4 0 0 0-4-4H35a5 5 0 0 0-3 1v33a5 5 0 0 1 3-1h13a4 4 0 0 1 4 4z" fill="currentColor" opacity=".55"/>' },
+  bep_asssp: { nom: 'Bac pro / BEP services à la personne', court: 'Bac pro ASSP', ton: '#3e7fb0',
+    dessin: '<rect x="12" y="14" width="40" height="36" rx="5" fill="currentColor" opacity=".55"/><path d="M20 26h24M20 34h24M20 42h14" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>' },
+  formation_initiale: { nom: 'Formation initiale obligatoire (120 h)', court: 'Formation initiale', ton: '#c08a2e',
+    dessin: '<circle cx="32" cy="32" r="20" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 20v12l8 5" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>' },
+  psc1: { nom: 'Premiers secours (PSC1 / SST)', court: 'Premiers secours', ton: '#c9453f',
+    dessin: '<rect x="10" y="20" width="44" height="28" rx="7" fill="currentColor"/><path d="M32 28v12M26 34h12" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/><path d="M24 20v-3a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v3" fill="none" stroke="currentColor" stroke-width="3.4"/>' },
+  haccp: { nom: 'Hygiène alimentaire', court: 'Hygiène', ton: '#4f9e5e',
+    dessin: '<path d="M22 14c-3 6-3 12 0 18v18a4 4 0 0 0 8 0V32c3-6 3-12 0-18z" fill="currentColor"/><path d="M42 14v14a4 4 0 0 0 8 0V14" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/><path d="M46 28v22" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>' },
+  montessori: { nom: 'Approche Montessori', court: 'Montessori', ton: '#c76a3a',
+    dessin: '<path d="M32 12l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z" fill="currentColor"/>' },
+  langue_signes: { nom: 'Langue des signes bébé', court: 'Signes bébé', ton: '#3f9bb0',
+    dessin: '<path d="M24 50V30a4 4 0 0 1 8 0v-6a4 4 0 0 1 8 0v6a4 4 0 0 1 8 0v14c0 7-5 12-12 12h-4c-5 0-8-3-8-6z" fill="currentColor"/><path d="M24 34l-6-8a4 4 0 0 1 6-5l4 6" fill="currentColor" opacity=".6"/>' },
+  continue: { nom: 'Formation continue', court: 'Formation continue', ton: '#8a8f6b',
+    dessin: '<path d="M32 12a20 20 0 1 1-14 34" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M18 34l-5 12 12-5z" fill="currentColor"/>' },
+  autre: { nom: 'Autre qualification', court: 'Autre', ton: '#7d8a86',
+    dessin: '<circle cx="32" cy="26" r="12" fill="currentColor"/><path d="M22 36l-4 18 14-7 14 7-4-18" fill="currentColor" opacity=".55"/>' }
+};
+
+function badgeQualif(cle, taille) {
+  const q = QUALIFS[cle] || QUALIFS.autre;
+  const t = taille || 40;
+  return `<svg viewBox="0 0 64 64" width="${t}" height="${t}" style="color:${q.ton}" aria-hidden="true">${q.dessin}</svg>`;
+}
+
+/* ---------------- Mode développeur ----------------
+   Certaines fonctions sont ecrites mais pas mures : la recherche d'une
+   assistante maternelle en fait partie. Plutot que de les livrer a moitie ou
+   de les garder hors du code, elles restent la, eteintes. */
+const CODE_MAINTENANCE = 'COCON-2026';
+
+function modeDev() {
+  try { return localStorage.getItem('cocon-dev') === '1'; } catch (e) { return false; }
+}
+
+function basculerDev(actif) {
+  try { localStorage.setItem('cocon-dev', actif ? '1' : '0'); } catch (e) {}
+  appliquerDev();
+}
+
+/* Les elements marques data-dev n'existent que dans ce mode. */
+function appliquerDev() {
+  const on = modeDev();
+  document.querySelectorAll('[data-dev]').forEach(el => { el.hidden = !on; });
+  const t = document.getElementById('etatDev');
+  if (t) t.textContent = on ? 'activé' : 'désactivé';
+  if (typeof renderBarre === 'function') renderBarre();
+}
+
+async function demanderCodeDev() {
+  if (modeDev()) {
+    if (confirm('Désactiver le mode développeur ?\n\nLes fonctions en préparation seront de nouveau masquées.')) basculerDev(false);
+    return;
+  }
+  const c = (prompt('Code de maintenance') || '').trim().toUpperCase();
+  if (!c) return;
+  if (c !== CODE_MAINTENANCE) { toast('Code incorrect'); secouer('.card'); return; }
+  basculerDev(true);
+  toast('Mode développeur activé — fonctions en préparation visibles');
+}
+
+/* ---------------- Les premières fois ----------------
+   Le sujet le plus delicat du metier. Un premier pas chez la nounou, et le
+   parent a le sentiment d'avoir manque quelque chose. Beaucoup
+   d'assistantes maternelles se taisent pour laisser la decouverte aux
+   parents ; d'autres racontent tout de suite. Aucune n'a tort : on laisse le
+   choix, a chaque fois. */
+const PREMIERES = {
+  sourire:   { nom: 'Premier sourire',      ton: '#f0a860',
+    d: '<circle cx="32" cy="32" r="20" fill="currentColor"/><circle cx="25" cy="28" r="2.6" fill="#fff"/><circle cx="39" cy="28" r="2.6" fill="#fff"/><path d="M22 38c4 6 16 6 20 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>' },
+  dent:      { nom: 'Première dent',        ton: '#7fb4c4',
+    d: '<path d="M20 16c8-4 16-4 24 0 3 2 4 6 3 10l-5 22c-1 4-6 4-7 0l-3-14-3 14c-1 4-6 4-7 0l-5-22c-1-4 0-8 3-10z" fill="currentColor"/>' },
+  assis:     { nom: 'Assis tout seul',      ton: '#94c9a0',
+    d: '<circle cx="32" cy="18" r="8" fill="currentColor"/><path d="M32 28c-7 0-11 5-11 12v6h22v-6c0-7-4-12-11-12z" fill="currentColor"/><path d="M21 46c-4 0-7 2-7 5h36c0-3-3-5-7-5z" fill="currentColor" opacity=".55"/>' },
+  quatre:    { nom: 'À quatre pattes',      ton: '#c4a25c',
+    d: '<circle cx="20" cy="24" r="7" fill="currentColor"/><path d="M26 30h18c4 0 7 3 7 7v3H26z" fill="currentColor"/><path d="M28 40v8M48 40v8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>' },
+  debout:    { nom: 'Debout',               ton: '#b88ec4',
+    d: '<circle cx="32" cy="14" r="7" fill="currentColor"/><path d="M32 22c-5 0-8 3-8 8v10h16V30c0-5-3-8-8-8z" fill="currentColor"/><path d="M27 40v12M37 40v12" stroke="currentColor" stroke-width="4.4" stroke-linecap="round"/>' },
+  pas:       { nom: 'Premiers pas',         ton: '#e08a92',
+    d: '<circle cx="32" cy="12" r="7" fill="currentColor"/><path d="M32 20c-5 0-8 3-8 8v8h16v-8c0-5-3-8-8-8z" fill="currentColor"/><path d="M26 36l-5 14M38 36l6 14" stroke="currentColor" stroke-width="4.4" stroke-linecap="round"/><path d="M16 52h10M40 52h10" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity=".5"/>' },
+  mot:       { nom: 'Premier mot',          ton: '#5fa8b8',
+    d: '<path d="M12 18h40v24H32l-10 8v-8h-10z" fill="currentColor"/><circle cx="24" cy="30" r="3" fill="#fff"/><circle cx="32" cy="30" r="3" fill="#fff"/><circle cx="40" cy="30" r="3" fill="#fff"/>' },
+  cuillere:  { nom: 'Mange à la cuillère',  ton: '#d09a4c',
+    d: '<ellipse cx="24" cy="20" rx="9" ry="11" fill="currentColor"/><path d="M24 31v21" stroke="currentColor" stroke-width="4.4" stroke-linecap="round"/><path d="M42 14v18a5 5 0 0 0 10 0V14" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><path d="M47 32v20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>' },
+  proprete:  { nom: 'Le pot',               ton: '#8fb87f',
+    d: '<path d="M16 28h32l-3 18a6 6 0 0 1-6 5H25a6 6 0 0 1-6-5z" fill="currentColor"/><path d="M48 32h4a4 4 0 0 1 0 8h-4" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M22 22a10 10 0 0 1 20 0" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>' },
+  copain:    { nom: 'Un copain',            ton: '#c48ea0',
+    d: '<circle cx="22" cy="22" r="9" fill="currentColor"/><circle cx="44" cy="24" r="8" fill="currentColor" opacity=".6"/><path d="M8 50c0-8 6-14 14-14s14 6 14 14z" fill="currentColor"/><path d="M32 50c0-7 5-12 12-12s12 5 12 12z" fill="currentColor" opacity=".6"/>' },
+  dessin:    { nom: 'Premier dessin',       ton: '#c9776a',
+    d: '<rect x="12" y="12" width="40" height="40" rx="5" fill="currentColor" opacity=".25"/><path d="M20 42c4-14 10-20 14-12s8 6 10-4" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>' },
+  autre:     { nom: 'Autre première fois',  ton: '#9aa39f',
+    d: '<path d="M32 10l7 14 15 2-11 11 3 15-14-8-14 8 3-15-11-11 15-2z" fill="currentColor"/>' }
+};
+
+function dessinPremiere(cle, taille) {
+  const p = PREMIERES[cle] || PREMIERES.autre;
+  const t = taille || 44;
+  return `<svg viewBox="0 0 64 64" width="${t}" height="${t}" style="color:${p.ton}" aria-hidden="true">${p.d}</svg>`;
+}
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;

@@ -439,6 +439,59 @@ html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#31202a 0%,va
   padding:0 10px;background:var(--card);color:var(--txt);font:inherit}
 .code-rempl{display:inline-block;margin-top:5px;font:700 17px/1 ui-monospace,monospace;
   letter-spacing:3px;color:var(--acc);background:var(--acc-doux);border-radius:9px;padding:6px 10px}
+/* ---------- Profil professionnel ---------- */
+/* ---------- Nouvelles familles ---------- */
+.places-libres{margin-top:12px}
+.places-vue{display:flex;align-items:center;gap:14px;background:var(--acc-doux);
+  border-radius:16px;padding:14px 16px}
+.places-vue b{font:700 34px/1 system-ui;color:var(--acc)}
+.places-vue span{line-height:1.3;font-weight:600}
+.places-vue small{display:block;font-weight:400;font-size:12.5px;color:var(--mut)}
+.demande-acc{border:1px solid var(--line);border-radius:15px;padding:12px 14px;margin-bottom:9px;background:var(--card)}
+.demande-acc.acceptee{border-color:var(--acc)}
+.da-haut{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.da-haut b{font-size:14.5px}
+.da-haut span{font-size:12px;color:var(--mut)}
+.demande-acc small{display:block;font-size:12.5px;color:var(--mut);margin-top:2px}
+.demande-acc small.ok{color:var(--acc);font-weight:600}
+.demande-acc small.manque{color:#b4690e;font-weight:600}
+.da-mot{background:var(--zebre);border-radius:12px;padding:9px 12px;font-size:13.5px;
+  line-height:1.45;margin:8px 0 0;white-space:pre-wrap}
+.bascule{display:flex;align-items:center;gap:12px;padding:10px 0}
+.bascule>span{flex:1;min-width:0;line-height:1.35}
+.bascule small{display:block;font-size:12.5px;color:var(--mut)}
+.profil-tete{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.profil-portrait{width:92px;height:92px;border-radius:46px;flex:0 0 auto;overflow:hidden;
+  background:var(--card);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 18px -8px rgba(60,25,35,.4);border:3px solid var(--card)}
+.profil-portrait svg,.profil-portrait img{width:100%;height:100%;object-fit:cover}
+.profil-btns{flex:1;min-width:0}
+.profil-btns .btn{width:100%;margin:0}
+
+.qualif{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.qualif:last-of-type{border-bottom:0}
+.qualif-badge{width:46px;height:46px;border-radius:14px;flex:0 0 auto;background:var(--zebre);
+  display:flex;align-items:center;justify-content:center}
+.qualif-txt{flex:1;min-width:0;line-height:1.35}
+.qualif-txt b{display:block;font-size:14px}
+.qualif-txt small{display:block;font-size:12px;color:var(--mut)}
+.qualif-txt .manque{color:#b4690e;font-weight:600}
+.qualif-txt .ok{color:var(--acc)}
+
+.qualif-grille{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 6px;margin-bottom:6px}
+.qualif-grille button{border:0;background:transparent;display:flex;flex-direction:column;
+  align-items:center;gap:6px;padding:8px 2px;cursor:pointer;color:var(--txt);
+  font:500 11px system-ui;text-align:center;border-radius:12px}
+.qualif-grille button:active{background:var(--zebre)}
+.qualif-grille span{width:56px;height:56px;border-radius:18px;background:var(--zebre);
+  display:flex;align-items:center;justify-content:center}
+
+.cadres{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.cadre{display:flex;align-items:center;gap:8px;border:1.4px solid var(--bord);
+  background:var(--card);border-radius:13px;padding:10px 11px;cursor:pointer;
+  font:500 13px system-ui;color:var(--mut);text-align:left;min-height:46px}
+.cadre span{font-size:17px;flex:0 0 auto}
+.cadre.on{border-color:var(--acc);background:var(--acc-doux);color:var(--txt);font-weight:600}
 .absence{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
 .absence:last-of-type{border-bottom:0}
 .absence.passee{opacity:.55}
@@ -877,6 +930,54 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 .modal{transition:background .2s ease}
 @media (prefers-reduced-motion:reduce){.modal-box{transition:none!important}}
 
+
+/* ---------- Les premières fois ---------- */
+.premiere{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.premiere:last-of-type{border-bottom:0}
+.premiere-rond{width:52px;height:52px;border-radius:18px;flex:0 0 auto;background:var(--zebre);
+  display:flex;align-items:center;justify-content:center}
+.premiere-txt{flex:1;min-width:0;line-height:1.4}
+.premiere-txt b{display:block;font-size:14.5px}
+.premiere-txt small{display:block;font-size:12.5px;color:var(--mut)}
+.premiere-txt .dit{color:var(--txt);margin-top:3px;font-style:italic}
+.premiere-txt .secret{color:#a06a2c;font-weight:600}
+.premiere-txt .ok{color:var(--acc)}
+
+.premieres-grille{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 6px}
+.premieres-grille button{border:0;background:transparent;display:flex;flex-direction:column;
+  align-items:center;gap:6px;padding:8px 2px;cursor:pointer;color:var(--txt);
+  font:500 11px system-ui;text-align:center;border-radius:12px}
+.premieres-grille button:active{background:var(--zebre)}
+.premieres-grille span{width:54px;height:54px;border-radius:18px;background:var(--zebre);
+  display:flex;align-items:center;justify-content:center}
+
+.premiere-tete{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.premiere-tete h3{margin:0;font-size:18px}
+.facon{display:block;width:100%;text-align:left;border:1.6px solid var(--bord);
+  background:var(--card);border-radius:15px;padding:13px 15px;margin-bottom:9px;cursor:pointer}
+.facon b{display:block;font-size:14.5px;margin-bottom:3px}
+.facon small{display:block;font-size:12.5px;color:var(--mut);line-height:1.45}
+.facon:active{border-color:var(--acc);background:var(--acc-doux)}
+
+/* ---------- Ce qu'on a fait ---------- */
+.reponse-famille{background:var(--acc-doux);border-radius:14px;padding:12px 14px;
+  margin-bottom:12px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;
+  animation:eclot .45s ease both}
+.reponse-famille small{display:block;font-size:11px;color:var(--mut);margin-top:5px}
+.coeur-recu{background:var(--acc-doux);border-radius:14px;padding:11px 14px;
+  margin-bottom:12px;font:600 13.5px system-ui;animation:eclot .45s ease both}
+.puces{display:flex;flex-wrap:wrap;gap:6px}
+.puce{display:flex;align-items:center;gap:5px;border:1.4px solid var(--bord);
+  background:var(--card);border-radius:20px;padding:7px 12px;cursor:pointer;
+  font:500 13px system-ui;color:var(--mut);min-height:38px}
+.puce span{font-size:15px}
+.puce.on{border-color:var(--acc);background:var(--acc-doux);color:var(--txt);font-weight:600}
+.etiquettes{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.etiq-sup{display:inline-flex;align-items:center;gap:6px;background:var(--acc-doux);
+  border-radius:11px;padding:5px 6px 5px 11px;font:500 12.5px system-ui}
+.etiq-sup button{border:0;background:transparent;color:var(--mut);cursor:pointer;
+  font-size:12px;padding:2px 4px;line-height:1}
+
 </style>
 </head>
 <body>
@@ -975,6 +1076,36 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <div class="sous">Vos accueils, au même endroit</div>
 </div>
 
+<div id="choixPremiere" class="modal" hidden>
+  <div class="modal-box">
+    <h3>Quelle première fois ?</h3>
+    <div class="premieres-grille" id="premieresGrille"></div>
+    <div class="modal-actions"><button id="premiereFermer" class="btn btn-ghost">Annuler</button></div>
+  </div>
+</div>
+
+<div id="ditPremiere" class="modal" hidden>
+  <div class="modal-box">
+    <div class="premiere-tete"><span id="ditDessin"></span><h3 id="ditNom">—</h3></div>
+    <textarea id="ditMot" rows="3" placeholder="Raconte en quelques mots…"></textarea>
+    <div class="rub">Comment le dire ?</div>
+    <button class="facon" data-facon="raconte">
+      <b>Je raconte</b><small>Ils lisent tout de suite ce qui s'est passé.</small></button>
+    <button class="facon" data-facon="devine">
+      <b>Je préviens sans dire quoi</b>
+      <small>Ils sauront qu'il s'est passé quelque chose de beau, et découvriront quoi quand ils le voudront. Beaucoup préfèrent garder la surprise.</small></button>
+    <div class="modal-actions"><button id="ditFermer" class="btn btn-ghost">Annuler</button></div>
+  </div>
+</div>
+
+<div id="choixQualif" class="modal" hidden>
+  <div class="modal-box">
+    <h3 id="qualifTitre">Quel diplôme ?</h3>
+    <div class="qualif-grille" id="qualifGrille"></div>
+    <div class="modal-actions"><button id="qualifFermer" class="btn btn-ghost">Annuler</button></div>
+  </div>
+</div>
+
 <div id="centreNotif" class="modal" hidden>
   <div class="modal-box">
     <h3>Ce qui est arrivé</h3>
@@ -1059,6 +1190,15 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       </div>
     </details>
 
+    <details class="card" id="cartePremieres">
+      <summary class="tete-repli"><svg><use href="#i-ok"/></svg><span>Les premières fois</span><b class="compteur" id="cptPremieres"></b></summary>
+      <div class="corps">
+        <div id="listePremieres"></div>
+        <button id="btnPremiere" class="btn btn-primary btn-block">Noter une première fois</button>
+        <p class="hint">Un premier pas chez toi, c'est délicat. Tu choisis à chaque fois : raconter, ou prévenir sans dire quoi pour leur laisser la découverte.</p>
+      </div>
+    </details>
+
     <div class="card urgence">
       <div class="tete"><svg><use href="#i-alerte"/></svg>Fiche d'urgence</div>
       <div class="corps" id="ficheUrgence"></div>
@@ -1083,6 +1223,22 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 
         <div class="rub">Humeur</div>
         <div class="choix" id="chHumeur"></div>
+
+        <div id="motDuSoir"></div>
+
+        <div class="rub">Ce qu'on a fait</div>
+        <div class="puces" id="activites"></div>
+        <div class="deux" style="margin-top:8px">
+          <input id="comptineTexte" placeholder="Une comptine chantée">
+          <button id="btnComptine" class="btn btn-ghost btn-petit">Ajouter</button>
+        </div>
+        <div id="listeComptines" class="etiquettes"></div>
+        <div class="deux" style="margin-top:8px">
+          <input id="livreTexte" placeholder="Un livre lu">
+          <button id="btnLivre" class="btn btn-ghost btn-petit">Ajouter</button>
+        </div>
+        <div id="listeLivres" class="etiquettes"></div>
+        <p class="hint">Les parents peuvent reprendre la comptine le soir. C'est un fil entre les deux maisons.</p>
 
         <div class="rub">Siestes</div>
         <div id="listeSiestes"></div>
@@ -1175,6 +1331,30 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <div class="tete"><svg><use href="#i-gens"/></svg><span>Mes familles</span><b class="compteur" id="compteurFamilles"></b></div>
       <div class="corps" id="listeContrats"></div>
     </div>
+
+
+    <details class="card" id="carteVisibilite" data-dev hidden>
+      <summary class="tete-repli"><svg><use href="#i-gens"/></svg><span>Nouvelles familles</span><b class="compteur" id="cptDemAcc"></b></summary>
+      <div class="corps">
+        <div class="avertissement">Fonction en préparation. Elle n'a de sens que lorsque assez de familles utilisent Cocon.</div>
+
+        <label class="bascule">
+          <span><b>Apparaître dans la recherche</b>
+            <small>Les familles du secteur peuvent te trouver et t'écrire.</small></span>
+          <input id="proVisible" type="checkbox">
+        </label>
+
+        <div class="deux" style="margin-top:10px">
+          <label class="field"><span>Commune</span><input id="proCommune" placeholder="Nantes"></label>
+          <label class="field"><span>Code postal</span><input id="proCP" inputmode="numeric" maxlength="5" placeholder="44000"></label>
+        </div>
+
+        <div id="placesLibres" class="places-libres"></div>
+
+        <div class="rub">Demandes reçues</div>
+        <div id="listeDemAccueil"></div>
+      </div>
+    </details>
 
     <details class="card" id="carteRemplacement">
       <summary class="tete-repli"><svg><use href="#i-gens"/></svg><span>Remplacements</span><b class="compteur" id="compteurRempl"></b></summary>
@@ -1310,7 +1490,61 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     </div>
   </section>
 
-  <section id="vueParams" hidden>
+  <section id="vueProfil" hidden>
+    <div class="profil-tete">
+      <div class="profil-portrait" id="proPortrait"></div>
+      <div class="profil-btns">
+        <button id="btnProPhoto" class="btn btn-primary btn-petit">Ma photo</button>
+        <input id="proPhotoFichier" type="file" accept="image/*" hidden>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-info"/></svg>Me présenter</div>
+      <div class="corps">
+        <textarea id="proPresentation" rows="4" placeholder="Quelques mots sur votre façon d'accueillir, ce qui vous tient à cœur…" maxlength="1500"></textarea>
+        <div class="deux" style="margin-top:10px">
+          <label class="field"><span>Assistante maternelle depuis</span><input id="proDepuis" placeholder="jj/mm/aaaa"></label>
+          <label class="field"><span>Places d'agrément</span><input id="proPlaces" inputmode="numeric" placeholder="3"></label>
+        </div>
+        <div class="deux">
+          <label class="field"><span>N° d'agrément</span><input id="proAgrement" placeholder="Facultatif"></label>
+          <label class="field"><span>Valable jusqu'au</span><input id="proAgrementJusqu" placeholder="jj/mm/aaaa"></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-ok"/></svg><span>Diplômes</span><b class="compteur" id="cptDiplomes"></b></div>
+      <div class="corps">
+        <div id="listeDiplomes"></div>
+        <button id="btnAjoutDiplome" class="btn btn-ghost btn-block">Ajouter un diplôme</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-alerte"/></svg><span>Formations</span><b class="compteur" id="cptFormations"></b></div>
+      <div class="corps">
+        <div id="listeFormations"></div>
+        <button id="btnAjoutFormation" class="btn btn-ghost btn-block">Ajouter une formation</button>
+        <p class="hint">Les premiers secours se renouvellent : indiquer la date de fin permet d'être prévenue.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-gens"/></svg>Le cadre d'accueil</div>
+      <div class="corps">
+        <div class="cadres" id="cadreAccueil"></div>
+        <label class="field" style="margin-top:10px"><span>Animaux</span><input id="proAnimaux" placeholder="Un chat, un chien…"></label>
+        <label class="field"><span>Langues parlées</span><input id="proLangues" placeholder="Français, anglais…"></label>
+      </div>
+    </div>
+
+    <button id="btnProfilEnregistrer" class="btn btn-primary btn-block">Enregistrer mon profil</button>
+    <p class="hint" style="text-align:center">Vos familles voient ce profil depuis « Mes nounous ». Ni salaire, ni numéro de sécurité sociale : ces informations ne quittent jamais ce téléphone.</p>
+  </section>
+
+<section id="vueParams" hidden>
     <div class="profil-tete">
       <div class="avatar" id="avatarInitiale">?</div>
       <div>
@@ -1333,6 +1567,15 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
         </label>
         <button id="btnChangerCode" class="btn btn-ghost btn-block">Changer le code</button>
         <p class="hint" id="secEtat"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tete"><svg><use href="#i-reglages"/></svg>Maintenance</div>
+      <div class="corps">
+        <div class="ds"><span>Mode développeur</span><b id="etatDev">désactivé</b></div>
+        <button id="btnDev" class="btn btn-ghost btn-block">Saisir le code de maintenance</button>
+        <p class="hint">Ce mode révèle des fonctions en préparation, incomplètes et susceptibles de changer.</p>
       </div>
     </div>
 
@@ -1381,7 +1624,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.4.4</b></div>
+        <div class="ds"><span>Version</span><b>1.7.1</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -1755,7 +1998,7 @@ function renderChoixEnfant() {
 
 function montrer(v) {
   vue = v;
-  for (const nom of ['accueil', 'planning', 'journal', 'messages', 'galerie', 'familles', 'commun', 'params']) {
+  for (const nom of ['accueil', 'planning', 'journal', 'messages', 'galerie', 'familles', 'commun', 'profil', 'params']) {
     const el = $('#vue' + nom[0].toUpperCase() + nom.slice(1));
     el.hidden = v !== nom;
     if (v === nom) { el.classList.remove('vue-arrive'); void el.offsetWidth; el.classList.add('vue-arrive'); }
@@ -1764,9 +2007,11 @@ function montrer(v) {
   const c = contrats.find(x => x.id === contratActif);
   const titres = { accueil: 'Cocon', planning: c ? c.enfant_prenom : 'Planning',
                    journal: 'Journal', messages: 'Messages',
-                   familles: 'Mes familles', galerie: 'Photos', commun: 'Espace commun', params: 'Réglages' };
+                   familles: 'Mes familles', galerie: 'Photos', commun: 'Espace commun',
+                   profil: 'Mon profil', params: 'Réglages' };
   $('#titre').textContent = titres[v];
   if (v === 'planning') renderPlanning();
+  if (v === 'planning') chargerPremieres().then(renderPremieres);
   renderChoixEnfant();
   if (v === 'journal') chargerJournal();
   if (v === 'messages') { chargerBoite().then(renderBoite); if (conversationActive) ouvrirConversation(conversationActive); }
@@ -1774,10 +2019,15 @@ function montrer(v) {
     renderContrats(); renderRegleAbsence();
     chargerFermetures().then(renderFermetures);
     chargerRemplacements().then(renderRemplacements);
+    if (modeDev()) {
+      chargerProfilPro().then(() => { renderVisibilite();
+        chargerDemandesAccueil().then(renderDemandesAccueil); });
+    }
   }
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
   if (v === 'galerie') chargerGalerie().then(() => chercherOrphelines().then(renderOrphelines));
-  if (v === 'params') { majCompte(); majEtatPush(); renderModulesNatifs(); }
+  if (v === 'profil') chargerProfilPro().then(renderProfilPro);
+  if (v === 'params') { majCompte(); majEtatPush(); renderModulesNatifs(); appliquerDev(); }
   prevenirMigration();
 }
 
@@ -1919,6 +2169,8 @@ async function charger() {
     await chargerJours();
     await chargerRetards();
     await chargerEtatFiches();
+    if (!profilPro) { await chargerProfilPro();
+      if (profilPro && profilPro.photo) portraitPro = await telechargerPhoto(profilPro.photo); }
     await chargerPortraits();
   } catch (e) { toast('Chargement impossible : ' + (e.message || e)); }
   renderAccueil(); renderContrats(); renderAujourdhui(); renderChoixEnfant(); renderPointNotif(); renderBarre();
@@ -2491,7 +2743,7 @@ async function chargerJournal() {
     try {
       const r = await Supa.lire('journal',
         'contrat_id=eq.' + contratActif + '&jour=eq.' + jourJournal +
-        '&select=repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le');
+        '&select=repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le,activites,comptines,livres,reponse_parent,repondu_le,coeur');
       if (r && r.length) entree = r[0];
       if (jourJournal === isoDuJour(new Date())) journalRempliAujourdhui = !!(entree && entree.maj_le);
     } catch (e) { /* la vue le dira */ }
@@ -2506,6 +2758,18 @@ function renderJournal() {
   boutonsChoix('#chRepas', REPAS, entree.repas);
   boutonsChoix('#chHumeur', HUMEURS, entree.humeur);
   // les journees d'avant les siestes multiples n'ont que l'ancienne paire
+  activites = Array.isArray(entree.activites) ? entree.activites : [];
+  comptines = Array.isArray(entree.comptines) ? entree.comptines : [];
+  livres = Array.isArray(entree.livres) ? entree.livres : [];
+  renderActivites();
+  // ce que la famille a repondu hier soir : elle le lit en ouvrant le journal
+  const rep = $('#motDuSoir');
+  if (rep) {
+    rep.innerHTML = entree.reponse_parent
+      ? `<div class="reponse-famille">${esc(entree.reponse_parent)}
+          <small>la famille, ${esc(entree.repondu_le ? new Date(entree.repondu_le).toLocaleDateString('fr-FR') : '')}</small></div>`
+      : entree.coeur ? '<div class="coeur-recu">💛 La famille a aimé cette journée</div>' : '';
+  }
   siestes = Array.isArray(entree.siestes) && entree.siestes.length
     ? entree.siestes.map(x => ({ debut: (x.debut || '').slice(0, 5), fin: (x.fin || '').slice(0, 5) }))
     : (entree.sieste_debut ? [{ debut: (entree.sieste_debut || '').slice(0, 5), fin: (entree.sieste_fin || '').slice(0, 5) }] : []);
@@ -2574,6 +2838,7 @@ async function enregistrerJournal() {
     contrat_id: contratActif, jour: jourJournal,
     repas: entree.repas || null, humeur: entree.humeur || null,
     siestes: propres,
+    activites, comptines, livres,
     // les deux anciennes colonnes gardent la première sieste, pour ne rien casser
     sieste_debut: propres.length ? (propres[0].debut || null) : null,
     sieste_fin: propres.length ? (propres[0].fin || null) : null,
@@ -2784,6 +3049,7 @@ const ECRANS = [
   { id: 'galerie',  nom: 'Photos',    ico: 'i-image' },
   { id: 'familles', nom: 'Familles',  ico: 'i-gens' },
   { id: 'commun',   nom: 'Commun',    ico: 'i-commun' },
+  { id: 'profil',   nom: 'Mon profil', ico: 'i-info' },
   { id: 'params',   nom: 'Réglages',  ico: 'i-reglages' }
 ];
 const BARRE_DEFAUT = ['accueil', 'journal', 'messages', 'familles'];
@@ -3260,6 +3526,406 @@ async function chargerAdaptation() {
     adaptation = await Supa.lire('adaptation',
       'contrat_id=eq.' + contratActif + '&select=id,jour,duree,etape,ressenti_salariee,ressenti_parent&order=jour');
   } catch (e) { adaptation = []; }
+}
+
+/* ---------------- Profil professionnel ----------------
+   Une assistante maternelle a des diplomes, une experience, une facon de
+   faire. Aucune application ne lui laisse les montrer : les familles la
+   choisissent sur un annuaire, puis n'en savent plus rien. */
+const CADRES = [
+  ['jardin', '🌳', 'Jardin'],
+  ['exterieur', '🛝', 'Espace de jeu dehors'],
+  ['non_fumeur', '🚭', 'Non-fumeur'],
+  ['plain_pied', '🏠', 'De plain-pied'],
+  ['ascenseur', '🛗', 'Ascenseur'],
+  ['poussette', '👶', 'Poussette acceptée'],
+  ['sorties', '🚶', 'Sorties régulières'],
+  ['bio', '🥕', 'Repas maison']
+];
+let profilPro = null;
+
+/* ---------------- Les premières fois, côté nounou ---------------- */
+const ACTIVITES = [
+  ['🎨', 'Peinture'], ['🧩', 'Puzzle'], ['🎵', 'Musique'], ['📚', 'Histoires'],
+  ['🌳', 'Sortie'], ['🍪', 'Cuisine'], ['💧', 'Transvasement'], ['🤸', 'Motricité'],
+  ['🪁', 'Parc'], ['🛁', 'Jeux d\u2019eau'], ['🧸', 'Jeu libre'], ['😴', 'Repos']
+];
+let premieres = [], premiereChoisie = null;
+
+async function chargerPremieres() {
+  premieres = [];
+  if (!contratActif || !Supa.connecte()) return;
+  try {
+    premieres = await Supa.lire('premieres_fois',
+      'contrat_id=eq.' + contratActif + '&select=id,type,jour,mot,facon,devoile_le,vu_le,aussi_maison,cree_le&order=jour.desc&limit=40');
+  } catch (e) {}
+}
+
+function renderPremieres() {
+  const cpt = $('#cptPremieres');
+  if (cpt) cpt.textContent = premieres.length ? String(premieres.length) : '';
+  const box = $('#listePremieres');
+  if (!box) return;
+  if (!premieres.length) {
+    box.innerHTML = `<div class="vide-doux craft">${ILLU_PREMIERE}<b>Rien de noté</b>
+      <small>Les grands moments se gardent. Celui-là aussi.</small></div>`;
+    return;
+  }
+  box.innerHTML = premieres.map(p => {
+    const info = PREMIERES[p.type] || PREMIERES.autre;
+    return `<div class="premiere">
+      <span class="premiere-rond">${dessinPremiere(p.type, 40)}</span>
+      <span class="premiere-txt">
+        <b>${esc(info.nom)}</b>
+        <small>${esc(versFR(p.jour))}</small>
+        ${p.mot ? `<small class="dit">${esc(p.mot)}</small>` : ''}
+        ${p.facon === 'devine' && !p.devoile_le
+          ? '<small class="secret">🤫 gardé pour eux</small>'
+          : p.vu_le ? '<small class="ok">lu par la famille</small>' : ''}
+        ${p.aussi_maison ? '<small class="ok">💛 vu à la maison aussi</small>' : ''}
+      </span>
+      <button class="abs-act" data-suppr-prem="${esc(p.id)}" aria-label="Retirer">
+        <svg><use href="#i-poubelle"/></svg></button>
+    </div>`;
+  }).join('');
+  $$('#listePremieres [data-suppr-prem]').forEach(b => {
+    b.onclick = async () => {
+      if (!confirm('Retirer cette première fois ?')) return;
+      try { await Supa.supprimer('premieres_fois', 'id=eq.' + b.dataset.supprPrem);
+        await chargerPremieres(); renderPremieres(); } catch (e) { toast(enClair(e)); }
+    };
+  });
+}
+
+const ILLU_PREMIERE = `<svg viewBox="0 0 96 72" fill="none" aria-hidden="true">
+  <path d="M48 12l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z" fill="var(--acc-doux)" stroke="var(--acc)" stroke-width="1.6" stroke-linejoin="round"/>
+  <circle cx="20" cy="52" r="4" fill="var(--acc-doux)"/><circle cx="76" cy="46" r="3" fill="var(--acc-doux)"/>
+  <path d="M30 60h36" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" opacity=".4"/></svg>`;
+
+function ouvrirChoixPremiere() {
+  if (!contratActif) { toast('Choisis d\u2019abord une famille'); return; }
+  $('#premieresGrille').innerHTML = Object.keys(PREMIERES).map(c =>
+    `<button data-p="${c}"><span>${dessinPremiere(c, 40)}</span>${esc(PREMIERES[c].nom)}</button>`).join('');
+  $$('#premieresGrille [data-p]').forEach(b => {
+    b.onclick = () => {
+      $('#choixPremiere').hidden = true;
+      premiereChoisie = b.dataset.p;
+      $('#ditDessin').innerHTML = dessinPremiere(premiereChoisie, 46);
+      $('#ditNom').textContent = PREMIERES[premiereChoisie].nom;
+      $('#ditMot').value = '';
+      $('#ditPremiere').hidden = false;
+    };
+  });
+  $('#choixPremiere').hidden = false;
+}
+
+async function noterPremiere(facon) {
+  if (!premiereChoisie || !contratActif) return;
+  const c = contrats.find(x => x.id === contratActif);
+  const prenom = (c && c.enfant_prenom) || 'votre enfant';
+  const info = PREMIERES[premiereChoisie];
+  try {
+    await Supa.ecrire('premieres_fois', {
+      contrat_id: contratActif, auteur_id: Supa.moi().id,
+      type: premiereChoisie, jour: isoDuJour(new Date()),
+      mot: $('#ditMot').value.trim() || null, facon
+    });
+    // Le titre de la notification ne trahit rien quand elle a choisi de se taire.
+    Supa.notifier(contratActif,
+      facon === 'devine' ? prenom + ' — quelque chose de beau' : prenom + ' — ' + info.nom,
+      facon === 'devine' ? 'Il s\u2019est passé quelque chose aujourd\u2019hui.' : ($('#ditMot').value.trim().slice(0, 90) || ''),
+      false, 'premieres');
+    $('#ditPremiere').hidden = true;
+    premiereChoisie = null;
+    await chargerPremieres(); renderPremieres();
+    toast(facon === 'devine' ? 'Prévenus, sans le détail' : 'Raconté à la famille');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+/* ---------------- Ce qu'on a fait aujourd'hui ---------------- */
+let activites = [], comptines = [], livres = [];
+
+function renderActivites() {
+  const box = $('#activites');
+  if (box) {
+    box.innerHTML = ACTIVITES.map(([emoji, nom]) =>
+      `<button class="puce ${activites.includes(nom) ? 'on' : ''}" data-activite="${esc(nom)}">
+        <span>${emoji}</span>${esc(nom)}</button>`).join('');
+    $$('#activites [data-activite]').forEach(b => {
+      b.onclick = () => {
+        const n = b.dataset.activite;
+        activites = activites.includes(n) ? activites.filter(x => x !== n) : [...activites, n];
+        b.classList.toggle('on');
+      };
+    });
+  }
+  const etiq = (liste, champ) => liste.length
+    ? liste.map((t, i) => `<span class="etiq-sup">${esc(t)}<button data-sup="${champ}:${i}">✕</button></span>`).join('')
+    : '';
+  $('#listeComptines').innerHTML = etiq(comptines, 'comptines');
+  $('#listeLivres').innerHTML = etiq(livres, 'livres');
+  $$('[data-sup]').forEach(b => {
+    b.onclick = () => {
+      const [c, i] = b.dataset.sup.split(':');
+      if (c === 'comptines') comptines = comptines.filter((_, n) => n !== +i);
+      else livres = livres.filter((_, n) => n !== +i);
+      renderActivites();
+    };
+  });
+}
+
+/* ---------------- Nouvelles familles ----------------
+   Sa disponibilite se calcule : places d'agrement moins contrats actifs. Elle
+   n'a rien a tenir a jour, et c'est justement ce que les annuaires ratent. */
+let demandesAccueil = [];
+
+function placesLibres() {
+  const places = (profilPro && profilPro.places) || 0;
+  const actifs = contrats.filter(c => c.statut === 'actif').length;
+  return Math.max(0, places - actifs);
+}
+
+function renderVisibilite() {
+  const v = $('#proVisible');
+  if (v && profilPro) v.checked = !!profilPro.visible_recherche;
+  if (profilPro) {
+    $('#proCommune').value = profilPro.commune || '';
+    $('#proCP').value = profilPro.code_postal || '';
+  }
+  const box = $('#placesLibres');
+  if (box) {
+    const libres = placesLibres();
+    const places = (profilPro && profilPro.places) || 0;
+    box.innerHTML = !places
+      ? '<p class="hint" style="margin:0">Renseigne tes places d\u2019agrément dans Mon profil pour que ta disponibilité se calcule.</p>'
+      : `<div class="places-vue"><b>${libres}</b><span>place${libres > 1 ? 's' : ''} libre${libres > 1 ? 's' : ''}
+         <small>${places} agréée${places > 1 ? 's' : ''}, ${places - libres} occupée${places - libres > 1 ? 's' : ''}</small></span></div>
+         <p class="hint" style="margin:8px 0 0">Ce chiffre se met à jour seul quand un contrat commence ou se termine. Rien à saisir.</p>`;
+  }
+}
+
+async function chargerDemandesAccueil() {
+  demandesAccueil = [];
+  if (!Supa.connecte()) return;
+  try {
+    demandesAccueil = await Supa.lire('demandes_accueil',
+      'salariee_id=eq.' + Supa.moi().id + '&etat=neq.retiree&select=id,parent_id,enfant_prenom,enfant_naissance,debut_souhaite,mot,etat,cree_le&order=cree_le.desc&limit=20');
+  } catch (e) {}
+}
+
+function renderDemandesAccueil() {
+  const attente = demandesAccueil.filter(d => d.etat === 'attente');
+  const cpt = $('#cptDemAcc');
+  if (cpt) cpt.textContent = attente.length ? String(attente.length) : '';
+  const box = $('#listeDemAccueil');
+  if (!box) return;
+
+  box.innerHTML = demandesAccueil.length ? demandesAccueil.map(d => `
+    <div class="demande-acc ${d.etat}">
+      <div class="da-haut"><b>${esc(d.enfant_prenom || 'Un enfant')}</b>
+        <span>${esc(ilYA(d.cree_le))}</span></div>
+      ${d.debut_souhaite ? `<small>Souhaite commencer le ${esc(versFR(d.debut_souhaite))}</small>` : ''}
+      ${d.mot ? `<p class="da-mot">${esc(d.mot)}</p>` : ''}
+      ${d.etat === 'attente'
+        ? `<div class="deux" style="margin-top:8px">
+             <button class="btn btn-primary btn-petit" data-acc="${esc(d.id)}">Accepter</button>
+             <button class="btn btn-ghost btn-petit" data-ref="${esc(d.id)}">Refuser</button>
+           </div>`
+        : `<small class="${d.etat === 'acceptee' ? 'ok' : 'manque'}">${d.etat === 'acceptee' ? 'acceptée' : 'refusée'}</small>`}
+    </div>`).join('')
+    : '<p class="hint" style="margin:0">Aucune demande pour le moment.</p>';
+
+  $$('#listeDemAccueil [data-acc]').forEach(b => { b.onclick = () => repondreDemandeAccueil(b.dataset.acc, true); });
+  $$('#listeDemAccueil [data-ref]').forEach(b => { b.onclick = () => repondreDemandeAccueil(b.dataset.ref, false); });
+}
+
+function ilYA(iso) {
+  const j = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (j <= 0) return "aujourd'hui";
+  if (j === 1) return 'hier';
+  if (j < 7) return 'il y a ' + j + ' jours';
+  if (j < 31) return 'il y a ' + Math.floor(j / 7) + ' semaine' + (j >= 14 ? 's' : '');
+  return 'il y a ' + Math.floor(j / 30) + ' mois';
+}
+
+async function repondreDemandeAccueil(id, oui) {
+  const motif = oui ? null : (prompt('Un mot pour expliquer ? (facultatif)') || '').trim() || null;
+  try {
+    await Supa.modifier('demandes_accueil',
+      { etat: oui ? 'acceptee' : 'refusee', motif_refus: motif }, 'id=eq.' + id);
+    await chargerDemandesAccueil(); renderDemandesAccueil();
+    toast(oui ? 'Acceptée — la famille va publier son contrat' : 'Refusée');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+async function enregistrerVisibilite() {
+  if (!profilPro) return;
+  try {
+    await Supa.ecrire('profils_pro', [{
+      id: Supa.moi().id,
+      visible_recherche: $('#proVisible').checked,
+      commune: $('#proCommune').value.trim() || null,
+      code_postal: $('#proCP').value.trim() || null
+    }], 'resolution=merge-duplicates');
+    profilPro.visible_recherche = $('#proVisible').checked;
+    toast($('#proVisible').checked ? 'Tu apparais dans la recherche' : 'Tu n\u2019apparais plus');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+async function chargerProfilPro() {
+  profilPro = null;
+  if (!Supa.connecte()) return;
+  try {
+    const r = await Supa.lire('profils_pro',
+      'id=eq.' + Supa.moi().id +
+      '&select=photo,presentation,depuis,agrement_num,agrement_jusqu,places,diplomes,formations,langues,accueil,visible_recherche,commune,code_postal');
+    profilPro = (r && r[0]) || { diplomes: [], formations: [], langues: [], accueil: {} };
+  } catch (e) { profilPro = { diplomes: [], formations: [], langues: [], accueil: {} }; }
+}
+
+let portraitPro = null;
+
+function renderProfilPro() {
+  if (!profilPro) return;
+  const p = profilPro;
+
+  $('#proPresentation').value = p.presentation || '';
+  $('#proDepuis').value = p.depuis ? versFR(p.depuis) : '';
+  $('#proPlaces').value = p.places || '';
+  $('#proAgrement').value = p.agrement_num || '';
+  $('#proAgrementJusqu').value = p.agrement_jusqu ? versFR(p.agrement_jusqu) : '';
+  $('#proAnimaux').value = (p.accueil || {}).animaux || '';
+  $('#proLangues').value = (p.langues || []).join(', ');
+
+  // le portrait
+  const box = $('#proPortrait');
+  if (portraitPro) box.innerHTML = `<img src="${portraitPro}" alt="">`;
+  else box.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="25" r="12" fill="var(--acc-doux)"/>
+      <path d="M11 56c0-11 9-19 21-19s21 8 21 19z" fill="var(--acc-doux)"/>
+      <path d="M26 24a6 6 0 0 1 12 0" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round"/>
+    </svg>`;
+
+  renderQualifs('diplomes', '#listeDiplomes', '#cptDiplomes');
+  renderQualifs('formations', '#listeFormations', '#cptFormations');
+
+  const acc = p.accueil || {};
+  $('#cadreAccueil').innerHTML = CADRES.map(([cle, emoji, nom]) =>
+    `<button class="cadre ${acc[cle] ? 'on' : ''}" data-cadre="${cle}">
+      <span>${emoji}</span>${esc(nom)}</button>`).join('');
+  $$('#cadreAccueil [data-cadre]').forEach(b => {
+    b.onclick = () => {
+      profilPro.accueil = { ...(profilPro.accueil || {}) };
+      profilPro.accueil[b.dataset.cadre] = !profilPro.accueil[b.dataset.cadre];
+      b.classList.toggle('on');
+    };
+  });
+}
+
+function renderQualifs(champ, selListe, selCompteur) {
+  const liste = profilPro[champ] || [];
+  const cpt = $(selCompteur);
+  if (cpt) cpt.textContent = liste.length ? String(liste.length) : '';
+  const box = $(selListe);
+  if (!box) return;
+
+  box.innerHTML = liste.length ? liste.map((q, i) => {
+    const info = QUALIFS[q.type] || QUALIFS.autre;
+    const perime = q.jusqu && q.jusqu < new Date().toISOString().slice(0, 10);
+    return `<div class="qualif">
+      <span class="qualif-badge">${badgeQualif(q.type, 40)}</span>
+      <span class="qualif-txt">
+        <b>${esc(q.intitule || info.nom)}</b>
+        <small>${q.annee ? esc(String(q.annee)) : ''}${q.organisme ? ' · ' + esc(q.organisme) : ''}</small>
+        ${q.jusqu ? `<small class="${perime ? 'manque' : 'ok'}">${perime ? 'à renouveler' : 'valable jusqu\u2019au ' + esc(versFR(q.jusqu))}</small>` : ''}
+      </span>
+      <button class="abs-act" data-retire="${champ}:${i}" aria-label="Retirer">
+        <svg><use href="#i-poubelle"/></svg></button>
+    </div>`;
+  }).join('')
+    : `<p class="hint" style="margin:0 0 8px">${champ === 'diplomes' ? 'Aucun diplôme renseigné.' : 'Aucune formation renseignée.'}</p>`;
+
+  $$(selListe + ' [data-retire]').forEach(b => {
+    b.onclick = () => {
+      const [c, i] = b.dataset.retire.split(':');
+      profilPro[c] = profilPro[c].filter((_, n) => n !== +i);
+      renderQualifs(c, selListe, selCompteur);
+    };
+  });
+}
+
+/* Le choix se fait dans une feuille : les badges se reconnaissent d'un coup. */
+function ouvrirChoixQualif(champ) {
+  const modale = $('#choixQualif');
+  $('#qualifTitre').textContent = champ === 'diplomes' ? 'Quel diplôme ?' : 'Quelle formation ?';
+  const cles = champ === 'diplomes'
+    ? ['cap_aepe', 'auxi_puer', 'eje', 'bep_asssp', 'formation_initiale', 'autre']
+    : ['psc1', 'haccp', 'montessori', 'langue_signes', 'continue', 'autre'];
+  $('#qualifGrille').innerHTML = cles.map(c =>
+    `<button data-q="${c}"><span>${badgeQualif(c, 44)}</span>${esc(QUALIFS[c].court)}</button>`).join('');
+  $$('#qualifGrille [data-q]').forEach(b => {
+    b.onclick = () => {
+      modale.hidden = true;
+      ajouterQualif(champ, b.dataset.q);
+    };
+  });
+  modale.hidden = false;
+}
+
+function ajouterQualif(champ, type) {
+  const info = QUALIFS[type];
+  const intitule = type === 'autre' ? (prompt('Intitulé de la qualification ?') || '').trim() : info.nom;
+  if (type === 'autre' && !intitule) return;
+  const annee = (prompt('Année d\u2019obtention ?', String(new Date().getFullYear())) || '').trim();
+  const q = { type, intitule, annee: annee ? Number(annee) : null };
+  if (champ === 'formations' && ['psc1', 'haccp'].includes(type)) {
+    const j = (prompt('Valable jusqu\u2019au ? (jj/mm/aaaa, laissez vide si sans limite)') || '').trim();
+    if (j) q.jusqu = versISO(j);
+  }
+  profilPro[champ] = [...(profilPro[champ] || []), q];
+  renderQualifs(champ, champ === 'diplomes' ? '#listeDiplomes' : '#listeFormations',
+                champ === 'diplomes' ? '#cptDiplomes' : '#cptFormations');
+}
+
+async function enregistrerProfilPro() {
+  if (!Supa.connecte()) { toast('Connecte-toi d\u2019abord'); return; }
+  const langues = $('#proLangues').value.split(',').map(x => x.trim()).filter(Boolean);
+  const places = parseInt($('#proPlaces').value, 10);
+  const corps = {
+    id: Supa.moi().id,
+    presentation: $('#proPresentation').value.trim() || null,
+    depuis: versISO($('#proDepuis').value) || null,
+    agrement_num: $('#proAgrement').value.trim() || null,
+    agrement_jusqu: versISO($('#proAgrementJusqu').value) || null,
+    places: isFinite(places) && places >= 1 && places <= 6 ? places : null,
+    diplomes: profilPro.diplomes || [],
+    formations: profilPro.formations || [],
+    langues,
+    accueil: { ...(profilPro.accueil || {}), animaux: $('#proAnimaux').value.trim() || null }
+  };
+  try {
+    await Supa.ecrire('profils_pro', [corps], 'resolution=merge-duplicates');
+    await chargerProfilPro();
+    toast('Profil enregistré — tes familles le voient');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+/* La photo de profil : elle n'appartient a aucun contrat, sa lecture passe
+   par la regle attachee a profils_pro. */
+async function envoyerPhotoPro(fichier) {
+  if (fichier.size > 8 * 1024 * 1024) { toast('Photo trop lourde, 8 Mo maximum'); return; }
+  toast('Envoi…');
+  try {
+    const chemin = 'profils/' + Supa.moi().id + '.jpg';
+    const r = await fetch(Supa.adresse() + '/storage/v1/object/photos/' + chemin + '?upsert=true', {
+      method: 'POST', headers: { ...Supa.entetes(), 'Content-Type': fichier.type || 'image/jpeg' }, body: fichier });
+    if (!r.ok) throw new Error('Dépôt refusé (' + r.status + ')');
+    await Supa.ecrire('profils_pro', [{ id: Supa.moi().id, photo: chemin }], 'resolution=merge-duplicates');
+    profilPro.photo = chemin;
+    portraitPro = await telechargerPhoto(chemin);
+    renderProfilPro();
+    toast('Photo enregistrée');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 
 /* ---------------- Remplacement ----------------
@@ -4033,6 +4699,19 @@ $('#fichierJustif').onchange = e => {
   e.target.value = '';
 };
 $('#btnFrimousse').onclick = ouvrirFrimousses;
+$('#proVisible').onchange = enregistrerVisibilite;
+$('#proCommune').onchange = enregistrerVisibilite;
+$('#proCP').onchange = enregistrerVisibilite;
+$('#btnAjoutDiplome').onclick = () => ouvrirChoixQualif('diplomes');
+$('#btnAjoutFormation').onclick = () => ouvrirChoixQualif('formations');
+$('#qualifFermer').onclick = () => { $('#choixQualif').hidden = true; };
+$('#btnProfilEnregistrer').onclick = enregistrerProfilPro;
+$('#btnProPhoto').onclick = () => photoOuChamp('proPhotoFichier', f => envoyerPhotoPro(f));
+$('#proPhotoFichier').onchange = e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) envoyerPhotoPro(f);
+  e.target.value = '';
+};
 // un bouton qui déclenche le champ : plus fiable qu'un label enveloppant
 $('#btnPhotoPortrait').onclick = () => photoOuChamp('photoPortrait', f => envoyerPortrait(f));
 $('#photoPortrait').onchange = e => {
@@ -4043,6 +4722,7 @@ $('#photoPortrait').onchange = e => {
 $('#btnNotif').onclick = ouvrirCentreNotif;
 $('#notifFermer').onclick = () => { $('#centreNotif').hidden = true; };
 $('#centreNotif').addEventListener('click', e => { if (e.target === e.currentTarget) $('#centreNotif').hidden = true; });
+$('#btnDev').onclick = demanderCodeDev;
 $('#btnRelancerPush').onclick = () => activerPush();
 $('#btnTestPush').onclick = testerPush;
 $('#btnCreerCommun').onclick = creerCommun;
@@ -4088,6 +4768,20 @@ $('#btnMdpOublie').onclick = async () => {
 };
 $('#btnJournal').onclick = enregistrerJournal;
 $('#btnAjoutSieste').onclick = () => { siestes.push({ debut: '', fin: '' }); renderSiestes(); };
+$('#btnPremiere').onclick = ouvrirChoixPremiere;
+$('#premiereFermer').onclick = () => { $('#choixPremiere').hidden = true; };
+$('#ditFermer').onclick = () => { $('#ditPremiere').hidden = true; premiereChoisie = null; };
+$$('#ditPremiere .facon').forEach(b => { b.onclick = () => noterPremiere(b.dataset.facon); });
+$('#btnComptine').onclick = () => {
+  const t = $('#comptineTexte').value.trim();
+  if (!t) return;
+  comptines = [...comptines, t]; $('#comptineTexte').value = ''; renderActivites();
+};
+$('#btnLivre').onclick = () => {
+  const t = $('#livreTexte').value.trim();
+  if (!t) return;
+  livres = [...livres, t]; $('#livreTexte').value = ''; renderActivites();
+};
 $('#jourPrec').onclick = () => decalerJour(-1);
 $('#jourSuiv').onclick = () => decalerJour(1);
 $('#chRepas').addEventListener('click', e => {
@@ -4693,6 +5387,115 @@ function glisserToutesLesFeuilles(racine) {
 new MutationObserver(() => glisserToutesLesFeuilles()).observe(document.documentElement, { childList: true, subtree: true });
 glisserToutesLesFeuilles();
 
+/* ---------------- Diplômes et formations ----------------
+   Chacun a son dessin : un badge se reconnait d'un coup d'oeil, une ligne de
+   texte se lit. Les couleurs distinguent les familles de qualification. */
+const QUALIFS = {
+  cap_aepe: { nom: 'CAP Accompagnant éducatif petite enfance', court: 'CAP AEPE', ton: '#2f7d73',
+    dessin: '<path d="M32 10L6 23l26 13 26-13z" fill="currentColor"/><path d="M16 30v13c0 5 7 9 16 9s16-4 16-9V30" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M56 24v14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>' },
+  auxi_puer: { nom: 'Auxiliaire de puériculture', court: 'Auxiliaire puéri.', ton: '#d1698a',
+    dessin: '<circle cx="32" cy="24" r="11" fill="currentColor"/><path d="M13 54c0-10 8-17 19-17s19 7 19 17z" fill="currentColor" opacity=".55"/><path d="M32 15v8M28 19h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>' },
+  eje: { nom: 'Éducateur de jeunes enfants', court: 'EJE', ton: '#7a5cc4',
+    dessin: '<path d="M12 44V18a4 4 0 0 1 4-4h13a5 5 0 0 1 3 1v33a5 5 0 0 0-3-1H16a4 4 0 0 0-4 4z" fill="currentColor"/><path d="M52 44V18a4 4 0 0 0-4-4H35a5 5 0 0 0-3 1v33a5 5 0 0 1 3-1h13a4 4 0 0 1 4 4z" fill="currentColor" opacity=".55"/>' },
+  bep_asssp: { nom: 'Bac pro / BEP services à la personne', court: 'Bac pro ASSP', ton: '#3e7fb0',
+    dessin: '<rect x="12" y="14" width="40" height="36" rx="5" fill="currentColor" opacity=".55"/><path d="M20 26h24M20 34h24M20 42h14" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>' },
+  formation_initiale: { nom: 'Formation initiale obligatoire (120 h)', court: 'Formation initiale', ton: '#c08a2e',
+    dessin: '<circle cx="32" cy="32" r="20" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 20v12l8 5" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>' },
+  psc1: { nom: 'Premiers secours (PSC1 / SST)', court: 'Premiers secours', ton: '#c9453f',
+    dessin: '<rect x="10" y="20" width="44" height="28" rx="7" fill="currentColor"/><path d="M32 28v12M26 34h12" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/><path d="M24 20v-3a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v3" fill="none" stroke="currentColor" stroke-width="3.4"/>' },
+  haccp: { nom: 'Hygiène alimentaire', court: 'Hygiène', ton: '#4f9e5e',
+    dessin: '<path d="M22 14c-3 6-3 12 0 18v18a4 4 0 0 0 8 0V32c3-6 3-12 0-18z" fill="currentColor"/><path d="M42 14v14a4 4 0 0 0 8 0V14" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/><path d="M46 28v22" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>' },
+  montessori: { nom: 'Approche Montessori', court: 'Montessori', ton: '#c76a3a',
+    dessin: '<path d="M32 12l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z" fill="currentColor"/>' },
+  langue_signes: { nom: 'Langue des signes bébé', court: 'Signes bébé', ton: '#3f9bb0',
+    dessin: '<path d="M24 50V30a4 4 0 0 1 8 0v-6a4 4 0 0 1 8 0v6a4 4 0 0 1 8 0v14c0 7-5 12-12 12h-4c-5 0-8-3-8-6z" fill="currentColor"/><path d="M24 34l-6-8a4 4 0 0 1 6-5l4 6" fill="currentColor" opacity=".6"/>' },
+  continue: { nom: 'Formation continue', court: 'Formation continue', ton: '#8a8f6b',
+    dessin: '<path d="M32 12a20 20 0 1 1-14 34" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M18 34l-5 12 12-5z" fill="currentColor"/>' },
+  autre: { nom: 'Autre qualification', court: 'Autre', ton: '#7d8a86',
+    dessin: '<circle cx="32" cy="26" r="12" fill="currentColor"/><path d="M22 36l-4 18 14-7 14 7-4-18" fill="currentColor" opacity=".55"/>' }
+};
+
+function badgeQualif(cle, taille) {
+  const q = QUALIFS[cle] || QUALIFS.autre;
+  const t = taille || 40;
+  return `<svg viewBox="0 0 64 64" width="${t}" height="${t}" style="color:${q.ton}" aria-hidden="true">${q.dessin}</svg>`;
+}
+
+/* ---------------- Mode développeur ----------------
+   Certaines fonctions sont ecrites mais pas mures : la recherche d'une
+   assistante maternelle en fait partie. Plutot que de les livrer a moitie ou
+   de les garder hors du code, elles restent la, eteintes. */
+const CODE_MAINTENANCE = 'COCON-2026';
+
+function modeDev() {
+  try { return localStorage.getItem('cocon-dev') === '1'; } catch (e) { return false; }
+}
+
+function basculerDev(actif) {
+  try { localStorage.setItem('cocon-dev', actif ? '1' : '0'); } catch (e) {}
+  appliquerDev();
+}
+
+/* Les elements marques data-dev n'existent que dans ce mode. */
+function appliquerDev() {
+  const on = modeDev();
+  document.querySelectorAll('[data-dev]').forEach(el => { el.hidden = !on; });
+  const t = document.getElementById('etatDev');
+  if (t) t.textContent = on ? 'activé' : 'désactivé';
+  if (typeof renderBarre === 'function') renderBarre();
+}
+
+async function demanderCodeDev() {
+  if (modeDev()) {
+    if (confirm('Désactiver le mode développeur ?\n\nLes fonctions en préparation seront de nouveau masquées.')) basculerDev(false);
+    return;
+  }
+  const c = (prompt('Code de maintenance') || '').trim().toUpperCase();
+  if (!c) return;
+  if (c !== CODE_MAINTENANCE) { toast('Code incorrect'); secouer('.card'); return; }
+  basculerDev(true);
+  toast('Mode développeur activé — fonctions en préparation visibles');
+}
+
+/* ---------------- Les premières fois ----------------
+   Le sujet le plus delicat du metier. Un premier pas chez la nounou, et le
+   parent a le sentiment d'avoir manque quelque chose. Beaucoup
+   d'assistantes maternelles se taisent pour laisser la decouverte aux
+   parents ; d'autres racontent tout de suite. Aucune n'a tort : on laisse le
+   choix, a chaque fois. */
+const PREMIERES = {
+  sourire:   { nom: 'Premier sourire',      ton: '#f0a860',
+    d: '<circle cx="32" cy="32" r="20" fill="currentColor"/><circle cx="25" cy="28" r="2.6" fill="#fff"/><circle cx="39" cy="28" r="2.6" fill="#fff"/><path d="M22 38c4 6 16 6 20 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>' },
+  dent:      { nom: 'Première dent',        ton: '#7fb4c4',
+    d: '<path d="M20 16c8-4 16-4 24 0 3 2 4 6 3 10l-5 22c-1 4-6 4-7 0l-3-14-3 14c-1 4-6 4-7 0l-5-22c-1-4 0-8 3-10z" fill="currentColor"/>' },
+  assis:     { nom: 'Assis tout seul',      ton: '#94c9a0',
+    d: '<circle cx="32" cy="18" r="8" fill="currentColor"/><path d="M32 28c-7 0-11 5-11 12v6h22v-6c0-7-4-12-11-12z" fill="currentColor"/><path d="M21 46c-4 0-7 2-7 5h36c0-3-3-5-7-5z" fill="currentColor" opacity=".55"/>' },
+  quatre:    { nom: 'À quatre pattes',      ton: '#c4a25c',
+    d: '<circle cx="20" cy="24" r="7" fill="currentColor"/><path d="M26 30h18c4 0 7 3 7 7v3H26z" fill="currentColor"/><path d="M28 40v8M48 40v8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>' },
+  debout:    { nom: 'Debout',               ton: '#b88ec4',
+    d: '<circle cx="32" cy="14" r="7" fill="currentColor"/><path d="M32 22c-5 0-8 3-8 8v10h16V30c0-5-3-8-8-8z" fill="currentColor"/><path d="M27 40v12M37 40v12" stroke="currentColor" stroke-width="4.4" stroke-linecap="round"/>' },
+  pas:       { nom: 'Premiers pas',         ton: '#e08a92',
+    d: '<circle cx="32" cy="12" r="7" fill="currentColor"/><path d="M32 20c-5 0-8 3-8 8v8h16v-8c0-5-3-8-8-8z" fill="currentColor"/><path d="M26 36l-5 14M38 36l6 14" stroke="currentColor" stroke-width="4.4" stroke-linecap="round"/><path d="M16 52h10M40 52h10" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity=".5"/>' },
+  mot:       { nom: 'Premier mot',          ton: '#5fa8b8',
+    d: '<path d="M12 18h40v24H32l-10 8v-8h-10z" fill="currentColor"/><circle cx="24" cy="30" r="3" fill="#fff"/><circle cx="32" cy="30" r="3" fill="#fff"/><circle cx="40" cy="30" r="3" fill="#fff"/>' },
+  cuillere:  { nom: 'Mange à la cuillère',  ton: '#d09a4c',
+    d: '<ellipse cx="24" cy="20" rx="9" ry="11" fill="currentColor"/><path d="M24 31v21" stroke="currentColor" stroke-width="4.4" stroke-linecap="round"/><path d="M42 14v18a5 5 0 0 0 10 0V14" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><path d="M47 32v20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>' },
+  proprete:  { nom: 'Le pot',               ton: '#8fb87f',
+    d: '<path d="M16 28h32l-3 18a6 6 0 0 1-6 5H25a6 6 0 0 1-6-5z" fill="currentColor"/><path d="M48 32h4a4 4 0 0 1 0 8h-4" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M22 22a10 10 0 0 1 20 0" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>' },
+  copain:    { nom: 'Un copain',            ton: '#c48ea0',
+    d: '<circle cx="22" cy="22" r="9" fill="currentColor"/><circle cx="44" cy="24" r="8" fill="currentColor" opacity=".6"/><path d="M8 50c0-8 6-14 14-14s14 6 14 14z" fill="currentColor"/><path d="M32 50c0-7 5-12 12-12s12 5 12 12z" fill="currentColor" opacity=".6"/>' },
+  dessin:    { nom: 'Premier dessin',       ton: '#c9776a',
+    d: '<rect x="12" y="12" width="40" height="40" rx="5" fill="currentColor" opacity=".25"/><path d="M20 42c4-14 10-20 14-12s8 6 10-4" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>' },
+  autre:     { nom: 'Autre première fois',  ton: '#9aa39f',
+    d: '<path d="M32 10l7 14 15 2-11 11 3 15-14-8-14 8 3-15-11-11 15-2z" fill="currentColor"/>' }
+};
+
+function dessinPremiere(cle, taille) {
+  const p = PREMIERES[cle] || PREMIERES.autre;
+  const t = taille || 44;
+  return `<svg viewBox="0 0 64 64" width="${t}" height="${t}" style="color:${p.ton}" aria-hidden="true">${p.d}</svg>`;
+}
+
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
   if (!PROJET.notifications) { etatPush.etape = 'Firebase absent de cette version de l\u2019application'; majEtatPush(); return; }
@@ -4722,7 +5525,7 @@ async function activerPush() {
       await rafraichirTout(true);
       const d = (ev && ev.notification && ev.notification.data) || {};
       if (d.contrat_id && contrats.some(c => c.id === d.contrat_id)) contratActif = d.contrat_id;
-      const ecrans = ['accueil', 'planning', 'journal', 'messages', 'galerie', 'familles', 'commun', 'params'];
+      const ecrans = ['accueil', 'planning', 'journal', 'messages', 'galerie', 'familles', 'commun', 'profil', 'params'];
       if (d.cible && ecrans.includes(d.cible)) {
         montrer(d.cible);
         if (d.cible === 'messages' && d.contrat_id) ouvrirConversation(d.contrat_id);

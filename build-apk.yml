@@ -165,6 +165,7 @@ jobs:
           fi
           cat android-extra/biometrie.gradle >> android/app/build.gradle
           cat android-extra/signature.gradle >> android/app/build.gradle
+          cat android-extra/version.gradle >> android/app/build.gradle
           python3 android-extra/icone-notification.py "${{ matrix.config }}"
           echo "--- classes copiées ---"; ls -1 "$APP"
 
@@ -214,6 +215,13 @@ jobs:
             echo "::warning::Aucune clé de signature : version de débogage."
           fi
 
+      - name: Relever la version
+        id: version
+        run: |
+          V=$(node -p "require('./package.json').version")
+          echo "valeur=$V" >> "$GITHUB_OUTPUT"
+          echo "Version $V, compilation ${{ github.run_number }}"
+
       - name: Compiler l'APK
         working-directory: ${{ steps.projet.outputs.dossier }}
         env:
@@ -223,11 +231,20 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
+          export COCON_VERSION="${{ steps.version.outputs.valeur }}"
+          export COCON_BUILD="${{ github.run_number }}"
+
           if [ "${{ steps.signature.outputs.signe }}" = "oui" ]; then
             export ASSMAT_KEYSTORE_FILE="$PWD/cocon.jks"
-            ./gradlew assembleRelease --no-daemon --stacktrace
+            # L'APK sert a l'installation directe ; l'AAB est ce que Google Play
+            # accepte. On produit les deux : le test par l'APK, la publication
+            # par l'AAB.
+            ./gradlew assembleRelease bundleRelease --no-daemon --stacktrace
             cp app/build/outputs/apk/release/app-release.apk ../${{ matrix.nom }}.apk
+            cp app/build/outputs/bundle/release/app-release.aab ../${{ matrix.nom }}.aab
+            echo "AAB prêt pour Google Play : $(du -h ../${{ matrix.nom }}.aab | cut -f1)"
           else
+            echo "::warning::Sans signature, pas d'AAB : Google Play refuse un envoi non signé."
             ./gradlew assembleDebug --no-daemon --stacktrace
             cp app/build/outputs/apk/debug/app-debug.apk ../${{ matrix.nom }}.apk
           fi
@@ -236,7 +253,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.nom }}
-          path: ${{ steps.projet.outputs.dossier }}/${{ matrix.nom }}.apk
+          path: |
+            ${{ steps.projet.outputs.dossier }}/${{ matrix.nom }}.apk
+            ${{ steps.projet.outputs.dossier }}/${{ matrix.nom }}.aab
           if-no-files-found: error
 
       - name: Ajouter à la version publiée
@@ -249,3 +268,6 @@ jobs:
             --notes "Cocon Parent pour l'employeur, Cocon Nounou pour l'assistante maternelle." \
             || true
           gh release upload "${{ github.ref_name }}" ${{ matrix.nom }}.apk --clobber
+          if [ -f ${{ matrix.nom }}.aab ]; then
+            gh release upload "${{ github.ref_name }}" ${{ matrix.nom }}.aab --clobber
+          fi

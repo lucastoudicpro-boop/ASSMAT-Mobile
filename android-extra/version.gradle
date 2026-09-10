@@ -1,0 +1,21 @@
+// Ajoute a la fin de android/app/build.gradle par le workflow.
+//
+// Google Play refuse un depot dont le numero de version n'a pas augmente.
+// On le calcule a partir de la version du projet — 1.4.4 devient 10404 — et
+// on y ajoute le numero de la compilation, pour que deux envois du meme
+// numero de version restent distincts.
+android {
+    defaultConfig {
+        def v = System.getenv("COCON_VERSION") ?: "0.0.0"
+        def bout = v.tokenize('.')
+        def majeur = (bout.size() > 0 ? bout[0] : "0").toInteger()
+        def mineur = (bout.size() > 1 ? bout[1] : "0").toInteger()
+        def correctif = (bout.size() > 2 ? bout[2] : "0").toInteger()
+        def compilation = (System.getenv("COCON_BUILD") ?: "0").toInteger()
+
+        versionName v
+        versionCode majeur * 1000000 + mineur * 10000 + correctif * 100 + Math.min(compilation, 99)
+
+        println "Version ${versionName} — code ${versionCode}"
+    }
+}
