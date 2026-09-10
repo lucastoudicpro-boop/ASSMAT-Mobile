@@ -2073,3 +2073,47 @@ applications au schema, mais pas le SQL a lui-meme. J'ai ajoute cette
 verification : chaque colonne citee dans les declencheurs et les fonctions est
 desormais confrontee au schema complet. Les trois autres fichiers sont propres,
 et les quatre declencheurs ne citent aucune colonne inexistante.
+
+## 1.8.0 — les derniers ajouts
+
+`020-sujets-dates.sql` est a executer. **C'est le dernier ajout de fonction :
+on passe ensuite a la verification de securite.**
+
+### A mettre au clair
+
+Une morsure, un retard de paiement, un desaccord sur le sommeil : c'est la que
+les relations se cassent, et rien n'aide a en parler. Ecrire a chaud dans la
+conversation ordinaire ne convient pas — l'autre lit a chaud.
+
+Neuf themes, chacun avec **une amorce neutre** qui s'inscrit dans le champ :
+« J'aimerais qu'on reparle des siestes, parce que… ». Ce n'est pas de la
+decoration : « j'aimerais qu'on reparle de » ouvre une discussion la ou « tu ne
+fais jamais » la ferme.
+
+Un conseil tire au hasard sous le champ, dont celui-ci : *ecrire, relire,
+envoyer plus tard — ce qui est pose le soir se lit mieux le matin*.
+
+Le sujet est pose, l'autre a le temps de le lire, chacun repond, et les deux
+peuvent marquer **« C'est regle »**. Une reponse ecrite ne se reecrit pas : un
+declencheur refuse toute modification. On n'efface pas ce qu'on a dit.
+
+### Les dates qui comptent
+
+L'anniversaire de l'enfant et celui du premier jour ensemble, tous deux
+**deduits** de ce qui est deja saisi. La carte n'apparait que dans les quinze
+jours qui precedent : un rappel permanent cesse d'etre remarque.
+
+### Le carnet de l'annee
+
+Ce qu'un parent garde et relit dans dix ans. Quatre chiffres qui montent, les
+grands moments avec leurs dessins, les comptines, les livres, ce qu'on a le plus
+fait — et un **jardin des humeurs** : une pousse par journee, dont la couleur
+dit l'humeur et dont la fleur grossit si le parent a aime la journee. Douze mois
+d'un coup d'oeil, sans un seul chiffre.
+
+Un bouton produit le carnet en PDF, mis en page comme un livre.
+
+**Corrige au test** : le jardin ne montrait que janvier. Mes retards
+d'animation montaient jusqu'a trente-trois secondes — les fleurs des autres
+mois attendaient encore quand on regardait deja ailleurs. Le retard total tient
+maintenant sous une demi-seconde, verifie a 0,41 s.

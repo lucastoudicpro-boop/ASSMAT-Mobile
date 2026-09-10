@@ -1403,6 +1403,62 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 .modal{transition:background .2s ease}
 @media (prefers-reduced-motion:reduce){.modal-box{transition:none!important}}
 
+
+/* ---------- Les sujets difficiles ---------- */
+.sujet{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;
+  border-bottom:1px solid var(--line);background:transparent;cursor:pointer;
+  text-align:left;color:var(--txt);font:inherit}
+.sujet:last-of-type{border-bottom:0}
+.sujet-ico{width:44px;height:44px;border-radius:15px;flex:0 0 auto;background:var(--zebre);
+  display:flex;align-items:center;justify-content:center;font-size:20px}
+.sujet-txt{flex:1;min-width:0;line-height:1.35}
+.sujet-txt b{display:block;font-size:14.5px}
+.sujet-txt small{display:block;font-size:12px;color:var(--mut)}
+.sujet-txt .neuf{color:#b4690e;font-weight:600}
+.sujet-txt .ok{color:var(--acc)}
+.sujet.regle{opacity:.55}
+.sujet.regle .sujet-ico{background:transparent}
+
+.themes-grille{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 6px}
+.themes-grille button{border:1.4px solid var(--bord);background:var(--card);border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;
+  cursor:pointer;color:var(--mut);font:500 11.5px system-ui;text-align:center;min-height:64px}
+.themes-grille button span{font-size:19px}
+.themes-grille button.on{border-color:var(--acc);background:var(--acc-doux);color:var(--txt);font-weight:600}
+.sujet-corps{background:var(--zebre);border-radius:14px;padding:12px 14px;
+  font-size:13.5px;line-height:1.5;white-space:pre-wrap;margin:8px 0 12px}
+
+
+/* ---------- Le carnet de l'année ---------- */
+.carnet-tete{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:14px}
+.carnet-tete b{font:700 26px system-ui}
+.fleche{border:0;background:var(--zebre);width:36px;height:36px;border-radius:18px;
+  font-size:19px;color:var(--acc);cursor:pointer}
+.fleche:disabled{opacity:.3}
+.carnet-chiffres{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
+.carnet-chiffres div{background:var(--acc-doux);border-radius:15px;padding:13px 14px;text-align:center}
+.carnet-chiffres b{display:block;font:700 27px/1 system-ui;color:var(--acc)}
+.carnet-chiffres small{font-size:12px;color:var(--mut);line-height:1.3;display:block;margin-top:4px}
+.jardin{width:100%;height:auto;margin:4px 0}
+.jardin g{animation:pousse .6s cubic-bezier(.3,1.3,.5,1) both;animation-delay:var(--i)}
+@keyframes pousse{from{opacity:0;transform:translateY(4px) scale(.4)}to{opacity:1;transform:none}}
+.carnet-premieres{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cp{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;
+  text-align:center;line-height:1.3}
+.cp span{display:block;margin-bottom:5px}
+.cp b{display:block;font-size:12.5px}
+.cp small{font-size:11px;color:var(--mut)}
+@media (prefers-reduced-motion:reduce){.jardin g{animation:none}}
+.date-marquante{display:flex;align-items:center;gap:14px;background:var(--acc-doux);
+  border-radius:16px;padding:13px 15px;margin-bottom:10px;animation:eclot .5s ease both}
+.date-marquante.anniv{background:linear-gradient(120deg,#fdeef1,#fff6e0)}
+.dm-dessin{width:46px;height:46px;flex:0 0 auto}
+.dm-dessin svg{width:100%;height:100%;animation:flotte 3s ease-in-out infinite}
+.dm-txt{flex:1;min-width:0;line-height:1.35}
+.dm-txt b{display:block;font-size:14.5px}
+.dm-txt small{font-size:12.5px;color:var(--mut)}
+@media (prefers-reduced-motion:reduce){.dm-dessin svg{animation:none}}
+
 </style>
 </head>
 <body>
@@ -1549,6 +1605,38 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <div id="sp-mot">Cocon Parent</div>
   <div id="sp-barre"></div>
   <div id="sp-sous">Fiches de salaire</div>
+</div>
+
+<div id="feuilleNouveau" class="modal" hidden>
+  <div class="modal-box">
+    <h3>Mettre quelque chose au clair</h3>
+    <div class="themes-grille" id="themesGrille"></div>
+    <input id="nouvTitre" placeholder="De quoi s'agit-il, en quelques mots" maxlength="140" style="margin-top:12px">
+    <textarea id="nouvCorps" rows="5" placeholder="Ce que vous avez constaté…" maxlength="2000" style="margin-top:8px"></textarea>
+    <p class="hint" id="conseilSujet"></p>
+    <div class="modal-actions">
+      <button id="nouvFermer" class="btn btn-ghost">Annuler</button>
+      <button id="nouvPoser" class="btn btn-primary">Poser le sujet</button>
+    </div>
+  </div>
+</div>
+
+<div id="feuilleSujet" class="modal" hidden>
+  <div class="modal-box">
+    <small id="sujTheme"></small>
+    <h3 id="sujTitre">—</h3>
+    <p id="sujCorps" class="sujet-corps"></p>
+    <div id="sujFil"></div>
+    <div class="deux" style="margin-top:10px">
+      <input id="sujReponse" placeholder="Votre réponse">
+      <button id="sujEnvoyer" class="btn btn-primary">Envoyer</button>
+    </div>
+    <div class="modal-actions">
+      <button id="sujFermer" class="btn btn-ghost">Fermer</button>
+      <button id="sujRegler" class="btn btn-primary">C'est réglé</button>
+    </div>
+    <p class="hint" id="sujEtat"></p>
+  </div>
 </div>
 
 <header id="hdr">
@@ -1843,6 +1931,20 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 </section>
 
 <div id="reserve" hidden>
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-notes"/></svg><span class="ttl">Le carnet de l'année</span></summary>
+    <div class="body"><div id="carnetAnnee"></div></div>
+  </details>
+
+  <details class="card">
+    <summary><svg class="ico"><use href="#i-mail"/></svg><span class="ttl">À mettre au clair</span><b class="tot" id="cptSujets"></b></summary>
+    <div class="body">
+      <div id="listeSujets"></div>
+      <button id="btnNouveauSujet" class="btn btn-ghost btn-block">Poser un sujet</button>
+      <p class="hint">Pour ce qui se dit mal dans un message rapide. Chacun a le temps de lire avant de répondre.</p>
+    </div>
+  </details>
+
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">Les premières fois</span><b class="tot" id="badgePremieres"></b></summary>
     <div class="body"><div id="listePremieres"></div></div>
@@ -2192,7 +2294,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.7.1</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.8.0</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -5205,6 +5307,8 @@ const PAGES = {
   commun:     { titre: 'Espace commun',     ancres: ['communEtat'] },
   adaptation: { titre: 'Adaptation',        ancres: ['listeAdaptation'] },
   premieres:  { titre: 'Premières fois',    ancres: ['listePremieres'] },
+  sujets:     { titre: 'À mettre au clair',  ancres: ['listeSujets'] },
+  carnet:     { titre: "Carnet de l'année",  ancres: ['carnetAnnee'] },
   recherche:  { titre: 'Chercher',          ancres: ['resultatsRecherche'] },
   reprise:    { titre: 'Reprise',           ancres: ['listeReprises'] },
   archive:    { titre: 'Archive',           ancres: ['archiveEtat'] },
@@ -5216,7 +5320,7 @@ let moduleActif = null;
    « le quotidien » et « le contrat », pas onze entrées. */
 const GROUPES = {
   quotidien: { titre: 'Au quotidien', onglets: ['journal', 'galerie', 'premieres', 'messages', 'demandes', 'semaine', 'commun'] },
-  contrat:   { titre: 'Le contrat',   onglets: ['nounous', 'urgence', 'adaptation', 'reprise', 'fermetures', 'conges', 'documents', 'archive'] }
+  contrat:   { titre: 'Le contrat',   onglets: ['nounous', 'urgence', 'adaptation', 'reprise', 'sujets', 'carnet', 'fermetures', 'conges', 'documents', 'archive'] }
 };
 const groupeDe = id => Object.keys(GROUPES).find(g => GROUPES[g].onglets.includes(id)) || null;
 
@@ -5296,6 +5400,8 @@ async function rafraichirModule(id) {
     commun:     async () => { await chargerCommun(); renderCommun(); },
     adaptation: async () => { await chargerAdaptation(); renderAdaptation(); },
     premieres:  async () => { await chargerPremieres(); renderPremieres(); },
+    sujets:     async () => { await chargerSujets(); renderSujets(); },
+    carnet:     async () => { $('#carnetAnnee').innerHTML = miroiter(4, true); renderCarnet(await chargerCarnet()); },
     recherche:  async () => { await chargerDemandesAccueil(); renderDemandesAccueil(); },
     reprise:    async () => { await chargerReprises(); renderReprises(); },
     archive:    async () => { renderArchive(); }
@@ -5318,6 +5424,8 @@ const MODULES = [
   { id: 'commun',    nom: 'Espace commun', ico: 'i-gens',    fn: () => ouvrirModule('commun') },
   { id: 'adaptation',nom: 'Adaptation',   ico: 'i-cal',      fn: () => ouvrirModule('adaptation') },
   { id: 'premieres', nom: 'Premières fois', ico: 'i-ok',      fn: () => ouvrirModule('premieres') },
+  { id: 'sujets',    nom: 'Au clair',      ico: 'i-mail',     fn: () => ouvrirModule('sujets') },
+  { id: 'carnet',    nom: "Carnet de l'année", ico: 'i-notes', fn: () => ouvrirModule('carnet') },
   { id: 'recherche', nom: 'Chercher',     ico: 'i-gens',     fn: () => ouvrirModule('recherche'), dev: true },
   { id: 'reprise',   nom: 'Reprise',      ico: 'i-notes',    fn: () => ouvrirModule('reprise') },
   { id: 'archive',   nom: 'Archive',      ico: 'i-sauve',    fn: () => ouvrirModule('archive') },
@@ -5590,7 +5698,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.7.1';
+const VERSION = '1.8.0';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -5789,6 +5897,173 @@ async function verifierContrat() {
 /* Un contrat en ligne dont l'enfant n'existe plus dans l'application : la
    nounou le voit toujours, le parent n'y accède plus. */
 let contratsOrphelins = [];
+
+/* ---------------- Le carnet de l'année ----------------
+   Des journees, des photos, des premieres fois : la matiere existe, mais rien
+   ne remonte le temps. C'est pourtant ce qu'un parent garde et relit dans dix
+   ans. On rassemble, on ne demande rien de plus. */
+const MOIS_COURTS = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin',
+                     'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
+let anneeCarnet = new Date().getFullYear();
+
+async function chargerCarnet() {
+  const id = contratLie();
+  if (!id || !Supa.connecte()) return null;
+  const du = anneeCarnet + '-01-01', au = anneeCarnet + '-12-31';
+  try {
+    const [j, p, ph] = await Promise.all([
+      Supa.lire('journal', 'contrat_id=eq.' + id + '&jour=gte.' + du + '&jour=lte.' + au +
+        '&select=jour,humeur,mot,comptines,livres,activites,coeur&order=jour'),
+      Supa.lire('premieres_fois', 'contrat_id=eq.' + id + '&jour=gte.' + du + '&jour=lte.' + au +
+        '&select=type,jour,mot,facon,devoile_le&order=jour'),
+      Supa.lire('photos_contrats', 'contrat_id=eq.' + id + '&select=photo_id')
+    ]);
+    return { journal: j, premieres: p, photos: ph.length };
+  } catch (e) { return null; }
+}
+
+/* Le jardin des humeurs : une pousse par journee, dont la couleur dit
+   l'humeur. Douze mois d'un coup d'oeil, sans un seul chiffre. */
+const TEINTES = { joyeux: '#f5c65e', calme: '#94c9a0', fatigue: '#a9b8d0',
+                  grognon: '#e0a07a', patraque: '#d98a94' };
+
+function jardinHumeurs(journal) {
+  const parMois = Array.from({ length: 12 }, () => []);
+  for (const j of journal) parMois[Number(j.jour.slice(5, 7)) - 1].push(j);
+  const large = 320, hautMois = 22;
+  return `<svg viewBox="0 0 ${large} ${12 * hautMois + 14}" class="jardin" aria-hidden="true">
+    ${parMois.map((jours, m) => {
+      const y = m * hautMois + 14;
+      const tiges = jours.map((j, i) => {
+        const x = 52 + (Number(j.jour.slice(8, 10)) - 1) * 8.2;
+        const c = TEINTES[j.humeur] || '#dfe6e3';
+        const h = j.coeur ? 11 : 8;
+        // le retard cumule doit rester sous la seconde : au-dela, les derniers
+        // mois n'ont pas eclos quand on regarde deja ailleurs
+        return `<g style="--i:${(m * 0.045 + i * 0.004).toFixed(3)}s">
+          <path d="M${x} ${y + 12}v-${h - 3}" stroke="${c}" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+          <circle cx="${x}" cy="${y + 12 - h}" r="${j.coeur ? 3.2 : 2.4}" fill="${c}"/>
+          ${j.coeur ? `<circle cx="${x}" cy="${y + 12 - h}" r="5" fill="none" stroke="${c}" stroke-width=".8" opacity=".5"/>` : ''}
+        </g>`;
+      }).join('');
+      return `<text x="4" y="${y + 15}" font-size="9" fill="var(--mut)">${MOIS_COURTS[m]}</text>
+              <line x1="50" y1="${y + 13}" x2="${large - 6}" y2="${y + 13}" stroke="var(--line)" stroke-width="1"/>
+              ${tiges}`;
+    }).join('')}
+  </svg>`;
+}
+
+function renderCarnet(d) {
+  const box = $('#carnetAnnee');
+  if (!box) return;
+  if (!d || !d.journal.length) {
+    box.innerHTML = `<p class="msg-vide">Rien d\u2019enregistré pour ${anneeCarnet}.</p>`;
+    return;
+  }
+  const j = d.journal;
+  const jours = j.length;
+  const coeurs = j.filter(x => x.coeur).length;
+  const comptines = [...new Set(j.flatMap(x => x.comptines || []))];
+  const livres = [...new Set(j.flatMap(x => x.livres || []))];
+  const activites = {};
+  for (const a of j.flatMap(x => x.activites || [])) activites[a] = (activites[a] || 0) + 1;
+  const top = Object.entries(activites).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const humeurs = {};
+  for (const x of j) if (x.humeur) humeurs[x.humeur] = (humeurs[x.humeur] || 0) + 1;
+  const dominante = Object.entries(humeurs).sort((a, b) => b[1] - a[1])[0];
+  const visibles = d.premieres.filter(p => p.facon !== 'devine' || p.devoile_le);
+
+  box.innerHTML = `
+    <div class="carnet-tete">
+      <button class="fleche" data-annee="-1" aria-label="Année précédente">‹</button>
+      <b>${anneeCarnet}</b>
+      <button class="fleche" data-annee="1" aria-label="Année suivante"
+        ${anneeCarnet >= new Date().getFullYear() ? 'disabled' : ''}>›</button>
+    </div>
+
+    <div class="carnet-chiffres">
+      <div><b data-compte="${jours}">0</b><small>journée${jours > 1 ? 's' : ''} racontée${jours > 1 ? 's' : ''}</small></div>
+      <div><b data-compte="${visibles.length}">0</b><small>première${visibles.length > 1 ? 's' : ''} fois</small></div>
+      <div><b data-compte="${d.photos}">0</b><small>photo${d.photos > 1 ? 's' : ''}</small></div>
+      <div><b data-compte="${coeurs}">0</b><small>journée${coeurs > 1 ? 's' : ''} aimée${coeurs > 1 ? 's' : ''}</small></div>
+    </div>
+
+    <div class="rub">Le jardin des humeurs</div>
+    ${jardinHumeurs(j)}
+    ${dominante ? `<p class="hint">Une année plutôt ${esc(String(dominante[0]))}.</p>` : ''}
+
+    ${visibles.length ? `<div class="rub">Les grands moments</div>
+      <div class="carnet-premieres">${visibles.map(p => {
+        const info = PREMIERES[p.type] || PREMIERES.autre;
+        return `<div class="cp"><span>${dessinPremiere(p.type, 34)}</span>
+          <b>${esc(info.nom)}</b><small>${esc(fr(p.jour))}</small></div>`;
+      }).join('')}</div>` : ''}
+
+    ${top.length ? `<div class="rub">Ce qu\u2019on a le plus fait</div>
+      <div class="fils">${top.map(([a, n]) => `<span class="fil">${esc(a)} · ${n}</span>`).join('')}</div>` : ''}
+
+    ${comptines.length ? `<div class="rub">Les comptines de l\u2019année</div>
+      <div class="fils">${comptines.slice(0, 12).map(c => `<span class="fil">🎵 ${esc(c)}</span>`).join('')}</div>` : ''}
+
+    ${livres.length ? `<div class="rub">Les livres</div>
+      <div class="fils">${livres.slice(0, 12).map(l => `<span class="fil">📖 ${esc(l)}</span>`).join('')}</div>` : ''}
+
+    <button id="btnCarnetPdf" class="btn btn-primary btn-block" style="margin-top:16px">Garder le carnet en PDF</button>
+  `;
+
+  // les chiffres montent, un par un
+  $$('#carnetAnnee [data-compte]').forEach((el, i) => {
+    setTimeout(() => compterVers(el, el.dataset.compte), 120 * i);
+  });
+  $$('#carnetAnnee [data-annee]').forEach(b => {
+    b.onclick = async () => {
+      anneeCarnet += Number(b.dataset.annee);
+      $('#carnetAnnee').innerHTML = miroiter(4, true);
+      renderCarnet(await chargerCarnet());
+    };
+  });
+  const pdf = $('#btnCarnetPdf');
+  if (pdf) pdf.onclick = () => imprimerCarnet(d);
+}
+
+/* Le carnet en PDF : ce qui se garde vraiment quand tout s'arrete. */
+function imprimerCarnet(d) {
+  const prenom = cur.enfant.prenom || 'Notre enfant';
+  const visibles = d.premieres.filter(p => p.facon !== 'devine' || p.devoile_le);
+  const comptines = [...new Set(d.journal.flatMap(x => x.comptines || []))];
+  const livres = [...new Set(d.journal.flatMap(x => x.livres || []))];
+  const mots = d.journal.filter(x => x.mot).slice(-40);
+
+  const f = document.createElement('iframe');
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  document.body.appendChild(f);
+  f.contentDocument.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8">
+    <title>Carnet ${anneeCarnet} — ${prenom}</title><style>
+    @page{size:A4;margin:18mm}
+    body{font:12pt/1.6 Georgia,'Times New Roman',serif;color:#22302c}
+    h1{font-size:26pt;margin:0 0 4pt;font-weight:400}
+    .sous{color:#6a7d78;font-size:11pt;margin:0 0 24pt}
+    h2{font-size:14pt;margin:22pt 0 8pt;font-weight:400;border-bottom:1px solid #d8e4e0;padding-bottom:4pt}
+    ul{margin:0;padding-left:16pt}li{margin-bottom:4pt}
+    .jour{margin-bottom:10pt;page-break-inside:avoid}
+    .jour b{font-weight:400;color:#6a7d78;font-size:10pt}
+    .jour p{margin:2pt 0 0}
+    .fin{margin-top:30pt;color:#6a7d78;font-size:10pt;text-align:center}
+    </style></head><body>
+    <h1>${prenom}</h1><p class="sous">Carnet de l'année ${anneeCarnet}</p>
+    <p>${d.journal.length} journées racontées, ${visibles.length} premières fois, ${d.photos} photos.</p>
+    ${visibles.length ? `<h2>Les grands moments</h2><ul>${visibles.map(p =>
+      `<li><b>${(PREMIERES[p.type] || PREMIERES.autre).nom}</b> — ${fr(p.jour)}${p.mot ? ' · ' + p.mot : ''}</li>`).join('')}</ul>` : ''}
+    ${comptines.length ? `<h2>Les comptines</h2><ul>${comptines.map(c => '<li>' + c + '</li>').join('')}</ul>` : ''}
+    ${livres.length ? `<h2>Les livres</h2><ul>${livres.map(l => '<li>' + l + '</li>').join('')}</ul>` : ''}
+    ${mots.length ? `<h2>Les mots de la journée</h2>${mots.map(m =>
+      `<div class="jour"><b>${fr(m.jour)}</b><p>${m.mot}</p></div>`).join('')}` : ''}
+    <p class="fin">Carnet établi avec Cocon</p>
+    </body></html>`);
+  f.contentDocument.close();
+  setTimeout(() => { f.contentWindow.focus(); f.contentWindow.print();
+    setTimeout(() => f.remove(), 1500); }, 400);
+}
 
 /* ---------------- Les premières fois, côté famille ----------------
    Elle a vu le premier pas. Le dire tout de suite, c'est priver les parents de
@@ -7314,7 +7589,8 @@ async function rafraichirTout(force) {
     // Le centre de notifications parle de tout cela : il faut donc tout charger,
     // sinon il annonce moins que ce qui attend vraiment.
     await Promise.all([chargerMessages(), chargerJournal(), chargerGalerie(), chargerDemandes(),
-                       chargerPortrait(), chargerFermetures(), chargerAdaptation(), chargerCommun()]);
+                       chargerPortrait(), chargerFermetures(), chargerAdaptation(), chargerCommun(),
+                       chargerSujets(), chargerDates()]);
     if (vue === 'accueil') renderAccueil();
     else if (vue === 'module') await rafraichirModule(moduleActif);
     renderBarre();
@@ -7394,6 +7670,7 @@ async function renderAccueil() {
   ].map(([i, t, a]) => `<button class="puce-act" data-act="${a}"><svg><use href="#${i}"/></svg>${t}</button>`).join('');
 
   $('#accueil').innerHTML = `
+    <div id="datesMarquantes"></div>
     <div id="hero">
       <div class="mois">${ICO_SALUT[salutDuMoment().ico]}${esc(salutDuMoment().mot)} · ${esc(F.labelMois(cur.mois))}${enfants().length > 1 ? ' · ' + esc(nomEnfant(enfantActif) || enfantActif) : ''}</div>
       <div class="montant" data-compte="${esc(eur(c.solde))}">${eur(c.solde)}</div>
@@ -7470,6 +7747,7 @@ async function renderAccueil() {
   };
   $$('#accueil [data-act]').forEach(b => { b.onclick = () => actions[b.dataset.act](); });
   // le montant compte jusqu'à sa valeur
+  renderDates('#datesMarquantes', cur.enfant.prenom);
   const mt = $('#hero .montant');
   if (mt) { const fin = mt.dataset.compte; mt.dataset.valeur = mt.dataset.valeur || '0'; compterVers(mt, fin); }
   $$('#accueil [data-mod]').forEach(b => { b.onclick = () => MODULES.find(m => m.id === b.dataset.mod).fn(); });
@@ -8234,6 +8512,12 @@ $('#btnAjoutEnfant').onclick = ajouterEnfant;
 $('#btnRepondre').onclick = repondre;
 $('#btnSilence').onclick = enregistrerSilence;
 $('#btnDev').onclick = demanderCodeDev;
+$('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
+$('#nouvFermer').onclick = () => { $('#feuilleNouveau').hidden = true; };
+$('#nouvPoser').onclick = poserSujet;
+$('#sujFermer').onclick = () => { $('#feuilleSujet').hidden = true; sujetOuvert = null; };
+$('#sujEnvoyer').onclick = repondreSujet;
+$('#sujRegler').onclick = reglerSujet;
 $('#btnReprise').onclick = envoyerReprise;
 $('#visioFermer').onclick = fermerVisionneuse;
 $('#visioEnregistrer').onclick = enregistrerPhoto;
@@ -9007,6 +9291,239 @@ function dessinPremiere(cle, taille) {
   const t = taille || 44;
   return `<svg viewBox="0 0 64 64" width="${t}" height="${t}" style="color:${p.ton}" aria-hidden="true">${p.d}</svg>`;
 }
+
+/* ---------------- Les sujets difficiles ----------------
+   Une morsure, un retard de paiement, un desaccord sur le sommeil : c'est la
+   que les relations se cassent. Ecrire a chaud dans la conversation ordinaire
+   ne convient pas — l'autre lit a chaud.
+
+   On pose le sujet, l'autre a le temps de le lire, chacun repond, et les deux
+   marquent quand c'est regle. Les amorces sont neutres a dessein : « j'aimerais
+   qu'on reparle de » ouvre, « tu ne fais jamais » ferme. */
+const THEMES = {
+  sommeil:    { nom: 'Le sommeil',            ico: '😴', amorce: "J'aimerais qu'on reparle des siestes, parce que" },
+  repas:      { nom: 'Les repas',             ico: '🍽', amorce: "Au sujet des repas, j'ai remarqué que" },
+  sante:      { nom: 'La santé',              ico: '🌡', amorce: "Je voulais vous parler de sa santé :" },
+  comportement:{ nom: 'Le comportement',      ico: '🧸', amorce: "Il y a quelque chose que je souhaite partager sur son comportement :" },
+  horaires:   { nom: 'Les horaires',          ico: '🕒', amorce: "J'aimerais qu'on remette au clair les horaires, parce que" },
+  paiement:   { nom: 'Le paiement',           ico: '💶', amorce: "Je préfère en parler directement : au sujet du versement," },
+  materiel:   { nom: 'Le matériel',           ico: '🎒', amorce: "Sur ce qu'il faut prévoir, je pense que" },
+  organisation:{ nom: "L'organisation",       ico: '📋', amorce: "Pour mieux nous organiser, je propose que" },
+  autre:      { nom: 'Autre chose',           ico: '💬', amorce: "" }
+};
+
+const CONSEILS = [
+  'Dire ce qu\u2019on a constaté, pas ce qu\u2019on en déduit.',
+  'Une seule chose à la fois. Deux sujets dans un message, aucun n\u2019est traité.',
+  'Écrire, relire, envoyer plus tard. Ce qui est posé le soir se lit mieux le matin.'
+];
+
+let sujets = [], sujetOuvert = null, themeChoisi = 'autre';
+
+function idContratSujets() {
+  return typeof contratActif !== 'undefined' ? contratActif : contratLie();
+}
+
+async function chargerSujets() {
+  sujets = [];
+  const id = idContratSujets();
+  if (!id || !Supa.connecte()) return;
+  try {
+    sujets = await Supa.lire('sujets',
+      'contrat_id=eq.' + id + '&select=id,auteur_id,theme,titre,corps,etat,lu_le,regle_le,cree_le&order=cree_le.desc&limit=30');
+  } catch (e) {}
+}
+
+function renderSujets() {
+  const moi = (Supa.moi() || {}).id;
+  const ouverts = sujets.filter(s => s.etat !== 'regle');
+  const cpt = document.getElementById('cptSujets');
+  if (cpt) cpt.textContent = ouverts.length ? String(ouverts.length) : '';
+  const box = document.getElementById('listeSujets');
+  if (!box) return;
+
+  if (!sujets.length) {
+    box.innerHTML = `<div class="vide-doux craft">${ILLU_SUJET}<b>Rien à mettre au clair</b>
+      <small>C\u2019est bon signe. Si un jour quelque chose coince, c\u2019est ici.</small></div>`;
+    return;
+  }
+
+  box.innerHTML = sujets.map(s => {
+    const t = THEMES[s.theme] || THEMES.autre;
+    const mien = s.auteur_id === moi;
+    return `<button class="sujet ${s.etat}" data-sujet="${esc(s.id)}">
+      <span class="sujet-ico">${t.ico}</span>
+      <span class="sujet-txt">
+        <b>${esc(s.titre)}</b>
+        <small>${esc(t.nom)} · ${mien ? 'posé par vous' : 'posé par l\u2019autre'} · ${esc(ilYAsujet(s.cree_le))}</small>
+        ${s.etat === 'regle' ? '<small class="ok">réglé</small>'
+          : s.lu_le ? '<small class="vu">lu</small>' : '<small class="neuf">pas encore lu</small>'}
+      </span></button>`;
+  }).join('');
+
+  $$('#listeSujets [data-sujet]').forEach(b => { b.onclick = () => ouvrirSujet(b.dataset.sujet); });
+}
+
+function ilYAsujet(iso) {
+  const j = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (j <= 0) return "aujourd'hui";
+  if (j === 1) return 'hier';
+  if (j < 31) return 'il y a ' + j + ' jours';
+  return 'il y a ' + Math.floor(j / 30) + ' mois';
+}
+
+const ILLU_SUJET = `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M10 16h44v26H30l-12 9v-9h-8z" fill="var(--acc-doux)"/>
+  <path d="M44 26h42v22H68l-10 8v-8h-14z" fill="#fff"/>
+  <path d="M20 26h20M20 33h14M54 36h20M54 43h12" opacity=".6"/></svg>`;
+
+async function ouvrirSujet(id) {
+  const s = sujets.find(x => x.id === id);
+  if (!s) return;
+  sujetOuvert = s;
+  const moi = (Supa.moi() || {}).id;
+  const t = THEMES[s.theme] || THEMES.autre;
+
+  document.getElementById('sujTitre').textContent = s.titre;
+  document.getElementById('sujTheme').textContent = t.ico + ' ' + t.nom;
+  document.getElementById('sujCorps').textContent = s.corps || '';
+  document.getElementById('sujRegler').hidden = s.etat === 'regle';
+  document.getElementById('sujEtat').textContent = s.etat === 'regle' ? 'Réglé' : '';
+
+  const fil = document.getElementById('sujFil');
+  fil.innerHTML = miroiter(2);
+  document.getElementById('feuilleSujet').hidden = false;
+
+  // marquer lu si l'autre l'a pose
+  if (s.auteur_id !== moi && !s.lu_le) {
+    try { await Supa.modifier('sujets', { etat: 'lu' }, 'id=eq.' + id); s.lu_le = new Date().toISOString(); }
+    catch (e) {}
+  }
+  let reponses = [];
+  try {
+    reponses = await Supa.lire('sujets_reponses',
+      'sujet_id=eq.' + id + '&select=auteur_id,texte,cree_le&order=cree_le');
+  } catch (e) {}
+  fil.innerHTML = reponses.length ? reponses.map(r =>
+    `<div class="bulle-l ${r.auteur_id === moi ? 'moi' : 'lui'}">
+      <div class="bulle"><span class="dit">${esc(r.texte)}</span>
+      <time>${esc(new Date(r.cree_le).toLocaleDateString('fr-FR'))}</time></div></div>`).join('')
+    : '<p class="hint" style="margin:0">Aucune réponse pour le moment.</p>';
+}
+
+async function repondreSujet() {
+  const t = document.getElementById('sujReponse').value.trim();
+  if (!t || !sujetOuvert) return;
+  try {
+    await Supa.ecrire('sujets_reponses', { sujet_id: sujetOuvert.id, auteur_id: Supa.moi().id, texte: t });
+    document.getElementById('sujReponse').value = '';
+    Supa.notifier(idContratSujets(), 'Réponse : ' + sujetOuvert.titre, t.slice(0, 90), false, 'sujets');
+    await ouvrirSujet(sujetOuvert.id);
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+async function reglerSujet() {
+  if (!sujetOuvert) return;
+  if (!confirm('Marquer ce sujet comme réglé ?\n\nIl restera consultable.')) return;
+  try {
+    await Supa.modifier('sujets', { etat: 'regle' }, 'id=eq.' + sujetOuvert.id);
+    document.getElementById('feuilleSujet').hidden = true;
+    await chargerSujets(); renderSujets();
+    toast('Réglé');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+function ouvrirNouveauSujet() {
+  if (!idContratSujets()) { toast('Aucun contrat relié'); return; }
+  themeChoisi = 'autre';
+  document.getElementById('themesGrille').innerHTML = Object.entries(THEMES).map(([c, t]) =>
+    `<button data-theme="${c}" class="${c === 'autre' ? 'on' : ''}"><span>${t.ico}</span>${esc(t.nom)}</button>`).join('');
+  $$('#themesGrille [data-theme]').forEach(b => {
+    b.onclick = () => {
+      themeChoisi = b.dataset.theme;
+      $$('#themesGrille button').forEach(x => x.classList.toggle('on', x === b));
+      const corps = document.getElementById('nouvCorps');
+      const a = THEMES[themeChoisi].amorce;
+      if (a && !corps.value.trim()) corps.value = a + ' ';
+      corps.focus();
+    };
+  });
+  document.getElementById('nouvTitre').value = '';
+  document.getElementById('nouvCorps').value = '';
+  document.getElementById('conseilSujet').textContent = CONSEILS[Math.floor(Math.random() * CONSEILS.length)];
+  document.getElementById('feuilleNouveau').hidden = false;
+}
+
+async function poserSujet() {
+  const titre = document.getElementById('nouvTitre').value.trim();
+  const corps = document.getElementById('nouvCorps').value.trim();
+  if (!titre) { toast('Un titre court, pour savoir de quoi il s\u2019agit'); return; }
+  try {
+    await Supa.ecrire('sujets', {
+      contrat_id: idContratSujets(), auteur_id: Supa.moi().id,
+      theme: themeChoisi, titre, corps: corps || null
+    });
+    Supa.notifier(idContratSujets(), 'À mettre au clair : ' + titre,
+      'Prenez le temps de le lire.', false, 'sujets');
+    document.getElementById('feuilleNouveau').hidden = true;
+    await chargerSujets(); renderSujets();
+    toast('Posé — il ou elle le lira à son rythme');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+/* ---------------- Les dates qui comptent ----------------
+   L'anniversaire de l'enfant, et celui du premier jour ensemble. Les deux se
+   deduisent de ce qui est deja saisi : rien a tenir a jour, et un rappel
+   quelques jours avant suffit a ne pas passer a cote. */
+let datesMarquantes = [];
+
+async function chargerDates() {
+  datesMarquantes = [];
+  const id = typeof contratActif !== 'undefined' ? contratActif : contratLie();
+  if (!id || !Supa.connecte()) return;
+  try { datesMarquantes = await Supa.fonction('dates_marquantes', { c: id }); } catch (e) {}
+}
+
+function joursAvant(iso) {
+  return Math.ceil((new Date(iso + 'T00:00:00') - new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00')) / 86400000);
+}
+
+/* Une seule carte, et seulement quand la date approche : un rappel permanent
+   cesse d'etre remarque. */
+function renderDates(selecteur, prenom) {
+  const box = document.querySelector(selecteur);
+  if (!box) return;
+  const proches = datesMarquantes
+    .map(d => ({ ...d, dans: joursAvant(d.jour) }))
+    .filter(d => d.dans >= 0 && d.dans <= 14)
+    .sort((a, b) => a.dans - b.dans);
+  if (!proches.length) { box.innerHTML = ''; return; }
+
+  box.innerHTML = proches.map(d => {
+    const anniv = d.quoi === 'anniversaire';
+    const quand = d.dans === 0 ? "c'est aujourd'hui"
+      : d.dans === 1 ? 'demain' : 'dans ' + d.dans + ' jours';
+    return `<div class="date-marquante ${anniv ? 'anniv' : ''}">
+      <span class="dm-dessin">${anniv ? GATEAU : MAINS}</span>
+      <span class="dm-txt">
+        <b>${anniv ? esc(prenom || 'L\u2019enfant') + ' aura ' + d.annees + ' an' + (d.annees > 1 ? 's' : '') 
+                   : d.annees + ' an' + (d.annees > 1 ? 's' : '') + ' ensemble'}</b>
+        <small>${esc(quand)}</small>
+      </span></div>`;
+  }).join('');
+}
+
+const GATEAU = `<svg viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M12 36h40v14a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" fill="#e8a0ae"/>
+  <path d="M12 36c4-6 8-6 10 0s6 6 10 0 6-6 10 0 6 6 10 0" fill="#fff" opacity=".55"/>
+  <rect x="30" y="20" width="4" height="14" rx="2" fill="#f5d76e"/>
+  <path d="M32 12c3 3 3 6 0 8-3-2-3-5 0-8z" fill="#f0a860"/>
+  <circle cx="20" cy="44" r="2" fill="#fff" opacity=".7"/><circle cx="44" cy="46" r="2" fill="#fff" opacity=".7"/></svg>`;
+
+const MAINS = `<svg viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M26 50V28a4 4 0 0 1 8 0v-8a4 4 0 0 1 8 0v8a4 4 0 0 1 8 0v14c0 7-5 12-12 12h-4c-5 0-8-3-8-6z" fill="#94c9a0"/>
+  <path d="M24 34l-8-8a4 4 0 0 1 6-6l6 6" fill="#b3dcbc"/>
+  <circle cx="18" cy="16" r="3" fill="#f5d76e"/></svg>`;
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;

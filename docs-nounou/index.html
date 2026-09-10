@@ -978,6 +978,42 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 .etiq-sup button{border:0;background:transparent;color:var(--mut);cursor:pointer;
   font-size:12px;padding:2px 4px;line-height:1}
 
+
+/* ---------- Les sujets difficiles ---------- */
+.sujet{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;
+  border-bottom:1px solid var(--line);background:transparent;cursor:pointer;
+  text-align:left;color:var(--txt);font:inherit}
+.sujet:last-of-type{border-bottom:0}
+.sujet-ico{width:44px;height:44px;border-radius:15px;flex:0 0 auto;background:var(--zebre);
+  display:flex;align-items:center;justify-content:center;font-size:20px}
+.sujet-txt{flex:1;min-width:0;line-height:1.35}
+.sujet-txt b{display:block;font-size:14.5px}
+.sujet-txt small{display:block;font-size:12px;color:var(--mut)}
+.sujet-txt .neuf{color:#b4690e;font-weight:600}
+.sujet-txt .ok{color:var(--acc)}
+.sujet.regle{opacity:.55}
+.sujet.regle .sujet-ico{background:transparent}
+
+.themes-grille{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 6px}
+.themes-grille button{border:1.4px solid var(--bord);background:var(--card);border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;
+  cursor:pointer;color:var(--mut);font:500 11.5px system-ui;text-align:center;min-height:64px}
+.themes-grille button span{font-size:19px}
+.themes-grille button.on{border-color:var(--acc);background:var(--acc-doux);color:var(--txt);font-weight:600}
+.sujet-corps{background:var(--zebre);border-radius:14px;padding:12px 14px;
+  font-size:13.5px;line-height:1.5;white-space:pre-wrap;margin:8px 0 12px}
+
+
+.date-marquante{display:flex;align-items:center;gap:14px;background:var(--acc-doux);
+  border-radius:16px;padding:13px 15px;margin-bottom:10px;animation:eclot .5s ease both}
+.date-marquante.anniv{background:linear-gradient(120deg,#fdeef1,#fff6e0)}
+.dm-dessin{width:46px;height:46px;flex:0 0 auto}
+.dm-dessin svg{width:100%;height:100%;animation:flotte 3s ease-in-out infinite}
+.dm-txt{flex:1;min-width:0;line-height:1.35}
+.dm-txt b{display:block;font-size:14.5px}
+.dm-txt small{font-size:12.5px;color:var(--mut)}
+@media (prefers-reduced-motion:reduce){.dm-dessin svg{animation:none}}
+
 </style>
 </head>
 <body>
@@ -1114,6 +1150,38 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
   </div>
 </div>
 
+<div id="feuilleNouveau" class="modal" hidden>
+  <div class="modal-box">
+    <h3>Mettre quelque chose au clair</h3>
+    <div class="themes-grille" id="themesGrille"></div>
+    <input id="nouvTitre" placeholder="De quoi s'agit-il, en quelques mots" maxlength="140" style="margin-top:12px">
+    <textarea id="nouvCorps" rows="5" placeholder="Ce que vous avez constaté…" maxlength="2000" style="margin-top:8px"></textarea>
+    <p class="hint" id="conseilSujet"></p>
+    <div class="modal-actions">
+      <button id="nouvFermer" class="btn btn-ghost">Annuler</button>
+      <button id="nouvPoser" class="btn btn-primary">Poser le sujet</button>
+    </div>
+  </div>
+</div>
+
+<div id="feuilleSujet" class="modal" hidden>
+  <div class="modal-box">
+    <small id="sujTheme"></small>
+    <h3 id="sujTitre">—</h3>
+    <p id="sujCorps" class="sujet-corps"></p>
+    <div id="sujFil"></div>
+    <div class="deux" style="margin-top:10px">
+      <input id="sujReponse" placeholder="Votre réponse">
+      <button id="sujEnvoyer" class="btn btn-primary">Envoyer</button>
+    </div>
+    <div class="modal-actions">
+      <button id="sujFermer" class="btn btn-ghost">Fermer</button>
+      <button id="sujRegler" class="btn btn-primary">C'est réglé</button>
+    </div>
+    <p class="hint" id="sujEtat"></p>
+  </div>
+</div>
+
 <header id="hdr">
   <h1 id="titre">Cocon</h1>
   <button id="btnNotif" class="iconbtn" aria-label="Notifications">
@@ -1130,6 +1198,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
       <div class="gros" id="heroHeures">— h</div>
       <div class="bas" id="heroBas">Connecte-toi pour voir tes accueils</div>
     </div>
+    <div id="datesMarquantes"></div>
     <div class="card">
       <div class="tete"><svg><use href="#i-cal"/></svg>Aujourd'hui</div>
       <div class="corps" id="aujourdhui"></div>
@@ -1187,6 +1256,15 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
         <textarea id="adaptRessenti" rows="2" placeholder="Comment ça s'est passé" style="margin-top:8px"></textarea>
         <button id="btnAdaptation" class="btn btn-primary btn-block">Enregistrer</button>
         <p class="hint">Les parents lisent ton ressenti et écrivent le leur. Chacun le sien : tu ne peux pas modifier le leur.</p>
+      </div>
+    </details>
+
+    <details class="card" id="carteSujets">
+      <summary class="tete-repli"><svg><use href="#i-mail"/></svg><span>À mettre au clair</span><b class="compteur" id="cptSujets"></b></summary>
+      <div class="corps">
+        <div id="listeSujets"></div>
+        <button id="btnNouveauSujet" class="btn btn-ghost btn-block">Poser un sujet</button>
+        <p class="hint">Pour ce qui se dit mal dans un message rapide. La famille a le temps de lire avant de répondre.</p>
       </div>
     </details>
 
@@ -1624,7 +1702,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b>1.7.1</b></div>
+        <div class="ds"><span>Version</span><b>1.8.0</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -2011,7 +2089,7 @@ function montrer(v) {
                    profil: 'Mon profil', params: 'Réglages' };
   $('#titre').textContent = titres[v];
   if (v === 'planning') renderPlanning();
-  if (v === 'planning') chargerPremieres().then(renderPremieres);
+  if (v === 'planning') { chargerPremieres().then(renderPremieres); chargerSujets().then(renderSujets); }
   renderChoixEnfant();
   if (v === 'journal') chargerJournal();
   if (v === 'messages') { chargerBoite().then(renderBoite); if (conversationActive) ouvrirConversation(conversationActive); }
@@ -2172,6 +2250,9 @@ async function charger() {
     if (!profilPro) { await chargerProfilPro();
       if (profilPro && profilPro.photo) portraitPro = await telechargerPhoto(profilPro.photo); }
     await chargerPortraits();
+    await chargerDates();
+    const c0 = contrats.find(x => x.id === contratActif) || contrats[0];
+    renderDates('#datesMarquantes', c0 && c0.enfant_prenom);
   } catch (e) { toast('Chargement impossible : ' + (e.message || e)); }
   renderAccueil(); renderContrats(); renderAujourdhui(); renderChoixEnfant(); renderPointNotif(); renderBarre();
 }
@@ -4723,6 +4804,12 @@ $('#btnNotif').onclick = ouvrirCentreNotif;
 $('#notifFermer').onclick = () => { $('#centreNotif').hidden = true; };
 $('#centreNotif').addEventListener('click', e => { if (e.target === e.currentTarget) $('#centreNotif').hidden = true; });
 $('#btnDev').onclick = demanderCodeDev;
+$('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
+$('#nouvFermer').onclick = () => { $('#feuilleNouveau').hidden = true; };
+$('#nouvPoser').onclick = poserSujet;
+$('#sujFermer').onclick = () => { $('#feuilleSujet').hidden = true; sujetOuvert = null; };
+$('#sujEnvoyer').onclick = repondreSujet;
+$('#sujRegler').onclick = reglerSujet;
 $('#btnRelancerPush').onclick = () => activerPush();
 $('#btnTestPush').onclick = testerPush;
 $('#btnCreerCommun').onclick = creerCommun;
@@ -5495,6 +5582,239 @@ function dessinPremiere(cle, taille) {
   const t = taille || 44;
   return `<svg viewBox="0 0 64 64" width="${t}" height="${t}" style="color:${p.ton}" aria-hidden="true">${p.d}</svg>`;
 }
+
+/* ---------------- Les sujets difficiles ----------------
+   Une morsure, un retard de paiement, un desaccord sur le sommeil : c'est la
+   que les relations se cassent. Ecrire a chaud dans la conversation ordinaire
+   ne convient pas — l'autre lit a chaud.
+
+   On pose le sujet, l'autre a le temps de le lire, chacun repond, et les deux
+   marquent quand c'est regle. Les amorces sont neutres a dessein : « j'aimerais
+   qu'on reparle de » ouvre, « tu ne fais jamais » ferme. */
+const THEMES = {
+  sommeil:    { nom: 'Le sommeil',            ico: '😴', amorce: "J'aimerais qu'on reparle des siestes, parce que" },
+  repas:      { nom: 'Les repas',             ico: '🍽', amorce: "Au sujet des repas, j'ai remarqué que" },
+  sante:      { nom: 'La santé',              ico: '🌡', amorce: "Je voulais vous parler de sa santé :" },
+  comportement:{ nom: 'Le comportement',      ico: '🧸', amorce: "Il y a quelque chose que je souhaite partager sur son comportement :" },
+  horaires:   { nom: 'Les horaires',          ico: '🕒', amorce: "J'aimerais qu'on remette au clair les horaires, parce que" },
+  paiement:   { nom: 'Le paiement',           ico: '💶', amorce: "Je préfère en parler directement : au sujet du versement," },
+  materiel:   { nom: 'Le matériel',           ico: '🎒', amorce: "Sur ce qu'il faut prévoir, je pense que" },
+  organisation:{ nom: "L'organisation",       ico: '📋', amorce: "Pour mieux nous organiser, je propose que" },
+  autre:      { nom: 'Autre chose',           ico: '💬', amorce: "" }
+};
+
+const CONSEILS = [
+  'Dire ce qu\u2019on a constaté, pas ce qu\u2019on en déduit.',
+  'Une seule chose à la fois. Deux sujets dans un message, aucun n\u2019est traité.',
+  'Écrire, relire, envoyer plus tard. Ce qui est posé le soir se lit mieux le matin.'
+];
+
+let sujets = [], sujetOuvert = null, themeChoisi = 'autre';
+
+function idContratSujets() {
+  return typeof contratActif !== 'undefined' ? contratActif : contratLie();
+}
+
+async function chargerSujets() {
+  sujets = [];
+  const id = idContratSujets();
+  if (!id || !Supa.connecte()) return;
+  try {
+    sujets = await Supa.lire('sujets',
+      'contrat_id=eq.' + id + '&select=id,auteur_id,theme,titre,corps,etat,lu_le,regle_le,cree_le&order=cree_le.desc&limit=30');
+  } catch (e) {}
+}
+
+function renderSujets() {
+  const moi = (Supa.moi() || {}).id;
+  const ouverts = sujets.filter(s => s.etat !== 'regle');
+  const cpt = document.getElementById('cptSujets');
+  if (cpt) cpt.textContent = ouverts.length ? String(ouverts.length) : '';
+  const box = document.getElementById('listeSujets');
+  if (!box) return;
+
+  if (!sujets.length) {
+    box.innerHTML = `<div class="vide-doux craft">${ILLU_SUJET}<b>Rien à mettre au clair</b>
+      <small>C\u2019est bon signe. Si un jour quelque chose coince, c\u2019est ici.</small></div>`;
+    return;
+  }
+
+  box.innerHTML = sujets.map(s => {
+    const t = THEMES[s.theme] || THEMES.autre;
+    const mien = s.auteur_id === moi;
+    return `<button class="sujet ${s.etat}" data-sujet="${esc(s.id)}">
+      <span class="sujet-ico">${t.ico}</span>
+      <span class="sujet-txt">
+        <b>${esc(s.titre)}</b>
+        <small>${esc(t.nom)} · ${mien ? 'posé par vous' : 'posé par l\u2019autre'} · ${esc(ilYAsujet(s.cree_le))}</small>
+        ${s.etat === 'regle' ? '<small class="ok">réglé</small>'
+          : s.lu_le ? '<small class="vu">lu</small>' : '<small class="neuf">pas encore lu</small>'}
+      </span></button>`;
+  }).join('');
+
+  $$('#listeSujets [data-sujet]').forEach(b => { b.onclick = () => ouvrirSujet(b.dataset.sujet); });
+}
+
+function ilYAsujet(iso) {
+  const j = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (j <= 0) return "aujourd'hui";
+  if (j === 1) return 'hier';
+  if (j < 31) return 'il y a ' + j + ' jours';
+  return 'il y a ' + Math.floor(j / 30) + ' mois';
+}
+
+const ILLU_SUJET = `<svg viewBox="0 0 96 72" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M10 16h44v26H30l-12 9v-9h-8z" fill="var(--acc-doux)"/>
+  <path d="M44 26h42v22H68l-10 8v-8h-14z" fill="#fff"/>
+  <path d="M20 26h20M20 33h14M54 36h20M54 43h12" opacity=".6"/></svg>`;
+
+async function ouvrirSujet(id) {
+  const s = sujets.find(x => x.id === id);
+  if (!s) return;
+  sujetOuvert = s;
+  const moi = (Supa.moi() || {}).id;
+  const t = THEMES[s.theme] || THEMES.autre;
+
+  document.getElementById('sujTitre').textContent = s.titre;
+  document.getElementById('sujTheme').textContent = t.ico + ' ' + t.nom;
+  document.getElementById('sujCorps').textContent = s.corps || '';
+  document.getElementById('sujRegler').hidden = s.etat === 'regle';
+  document.getElementById('sujEtat').textContent = s.etat === 'regle' ? 'Réglé' : '';
+
+  const fil = document.getElementById('sujFil');
+  fil.innerHTML = miroiter(2);
+  document.getElementById('feuilleSujet').hidden = false;
+
+  // marquer lu si l'autre l'a pose
+  if (s.auteur_id !== moi && !s.lu_le) {
+    try { await Supa.modifier('sujets', { etat: 'lu' }, 'id=eq.' + id); s.lu_le = new Date().toISOString(); }
+    catch (e) {}
+  }
+  let reponses = [];
+  try {
+    reponses = await Supa.lire('sujets_reponses',
+      'sujet_id=eq.' + id + '&select=auteur_id,texte,cree_le&order=cree_le');
+  } catch (e) {}
+  fil.innerHTML = reponses.length ? reponses.map(r =>
+    `<div class="bulle-l ${r.auteur_id === moi ? 'moi' : 'lui'}">
+      <div class="bulle"><span class="dit">${esc(r.texte)}</span>
+      <time>${esc(new Date(r.cree_le).toLocaleDateString('fr-FR'))}</time></div></div>`).join('')
+    : '<p class="hint" style="margin:0">Aucune réponse pour le moment.</p>';
+}
+
+async function repondreSujet() {
+  const t = document.getElementById('sujReponse').value.trim();
+  if (!t || !sujetOuvert) return;
+  try {
+    await Supa.ecrire('sujets_reponses', { sujet_id: sujetOuvert.id, auteur_id: Supa.moi().id, texte: t });
+    document.getElementById('sujReponse').value = '';
+    Supa.notifier(idContratSujets(), 'Réponse : ' + sujetOuvert.titre, t.slice(0, 90), false, 'sujets');
+    await ouvrirSujet(sujetOuvert.id);
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+async function reglerSujet() {
+  if (!sujetOuvert) return;
+  if (!confirm('Marquer ce sujet comme réglé ?\n\nIl restera consultable.')) return;
+  try {
+    await Supa.modifier('sujets', { etat: 'regle' }, 'id=eq.' + sujetOuvert.id);
+    document.getElementById('feuilleSujet').hidden = true;
+    await chargerSujets(); renderSujets();
+    toast('Réglé');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+function ouvrirNouveauSujet() {
+  if (!idContratSujets()) { toast('Aucun contrat relié'); return; }
+  themeChoisi = 'autre';
+  document.getElementById('themesGrille').innerHTML = Object.entries(THEMES).map(([c, t]) =>
+    `<button data-theme="${c}" class="${c === 'autre' ? 'on' : ''}"><span>${t.ico}</span>${esc(t.nom)}</button>`).join('');
+  $$('#themesGrille [data-theme]').forEach(b => {
+    b.onclick = () => {
+      themeChoisi = b.dataset.theme;
+      $$('#themesGrille button').forEach(x => x.classList.toggle('on', x === b));
+      const corps = document.getElementById('nouvCorps');
+      const a = THEMES[themeChoisi].amorce;
+      if (a && !corps.value.trim()) corps.value = a + ' ';
+      corps.focus();
+    };
+  });
+  document.getElementById('nouvTitre').value = '';
+  document.getElementById('nouvCorps').value = '';
+  document.getElementById('conseilSujet').textContent = CONSEILS[Math.floor(Math.random() * CONSEILS.length)];
+  document.getElementById('feuilleNouveau').hidden = false;
+}
+
+async function poserSujet() {
+  const titre = document.getElementById('nouvTitre').value.trim();
+  const corps = document.getElementById('nouvCorps').value.trim();
+  if (!titre) { toast('Un titre court, pour savoir de quoi il s\u2019agit'); return; }
+  try {
+    await Supa.ecrire('sujets', {
+      contrat_id: idContratSujets(), auteur_id: Supa.moi().id,
+      theme: themeChoisi, titre, corps: corps || null
+    });
+    Supa.notifier(idContratSujets(), 'À mettre au clair : ' + titre,
+      'Prenez le temps de le lire.', false, 'sujets');
+    document.getElementById('feuilleNouveau').hidden = true;
+    await chargerSujets(); renderSujets();
+    toast('Posé — il ou elle le lira à son rythme');
+  } catch (e) { toast('Impossible : ' + enClair(e)); }
+}
+
+/* ---------------- Les dates qui comptent ----------------
+   L'anniversaire de l'enfant, et celui du premier jour ensemble. Les deux se
+   deduisent de ce qui est deja saisi : rien a tenir a jour, et un rappel
+   quelques jours avant suffit a ne pas passer a cote. */
+let datesMarquantes = [];
+
+async function chargerDates() {
+  datesMarquantes = [];
+  const id = typeof contratActif !== 'undefined' ? contratActif : contratLie();
+  if (!id || !Supa.connecte()) return;
+  try { datesMarquantes = await Supa.fonction('dates_marquantes', { c: id }); } catch (e) {}
+}
+
+function joursAvant(iso) {
+  return Math.ceil((new Date(iso + 'T00:00:00') - new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00')) / 86400000);
+}
+
+/* Une seule carte, et seulement quand la date approche : un rappel permanent
+   cesse d'etre remarque. */
+function renderDates(selecteur, prenom) {
+  const box = document.querySelector(selecteur);
+  if (!box) return;
+  const proches = datesMarquantes
+    .map(d => ({ ...d, dans: joursAvant(d.jour) }))
+    .filter(d => d.dans >= 0 && d.dans <= 14)
+    .sort((a, b) => a.dans - b.dans);
+  if (!proches.length) { box.innerHTML = ''; return; }
+
+  box.innerHTML = proches.map(d => {
+    const anniv = d.quoi === 'anniversaire';
+    const quand = d.dans === 0 ? "c'est aujourd'hui"
+      : d.dans === 1 ? 'demain' : 'dans ' + d.dans + ' jours';
+    return `<div class="date-marquante ${anniv ? 'anniv' : ''}">
+      <span class="dm-dessin">${anniv ? GATEAU : MAINS}</span>
+      <span class="dm-txt">
+        <b>${anniv ? esc(prenom || 'L\u2019enfant') + ' aura ' + d.annees + ' an' + (d.annees > 1 ? 's' : '') 
+                   : d.annees + ' an' + (d.annees > 1 ? 's' : '') + ' ensemble'}</b>
+        <small>${esc(quand)}</small>
+      </span></div>`;
+  }).join('');
+}
+
+const GATEAU = `<svg viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M12 36h40v14a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" fill="#e8a0ae"/>
+  <path d="M12 36c4-6 8-6 10 0s6 6 10 0 6-6 10 0 6 6 10 0" fill="#fff" opacity=".55"/>
+  <rect x="30" y="20" width="4" height="14" rx="2" fill="#f5d76e"/>
+  <path d="M32 12c3 3 3 6 0 8-3-2-3-5 0-8z" fill="#f0a860"/>
+  <circle cx="20" cy="44" r="2" fill="#fff" opacity=".7"/><circle cx="44" cy="46" r="2" fill="#fff" opacity=".7"/></svg>`;
+
+const MAINS = `<svg viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M26 50V28a4 4 0 0 1 8 0v-8a4 4 0 0 1 8 0v8a4 4 0 0 1 8 0v14c0 7-5 12-12 12h-4c-5 0-8-3-8-6z" fill="#94c9a0"/>
+  <path d="M24 34l-8-8a4 4 0 0 1 6-6l6 6" fill="#b3dcbc"/>
+  <circle cx="18" cy="16" r="3" fill="#f5d76e"/></svg>`;
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
