@@ -2521,6 +2521,7 @@ input:focus,textarea:focus,select:focus,
     <div class="body">
       <div class="ds"><span>Mode développeur</span><b id="etatDev">désactivé</b></div>
       <button id="btnDev" class="btn btn-ghost btn-block">Saisir le code de maintenance</button>
+      <button id="btnRefaireDossier" class="btn btn-ghost btn-block" data-dev hidden>Rejouer le formulaire de bienvenue</button>
       <p class="hint">Ce mode révèle des fonctions en préparation, incomplètes et susceptibles de changer. Il ne sert à rien au quotidien.</p>
     </div>
   </details>
@@ -2646,7 +2647,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.12.1</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.12.3</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -5978,9 +5979,9 @@ async function fermerPorte() {
   // renvoyer vers l'autre application
   if (!await verifierRole('employeur', 'Cocon Nounou')) return;
   // Le dossier d'abord, le tour ensuite : expliquer ou sont les choses n'a de
-  // sens qu'une fois qu'elles y sont.
-  if (!profil.dossierFait) setTimeout(ouvrirBienvenue, 450);
-  else if (!profil.tourVu) setTimeout(ouvrirTour, 450);
+  // sens qu'une fois qu'elles y sont. Mais avant de redemander quoi que ce
+  // soit, on regarde si ce compte a deja tout donne sur un autre telephone.
+  setTimeout(ouvrirCeQuIlFaut, 450);
   await assurerProfil();
   publierIdentite();
   await reconcilierContrats(false);
@@ -6143,7 +6144,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.12.1';
+const VERSION = '1.12.3';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -8693,6 +8694,9 @@ async function doProfilSave() {
 }
 
 async function renderDossier() {
+  // Sans cela, ce qui a ete ecrit ailleurs — le formulaire de bienvenue, une
+  // reprise — n'apparait pas : les champs gardent l'etat du dernier remplissage.
+  await fillProfilForm();
   renderAvenants();
   majSauvegarde();
   renderHoraires();
@@ -9081,6 +9085,13 @@ $('#bvPlusTard').onclick = async () => {
       oui: 'Plus tard' })) return;
   document.getElementById('bienvenue').hidden = true;
   showView('accueil');
+};
+$('#btnRefaireDossier').onclick = async () => {
+  if (!await confirmer('Rejouer le formulaire ?',
+    { detail: 'Vos informations actuelles y seront reprises. Rien n\u2019est efface.',
+      oui: 'Rejouer' })) return;
+  showView('accueil');
+  ouvrirBienvenue();
 };
 $('#btnDev').onclick = demanderCodeDev;
 $('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
@@ -10566,7 +10577,7 @@ async function majEtatSauvegarde() {
 
 /* La restauration ne remplace rien sans le dire : elle montre ce qu'elle a
    trouve et ce qu'elle va ecraser. */
-async function restaurerDossier() {
+async function restaurerDossier(dejaConfirme) {
   const s = await etatSauvegarde();
   if (!s) { toast('Aucune sauvegarde trouvée pour ce compte'); return; }
   let contenu = null;
@@ -10578,7 +10589,7 @@ async function restaurerDossier() {
 
   const nbFiches = Object.keys((contenu.donnees || {}).fiches || {}).length;
   const local = Object.keys((await Store.all()).fiches || {}).length;
-  if (!await confirmer('Restaurer le dossier du ' +
+  if (!dejaConfirme && !await confirmer('Restaurer le dossier du ' +
       new Date(s.maj_le).toLocaleDateString('fr-FR') + ' ?',
     { detail: nbFiches + ' fiche(s) et le dossier seront repris.' +
         (local ? ' Les ' + local + ' fiche(s) de ce téléphone seront remplacées.' : '') +
@@ -10604,6 +10615,9 @@ async function restaurerDossier() {
         if (v) fusion.profil[bloc][cle] = v;
       }
     }
+    // Un dossier repris est un dossier fait : le formulaire n'a plus lieu d'etre.
+    fusion.profil = fusion.profil || {};
+    if (nbFiches || (fusion.profil.enfants || []).length) fusion.profil.dossierFait = true;
     await Store.replaceAll(fusion);
     toast(nbFiches + ' fiche(s) restaurée(s)');
     setTimeout(() => location.reload(), 1400);
@@ -10814,12 +10828,21 @@ const BV_ETAPES = [
        '52 semaines sur 12 mois. Décochez pour une année incomplète — les semaines d\u2019accueil sont alors comptées.']
     ],
     champs: [
-      ['contrat.tHn', 'Tarif horaire net (€/h)', 'decimal', 'Le taux des heures normales'],
-      ['contrat.hnH', 'Heures normales par semaine', 'decimal', 'Souvent 40 ou 45'],
+      ['contrat.tHn', 'Tarif horaire brut (€/h)', 'decimal', 'Le taux du contrat. Pajemploi en déduit le net.'],
+      ['contrat.hnH', 'Heures normales par semaine', 'decimal', 'Jusqu\u2019à 45 h. Exemple : 45 pour un contrat de 47,5 h'],
       ['contrat.hnS', 'Semaines par an', 'numeric', '52 en année complète, 47 sinon'],
-      ['contrat.tHm', 'Tarif heures majorées (€/h)', 'decimal', 'Au-delà de 45 h, facultatif'],
+      ['contrat.hmH', 'Heures majorées par semaine', 'decimal', 'Au-delà de 45 h. Exemple : 2,5 pour un contrat de 47,5 h'],
+      ['contrat.tHm', 'Tarif heures majorées (€/h)', 'decimal', 'Souvent le taux normal augmenté'],
       ['contrat.tHc', 'Tarif heures complémentaires (€/h)', 'decimal', 'Facultatif']
     ] },
+
+  { dessin: 'euro', titre: 'Le salaire mensuel',
+    sous: 'En mensualisation, il ne bouge pas d\u2019un mois sur l\u2019autre. Vous ne le retaperez qu\u2019en cas de changement.',
+    champs: [
+      ['net.netPaje', 'Net à déclarer à Pajemploi (€)', 'decimal', 'Le montant que vous déclarez chaque mois'],
+      ['net.exo', 'Exonération heures majorées (€)', 'decimal', 'Calculée plus bas si vous laissez vide']
+    ],
+    calculExo: true },
 
   { dessin: 'euro', titre: 'Les indemnités',
     sous: 'Entretien, repas, trajets. Elles reviennent chaque mois, calculées sur les jours d\u2019accueil.',
@@ -10855,14 +10878,17 @@ const BV_AUTORISATIONS = [
   ['medicament', 'Médicaments', 'Uniquement sur ordonnance, et seulement si vous le demandez.']
 ];
 
+// Dimanche est d0, comme le renvoie getDay() : ecrire d7 remplissait une case
+// que rien ne lit, d'ou un planning enregistre mais invisible.
 const BV_JOURS = [['d1', 'Lundi'], ['d2', 'Mardi'], ['d3', 'Mercredi'], ['d4', 'Jeudi'],
-                  ['d5', 'Vendredi'], ['d6', 'Samedi'], ['d7', 'Dimanche']];
+                  ['d5', 'Vendredi'], ['d6', 'Samedi'], ['d0', 'Dimanche']];
 
 function ouvrirBienvenue() {
   bvEtape = 0;
   bvUrgence = { autorisations: {} };
-  bvEnfants = (enfants() || []).map(e => ({ id: e.id, prenom: e.prenom || '', naissance: '' }));
-  if (!bvEnfants.length) bvEnfants = [{ id: 'e' + Date.now(), prenom: '', naissance: '' }];
+  bvEnfants = (enfants() || []).map(e => ({ id: e.id, prenom: e.prenom || '',
+    nom: e.nom || '', naissance: e.naissance || '' }));
+  if (!bvEnfants.length) bvEnfants = [{ id: 'e' + Date.now(), prenom: '', nom: '', naissance: '' }];
   document.getElementById('bienvenue').hidden = false;
   renderBienvenue();
 }
@@ -10922,6 +10948,41 @@ function renderBienvenue() {
     };
   });
   bvAjusterAnnee();
+  bvProposerExo();
+}
+
+/* L'exoneration porte sur la remuneration des heures majorees. On sait la
+   calculer a partir du contrat — heures majorees x tarif x semaines / 12 —
+   mais les regles URSSAF evoluent : on propose, on n'impose pas, et on dit
+   d'ou vient le chiffre. */
+function bvProposerExo() {
+  const box = document.getElementById('bvChamps');
+  const champ = box.querySelector('[data-bv="net.exo"]');
+  if (!champ) return;
+  const ct = cur.contrat || {};
+  const n = v => Number(String(v == null ? '' : v).replace(',', '.')) || 0;
+  // Le formulaire ne demande pas les semaines majorees : elles suivent celles
+  // du contrat. Prendre la valeur par defaut donnait 52 la ou l'annee etait
+  // incomplete.
+  const semaines = n(ct.hnS) || n(ct.hmS) || 52;
+  const mensuel = n(ct.hmH) * n(ct.tHm) * semaines / 12;
+  if (mensuel <= 0) return;
+  const somme = mensuel.toFixed(2).replace('.', ',');
+  const bloc = champ.closest('.field');
+  const aide = document.createElement('button');
+  aide.type = 'button';
+  aide.className = 'btn btn-ghost btn-petit';
+  aide.style.marginTop = '6px';
+  aide.textContent = 'Proposer ' + somme + ' €';
+  aide.onclick = () => {
+    champ.value = somme;
+    cur.net = cur.net || {}; cur.net.exo = somme;
+    document.getElementById('bvAide').textContent =
+      n(ct.hmH) + ' h majorées × ' + n(ct.tHm) + ' € × ' + semaines +
+      ' semaines ÷ 12. À vérifier sur votre bulletin Pajemploi.';
+    aide.remove();
+  };
+  bloc.appendChild(aide);
 }
 
 /* En annee complete, le nombre de semaines vaut 52 et ne se discute pas : on
@@ -11016,6 +11077,7 @@ function renderBvEnfants() {
       ${bvEnfants.length > 1 ? `<button data-bv-suppr="${i}" aria-label="Retirer">✕</button>` : ''}
     </div>
     <label class="field"><span>Prénom</span><input data-bv-prenom="${i}" value="${esc(en.prenom)}"></label>
+    <label class="field"><span>NOM de famille</span><input data-bv-nom="${i}" value="${esc(en.nom || '')}"></label>
     <label class="field"><span>Date de naissance</span><input data-bv-naissance="${i}" placeholder="jj/mm/aaaa" value="${esc(en.naissance)}"></label>
   `).join('') + `<button id="bvAjoutEnfant" class="btn btn-ghost btn-block">Ajouter un enfant</button>`;
 
@@ -11024,6 +11086,9 @@ function renderBvEnfants() {
       const t = box.querySelectorAll('.bv-enfant b')[+inp.dataset.bvPrenom];
       if (t) t.textContent = inp.value || 'Enfant ' + (+inp.dataset.bvPrenom + 1); };
   });
+  box.querySelectorAll('[data-bv-nom]').forEach(inp => {
+    inp.oninput = () => { bvEnfants[+inp.dataset.bvNom].nom = inp.value; };
+  });
   box.querySelectorAll('[data-bv-naissance]').forEach(inp => {
     inp.oninput = () => { bvEnfants[+inp.dataset.bvNaissance].naissance = inp.value; };
   });
@@ -11031,7 +11096,7 @@ function renderBvEnfants() {
     b.onclick = () => { bvEnfants.splice(+b.dataset.bvSuppr, 1); renderBvEnfants(); };
   });
   document.getElementById('bvAjoutEnfant').onclick = () => {
-    bvEnfants.push({ id: 'e' + Date.now(), prenom: '', naissance: '' });
+    bvEnfants.push({ id: 'e' + Date.now(), prenom: '', nom: '', naissance: '' });
     renderBvEnfants();
   };
   nativiser(box);
@@ -11066,12 +11131,17 @@ async function bvSuivant() {
     secouer('.bv-champs'); return; }
 
   if (BV_ETAPES[bvEtape].enfants) {
+    // Le nom et la date appartiennent a l'enfant, pas a la fiche : sans eux
+    // dans le profil, le Dossier les affichait vides avec deux enfants.
     profil.enfants = bvEnfants.filter(x => (x.prenom || '').trim())
-      .map(x => ({ id: x.id, prenom: x.prenom.trim(), contratId: (enfants().find(y => y.id === x.id) || {}).contratId || null }));
+      .map(x => ({ id: x.id, prenom: x.prenom.trim(), nom: (x.nom || '').trim(),
+        naissance: x.naissance || '',
+        contratId: (enfants().find(y => y.id === x.id) || {}).contratId || null }));
     enfantActif = profil.enfants[0].id;
     profil.enfantActif = enfantActif;
     const premier = bvEnfants.find(x => (x.prenom || '').trim());
-    cur.enfant = { ...(cur.enfant || {}), prenom: premier.prenom.trim(), naissance: premier.naissance || '' };
+    cur.enfant = { ...(cur.enfant || {}), prenom: premier.prenom.trim(),
+      nom: premier.nom || '', naissance: premier.naissance || '' };
     await doProfilSave();
   }
   await doSave();
@@ -11081,7 +11151,33 @@ async function bvSuivant() {
   renderBienvenue();
 }
 
+/* Sur un telephone neuf, le dossier local est vide — mais le compte a peut-etre
+   deja tout. Redemander alors serait la double saisie qu'on cherche a eviter :
+   on propose de reprendre, et le formulaire n'apparait que s'il n'y a rien. */
+async function ouvrirCeQuIlFaut() {
+  if (profil.dossierFait) { if (!profil.tourVu) ouvrirTour(); return; }
+
+  const s = await etatSauvegarde();
+  const aDesFiches = Object.keys((await Store.all()).fiches || {}).length > 1;
+  if (s && !aDesFiches) {
+    const quand = new Date(s.maj_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    if (await confirmer('Reprendre votre dossier ?',
+      { detail: 'Ce compte a une sauvegarde du ' + quand +
+          '. Tout revient sauf le numéro de sécurité sociale, l\u2019IBAN et les adresses.',
+        oui: 'Reprendre' })) {
+      // on vient de dire oui : ne pas reposer la meme question
+      await restaurerDossier(true);
+      return;                       // la restauration recharge l'application
+    }
+  }
+  ouvrirBienvenue();
+}
+
 async function bvTerminer() {
+  // Les heures majorees suivent le rythme du contrat : le recopier ici, une
+  // fois les semaines connues — a l'etape des enfants elles ne l'etaient pas.
+  cur.contrat = cur.contrat || {};
+  if (cur.contrat.hnS) cur.contrat.hmS = cur.contrat.hnS;
   profil.dossierFait = true;
   await doProfilSave();
   await doSave();

@@ -2853,3 +2853,76 @@ trajectoire et sa rotation — et vingt-deux paillettes qui montent en ondulant.
 Plus une vibration de reussite sur le telephone.
 
 Coupee si la personne a demande moins de mouvement : un simple message.
+
+## 1.12.2 — le formulaire n'arrive qu'une fois
+
+Il se rouvrait sur un telephone neuf, alors que le compte avait deja tout donne
+ailleurs. Le dossier local etant vide a la connexion, la question « le dossier
+est-il fait ? » repondait non — sans regarder le serveur.
+
+Desormais, avant de redemander quoi que ce soit, l'application cherche la
+sauvegarde du compte :
+
+- **Une sauvegarde existe** → « Reprendre votre dossier ? Ce compte a une
+  sauvegarde du 10 septembre. » Un oui, et tout revient : enfants, planning
+  type, fiches, contrat, indemnites. Le formulaire n'apparait pas.
+- **Rien sur le serveur** → le formulaire, comme avant.
+- **Deja fait sur ce telephone** → ni l'un ni l'autre.
+
+Un dossier repris est marque comme fait : la question ne revient plus, meme
+apres une nouvelle reinstallation.
+
+**Une question posee deux fois.** La reprise depuis l'aiguillage declenchait la
+confirmation de l'aiguillage, puis celle de la restauration. La seconde est
+sautee quand la premiere a deja ete donnee — et c'est ce qui bloquait la reprise
+dans mon essai.
+
+Verifie de bout en bout : premier telephone sans sauvegarde -> formulaire ;
+deuxieme telephone avec sauvegarde -> proposition, reprise, trois fiches, deux
+enfants, planning sur deux jours, taux horaire, et le numero de securite sociale
+absent comme prevu ; reouverture -> plus aucune question.
+
+## 1.12.3 — cinq corrections sur le formulaire
+
+### Le planning s'enregistrait dans le vide
+
+Deux causes, chacune suffisante.
+
+**Dimanche est `d0`, pas `d7`.** L'application suit la convention de
+`getDay()` : dimanche vient en tete. J'ecrivais `d7`, une case que rien ne lit.
+
+**Le Dossier ne relisait pas le profil.** `fillProfilForm()` ne tournait qu'au
+demarrage : ce qui etait ecrit ensuite — par le formulaire, par une reprise —
+n'apparaissait jamais dans les champs. Elle est appelee a chaque ouverture.
+
+### Le taux est brut
+
+« Tarif horaire net » etait faux : le contrat porte un brut, Pajemploi en deduit
+le net. Corrige, avec l'explication sous le champ.
+
+### Les heures majorees
+
+Le champ manquait. Un contrat de 47,5 h se decompose en 45 h normales et 2,5 h
+majorees — sans ce champ, les 2,5 h disparaissaient. Les exemples le disent
+maintenant. Les semaines majorees suivent celles du contrat.
+
+### Le salaire mensuel
+
+Nouvelle etape : le net a declarer a Pajemploi. En mensualisation il ne bouge
+pas, donc on le donne une fois.
+
+**L'exoneration se propose.** Un bouton calcule *heures majorees x tarif x
+semaines / 12* et affiche le detail du calcul : « 2,5 h × 5,25 € × 47 ÷ 12 ».
+Je propose, je montre d'ou vient le chiffre, et je dis de verifier sur le
+bulletin Pajemploi — les regles URSSAF evoluent et je ne peux pas les garantir.
+
+### Le nom de l'enfant
+
+Il manquait, et le prenom seul ne suffit pas sur une fiche de salaire. Le nom
+et la date sont desormais ranges dans le profil, pas seulement dans la fiche :
+avec deux enfants ils s'affichaient vides.
+
+### Rejouer le formulaire
+
+Reglages → Maintenance → **Rejouer le formulaire de bienvenue**, visible en mode
+developpeur. Les informations actuelles y sont reprises, rien n'est efface.
