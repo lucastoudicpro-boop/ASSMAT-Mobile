@@ -119,6 +119,22 @@ for f, app in [('docs/index.html', 'Parent'), ('docs-nounou/index.html', 'Nounou
     ok(f'C5 {app} — aucun prompt/confirm du navigateur') if dialogues <= 0 else ko(f'C5 {app} — {dialogues} dialogue(s) navigateur', bloquant=False)
     ok(f'C6 {app} — refus à la porte de la mauvaise application') if 'verif-role' in s and 'barre-route' in s else ko(f'C6 {app} — refus à la porte absent')
 
+# ----------------------------------------------------- C bis. integrite
+titre('C bis. INTÉGRITÉ DES DONNÉES (ce qui a manqué le 10 septembre)')
+for f, app in [('docs/index.html', 'Parent')]:
+    s = open(f, encoding='utf-8').read()
+    js = '\n'.join(re.findall(r'<script>(.*?)</script>', s, re.S))
+    # C7 : une ecriture locale dont on ignore le resultat peut mentir
+    ign = [js[:m.start()].count('\n') + 1 for m in re.finditer(r'^\s*await (Store\.flush|Store\.replaceAll|API\.saveFiche|API\.saveProfil)\(', js, re.M)]
+    ok(f'C7 {app} — toute écriture locale vérifie son résultat') if not ign else ko(f'C7 {app} — résultat ignoré aux lignes {ign[:5]}')
+    # C8 : la sauvegarde en ligne ne doit jamais appauvrir celle qui existe
+    ok(f'C8 {app} — la sauvegarde refuse d\'appauvrir celle en ligne') if 'tailleDossier' in js and 'apres.total < avant.total' in js else ko(f'C8 {app} — pas de garde contre l\'appauvrissement')
+    # C9 : une lecture ratee ne doit pas autoriser l'ecriture
+    ok(f'C9 {app} — pas d\'écriture sans lecture préalable réussie') if 'lectureSure' in js and "if (!lectureSure)" in js else ko(f'C9 {app} — écriture possible sur lecture ratée')
+    # C10 : chaque lecture du stockage a un delai de garde
+    sans = len(re.findall(r'await cap\.get\(', js)) - len(re.findall(r'delai\(cap\.get\(', js))
+    ok(f'C10 {app} — chaque lecture du stockage a un délai de garde') if sans <= 0 else ko(f'C10 {app} — {sans} lecture(s) sans délai')
+
 # ------------------------------------------------------------- D. config
 titre('D. TRANSPORT ET CONFIGURATION')
 for cfg in ['capacitor.config.json', 'capacitor.config.nounou.json']:

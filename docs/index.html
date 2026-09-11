@@ -51,6 +51,7 @@ body{
 #saveDot{font-size:11px;color:var(--mut);padding-right:4px;white-space:nowrap}
 #saveDot.saving{color:var(--miel)}
 #saveDot.ok{color:var(--acc)}
+#saveDot.erreur{color:var(--danger);font-weight:700}
 
 /* ---------- Onglets ---------- */
 #tabs{
@@ -2729,7 +2730,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.14.4</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.15.0</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3681,16 +3682,16 @@ const API = {
   // Une copie, jamais la reference : sinon la fiche rangee reste liee a l'objet
   // courant, et toute modification ulterieure la change aussi — y compris celle
   // d'un mois deja enregistre.
-  async saveFiche(m, d) { (await Store.all()).fiches[m] = JSON.parse(JSON.stringify(d)); await Store.flush(); return true; },
-  async deleteFiche(m) { delete (await Store.all()).fiches[m]; await Store.flush(); return true; },
+  async saveFiche(m, d) { (await Store.all()).fiches[m] = JSON.parse(JSON.stringify(d)); return Store.flush(); },
+  async deleteFiche(m) { delete (await Store.all()).fiches[m]; return Store.flush(); },
   async existsFiche(m) { return !!(await Store.all()).fiches[m]; },
   async renameFiche(o0, n, d) {
     const f = (await Store.all()).fiches;
     f[n] = d; if (o0 && o0 !== n) delete f[o0];
-    await Store.flush(); return true;
+    return Store.flush();
   },
   async loadProfil() { return (await Store.all()).profil || {}; },
-  async saveProfil(p) { const a = await Store.all(); a.profil = { ...a.profil, ...p }; await Store.flush(); return true; }
+  async saveProfil(p) { const a = await Store.all(); a.profil = { ...a.profil, ...p }; return Store.flush(); }
 };
 
 let cur = null, moisOnDisk = null;
@@ -4374,8 +4375,16 @@ function reprendreJours() {
 /* ---------------- Enregistrement ---------------- */
 function setStatus(s) {
   const el = $('#saveDot');
-  el.textContent = s === 'saving' ? 'Enregistrement…' : 'Enregistré';
+  // « Enregistre » ne s'affiche que si l'ecriture a reellement eu lieu. Un
+  // stockage qui refuse doit se voir, pas se cacher derriere un vert rassurant.
+  el.textContent = s === 'saving' ? 'Enregistrement…'
+    : s === 'erreur' ? 'Non enregistré' : 'Enregistré';
   el.className = s;
+  if (s === 'erreur' && !setStatus.prevenu) {
+    setStatus.prevenu = true;
+    toast('Le téléphone refuse d\u2019enregistrer. Fermez et rouvrez l\u2019application : rien n\u2019est écrasé.');
+    setTimeout(() => { setStatus.prevenu = false; }, 30000);
+  }
 }
 function scheduleSave() {
   setStatus('saving'); clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 500);
@@ -4386,9 +4395,9 @@ async function doSave() {
   planifierSauvegarde();
   clearTimeout(saveTimer); saveTimer = null;
   if (!cur) return;
-  await API.saveFiche(cleFiche(cur.mois), cur);
+  const ecrit = await API.saveFiche(cleFiche(cur.mois), cur);
   moisOnDisk = cleFiche(cur.mois);
-  setStatus('ok');
+  setStatus(ecrit ? 'ok' : 'erreur');
   refreshList();
 }
 
@@ -4460,7 +4469,7 @@ async function nouveauMois() {
   const per = F.periodeFromMois(nf.mois);
   nf.periodeDu = per.du; nf.periodeAu = per.au;
   cur = nf; moisOnDisk = cleFiche(nf.mois);
-  await API.saveFiche(moisOnDisk, nf);
+  setStatus((await API.saveFiche(moisOnDisk, nf)) ? 'ok' : 'erreur');
   showView('saisie');
   fillForm();
   window.scrollTo(0, 0);
@@ -6307,7 +6316,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.14.4';
+const VERSION = '1.15.0';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -8860,8 +8869,8 @@ async function doProfilSave() {
   planifierSauvegarde();   // le planning type et les enfants comptent autant que les fiches
   ecranPropre();
   clearTimeout(profilTimer); profilTimer = null;
-  await API.saveProfil(JSON.parse(JSON.stringify(profil)));
-  setStatus('ok');
+  const ecrit = await API.saveProfil(JSON.parse(JSON.stringify(profil)));
+  setStatus(ecrit ? 'ok' : 'erreur');
 }
 
 async function renderDossier() {
@@ -9009,7 +9018,7 @@ async function importJson(file) {
   else if (Array.isArray(d)) d.forEach(f => ajoute(f));
   else ajoute(d);
   if (!n) { toast('Aucune fiche reconnue dans ce fichier'); return; }
-  await Store.flush();
+  if (!await Store.flush()) { toast('Import lu, mais le téléphone refuse d\u2019enregistrer. Rien n\u2019a été écrasé.'); return; }
   profil = normalizeProfil(await API.loadProfil());
   fillProfilForm();
   const list = await API.listFiches();

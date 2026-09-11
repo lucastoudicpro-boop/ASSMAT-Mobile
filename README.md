@@ -3152,3 +3152,42 @@ plausibles. Cet ecran remplace la devinette par un constat.
 Si le diagnostic annonce zero fiche en ligne, la sauvegarde a bien ete ecrasee
 et ce qui n'est plus sur aucun telephone est perdu. C'est la consequence du
 defaut d'origine, et aucune version ne la repare.
+
+## 1.15.0 — analyse approfondie : l'integrite des donnees
+
+Mes audits precedents verifiaient la syntaxe, la securite, l'ouverture des
+modules. Jamais si une donnee pouvait **se perdre sans bruit**. C'est
+exactement ce qui est arrive le 10 septembre, par une chaine de quatre
+maillons : lecture trop courte → dossier vide → enregistrement de ce vide →
+sauvegarde en ligne ecrasee. Chaque maillon etait plausible seul.
+
+### Ce que l'analyse a cherche
+
+- **Les erreurs avalees en silence** : 44 `catch` vides cote parent, 41 cote
+  nounou. Ceux qui suivent une ecriture ont ete lus un par un.
+- **Les ecritures dont le resultat est ignore** : depuis que le stockage peut
+  refuser d'ecrire, une ecriture non verifiee est un mensonge en attente.
+- **Les « enregistre » sans preuve** : chaque annonce de reussite doit suivre
+  une ecriture attendue.
+- **Le comportement sous charge** : stockage a 350 ms, reseau a 600 ms, trois
+  enregistrements simultanes, puis relecture et comparaison.
+
+### Ce qui a ete corrige
+
+**Chaque enregistrement dit la verite.** `saveFiche`, `saveProfil`,
+`renameFiche` et l'import remontent le resultat de l'ecriture. Le point
+« Enregistre » devient « Non enregistre » en rouge quand le telephone refuse,
+avec un message qui dit quoi faire. Avant, il restait vert.
+
+### Ce qui a ete verifie et tient
+
+Parent : trois ecritures simultanees coherentes, relecture identique au
+stockage, sauvegarde en ligne juste, panne de stockage visible. Nounou :
+journal ecrit puis relu a l'identique, photo refusee sans autorisation,
+premiere fois, profil complet — tout sous 600 ms de latence.
+
+### Le protocole apprend
+
+Quatre controles ajoutes, C7 a C10 : ecriture verifiee, sauvegarde qui refuse
+d'appauvrir, pas d'ecriture sur lecture ratee, delai de garde sur chaque
+lecture. Le premier passage en a attrape trois de plus.
