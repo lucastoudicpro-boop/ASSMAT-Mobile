@@ -752,12 +752,13 @@ html[data-theme="sombre"] .gr-jour.abs-s{background:#3a2024;border-color:#5c3338
 .contact .two:first-child{grid-template-columns:120px 1fr}
 .contact .retirer{border:0;background:transparent;color:var(--bord);cursor:pointer;padding:9px;border-radius:9px}
 .contact .retirer svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.reprise-dispo{display:flex;align-items:center;gap:12px;background:var(--acc-doux);
-  border-radius:14px;padding:12px 14px;margin:10px 0}
+/* Un titre, un sous-titre et un bouton cote a cote se compriment jusqu'a
+   devenir illisibles sur un telephone. Empiles, ils respirent. */
+.reprise-dispo{background:var(--acc-doux);border-radius:14px;padding:13px 14px;margin:10px 0}
+.rd-txt{display:block;margin-bottom:10px;line-height:1.4}
 .reprise-dispo b{display:block;font-size:13.5px}
-.reprise-dispo small{display:block;font-size:12px;color:var(--mut);margin-top:2px}
-.reprise-dispo>button{flex:0 0 auto;margin:0}
-.reprise-dispo>*:first-child{flex:1;min-width:0}
+.reprise-dispo small{display:block;font-size:12.5px;color:var(--mut);margin-top:3px}
+.reprise-dispo>button{margin:0}
 .pers{display:grid;grid-template-columns:1fr 1fr 40px;gap:7px;margin-bottom:7px;align-items:center}
 .pers input{min-height:42px}
 .pers button{border:0;background:transparent;color:var(--danger);cursor:pointer;
@@ -2721,7 +2722,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.14.2</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.14.3</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3600,9 +3601,14 @@ const Store = (() => {
 
   const CLE_SESSION = 'assmat-session';
   async function lireSession() {
+    // Sans delai de garde, un stockage qui ne repond pas laisse l'application
+    // sur son ecran de lancement, indefiniment. Mieux vaut demander de se
+    // reconnecter que de ne jamais rien afficher.
     try {
-      if (cap) return JSON.parse((await cap.get({ key: CLE_SESSION })).value || 'null');
-      if (host) { const r = await host.get(CLE_SESSION); return r ? JSON.parse(r.value) : null; }
+      if (cap) { const r = await delai(cap.get({ key: CLE_SESSION }), 8000);
+        return r ? JSON.parse(r.value || 'null') : null; }
+      if (host) { const r = await delai(host.get(CLE_SESSION), 8000);
+        return r ? JSON.parse(r.value) : null; }
       if (ls) return JSON.parse(ls.getItem(CLE_SESSION) || 'null');
     } catch (e) {}
     return null;
@@ -3645,7 +3651,10 @@ const Store = (() => {
     // ecrire, et il faut le signaler.
     lue() { return lectureSure; },
     async flush() { if (cache) return writeRaw(JSON.stringify(cache)); return false; },
-    async replaceAll(d) { cache = d; return writeRaw(JSON.stringify(cache)); }
+    // Une restauration remplace tout, volontairement : le garde-fou qui empeche
+    // d'ecraser par accident n'a pas a la bloquer. C'est le seul cas ou l'on
+    // ecrit sans savoir ce qu'il y avait — et c'est justement le but.
+    async replaceAll(d) { cache = d; lectureSure = true; return writeRaw(JSON.stringify(cache)); }
   };
 })();
 
@@ -6291,7 +6300,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.14.2';
+const VERSION = '1.14.3';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -10582,9 +10591,11 @@ function renderReprise() {
 
   box.innerHTML = aReprendre.length
     ? `<div class="reprise-dispo">
-        <b>${aReprendre.length} information(s) disponible(s) dans son profil</b>
-        <small>${esc(aReprendre.map(([n]) => n).join(', '))}</small>
-        <button id="btnReprendre" class="btn btn-ghost btn-petit">Reprendre</button>
+        <span class="rd-txt">
+          <b>${aReprendre.length === 1 ? 'Une information disponible' : aReprendre.length + ' informations disponibles'} dans son profil</b>
+          <small>${esc(aReprendre.map(([n]) => n).join(' · '))}</small>
+        </span>
+        <button id="btnReprendre" class="btn btn-primary btn-block">Reprendre ${aReprendre.length === 1 ? 'cette information' : 'ces informations'}</button>
       </div>`
     : '<p class="hint" style="margin:0">Les informations de la nounou sont déjà reprises.</p>';
   const b = document.getElementById('btnReprendre');
@@ -10773,7 +10784,15 @@ async function restaurerDossier(dejaConfirme) {
     // Un dossier repris est un dossier fait : le formulaire n'a plus lieu d'etre.
     fusion.profil = fusion.profil || {};
     if (nbFiches || (fusion.profil.enfants || []).length) fusion.profil.dossierFait = true;
-    await Store.replaceAll(fusion);
+    const ecrit = await Store.replaceAll(fusion);
+    if (!ecrit) {
+      // Annoncer une reussite qui n'a pas eu lieu est pire que l'echec :
+      // on croit avoir recupere, on continue, et tout est a refaire.
+      await confirmer('La restauration n\u2019a pas pu être enregistrée',
+        { detail: 'Le stockage du téléphone a refusé l\u2019écriture. Vos données sont toujours en ligne. Fermez complètement l\u2019application, rouvrez-la, et réessayez.',
+          oui: 'J\u2019ai compris', non: 'Fermer' });
+      return;
+    }
     toast(nbFiches + ' fiche(s) restaurée(s)');
     setTimeout(() => location.reload(), 1400);
   } catch (e) { toast('Impossible : ' + enClair(e)); }

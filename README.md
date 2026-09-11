@@ -3086,3 +3086,32 @@ workflows sont a recopier a la main, il faut le faire avant.
 
 **Les deux fichiers sont a recopier a la main** dans `.github/workflows/`,
 comme toujours.
+
+## 1.14.3 — le garde-fou bloquait la reparation
+
+Mon correctif d'hier interdisait l'ecriture tant qu'on ne savait pas ce que
+contenait le stockage. Bonne regle — mais **elle bloquait aussi la
+restauration**, qui remplace tout volontairement. La reprise annoncait donc sa
+reussite sans rien ecrire.
+
+Trois corrections :
+
+- **La restauration passe outre le garde-fou.** C'est le seul cas ou l'on
+  ecrit sans savoir ce qu'il y avait, et c'est justement le but.
+- **Le message dit la verite.** Si l'ecriture est refusee, l'application le dit
+  et explique quoi faire, au lieu d'annoncer des fiches restaurees qui ne le
+  sont pas. Annoncer une reussite qui n'a pas eu lieu est pire que l'echec : on
+  croit avoir recupere, on continue, et tout est a refaire.
+- **La lecture de session a enfin un delai de garde.** Elle n'en avait aucun :
+  un stockage qui ne repond pas laissait l'application sur son ecran de
+  lancement, indefiniment. Huit secondes, puis on demande de se reconnecter.
+
+### La carte de reprise etait illisible
+
+Titre, sous-titre et bouton cote a cote se comprimaient jusqu'a sortir de
+l'ecran. Empiles, avec le bouton en pleine largeur : 308 pixels au lieu d'un
+reste de place.
+
+Verifie sur deux stockages : rapide — trois fiches restaurees, l'enfant, le
+planning ; bloque a quarante secondes — la porte s'ouvre quand meme apres le
+delai, et l'echec est annonce clairement.
