@@ -2926,3 +2926,93 @@ avec deux enfants ils s'affichaient vides.
 
 Reglages → Maintenance → **Rejouer le formulaire de bienvenue**, visible en mode
 developpeur. Les informations actuelles y sont reprises, rien n'est efface.
+
+## 1.13.0 — la nounou a son formulaire, son tour et ses astuces
+
+`025-conges-recurrents.sql` est a executer.
+
+### Le formulaire de la nounou
+
+Cinq etapes, comme cote parent : son nom et son telephone, son metier — depuis
+quand, places d'agrement, numero —, sa commune et son cadre d'accueil, puis
+**ses conges**.
+
+Son nom n'etait saisissable nulle part avant : l'application affichait le debut
+de son adresse e-mail, et le parent le retapait.
+
+### Les conges qui reviennent
+
+Une assistante maternelle ferme souvent aux memes dates : trois semaines en
+aout, la semaine de Noel. Une case **« chaque annee »** marque la fermeture
+comme un modele ; l'an prochain, l'application proposera de la reconduire au
+lieu de la faire ressaisir.
+
+`fermetures_a_reconduire(annee)` renvoie ce qui reste a reporter — en ecartant
+ce qui l'a deja ete, par le lien de modele ou par la date.
+
+### Le tour guide, cote nounou
+
+Il n'existait pas. Cinq ecrans apres le formulaire : le journal du soir, les
+premieres fois et le choix de les dire, le volet et l'appui long, « a mettre au
+clair », et les astuces pour la suite.
+
+### Le module Astuces
+
+Onze astuces cote parent, douze cote nounou, rangees par moment — chaque mois,
+avec votre nounou, quand ca coince, vos donnees. Chacune se deplie.
+
+Le tour montre l'essentiel en cinq ecrans ; le reste ne se retient pas d'un
+trait. Les astuces se lisent quand on en a besoin.
+
+### La fete, un peu partout
+
+Portee cote nounou, et declenchee aux moments qui comptent : une premiere fois
+racontee, un profil complete, une demande d'accueil acceptee, la fiche
+d'urgence signee. Les petites etoiles pour les gestes plus discrets — une
+information reprise, une fermeture ajoutee, un sujet devoile.
+
+## 1.14.0 — cinq choses qu'on voit tous les jours
+
+`026-doudou.sql` est a executer.
+
+### L'anneau des mois
+
+Autour de la frimousse, un anneau qui se remplit a mesure de l'annee en cours
+depuis l'anniversaire, avec l'age au centre : « 1 an 5 m ». Il se remplit en une
+seconde a l'ouverture. Des deux cotes.
+
+C'est ce qu'on regarde le plus souvent sans y penser : autant qu'il dise
+quelque chose qu'aucun chiffre ne dit.
+
+### Le jardin du mois, cote nounou
+
+Elle voyait l'annee de l'enfant cote parent, mais rien de son propre mois. Une
+pousse par journee remplie, coloree selon l'humeur ; celles avec un mot portent
+une aureole. Les jours sans journal restent une graine : les trous se voient
+sans avoir a compter.
+
+### La barre qui coule
+
+Elle sautait d'une valeur a l'autre. Elle glisse maintenant en neuf cents
+millisecondes, avec une vague claire qui la traverse.
+
+### Les jours qui se posent
+
+« Remplir depuis le planning type » cochait trente jours dans le meme instant :
+on ne voyait rien. Ils arrivent desormais l'un apres l'autre, douze
+millisecondes d'ecart — la vague traverse le mois en moins d'une demi-seconde.
+
+### Le doudou oublie
+
+La nounou coche une case dans le journal ; le parent voit un petit ours sur son
+accueil : « Le doudou est reste ici ». La carte disparait le lendemain — un
+doudou oublie hier a deja ete recupere.
+
+C'est le genre de detail qui fait sourire a 18 h, et qui evite une soiree
+difficile.
+
+### Ce que je n'ai pas ajoute
+
+Des animations a l'ouverture de chaque carte — la cascade suffit, en ajouter
+rendrait l'application lente a l'usage. Du son — une nounou ouvre l'application
+pendant la sieste. Des confettis partout — ils valent parce qu'ils sont rares.

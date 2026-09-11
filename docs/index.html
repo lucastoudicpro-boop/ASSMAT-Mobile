@@ -1721,6 +1721,72 @@ input:focus,textarea:focus,select:focus,
 .bv-jour b{font-size:13.5px;color:var(--mut);font-weight:600}
 .bv-jour input{margin:0}
 
+
+/* ---------- Les astuces ---------- */
+.astuce{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  margin-bottom:10px;overflow:hidden;box-shadow:0 1px 2px var(--ombre)}
+.astuce summary{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;
+  list-style:none;font-weight:600;font-size:14.5px}
+.astuce summary::-webkit-details-marker{display:none}
+.astuce summary span.ico{width:38px;height:38px;border-radius:13px;flex:0 0 auto;
+  background:var(--zebre);display:flex;align-items:center;justify-content:center;font-size:18px}
+.astuce summary b{flex:1;min-width:0;font-weight:600}
+.astuce summary::after{content:'▾';color:var(--mut);font-size:13px;transition:transform .25s ease}
+.astuce[open] summary::after{transform:rotate(180deg)}
+.astuce .corps{padding:0 14px 14px 64px;color:var(--mut);font-size:13.5px;line-height:1.6;
+  animation:eclot .3s ease both}
+.astuce .corps b{color:var(--txt)}
+.astuce-groupe{font:600 11.5px system-ui;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--mut);margin:18px 0 9px}
+.astuce-groupe:first-child{margin-top:4px}
+
+
+/* ---------- L'anneau des mois ---------- */
+.porte-anneau{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.anneau{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);
+  pointer-events:none}
+.anneau circle:last-child{animation:remplir 1.1s .25s cubic-bezier(.3,.9,.4,1) forwards}
+@keyframes remplir{to{stroke-dashoffset:var(--fin)}}
+.anneau-age{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);
+  background:var(--card);border:1px solid var(--line);border-radius:9px;
+  padding:1px 7px;font:600 10.5px system-ui;color:var(--acc);white-space:nowrap;
+  box-shadow:0 1px 3px var(--ombre)}
+@media (prefers-reduced-motion:reduce){
+  .anneau circle:last-child{animation:none;stroke-dashoffset:var(--fin)}}
+
+/* ---------- La barre qui coule ---------- */
+.jauge{position:relative;height:8px;border-radius:5px;background:var(--zebre);overflow:hidden}
+.jauge>i{display:block;height:100%;border-radius:5px;background:var(--acc);
+  width:0;transition:width .9s cubic-bezier(.25,.8,.3,1)}
+.jauge>i::after{content:'';position:absolute;top:0;bottom:0;width:26px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+  animation:vague 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+  .jauge>i{transition:none}.jauge>i::after{animation:none;display:none}}
+@keyframes vague{0%{transform:translateX(-30px)}100%{transform:translateX(240px)}}
+
+/* ---------- Les jours qui se posent ---------- */
+@keyframes pose-jour{
+  0%{opacity:0;transform:scale(.7) translateY(-6px)}
+  60%{transform:scale(1.06)}
+  100%{opacity:1;transform:none}}
+.gr-jour.vient-de-remplir{animation:pose-jour .34s cubic-bezier(.3,1.3,.5,1) both;
+  animation-delay:var(--i)}
+@media (prefers-reduced-motion:reduce){.gr-jour.vient-de-remplir{animation:none}}
+
+
+/* ---------- Le doudou ---------- */
+.doudou{display:flex;align-items:center;gap:14px;background:#fdf3e7;
+  border:1px solid #f0dcc2;border-radius:16px;padding:13px 15px;margin-bottom:10px;
+  animation:eclot .45s ease both}
+.doudou-ours{width:48px;height:48px;flex:0 0 auto}
+.doudou-ours svg{width:100%;height:100%;animation:bv-tourne-doux 3.2s ease-in-out infinite;
+  transform-origin:50% 70%}
+.doudou-txt{flex:1;min-width:0;line-height:1.35}
+.doudou-txt b{display:block;font-size:14.5px;color:#8a5a28}
+.doudou-txt small{font-size:12.5px;color:#a07a4a}
+@media (prefers-reduced-motion:reduce){.doudou-ours svg{animation:none}}
+
 </style>
 </head>
 <body>
@@ -2270,6 +2336,14 @@ input:focus,textarea:focus,select:focus,
 
 <div id="reserve" hidden>
   <details class="card">
+    <summary><svg class="ico"><use href="#i-info"/></svg><span class="ttl">Astuces</span></summary>
+    <div class="body">
+      <p class="hint" style="margin-top:0">Ce que le tour n'a pas eu le temps de dire. À lire quand vous en aurez besoin.</p>
+      <div id="listeAstuces"></div>
+    </div>
+  </details>
+
+  <details class="card">
     <summary><svg class="ico"><use href="#i-notes"/></svg><span class="ttl">Le carnet de l'année</span></summary>
     <div class="body"><div id="carnetAnnee"></div></div>
   </details>
@@ -2647,7 +2721,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.12.3</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.14.0</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3903,6 +3977,9 @@ async function remplirSemaine() {
   }
 
   syncCalInputs(); renderGrille(); recalc(); scheduleSave();
+  // Vingt jours qui se cochent dans le meme instant ne se voient pas. Les
+  // faire arriver l'un apres l'autre montre ce qui vient de se passer.
+  poserLesJours();
   toast(jours + ' jours remplis' +
     (maj > 0.0001 ? ', dont ' + F.qn(maj) + ' h majorées' : '') +
     (sautes ? ' — ' + sautes + (sautes > 1 ? ' jours fériés laissés vides' : ' jour férié laissé vide') : ''));
@@ -3944,6 +4021,22 @@ function refreshCalendrierMeta() {
    La liste reste disponible pour la saisie au clavier. */
 let vueCal = 'grille';
 let jourEdite = null;
+
+/* Chaque jour rempli se pose a son tour, en douze millisecondes d'ecart : la
+   vague traverse le mois en moins d'une demi-seconde. */
+function poserLesJours() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cases = $$('#grille .gr-jour:not(.vide)');
+  let n = 0;
+  cases.forEach(el => {
+    if (!el.textContent.trim() || el.classList.contains('gr-vide')) return;
+    el.style.setProperty('--i', (n++ * 0.012).toFixed(3) + 's');
+    el.classList.remove('vient-de-remplir');
+    void el.offsetWidth;
+    el.classList.add('vient-de-remplir');
+  });
+  setTimeout(() => cases.forEach(el => el.classList.remove('vient-de-remplir')), 900);
+}
 
 function renderGrille() {
   const box = $('#grille');
@@ -5641,7 +5734,7 @@ function tuileJournal() {
   const sies = siestesDe(j);
   if (sies.length) bouts.push(sies.length > 1 ? sies.length + ' siestes' : sies[0].toLowerCase());
   return `<button class="tuile-m large" data-mod="journal">
-    <span class="rond portrait">${portraitHTML(38)}</span>
+    <span class="rond portrait porte-anneau">${portraitHTML(38)}${anneauAge(versISO(cur.enfant.naissance || ''), 38)}</span>
     <div><b>${esc(quand)} — ${esc(JOURNAL_HUMEUR[j.humeur] || 'Journal')}</b>
     <small>${esc(bouts.join(' · ') || j.mot || 'Voir le journal')}</small></div></button>`;
 }
@@ -5731,6 +5824,7 @@ const PAGES = {
   premieres:  { titre: 'Premières fois',    ancres: ['listePremieres'] },
   sujets:     { titre: 'À mettre au clair',  ancres: ['listeSujets'] },
   carnet:     { titre: "Carnet de l'année",  ancres: ['carnetAnnee'] },
+  astuces:    { titre: 'Astuces',            ancres: ['listeAstuces'] },
   recherche:  { titre: 'Chercher',          ancres: ['resultatsRecherche'] },
   reprise:    { titre: 'Reprise',           ancres: ['listeReprises'] },
   archive:    { titre: 'Archive',           ancres: ['archiveEtat'] },
@@ -5825,6 +5919,7 @@ async function rafraichirModule(id) {
     premieres:  async () => { await chargerPremieres(); renderPremieres(); },
     sujets:     async () => { await chargerSujets(); renderSujets(); },
     carnet:     async () => { $('#carnetAnnee').innerHTML = miroiter(4, true); renderCarnet(await chargerCarnet()); },
+    astuces:    async () => { renderAstuces(ASTUCES, '#listeAstuces'); },
     recherche:  async () => { await chargerDemandesAccueil(); renderDemandesAccueil(); },
     reprise:    async () => { await chargerReprises(); renderReprises(); },
     archive:    async () => { renderArchive(); }
@@ -5849,6 +5944,7 @@ const MODULES = [
   { id: 'premieres', nom: 'Premières fois', ico: 'i-ok',      fn: () => ouvrirModule('premieres') },
   { id: 'sujets',    nom: 'Au clair',      ico: 'i-mail',     fn: () => ouvrirModule('sujets') },
   { id: 'carnet',    nom: "Carnet de l'année", ico: 'i-notes', fn: () => ouvrirModule('carnet') },
+  { id: 'astuces',   nom: 'Astuces',       ico: 'i-info',     fn: () => ouvrirModule('astuces') },
   { id: 'recherche', nom: 'Chercher',     ico: 'i-gens',     fn: () => ouvrirModule('recherche'), dev: true },
   { id: 'reprise',   nom: 'Reprise',      ico: 'i-notes',    fn: () => ouvrirModule('reprise') },
   { id: 'archive',   nom: 'Archive',      ico: 'i-sauve',    fn: () => ouvrirModule('archive') },
@@ -5922,6 +6018,7 @@ function ouvrirVolet() {
     section('Au quotidien', GROUPES.quotidien.onglets.map(par).concat([par('retard')])) +
     section('Le salaire', ['saisie', 'fiche', 'bilan', 'planning'].map(par)) +
     section('Le contrat', GROUPES.contrat.onglets.map(par).concat([par('dossier')])) +
+    section('Pour s\u2019y retrouver', [par('astuces')]) +
     section('En préparation', [par('recherche')]) +
     section('Application', ['accueil', 'reglages'].map(par));
   $$('#voletGrille [data-module]').forEach(b => {
@@ -6144,7 +6241,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.12.3';
+const VERSION = '1.14.0';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -6723,7 +6820,7 @@ async function envoyerDemandeAccueil(salarieeId) {
       prenom + (debut ? ', pour ' + debut : ''));
     await chargerDemandesAccueil();
     renderResultats(); renderDemandesAccueil();
-    toast('Demande envoyée — elle décide');
+    petitesEtoiles(); toast('Demande envoyée — elle décide');
   } catch (e2) { toast('Impossible : ' + enClair(e2)); }
 }
 
@@ -7535,7 +7632,7 @@ async function chargerJournal() {
   if (!id || !Supa.connecte()) { journal = []; return; }
   try {
     journal = await Supa.lire('journal',
-      'contrat_id=eq.' + id + '&select=jour,repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le,activites,comptines,livres,reponse_parent,repondu_le,coeur&order=jour.desc&limit=14');
+      'contrat_id=eq.' + id + '&select=jour,repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le,activites,comptines,livres,reponse_parent,repondu_le,coeur,doudou&order=jour.desc&limit=14');
   } catch (e) { journal = []; }
 }
 
@@ -8210,6 +8307,7 @@ async function renderAccueil() {
 
   $('#accueil').innerHTML = `
     <div id="datesMarquantes"></div>
+    <div id="zoneDoudou"></div>
     <div id="hero">
       <div class="mois">${ICO_SALUT[salutDuMoment().ico]}${esc(salutDuMoment().mot)} · ${esc(F.labelMois(cur.mois))}${enfants().length > 1 ? ' · ' + esc(nomEnfant(enfantActif) || enfantActif) : ''}</div>
       <div class="montant" data-compte="${esc(eur(c.solde))}">${eur(c.solde)}</div>
@@ -8287,6 +8385,13 @@ async function renderAccueil() {
   $$('#accueil [data-act]').forEach(b => { b.onclick = () => actions[b.dataset.act](); });
   // le montant compte jusqu'à sa valeur
   renderDates('#datesMarquantes', cur.enfant.prenom);
+  // La journee la plus recente, et seulement si c'est aujourd'hui : un doudou
+  // oublie hier a deja ete recupere.
+  const ajd = new Date();
+  const cleAjd = ajd.getFullYear() + '-' + String(ajd.getMonth() + 1).padStart(2, '0') +
+    '-' + String(ajd.getDate()).padStart(2, '0');
+  renderDoudou('#zoneDoudou',
+    (journal[0] || {}).doudou && (journal[0] || {}).jour === cleAjd, cur.enfant.prenom);
   dessinerCiel('#hero');
   const mt = $('#hero .montant');
   if (mt) { const fin = mt.dataset.compte; mt.dataset.valeur = mt.dataset.valeur || '0'; compterVers(mt, fin); }
@@ -10406,7 +10511,7 @@ async function reprendreInfos(silencieux) {
     }
     n++;
   }
-  if (n) { await doSave(); if (!silencieux) toast(n + ' information(s) reprise(s) du profil de la nounou'); }
+  if (n) { await doSave(); if (!silencieux) petitesEtoiles(); toast(n + ' information(s) reprise(s) du profil de la nounou'); }
   else if (!silencieux) toast('Tout est déjà renseigné.');
   return n;
 }
@@ -11248,6 +11353,110 @@ function fete() {
   const C = window.Capacitor && window.Capacitor.Plugins;
   if (C && C.Haptics) { try { C.Haptics.notification({ type: 'SUCCESS' }); } catch (e) {} }
   setTimeout(() => zone.remove(), 2600);
+}
+
+
+/* ---------------- Les astuces ----------------
+   Le tour montre l'essentiel en cinq ecrans ; le reste ne se retient pas d'un
+   trait. Ici chaque chose est rangee par moment — le quotidien, l'argent, ce
+   qui coince — et se lit quand on en a besoin. */
+function renderAstuces(liste, selecteur) {
+  // Le champ « html » est ecrit dans ce fichier, jamais saisi : il porte des
+  // balises voulues. Tout ce qui vient d'un autre compte passe par esc().
+  const box = document.querySelector(selecteur);
+  if (!box) return;
+  let groupe = '';
+  box.innerHTML = liste.map(a => {
+    const tete = a.groupe !== groupe ? (groupe = a.groupe,
+      `<div class="astuce-groupe">${esc(a.groupe)}</div>`) : '';
+    return tete + `<details class="astuce">
+      <summary><span class="ico">${a.ico}</span><b>${esc(a.titre)}</b></summary>
+      <div class="corps">${a.html}</div>
+    </details>`;
+  }).join('');
+}
+
+const ASTUCES = [
+  { groupe: 'Chaque mois', ico: '📅', titre: 'Remplir un mois en trois gestes',
+    html: 'Ouvrez la saisie, touchez <b>Remplir depuis le planning type</b> : tous les jours d\u2019accueil se cochent d\u2019un coup. Il ne reste qu\u2019à corriger les exceptions — un jour d\u2019absence, une heure de plus.' },
+  { groupe: 'Chaque mois', ico: '🔁', titre: 'Ce qui ne se retape jamais',
+    html: 'Le tarif horaire, les heures, les indemnités, les identités et le planning sont repris du mois précédent. Vous ne les modifiez qu\u2019en cas de revalorisation ou de changement de contrat.' },
+  { groupe: 'Chaque mois', ico: '✓', titre: 'Marquer la fiche envoyée',
+    html: 'Une fois la déclaration faite sur Pajemploi, touchez <b>Fiche transmise</b>. Le mois se replie, et la progression avance. C\u2019est ce qui vous dit où vous en êtes l\u2019an prochain.' },
+
+  { groupe: 'Avec votre nounou', ico: '💬', titre: 'Répondre au journal',
+    html: 'Sous chaque journée, un cœur et un bouton pour répondre. Le cœur suffit les soirs pressés — elle voit que vous avez lu. Un mot fait toujours plaisir le lendemain matin.' },
+  { groupe: 'Avec votre nounou', ico: '⭐', titre: 'Les premières fois',
+    html: 'Quand elle voit un premier pas, elle choisit : vous raconter, ou vous prévenir sans dire quoi pour vous laisser la découverte. Si vous le voyez aussi à la maison, dites-le : « Je l\u2019ai vu à la maison aussi ».' },
+  { groupe: 'Avec votre nounou', ico: '🎵', titre: 'Reprendre la comptine du jour',
+    html: 'Le journal note ce qui a été chanté et lu. Reprenez-le le soir : c\u2019est un fil entre les deux maisons, et votre enfant adore reconnaître.' },
+
+  { groupe: 'Quand ça coince', ico: '🤝', titre: 'Mettre un sujet au clair',
+    html: 'Pour ce qui se dit mal dans un message rapide. Choisissez le thème, une amorce neutre s\u2019écrit toute seule. Elle lit à son rythme, répond, et vous marquez « réglé » quand c\u2019est fait.' },
+  { groupe: 'Quand ça coince', ico: '⏰', titre: 'Prévenir d\u2019un retard',
+    html: 'Le module Retard envoie en un geste : 15, 30, 45 minutes ou plus. Mieux vaut prévenir dix minutes avant que s\u2019excuser vingt minutes après.' },
+
+  { groupe: 'Vos données', ico: '📦', titre: 'Tout garder si vous changez de téléphone',
+    html: 'Votre dossier est sauvegardé en ligne à chaque enregistrement. Sur un téléphone neuf, connectez-vous : l\u2019application propose de tout reprendre.' },
+  { groupe: 'Vos données', ico: '🔒', titre: 'Ce qui ne quitte jamais ce téléphone',
+    html: 'Le numéro de sécurité sociale, l\u2019IBAN et les adresses précises. Ils ne sont ni sauvegardés ni partagés : vous les ressaisirez en cas de réinstallation, et c\u2019est voulu.' },
+  { groupe: 'Vos données', ico: '📸', titre: 'Les photos n\u2019arrivent pas ?',
+    html: 'Elles demandent votre autorisation explicite dans <b>Le contrat → Urgence</b>, et cet accord doit être signé. Sans lui, votre nounou ne peut rien envoyer.' }
+];
+
+
+/* ---------------- L'anneau des mois ----------------
+   Autour de la frimousse, un anneau qui se remplit a mesure de l'annee en
+   cours depuis l'anniversaire. L'age au centre. On le regarde souvent : autant
+   qu'il dise quelque chose. */
+function anneauAge(naissanceISO, taille) {
+  if (!naissanceISO) return '';
+  const t = taille || 92, r = t / 2 - 4, c = 2 * Math.PI * r;
+  const n = new Date(naissanceISO + 'T00:00:00');
+  if (isNaN(n)) return '';
+  const auj = new Date();
+  let ans = auj.getFullYear() - n.getFullYear();
+  const dernier = new Date(n); dernier.setFullYear(n.getFullYear() + ans);
+  if (dernier > auj) { ans--; dernier.setFullYear(dernier.getFullYear() - 1); }
+  const suivant = new Date(dernier); suivant.setFullYear(dernier.getFullYear() + 1);
+  const part = Math.min(1, Math.max(0, (auj - dernier) / (suivant - dernier)));
+  const mois = Math.floor(part * 12);
+
+  const libelle = ans < 1 ? (mois || 1) + ' mois'
+    : ans + ' an' + (ans > 1 ? 's' : '') + (mois ? ' ' + mois + ' m' : '');
+
+  return `<svg class="anneau" viewBox="0 0 ${t} ${t}" aria-hidden="true">
+    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="3"/>
+    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="3"
+      stroke-linecap="round" transform="rotate(-90 ${t/2} ${t/2})"
+      stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${c.toFixed(1)}"
+      style="--fin:${(c * (1 - part)).toFixed(1)}"/>
+  </svg><span class="anneau-age">${esc(libelle)}</span>`;
+}
+
+
+/* ---------------- Le doudou oublie ----------------
+   Un enfant parti sans son doudou, c'est une soiree difficile pour tout le
+   monde. La nounou le signale en un geste, le parent le voit tout de suite. */
+const OURS = `<svg viewBox="0 0 64 64" aria-hidden="true">
+  <circle cx="18" cy="18" r="8" fill="#c9976a"/><circle cx="46" cy="18" r="8" fill="#c9976a"/>
+  <circle cx="18" cy="18" r="4" fill="#e8c9a8"/><circle cx="46" cy="18" r="4" fill="#e8c9a8"/>
+  <circle cx="32" cy="34" r="19" fill="#c9976a"/>
+  <ellipse cx="32" cy="41" rx="9" ry="7" fill="#e8c9a8"/>
+  <circle cx="25" cy="30" r="2.2" fill="#4a3427"/><circle cx="39" cy="30" r="2.2" fill="#4a3427"/>
+  <ellipse cx="32" cy="38" rx="3" ry="2" fill="#4a3427"/>
+  <path d="M32 40v3M28 45a5 4 0 0 0 8 0" stroke="#4a3427" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+function renderDoudou(selecteur, oublie, prenom) {
+  const box = document.querySelector(selecteur);
+  if (!box) return;
+  if (!oublie) { box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="doudou">
+    <span class="doudou-ours">${OURS}</span>
+    <span class="doudou-txt"><b>Le doudou est resté ici</b>
+      <small>${esc(prenom || 'Votre enfant')} est parti sans lui. Passez le récupérer si besoin.</small></span>
+  </div>`;
 }
 
 async function activerPush() {

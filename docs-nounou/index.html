@@ -1204,6 +1204,201 @@ input:focus,textarea:focus,select:focus,
 @media (prefers-reduced-motion:reduce){
   .btn.occupe::after{animation:none;border-top-color:currentColor;opacity:.5}}
 
+/* ---------- La fete ---------- */
+.fete{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.fete u{position:absolute;top:38%;left:50%;width:10px;height:10px;margin:-5px 0 0 -5px;
+  border-radius:50%;border:3px solid var(--acc);opacity:.9;
+  animation:fete-onde .9s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes fete-onde{to{transform:scale(46);opacity:0;border-width:1px}}
+.fete i{position:absolute;top:38%;left:50%;width:9px;height:9px;border-radius:2px;
+  animation:fete-eclat 1.5s cubic-bezier(.15,.7,.35,1) forwards}
+@keyframes fete-eclat{
+  0%{transform:translate(0,0) rotate(0);opacity:1}
+  70%{opacity:1}
+  100%{transform:translate(var(--x),calc(var(--y) + 210px)) rotate(var(--r));opacity:0}}
+.fete b{position:absolute;bottom:-14px;width:7px;height:7px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0 30%,#f5c65e 32%,transparent 72%);
+  animation:fete-paillette 2s ease-out forwards}
+@keyframes fete-paillette{
+  0%{opacity:0;transform:translate(0,0) scale(.5)}
+  20%{opacity:1}
+  100%{opacity:0;transform:translate(var(--d),-88vh) scale(1.2)}}
+
+
+/* ---------------- Le formulaire de premiere fois ----------------
+   Tout le dossier en une fois, plutot qu'un renvoi vers un module ou l'on se
+   perd. Une etape par sujet, un dessin par etape, et rien a ressaisir apres. */
+#bienvenue{position:fixed;inset:0;z-index:125;background:var(--bg);
+  display:flex;flex-direction:column;padding:0 20px env(safe-area-inset-bottom)}
+#bienvenue[hidden]{display:none}
+
+.bv-barre{height:4px;background:var(--line);border-radius:2px;margin:14px 0 0;overflow:hidden}
+.bv-barre span{display:block;height:100%;background:var(--acc);border-radius:2px;
+  width:0;transition:width .45s cubic-bezier(.2,.8,.3,1)}
+.bv-plus-tard{align-self:flex-end;border:0;background:transparent;color:var(--mut);
+  font:500 13px system-ui;padding:10px 2px;cursor:pointer}
+
+.bv-scene{flex:1;overflow-y:auto;padding-bottom:12px}
+.bv-dessin{height:132px;display:flex;align-items:center;justify-content:center;margin:4px 0 10px}
+.bv-dessin svg{height:100%;width:auto;max-width:100%}
+.bv-scene h2{font-size:23px;line-height:1.25;margin:0 0 6px;animation:bv-monte .42s ease both}
+.bv-scene>p{color:var(--mut);line-height:1.5;margin:0 0 18px;font-size:14.5px;
+  animation:bv-monte .42s .06s ease both}
+.bv-champs{animation:bv-monte .42s .12s ease both}
+.bv-champs .field{margin-bottom:11px}
+@keyframes bv-monte{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.bv-pied{display:flex;gap:10px;padding:12px 0 18px;border-top:1px solid var(--line)}
+.bv-pied .btn{flex:1;margin:0}
+.bv-pied .btn-ghost{flex:0 0 34%}
+
+/* Un enfant de plus dans la liste */
+.bv-enfant{display:flex;align-items:center;gap:10px;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:9px;
+  animation:bv-eclot .34s cubic-bezier(.3,1.3,.5,1) both}
+@keyframes bv-eclot{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.bv-enfant b{flex:1;min-width:0;font-size:14.5px}
+.bv-enfant small{color:var(--mut);font-size:12.5px}
+.bv-enfant button{border:0;background:transparent;color:var(--mut);cursor:pointer;padding:4px}
+
+/* Les dessins de chaque etape respirent */
+@keyframes bv-flotte{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes bv-tourne-doux{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.bv-dessin .flotte{animation:bv-flotte 3.4s ease-in-out infinite}
+.bv-dessin .balance{animation:bv-tourne-doux 4s ease-in-out infinite;transform-origin:50% 20%}
+@media (prefers-reduced-motion:reduce){
+  .bv-dessin .flotte,.bv-dessin .balance{animation:none}
+  .bv-scene h2,.bv-scene>p,.bv-champs,.bv-enfant{animation:none}
+  .bv-barre span{transition:none}}
+
+
+/* ---------- La fete ---------- */
+.fete{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.fete u{position:absolute;top:38%;left:50%;width:10px;height:10px;margin:-5px 0 0 -5px;
+  border-radius:50%;border:3px solid var(--acc);opacity:.9;
+  animation:fete-onde .9s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes fete-onde{to{transform:scale(46);opacity:0;border-width:1px}}
+.fete i{position:absolute;top:38%;left:50%;width:9px;height:9px;border-radius:2px;
+  animation:fete-eclat 1.5s cubic-bezier(.15,.7,.35,1) forwards}
+@keyframes fete-eclat{
+  0%{transform:translate(0,0) rotate(0);opacity:1}
+  70%{opacity:1}
+  100%{transform:translate(var(--x),calc(var(--y) + 210px)) rotate(var(--r));opacity:0}}
+.fete b{position:absolute;bottom:-14px;width:7px;height:7px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0 30%,#f5c65e 32%,transparent 72%);
+  animation:fete-paillette 2s ease-out forwards}
+@keyframes fete-paillette{
+  0%{opacity:0;transform:translate(0,0) scale(.5)}
+  20%{opacity:1}
+  100%{opacity:0;transform:translate(var(--d),-88vh) scale(1.2)}}
+
+/* ---------- Les cases du formulaire ---------- */
+.bv-case{display:flex;align-items:flex-start;gap:12px;background:var(--card);
+  border:1.5px solid var(--line);border-radius:15px;padding:13px 14px;margin-bottom:10px;
+  cursor:pointer;transition:border-color .2s ease,background .2s ease}
+.bv-case:has(input:checked){border-color:var(--acc);background:var(--acc-doux)}
+.bv-case input{width:21px;height:21px;flex:0 0 auto;margin-top:1px;accent-color:var(--acc)}
+.bv-case span{flex:1;min-width:0;line-height:1.4}
+.bv-case b{display:block;font-size:14.5px}
+.bv-case small{display:block;font-size:12.5px;color:var(--mut);margin-top:2px}
+
+/* ---------- Le planning dans le formulaire ---------- */
+.bv-planning{margin-bottom:12px}
+.bv-jour{display:grid;grid-template-columns:74px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
+
+/* ---------- Le tour guide ---------- */
+#tour{position:fixed;inset:0;z-index:128;background:rgba(20,14,16,.55);
+  display:flex;align-items:flex-end;justify-content:center;padding:20px;
+  animation:apparait .3s ease both}
+#tour[hidden]{display:none}
+.tour-boite{background:var(--card);border-radius:24px;padding:22px 20px 18px;
+  width:100%;max-width:420px;animation:glisse .34s cubic-bezier(.2,.8,.3,1) both}
+.tour-illu{height:96px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.tour-illu svg{height:100%;width:auto}
+.tour-boite h3{margin:0 0 6px;font-size:19px}
+.tour-boite p{margin:0 0 16px;color:var(--mut);line-height:1.5;font-size:14.5px}
+.tour-points{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
+.tour-points i{width:7px;height:7px;border-radius:50%;background:var(--bord);transition:all .3s ease}
+.tour-points i.on{background:var(--acc);width:20px;border-radius:4px}
+.tour-pied{display:flex;gap:10px}
+.tour-pied .btn{flex:1;margin:0}
+.tour-pied .btn-ghost{flex:0 0 32%}
+
+
+/* ---------- Les astuces ---------- */
+.astuce{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  margin-bottom:10px;overflow:hidden;box-shadow:0 1px 2px var(--ombre)}
+.astuce summary{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;
+  list-style:none;font-weight:600;font-size:14.5px}
+.astuce summary::-webkit-details-marker{display:none}
+.astuce summary span.ico{width:38px;height:38px;border-radius:13px;flex:0 0 auto;
+  background:var(--zebre);display:flex;align-items:center;justify-content:center;font-size:18px}
+.astuce summary b{flex:1;min-width:0;font-weight:600}
+.astuce summary::after{content:'▾';color:var(--mut);font-size:13px;transition:transform .25s ease}
+.astuce[open] summary::after{transform:rotate(180deg)}
+.astuce .corps{padding:0 14px 14px 64px;color:var(--mut);font-size:13.5px;line-height:1.6;
+  animation:eclot .3s ease both}
+.astuce .corps b{color:var(--txt)}
+.astuce-groupe{font:600 11.5px system-ui;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--mut);margin:18px 0 9px}
+.astuce-groupe:first-child{margin-top:4px}
+
+/* ---------- Petites étoiles ---------- */
+.etoiles{position:fixed;inset:0;pointer-events:none;z-index:200}
+.etoiles i{position:absolute;width:14px;height:14px;
+  background:radial-gradient(circle,#f5d76e 0 32%,transparent 33%);
+  animation:monte-etoile 1.9s cubic-bezier(.2,.7,.3,1) forwards}
+.etoiles i::after{content:'';position:absolute;inset:0;
+  background:conic-gradient(from 0deg,transparent 0 20%,#f5d76e 25%,transparent 30% 45%,#f5d76e 50%,transparent 55% 70%,#f5d76e 75%,transparent 80%)}
+@keyframes monte-etoile{
+  0%{opacity:0;transform:translate(0,0) scale(.3) rotate(0)}
+  25%{opacity:1}
+  100%{opacity:0;transform:translate(var(--d),-90px) scale(1.1) rotate(180deg)}
+}
+
+/* ---------- L'anneau des mois ---------- */
+.porte-anneau{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.anneau{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);
+  pointer-events:none}
+.anneau circle:last-child{animation:remplir 1.1s .25s cubic-bezier(.3,.9,.4,1) forwards}
+@keyframes remplir{to{stroke-dashoffset:var(--fin)}}
+.anneau-age{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);
+  background:var(--card);border:1px solid var(--line);border-radius:9px;
+  padding:1px 7px;font:600 10.5px system-ui;color:var(--acc);white-space:nowrap;
+  box-shadow:0 1px 3px var(--ombre)}
+@media (prefers-reduced-motion:reduce){
+  .anneau circle:last-child{animation:none;stroke-dashoffset:var(--fin)}}
+
+/* ---------- La barre qui coule ---------- */
+.jauge{position:relative;height:8px;border-radius:5px;background:var(--zebre);overflow:hidden}
+.jauge>i{display:block;height:100%;border-radius:5px;background:var(--acc);
+  width:0;transition:width .9s cubic-bezier(.25,.8,.3,1)}
+.jauge>i::after{content:'';position:absolute;top:0;bottom:0;width:26px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+  animation:vague 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+  .jauge>i{transition:none}.jauge>i::after{animation:none;display:none}}
+@keyframes vague{0%{transform:translateX(-30px)}100%{transform:translateX(240px)}}
+
+/* ---------- Les jours qui se posent ---------- */
+@keyframes pose-jour{
+  0%{opacity:0;transform:scale(.7) translateY(-6px)}
+  60%{transform:scale(1.06)}
+  100%{opacity:1;transform:none}}
+.cal-jour.vient-de-remplir{animation:pose-jour .34s cubic-bezier(.3,1.3,.5,1) both}
+@media (prefers-reduced-motion:reduce){.cal-jour.vient-de-remplir{animation:none}}
+
+
+.jardin-mois{width:100%;height:auto;margin:6px 0 4px}
+.jardin-mois g{animation:pousse .5s cubic-bezier(.3,1.3,.5,1) both;animation-delay:var(--i)}
+.jardin-tete{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.jardin-tete b{font-size:14.5px;text-transform:capitalize}
+.jardin-tete small{font-size:12.5px;color:var(--mut)}
+@media (prefers-reduced-motion:reduce){.jardin-mois g{animation:none}}
+
+
+@media (prefers-reduced-motion:reduce){}
+
 </style>
 </head>
 <body>
@@ -1428,6 +1623,35 @@ input:focus,textarea:focus,select:focus,
   </div>
 </div>
 
+<div id="tour" hidden>
+  <div class="tour-boite">
+    <div class="tour-illu" id="tourIllu"></div>
+    <h3 id="tourTitre">—</h3>
+    <p id="tourTexte">—</p>
+    <div class="tour-points" id="tourPoints"></div>
+    <div class="tour-pied">
+      <button id="tourPasser" class="btn btn-ghost">Passer</button>
+      <button id="tourSuivant" class="btn btn-primary">Suivant</button>
+    </div>
+  </div>
+</div>
+
+<div id="bienvenue" hidden>
+  <div class="bv-barre"><span id="bvProgres"></span></div>
+  <button id="bvPlusTard" class="bv-plus-tard">Plus tard</button>
+  <div class="bv-scene">
+    <div class="bv-dessin" id="bvDessin"></div>
+    <h2 id="bvTitre">—</h2>
+    <p id="bvSous">—</p>
+    <div class="bv-champs" id="bvChamps"></div>
+    <p class="hint" id="bvAide"></p>
+  </div>
+  <div class="bv-pied">
+    <button id="bvPrec" class="btn btn-ghost">Retour</button>
+    <button id="bvSuiv" class="btn btn-primary">Continuer</button>
+  </div>
+</div>
+
 <header id="hdr">
   <h1 id="titre">Cocon</h1>
   <button id="btnNotif" class="iconbtn" aria-label="Notifications">
@@ -1445,6 +1669,7 @@ input:focus,textarea:focus,select:focus,
       <div class="bas" id="heroBas">Connecte-toi pour voir tes accueils</div>
     </div>
     <div id="datesMarquantes"></div>
+    <div id="jardinMois"></div>
     <div class="card">
       <div class="tete"><svg><use href="#i-cal"/></svg>Aujourd'hui</div>
       <div class="corps" id="aujourdhui"></div>
@@ -1549,6 +1774,10 @@ input:focus,textarea:focus,select:focus,
         <div class="choix" id="chHumeur"></div>
 
         <div id="motDuSoir"></div>
+        <label class="bv-case" style="margin-bottom:12px">
+          <input type="checkbox" id="doudouReste">
+          <span><b>Le doudou est resté ici</b><small>La famille le verra tout de suite sur son accueil.</small></span>
+        </label>
 
         <div class="rub">Ce qu'on a fait</div>
         <div class="puces" id="activites"></div>
@@ -1837,6 +2066,14 @@ input:focus,textarea:focus,select:focus,
       </div>
     </div>
 
+    <div class="card" id="carteAstuces">
+      <div class="tete"><svg><use href="#i-info"/></svg>Astuces</div>
+      <div class="corps">
+        <p class="hint" style="margin-top:0">Ce que le tour n'a pas eu le temps de dire. À lire quand tu en auras besoin.</p>
+        <div id="listeAstuces"></div>
+      </div>
+    </div>
+
     <div class="card" id="cartePartage" data-dev hidden>
       <div class="tete"><svg><use href="#i-gens"/></svg>Partager mon profil</div>
       <div class="corps">
@@ -1977,7 +2214,7 @@ input:focus,textarea:focus,select:focus,
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b id="versionApp">1.12.3</b></div>
+        <div class="ds"><span>Version</span><b id="versionApp">1.14.0</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -2382,7 +2619,8 @@ function montrer(v) {
   }
   if (v === 'commun') chargerCommun().then(async () => { await inviterToutes(); renderCommun(); });
   if (v === 'galerie') chargerGalerie().then(() => chercherOrphelines().then(renderOrphelines));
-  if (v === 'profil') chargerProfilPro().then(() => { renderProfilPro(); renderVisibilite(); });
+  if (v === 'profil') { chargerProfilPro().then(() => { renderProfilPro(); renderVisibilite(); });
+    renderAstuces(ASTUCES, '#listeAstuces'); }
   if (v === 'params') { majCompte(); majEtatPush(); renderModulesNatifs(); appliquerDev();
     chargerEtatSuppression(); majEtatSauvegarde(); }
   prevenirMigration();
@@ -2408,6 +2646,11 @@ async function fermerPorte() {
   $('#porte').hidden = true;
   if (!await verifierRole('salariee', 'Cocon Parent')) return;
   await assurerProfil();
+  // Le profil d'abord, le tour ensuite : montrer ou sont les choses n'a de
+  // sens qu'une fois qu'elles y sont.
+  const r = Reglages.lire();
+  if (!r.profilFait) setTimeout(ouvrirBienvenue, 500);
+  else if (!r.tourVu) setTimeout(ouvrirTour, 500);
   activerPush();
   marquerConnexion();
   await charger();
@@ -2535,6 +2778,7 @@ async function charger() {
     await chargerDates();
     const c0 = contrats.find(x => x.id === contratActif) || contrats[0];
     renderDates('#datesMarquantes', c0 && c0.enfant_prenom);
+    chargerJardinMois().then(renderJardinMois);
     dessinerCiel('#hero');
   } catch (e) { toast('Chargement impossible : ' + (e.message || e)); }
   renderAccueil(); renderContrats(); renderAujourdhui(); renderChoixEnfant(); renderPointNotif(); renderBarre();
@@ -3124,7 +3368,7 @@ async function chargerJournal() {
     try {
       const r = await Supa.lire('journal',
         'contrat_id=eq.' + contratActif + '&jour=eq.' + pourCeJour +
-        '&select=repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le,activites,comptines,livres,reponse_parent,repondu_le,coeur');
+        '&select=repas,sieste_debut,sieste_fin,siestes,humeur,couches,mot,maj_le,activites,comptines,livres,reponse_parent,repondu_le,coeur,doudou');
       if (pourCeJour !== jourJournal) return;      // on a change de jour entre-temps
       if (r && r.length) entree = r[0];
       if (pourCeJour === isoDuJour(new Date())) journalRempliAujourdhui = !!(entree && entree.maj_le);
@@ -3145,6 +3389,8 @@ function renderJournal() {
   boutonsChoix('#chRepas', REPAS, entree.repas);
   boutonsChoix('#chHumeur', HUMEURS, entree.humeur);
   // les journees d'avant les siestes multiples n'ont que l'ancienne paire
+  const dd = $('#doudouReste');
+  if (dd) dd.checked = !!entree.doudou;
   activites = Array.isArray(entree.activites) ? entree.activites : [];
   comptines = Array.isArray(entree.comptines) ? entree.comptines : [];
   livres = Array.isArray(entree.livres) ? entree.livres : [];
@@ -3231,6 +3477,7 @@ async function enregistrerJournal() {
     repas: entree.repas || null, humeur: entree.humeur || null,
     siestes: propres,
     activites, comptines, livres,
+    doudou: !!($('#doudouReste') || {}).checked,
     // les deux anciennes colonnes gardent la première sieste, pour ne rien casser
     sieste_debut: propres.length ? (propres[0].debut || null) : null,
     sieste_fin: propres.length ? (propres[0].fin || null) : null,
@@ -3458,6 +3705,7 @@ const ECRANS = [
   { id: 'familles', nom: 'Familles',  ico: 'i-gens' },
   { id: 'commun',   nom: 'Commun',    ico: 'i-commun' },
   { id: 'profil',   nom: 'Mon profil', ico: 'i-info' },
+  { id: 'astuces',  nom: 'Astuces',   ico: 'i-info',        vers: 'profil', carte: 'carteAstuces' },
   { id: 'params',   nom: 'Réglages',  ico: 'i-reglages' }
 ];
 const BARRE_DEFAUT = ['accueil', 'journal', 'messages', 'familles'];
@@ -4081,6 +4329,9 @@ async function noterPremiere(facon) {
     fermerFeuille('#ditPremiere');
     premiereChoisie = null;
     await chargerPremieres(); renderPremieres();
+    // Une premiere fois merite qu'on la souligne : c'est le moment le plus
+    // important que cette application transporte.
+    fete();
     toast(facon === 'devine' ? 'Prévenus, sans le détail' : 'Raconté à la famille');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
@@ -4237,6 +4488,7 @@ async function repondreDemandeAccueil(id, oui) {
       oui ? 'Publiez votre contrat et envoyez-lui le code d\u2019invitation.'
           : (motif || 'Elle n\u2019a pas de place pour le moment.'));
     await chargerDemandesAccueil(); renderDemandesAccueil();
+    if (oui) fete();
     toast(oui ? 'Acceptée — la famille va publier son contrat' : 'Refusée');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
@@ -4437,7 +4689,7 @@ async function enregistrerProfilPro() {
     await enregistrerIdentite();
     await chargerProfilPro();
     renderApercuPartage();
-    ecranPropre(); toast('Profil enregistré — tes familles le voient');
+    ecranPropre(); fete(); toast('Profil enregistré — tes familles le voient');
   } catch (e) { toast('Impossible : ' + enClair(e)); }
 }
 
@@ -5063,7 +5315,9 @@ function renderHorairesBase(c) {
 function renderPortraitGrand(c) {
   const box = $('#portraitGrand');
   if (!box || !c) return;
-  box.innerHTML = portraitDe(c.id, c.enfant_prenom, 72);
+  box.classList.add('porte-anneau');
+  box.innerHTML = portraitDe(c.id, c.enfant_prenom, 72) +
+    anneauAge(c.enfant_naissance || '', 72);
 }
 
 function ouvrirFrimousses() {
@@ -5266,6 +5520,20 @@ $('#mpRetour').onclick = async () => {
 $('#btnSauvegarder').onclick = () => sauvegarderReglages(false);
 $('#btnRestaurer').onclick = restaurerReglages;
 $('#btnSupprCompte').onclick = () => avecAttente('#btnSupprCompte', supprimerMonCompte);
+$('#tourSuivant').onclick = () => {
+  if (tourEtape < TOUR.length - 1) { tourEtape++; renderTour(); }
+  else { finirTour(); petitesEtoilesN(); }
+};
+$('#tourPasser').onclick = finirTour;
+$('#bvSuiv').onclick = () => avecAttente('#bvSuiv', bvSuivant);
+$('#bvPrec').onclick = () => { if (bvEtape > 0) { bvEtape--; renderBienvenue(); } };
+$('#bvPlusTard').onclick = async () => {
+  if (!await confirmer('Remplir plus tard ?',
+    { detail: 'Vous retrouverez tout dans Mon profil, et l\u2019écran reviendra à la prochaine ouverture.',
+      oui: 'Plus tard' })) return;
+  document.getElementById('bienvenue').hidden = true;
+  montrer('accueil');
+};
 $('#btnDev').onclick = demanderCodeDev;
 $('#btnNouveauSujet').onclick = ouvrirNouveauSujet;
 $('#nouvFermer').onclick = () => { fermerFeuille('#feuilleNouveau'); };
@@ -6755,6 +7023,487 @@ async function avecAttente(bouton, travail) {
   try { return await travail(); }
   finally { el.classList.remove('occupe'); el.disabled = false; }
 }
+
+/* ---------------- La fete ----------------
+   Le moment ou tout est rempli merite mieux qu'un message. Trois couches : une
+   onde qui part du centre, des confettis en papier decoupe, des paillettes qui
+   montent. Une seconde et demie, puis plus rien. */
+function fete() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    toast('Dossier complet !'); return;
+  }
+  const zone = document.createElement('div');
+  zone.className = 'fete';
+  zone.setAttribute('aria-hidden', 'true');
+
+  const onde = document.createElement('u');
+  zone.appendChild(onde);
+
+  const TEINTES = ['#2f7d73', '#f5c65e', '#e8a0ae', '#7fb4c4', '#94c9a0', '#d99a3c'];
+  for (let i = 0; i < 46; i++) {
+    const c = document.createElement('i');
+    const angle = (Math.PI * 2 * i) / 46 + Math.random() * 0.3;
+    const force = 120 + Math.random() * 150;
+    c.style.setProperty('--x', Math.cos(angle) * force + 'px');
+    c.style.setProperty('--y', Math.sin(angle) * force - 60 + 'px');
+    c.style.setProperty('--r', (Math.random() * 900 - 450) + 'deg');
+    c.style.background = TEINTES[i % TEINTES.length];
+    c.style.animationDelay = (Math.random() * 0.12) + 's';
+    if (i % 3 === 0) c.style.borderRadius = '50%';
+    if (i % 4 === 0) { c.style.width = '6px'; c.style.height = '12px'; }
+    zone.appendChild(c);
+  }
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('b');
+    p.style.left = (10 + Math.random() * 80) + '%';
+    p.style.animationDelay = (Math.random() * 0.7) + 's';
+    p.style.setProperty('--d', (Math.random() * 70 - 35) + 'px');
+    zone.appendChild(p);
+  }
+  document.body.appendChild(zone);
+  const C = window.Capacitor && window.Capacitor.Plugins;
+  if (C && C.Haptics) { try { C.Haptics.notification({ type: 'SUCCESS' }); } catch (e) {} }
+  setTimeout(() => zone.remove(), 2600);
+}
+
+
+/* ---------------- Le formulaire de premiere fois ----------------
+   Une assistante maternelle qui arrive ne sait pas que son profil sert a la
+   recherche, ni que ses conges se reconduisent. Quatre etapes, une fois, et
+   tout est en place. */
+let bvEtape = 0, bvConges = [];
+
+const BV_DESSINS = {
+  bonjour: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><circle cx="100" cy="46" r="25" fill="var(--acc-doux)"/>
+    <circle cx="91" cy="42" r="2.6" fill="var(--acc)" stroke="none"/><circle cx="109" cy="42" r="2.6" fill="var(--acc)" stroke="none"/>
+    <path d="M90 55a12 12 0 0 0 20 0"/><path d="M66 94a34 34 0 0 1 68 0z" fill="var(--acc-doux)"/></g>
+    <circle cx="46" cy="32" r="4" fill="#f5c65e" stroke="none" class="flotte"/>
+    <path d="M40 112h120" opacity=".3"/></svg>`,
+  diplome: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><path d="M100 26L56 46l44 20 44-20z" fill="var(--acc-doux)"/>
+    <path d="M72 56v22c0 8 13 14 28 14s28-6 28-14V56" />
+    <path d="M144 46v24" /><circle cx="144" cy="74" r="5" fill="#f5c65e" stroke="none"/></g>
+    <path d="M40 112h120" opacity=".3"/></svg>`,
+  maison: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><path d="M62 62l38-28 38 28v44a6 6 0 0 1-6 6H68a6 6 0 0 1-6-6z" fill="var(--acc-doux)"/>
+    <rect x="88" y="82" width="24" height="30" rx="3" fill="#fff"/>
+    <circle cx="106" cy="97" r="2" fill="var(--acc)" stroke="none"/></g>
+    <path d="M46 60l10 8M154 60l-10 8" opacity=".35"/></svg>`,
+  valise: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><rect x="58" y="48" width="84" height="58" rx="9" fill="var(--acc-doux)"/>
+    <path d="M82 48V38a8 8 0 0 1 8-8h20a8 8 0 0 1 8 8v10"/>
+    <path d="M58 72h84" opacity=".5"/></g>
+    <circle cx="48" cy="34" r="12" fill="#f5c65e" stroke="none" class="flotte" style="animation-delay:-1.4s"/>
+    <path d="M40 116h120" opacity=".3"/></svg>`,
+  pret: `<svg viewBox="0 0 200 130" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <g class="flotte"><circle cx="100" cy="58" r="32" fill="var(--acc-doux)"/>
+    <path d="M86 58l10 11 20-24" stroke-width="4"/></g>
+    <path d="M52 34l4 8 8 4-8 4-4 8-4-8-8-4 8-4z" fill="#f5c65e" stroke="none"/>
+    <path d="M150 74l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="#f5c65e" stroke="none"/></svg>`
+};
+
+const BV_ETAPES = [
+  { dessin: 'bonjour', titre: 'Bonjour', sous: 'Votre nom apparaîtra chez vos familles et dans la recherche. Vous ne le redonnerez plus.',
+    champs: [
+      ['prenom', 'Prénom', 'text', ''],
+      ['nom', 'Nom', 'text', ''],
+      ['telephone', 'Téléphone', 'tel', 'Vos familles pourront vous joindre']
+    ] },
+  { dessin: 'diplome', titre: 'Votre métier',
+    sous: 'Ce que vous avez appris et depuis quand. Les diplômes s\u2019ajoutent ensuite dans Mon profil.',
+    pro: [
+      ['depuis', 'Assistante maternelle depuis', 'date', 'La date de votre premier agrément'],
+      ['places', 'Places d\u2019agrément', 'numeric', 'Entre 1 et 4 en général'],
+      ['agrement_num', 'N° d\u2019agrément', 'text', 'Facultatif']
+    ] },
+  { dessin: 'maison', titre: 'Chez vous',
+    sous: 'Ce que les familles aiment savoir avant de venir. Rien n\u2019est obligatoire.',
+    commune: true },
+  { dessin: 'valise', titre: 'Vos congés',
+    sous: 'Les semaines où vous fermez. Cochez « chaque année » et l\u2019application vous proposera de les reconduire.',
+    conges: true },
+  { dessin: 'pret', titre: 'C\u2019est prêt',
+    sous: 'Vos familles voient votre profil. Il ne reste qu\u2019à remplir le journal, chaque soir.',
+    fin: true }
+];
+
+const BV_CADRES = [
+  ['jardin', '🌳', 'Jardin'], ['exterieur', '🛝', 'Espace de jeu dehors'],
+  ['non_fumeur', '🚭', 'Non-fumeur'], ['plain_pied', '🏠', 'De plain-pied'],
+  ['sorties', '🚶', 'Sorties régulières'], ['bio', '🥕', 'Repas maison']
+];
+
+function ouvrirBienvenue() {
+  bvEtape = 0;
+  bvConges = [];
+  document.getElementById('bienvenue').hidden = false;
+  renderBienvenue();
+}
+
+function renderBienvenue() {
+  const e = BV_ETAPES[bvEtape];
+  document.getElementById('bvProgres').style.width = Math.round((bvEtape / (BV_ETAPES.length - 1)) * 100) + '%';
+  document.getElementById('bvDessin').innerHTML = BV_DESSINS[e.dessin];
+  document.getElementById('bvTitre').textContent = e.titre;
+  document.getElementById('bvSous').textContent = e.sous;
+  document.getElementById('bvPrec').hidden = bvEtape === 0;
+  document.getElementById('bvSuiv').textContent = e.fin ? 'Terminer' : 'Continuer';
+  document.getElementById('bvPlusTard').hidden = !!e.fin;
+  document.getElementById('bvAide').textContent = '';
+
+  const box = document.getElementById('bvChamps');
+  box.classList.remove('bv-champs'); void box.offsetWidth; box.classList.add('bv-champs');
+
+  if (e.fin) { box.innerHTML = ''; return; }
+  if (e.commune) return renderBvCommune();
+  if (e.conges) return renderBvConges();
+
+  const source = e.pro ? (profilPro || {}) : identiteMoi;
+  const liste = e.champs || e.pro;
+  box.innerHTML = liste.map(([cle, libelle, genre, aide]) => {
+    const mode = genre === 'numeric' ? 'inputmode="numeric"' : genre === 'tel' ? 'inputmode="tel"' : '';
+    const v = genre === 'date' ? (source[cle] ? versFR(source[cle]) : '') : (source[cle] || '');
+    return `<label class="field"><span>${esc(libelle)}</span>
+      <input data-bv="${e.pro ? 'pro.' : ''}${cle}" ${mode} ${genre === 'date' ? 'placeholder="jj/mm/aaaa"' : ''} value="${esc(String(v))}">
+      ${aide ? `<small class="hint" style="margin:3px 0 0">${esc(aide)}</small>` : ''}</label>`;
+  }).join('');
+
+  box.querySelectorAll('[data-bv]').forEach(inp => {
+    inp.oninput = () => {
+      const cle = inp.dataset.bv;
+      if (cle.startsWith('pro.')) { profilPro = profilPro || {}; profilPro[cle.slice(4)] = inp.value; }
+      else identiteMoi[cle] = inp.value;
+    };
+  });
+  nativiser(box);
+}
+
+function renderBvCommune() {
+  const box = document.getElementById('bvChamps');
+  const p = profilPro || (profilPro = {});
+  const acc = p.accueil || (p.accueil = {});
+  box.innerHTML = `
+    <div class="deux">
+      <label class="field"><span>Commune</span><input data-bv-c="commune" value="${esc(p.commune || '')}"></label>
+      <label class="field"><span>Code postal</span><input data-bv-c="code_postal" inputmode="numeric" maxlength="5" value="${esc(p.code_postal || '')}"></label>
+    </div>
+    <label class="field"><span>Quelques mots sur votre façon d'accueillir</span>
+      <textarea data-bv-c="presentation" rows="4" maxlength="1500">${esc(p.presentation || '')}</textarea></label>
+    <div class="rub">Le cadre</div>
+    <div class="cadres" id="bvCadres">${BV_CADRES.map(([cle, emoji, nom]) =>
+      `<button type="button" class="cadre ${acc[cle] ? 'on' : ''}" data-bv-cadre="${cle}"><span>${emoji}</span>${esc(nom)}</button>`).join('')}</div>
+    <p class="hint">Votre adresse précise n'est jamais partagée : seule la commune apparaît.</p>`;
+  box.querySelectorAll('[data-bv-c]').forEach(inp => {
+    inp.oninput = () => { profilPro[inp.dataset.bvC] = inp.value; };
+  });
+  box.querySelectorAll('[data-bv-cadre]').forEach(b => {
+    b.onclick = () => { acc[b.dataset.bvCadre] = !acc[b.dataset.bvCadre]; b.classList.toggle('on'); };
+  });
+}
+
+/* Les conges : souvent les memes semaines chaque annee. On les note une fois,
+   on coche « chaque annee », et l'application proposera de les reconduire. */
+function renderBvConges() {
+  const box = document.getElementById('bvChamps');
+  box.innerHTML = bvConges.map((c, i) => `
+    <div class="bv-enfant">
+      <b>${esc(c.motif || 'Fermeture')}</b>
+      <small>${esc(c.du || '?')} → ${esc(c.au || '?')}</small>
+      <button data-bv-suppr="${i}" aria-label="Retirer">✕</button>
+    </div>`).join('') + `
+    <div class="deux">
+      <label class="field"><span>Du</span><input id="bvCongeDu" placeholder="jj/mm/aaaa"></label>
+      <label class="field"><span>Au</span><input id="bvCongeAu" placeholder="jj/mm/aaaa"></label>
+    </div>
+    <label class="field"><span>Motif</span><input id="bvCongeMotif" placeholder="Congés d'été, Noël…"></label>
+    <label class="bv-case"><input type="checkbox" id="bvCongeChaque" checked>
+      <span><b>Chaque année</b><small>Ces dates reviendront : l'application vous proposera de les reconduire l'an prochain.</small></span></label>
+    <button id="bvAjoutConge" class="btn btn-ghost btn-block">Ajouter cette fermeture</button>
+    <p class="hint">Vous pourrez en ajouter d'autres à tout moment dans Mes familles.</p>`;
+
+  box.querySelectorAll('[data-bv-suppr]').forEach(b => {
+    b.onclick = () => { bvConges.splice(+b.dataset.bvSuppr, 1); renderBvConges(); };
+  });
+  document.getElementById('bvAjoutConge').onclick = () => {
+    const du = document.getElementById('bvCongeDu').value.trim();
+    const au = document.getElementById('bvCongeAu').value.trim();
+    if (!versISO(du) || !versISO(au)) {
+      document.getElementById('bvAide').textContent = 'Deux dates au format jj/mm/aaaa.'; return; }
+    if (versISO(au) < versISO(du)) {
+      document.getElementById('bvAide').textContent = 'La fin ne peut pas précéder le début.'; return; }
+    bvConges.push({ du, au, motif: document.getElementById('bvCongeMotif').value.trim() || 'Congés',
+      chaque: document.getElementById('bvCongeChaque').checked });
+    renderBvConges();
+    petitesEtoilesN();
+  };
+  nativiser(box);
+}
+
+function bvValide() {
+  const e = BV_ETAPES[bvEtape];
+  if (bvEtape === 0 && !(identiteMoi.prenom || '').trim()) return 'Votre prénom, au minimum.';
+  if (e.pro && !String(profilPro.places || '').trim()) return 'Vos places d\u2019agrément : elles servent à calculer vos disponibilités.';
+  return null;
+}
+
+async function bvSuivant() {
+  const souci = bvValide();
+  if (souci) { document.getElementById('bvAide').textContent = souci; secouer('.bv-champs'); return; }
+  if (BV_ETAPES[bvEtape].fin) { await bvTerminer(); return; }
+  bvEtape++;
+  renderBienvenue();
+}
+
+async function bvTerminer() {
+  try {
+    await Supa.modifier('profils', {
+      prenom: (identiteMoi.prenom || '').trim() || null,
+      nom: (identiteMoi.nom || '').trim() || null,
+      telephone: (identiteMoi.telephone || '').trim() || null
+    }, 'id=eq.' + Supa.moi().id);
+
+    const p = profilPro || {};
+    const places = parseInt(p.places, 10);
+    await Supa.ecrire('profils_pro', [{
+      id: Supa.moi().id,
+      depuis: versISO(p.depuis) || (p.depuis && p.depuis.length === 10 ? p.depuis : null),
+      places: isFinite(places) && places >= 1 && places <= 6 ? places : null,
+      agrement_num: (p.agrement_num || '').trim() || null,
+      commune: (p.commune || '').trim() || null,
+      code_postal: (p.code_postal || '').trim() || null,
+      presentation: (p.presentation || '').trim() || null,
+      accueil: p.accueil || {}
+    }], 'resolution=merge-duplicates');
+
+    for (const c of bvConges) {
+      await Supa.ecrire('fermetures', {
+        salariee_id: Supa.moi().id, du: versISO(c.du), au: versISO(c.au),
+        motif: c.motif, chaque_annee: !!c.chaque
+      });
+    }
+    Reglages.ecrire({ ...Reglages.lire(), profilFait: true });
+  } catch (e) { toast('Enregistrement partiel : ' + enClair(e)); }
+
+  document.getElementById('bienvenue').hidden = true;
+  montrer('accueil');
+  fete();
+  if (!Reglages.lire().tourVu) setTimeout(ouvrirTour, 1500);
+  else toast('Profil complet — vos familles vous voient.');
+}
+
+
+/* ---------------- Le tour guide ----------------
+   Cinq ecrans, apres le formulaire : on montre ou sont les choses une fois
+   qu'elles y sont. */
+const TOUR = [
+  { illu: 'journal', titre: 'Le journal, chaque soir',
+    texte: 'Repas, humeur, siestes, un mot. Trois minutes, et la famille sait comment s\u2019est passée la journée.' },
+  { illu: 'premieres', titre: 'Les premières fois',
+    texte: 'Un premier pas, un premier mot. Vous choisissez : raconter, ou prévenir sans dire quoi pour leur laisser la surprise.' },
+  { illu: 'volet', titre: 'Tout est dans le +',
+    texte: 'Quatorze écrans. Gardez le doigt une seconde sur l\u2019un d\u2019eux : il prend place dans la barre du bas.' },
+  { illu: 'clair', titre: 'Quand quelque chose coince',
+    texte: 'Une morsure, un retard de paiement, un désaccord. « À mettre au clair » aide à en parler sans que ça s\u2019envenime.' },
+  { illu: 'astuces', titre: 'Les astuces',
+    texte: 'Vous n\u2019avez pas à tout retenir maintenant. Le module Astuces reprend tout, quand vous en aurez besoin.' }
+];
+const TOUR_ILLUS = {
+  journal: DESSINS.livre, premieres: DESSINS.ourson, volet: DESSINS.mains,
+  clair: DESSINS.enveloppe, astuces: DESSINS.lune
+};
+let tourEtape = 0;
+
+function ouvrirTour() { tourEtape = 0; renderTour(); document.getElementById('tour').hidden = false; }
+
+function renderTour() {
+  const t = TOUR[tourEtape];
+  document.getElementById('tourIllu').innerHTML = TOUR_ILLUS[t.illu] || DESSINS.nuage;
+  document.getElementById('tourTitre').textContent = t.titre;
+  document.getElementById('tourTexte').textContent = t.texte;
+  document.getElementById('tourPoints').innerHTML =
+    TOUR.map((_, i) => `<i class="${i === tourEtape ? 'on' : ''}"></i>`).join('');
+  document.getElementById('tourSuivant').textContent =
+    tourEtape === TOUR.length - 1 ? 'C\u2019est parti' : 'Suivant';
+}
+
+function finirTour() {
+  document.getElementById('tour').hidden = true;
+  Reglages.ecrire({ ...Reglages.lire(), tourVu: true });
+}
+
+
+/* ---------------- Les astuces ----------------
+   Le tour montre l'essentiel en cinq ecrans ; le reste ne se retient pas d'un
+   trait. Ici chaque chose est rangee par moment — le quotidien, l'argent, ce
+   qui coince — et se lit quand on en a besoin. */
+function renderAstuces(liste, selecteur) {
+  // Le champ « html » est ecrit dans ce fichier, jamais saisi : il porte des
+  // balises voulues. Tout ce qui vient d'un autre compte passe par esc().
+  const box = document.querySelector(selecteur);
+  if (!box) return;
+  let groupe = '';
+  box.innerHTML = liste.map(a => {
+    const tete = a.groupe !== groupe ? (groupe = a.groupe,
+      `<div class="astuce-groupe">${esc(a.groupe)}</div>`) : '';
+    return tete + `<details class="astuce">
+      <summary><span class="ico">${a.ico}</span><b>${esc(a.titre)}</b></summary>
+      <div class="corps">${a.html}</div>
+    </details>`;
+  }).join('');
+}
+
+const ASTUCES = [
+  { groupe: 'Chaque jour', ico: '📖', titre: 'Le journal en trois minutes',
+    html: 'Repas, humeur, siestes, un mot. Les pastilles se touchent, les siestes se calculent seules. Le soir, la famille sait comment s\u2019est passée la journée.' },
+  { groupe: 'Chaque jour', ico: '🎵', titre: 'Notez la comptine et le livre',
+    html: 'Les parents peuvent la reprendre le soir. C\u2019est un fil entre les deux maisons, et l\u2019enfant adore reconnaître ce qu\u2019il a déjà entendu.' },
+  { groupe: 'Chaque jour', ico: '📷', titre: 'Une photo, quand c\u2019est autorisé',
+    html: 'L\u2019autorisation vient du parent, dans sa fiche d\u2019urgence. Si le bouton photo refuse, c\u2019est qu\u2019elle manque — demandez-la, elle se coche en deux touches chez lui.' },
+
+  { groupe: 'Les grands moments', ico: '⭐', titre: 'Une première fois, et le choix de la dire',
+    html: 'Un premier pas chez vous, c\u2019est délicat. Vous choisissez : <b>raconter</b>, ou <b>prévenir sans dire quoi</b> pour leur laisser la découverte. La notification elle-même ne trahit rien.' },
+  { groupe: 'Les grands moments', ico: '🌱', titre: 'L\u2019adaptation, palier par palier',
+    html: 'Six paliers, de la première heure à la première journée entière. Chacun note son ressenti, le vôtre et le leur, sans pouvoir modifier celui de l\u2019autre.' },
+
+  { groupe: 'Votre organisation', ico: '🧳', titre: 'Les congés qui reviennent',
+    html: 'Cochez <b>chaque année</b> en posant vos dates : l\u2019application vous proposera de les reconduire l\u2019an prochain, sans les ressaisir.' },
+  { groupe: 'Votre organisation', ico: '🤒', titre: 'Signaler une absence',
+    html: 'Sept types, chacun avec son délai de prévenance. Le justificatif peut s\u2019ajouter après coup — on ne pense pas à scanner une ordonnance avec 39 de fièvre.' },
+  { groupe: 'Votre organisation', ico: '🔑', titre: 'Un remplacement',
+    html: 'Un code à six caractères, daté. Le remplaçant voit le planning, l\u2019urgence et le journal — rien d\u2019autre — et l\u2019accès s\u2019éteint tout seul à la date prévue.' },
+
+  { groupe: 'Quand ça coince', ico: '🤝', titre: 'Mettre un sujet au clair',
+    html: 'Une morsure, un retard de paiement, un désaccord sur le sommeil. Choisissez le thème, l\u2019amorce neutre s\u2019écrit toute seule : « J\u2019aimerais qu\u2019on reparle de… ». Écrivez, relisez, envoyez plus tard.' },
+  { groupe: 'Quand ça coince', ico: '👥', titre: 'L\u2019espace commun',
+    html: 'Une annonce à toutes vos familles d\u2019un coup : une maladie qui circule, une fermeture. Chaque famille choisit d\u2019y entrer, et aucun prénom d\u2019enfant n\u2019y apparaît.' },
+
+  { groupe: 'Votre profil', ico: '🎓', titre: 'Vos diplômes se voient',
+    html: 'CAP, auxiliaire de puériculture, premiers secours… Chacun a son badge. Les premiers secours et l\u2019hygiène se renouvellent : indiquez la date de fin, vous serez prévenue avant.' },
+  { groupe: 'Votre profil', ico: '🏡', titre: 'Vos places libres se calculent',
+    html: 'Places d\u2019agrément moins contrats actifs. Vous n\u2019avez rien à tenir à jour — c\u2019est justement ce que les annuaires ratent.' }
+];
+
+function petitesEtoilesN() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const z = document.createElement('div');
+  z.className = 'etoiles';
+  for (let i = 0; i < 14; i++) {
+    const e = document.createElement('i');
+    e.style.left = (20 + Math.random() * 60) + '%';
+    e.style.top = (25 + Math.random() * 45) + '%';
+    e.style.animationDelay = (Math.random() * .5) + 's';
+    e.style.setProperty('--d', (Math.random() * 60 - 30) + 'px');
+    z.appendChild(e);
+  }
+  document.body.appendChild(z);
+  setTimeout(() => z.remove(), 2200);
+}
+
+
+/* ---------------- L'anneau des mois ----------------
+   Autour de la frimousse, un anneau qui se remplit a mesure de l'annee en
+   cours depuis l'anniversaire. L'age au centre. On le regarde souvent : autant
+   qu'il dise quelque chose. */
+function anneauAge(naissanceISO, taille) {
+  if (!naissanceISO) return '';
+  const t = taille || 92, r = t / 2 - 4, c = 2 * Math.PI * r;
+  const n = new Date(naissanceISO + 'T00:00:00');
+  if (isNaN(n)) return '';
+  const auj = new Date();
+  let ans = auj.getFullYear() - n.getFullYear();
+  const dernier = new Date(n); dernier.setFullYear(n.getFullYear() + ans);
+  if (dernier > auj) { ans--; dernier.setFullYear(dernier.getFullYear() - 1); }
+  const suivant = new Date(dernier); suivant.setFullYear(dernier.getFullYear() + 1);
+  const part = Math.min(1, Math.max(0, (auj - dernier) / (suivant - dernier)));
+  const mois = Math.floor(part * 12);
+
+  const libelle = ans < 1 ? (mois || 1) + ' mois'
+    : ans + ' an' + (ans > 1 ? 's' : '') + (mois ? ' ' + mois + ' m' : '');
+
+  return `<svg class="anneau" viewBox="0 0 ${t} ${t}" aria-hidden="true">
+    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="3"/>
+    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="3"
+      stroke-linecap="round" transform="rotate(-90 ${t/2} ${t/2})"
+      stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${c.toFixed(1)}"
+      style="--fin:${(c * (1 - part)).toFixed(1)}"/>
+  </svg><span class="anneau-age">${esc(libelle)}</span>`;
+}
+
+
+/* ---------------- Le jardin du mois ----------------
+   Elle voit l'annee de l'enfant cote parent, mais rien de son propre mois.
+   Une pousse par journee remplie : le mois se construit sous ses yeux, et les
+   trous se voient sans avoir a compter. */
+async function chargerJardinMois() {
+  if (!contratActif || !Supa.connecte()) return null;
+  const d = new Date(), a = d.getFullYear(), m = d.getMonth();
+  const du = isoDuJour(new Date(a, m, 1)), au = isoDuJour(new Date(a, m + 1, 0));
+  try {
+    const r = await Supa.lire('journal',
+      'contrat_id=eq.' + contratActif + '&jour=gte.' + du + '&jour=lte.' + au +
+      '&select=jour,humeur,mot&order=jour');
+    return { jours: r || [], dans: new Date(a, m + 1, 0).getDate(), mois: m, annee: a };
+  } catch (e) { return null; }
+}
+
+function renderJardinMois(d) {
+  const box = $('#jardinMois');
+  if (!box) return;
+  if (!d || !d.jours.length) { box.innerHTML = ''; return; }
+
+  const TEINTES = { joyeux: '#f5c65e', calme: '#94c9a0', fatigue: '#a9b8d0',
+                    grognon: '#e0a07a', patraque: '#d98a94' };
+  const parJour = {};
+  for (const j of d.jours) parJour[Number(j.jour.slice(8, 10))] = j;
+  const auj = new Date().getDate();
+  const large = 320, haut = 54;
+  const pas = (large - 16) / d.dans;
+
+  const pousses = [];
+  for (let n = 1; n <= d.dans; n++) {
+    const j = parJour[n];
+    const x = 8 + (n - 0.5) * pas;
+    if (!j) {
+      // un jour sans journal : une graine, pas un vide
+      if (n <= auj) pousses.push(`<circle cx="${x.toFixed(1)}" cy="44" r="1.6" fill="var(--line)"/>`);
+      continue;
+    }
+    const c = TEINTES[j.humeur] || 'var(--acc-doux)';
+    const h = j.mot ? 26 : 19;
+    pousses.push(`<g style="--i:${(n * 0.012).toFixed(3)}s">
+      <path d="M${x.toFixed(1)} 46v-${h - 6}" stroke="${c}" stroke-width="1.6" stroke-linecap="round" opacity=".6"/>
+      <circle cx="${x.toFixed(1)}" cy="${46 - h}" r="${j.mot ? 3.4 : 2.6}" fill="${c}"/>
+      ${j.mot ? `<circle cx="${x.toFixed(1)}" cy="${46 - h}" r="5.4" fill="none" stroke="${c}" stroke-width=".8" opacity=".45"/>` : ''}
+    </g>`);
+  }
+
+  const remplis = d.jours.length;
+  box.innerHTML = `<div class="card"><div class="corps" style="padding-bottom:10px">
+    <div class="jardin-tete"><b>${esc(new Date(d.annee, d.mois, 1).toLocaleDateString('fr-FR', { month: 'long' }))}</b>
+      <small>${remplis} journée${remplis > 1 ? 's' : ''} racontée${remplis > 1 ? 's' : ''}</small></div>
+    <svg viewBox="0 0 ${large} ${haut}" class="jardin jardin-mois" aria-hidden="true">
+      <line x1="8" y1="46" x2="${large - 8}" y2="46" stroke="var(--line)" stroke-width="1"/>
+      ${pousses.join('')}
+    </svg>
+    <p class="hint" style="margin:0">Une pousse par journée. Celles avec un mot ont une auréole.</p>
+  </div></div>`;
+}
+
+
+/* ---------------- Le doudou oublie ----------------
+   Un enfant parti sans son doudou, c'est une soiree difficile pour tout le
+   monde. La nounou le signale en un geste, le parent le voit tout de suite. */
+const OURS = `<svg viewBox="0 0 64 64" aria-hidden="true">
+  <circle cx="18" cy="18" r="8" fill="#c9976a"/><circle cx="46" cy="18" r="8" fill="#c9976a"/>
+  <circle cx="18" cy="18" r="4" fill="#e8c9a8"/><circle cx="46" cy="18" r="4" fill="#e8c9a8"/>
+  <circle cx="32" cy="34" r="19" fill="#c9976a"/>
+  <ellipse cx="32" cy="41" rx="9" ry="7" fill="#e8c9a8"/>
+  <circle cx="25" cy="30" r="2.2" fill="#4a3427"/><circle cx="39" cy="30" r="2.2" fill="#4a3427"/>
+  <ellipse cx="32" cy="38" rx="3" ry="2" fill="#4a3427"/>
+  <path d="M32 40v3M28 45a5 4 0 0 0 8 0" stroke="#4a3427" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</svg>`;
+
 
 async function activerPush() {
   etatPush.compile = !!PROJET.notifications;
