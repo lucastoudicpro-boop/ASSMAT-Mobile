@@ -3016,3 +3016,73 @@ difficile.
 Des animations a l'ouverture de chaque carte — la cascade suffit, en ajouter
 rendrait l'application lente a l'usage. Du son — une nounou ouvre l'application
 pendant la sieste. Des confettis partout — ils valent parce qu'ils sont rares.
+
+## 1.14.1 — la reprise qui ne reprenait rien
+
+Le plus grave depuis longtemps, et il ne venait pas de la reprise elle-meme.
+
+### Une lecture lente passait pour un dossier vide
+
+`readRaw` abandonnait la lecture du stockage au bout de **trois secondes** et
+renvoyait « rien ». L'application repartait alors sur un dossier blanc — puis
+le premier enregistrement ecrivait ce blanc **par-dessus tout ce qui etait
+stocke**.
+
+D'ou le symptome exact : la reprise annonce trois fiches restaurees, le
+rechargement les efface, et redemarrer n'y change rien puisque chaque
+demarrage recommence.
+
+Le stockage repond d'autant plus lentement que la sauvegarde grossit — plusieurs
+mois de fiches avec leurs calendriers. Le defaut dormait depuis le debut et ne
+se revelait qu'une fois le dossier bien rempli.
+
+### Trois corrections
+
+- **Deux tentatives, six puis neuf secondes** au lieu d'une de trois.
+- **Une lecture qui echoue n'autorise plus l'ecriture.** Tant qu'on ne sait pas
+  ce que contenait le stockage, on n'ecrit rien : mieux vaut ne pas enregistrer
+  que d'effacer.
+- **Une seule lecture a la fois.** Dix appels simultanes lancaient dix lectures,
+  et une reponse tardive pouvait faire croire que tout allait bien alors qu'on
+  avait deja repris sur du vide.
+
+### Et l'application le dit
+
+Si le stockage ne repond pas, un message le dit clairement : rien n'est perdu,
+rien ne sera ecrit par-dessus, fermez et rouvrez. Plutot qu'un dossier vide sans
+explication.
+
+Verifie sur trois scenarios : stockage rapide — tout fonctionne ; stockage
+bloque soixante secondes — ecriture refusee, contenu intact, avertissement ;
+reprise complete avec rechargement — trois fiches, l'enfant, le planning, tout
+survit.
+
+## 1.14.2 — l'ordre des operations
+
+La compilation partait sur chaque depot de fichier — donc **des le depot du
+zip, avant l'extraction**. Elle produisait un APK a partir du code de la
+version precedente, sans que rien ne le signale : on installait l'ancienne en
+croyant installer la nouvelle.
+
+L'ordre est desormais impose :
+
+1. **Deposer** l'archive — rien ne se declenche
+2. **Extraire** — manuel, comme avant
+3. **Compiler** — **automatique**, des que l'extraction se termine
+
+`build-apk.yml` ne reagit plus qu'a trois choses : une version publiee (`v*`),
+une extraction reussie, ou un lancement a la main.
+
+Deux precautions :
+
+- **Une extraction qui echoue ne compile pas.** On produirait un APK a partir
+  d'un code a moitie remplace.
+- **Le depot recupere est celui d'apres l'extraction.** Sans cela la
+  compilation aurait repris l'etat d'avant — le defaut qu'on vient de corriger,
+  deplace d'un cran.
+
+Le resume de l'extraction le dit : la compilation demarre seule, et si des
+workflows sont a recopier a la main, il faut le faire avant.
+
+**Les deux fichiers sont a recopier a la main** dans `.github/workflows/`,
+comme toujours.

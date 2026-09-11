@@ -1,13 +1,24 @@
 name: Construire les APK
 
+# Un depot de zip ne doit pas lancer la compilation : l'ordre est
+#   1. deposer l'archive   2. l'extraire   3. compiler
+# Sans cela, la compilation partait sur le code d'avant l'extraction et
+# produisait un APK de la version precedente, sans que rien ne le signale.
 on:
   push:
-    branches: [main, master]
-    tags: ['v*']
+    tags: ['v*']            # une version publiee : on compile
+  workflow_run:             # une extraction reussie : on enchaine
+    workflows: ["Extraire une archive"]
+    types: [completed]
   workflow_dispatch:
 
 jobs:
   apk:
+    # Une extraction qui a echoue ne doit pas declencher de compilation : on
+    # produirait un APK a partir d'un code a moitie remplace.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -27,6 +38,11 @@ jobs:
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
+        with:
+          # Apres une extraction, le commit voulu est celui qu'elle vient de
+          # pousser : sans cela on recupererait l'etat d'avant.
+          ref: ${{ github.event_name == 'workflow_run'
+                   && github.event.workflow_run.head_sha || github.ref }}
 
       - name: Localiser le projet
         id: projet

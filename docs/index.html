@@ -2721,7 +2721,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.14.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.14.2</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -3545,6 +3545,9 @@ const Store = (() => {
     w.setItem('__t', '1'); w.removeItem('__t'); ls = w;
   } catch (e) {}
   const mem = { v: null };
+  // Vrai seulement quand on sait ce que contenait le stockage.
+  let lectureSure = false;
+  let lectureEnCours = null;
 
   const kind = cap ? 'capacitor' : host ? 'hôte' : ls ? 'navigateur' : 'mémoire';
 
@@ -3554,21 +3557,46 @@ const Store = (() => {
   ]);
 
   async function readRaw() {
-    try {
-      if (cap) { const r = await delai(cap.get({ key: KEY }), 3000); return r ? r.value : mem.v; }
-      if (host) { const r = await delai(host.get(KEY), 3000); return r ? r.value : null; }
-      if (ls) return ls.getItem(KEY);
-    } catch (e) {}
-    return mem.v;
+    // Une lecture qui echoue ne doit jamais passer pour un dossier vide : le
+    // premier enregistrement ecraserait alors tout ce qui etait stocke. On
+    // reessaie, on laisse plus de temps, et on dit franchement quand on n'a
+    // pas pu lire.
+    lectureSure = false;
+    for (const attente of [6000, 9000]) {
+      try {
+        if (cap) {
+          const r = await delai(cap.get({ key: KEY }), attente);
+          if (r !== null) { lectureSure = true; return r ? r.value : null; }
+          continue;                       // delai depasse : on reessaie
+        }
+        if (host) {
+          const r = await delai(host.get(KEY), attente);
+          if (r !== null) { lectureSure = true; return r ? r.value : null; }
+          continue;
+        }
+        if (ls) { lectureSure = true; return ls.getItem(KEY); }
+        lectureSure = true; return mem.v;
+      } catch (e) { console.warn('lecture impossible', e); }
+    }
+    // Deux tentatives sans reponse : on se rabat sur ce qu'on a en memoire,
+    // et on refuse d'ecrire tant qu'on ne sait pas ce qu'il y avait.
+    if (mem.v !== null) { lectureSure = true; return mem.v; }
+    return null;
   }
   async function writeRaw(s) {
+    if (!lectureSure) {
+      console.warn('ecriture refusee : le contenu precedent n\u2019a pas pu etre lu');
+      return false;
+    }
     mem.v = s;
     try {
-      if (cap) return void await cap.set({ key: KEY, value: s });
-      if (host) return void await host.set(KEY, s);
-      if (ls) return void ls.setItem(KEY, s);
-    } catch (e) { console.warn('écriture impossible', e); }
+      if (cap) { await cap.set({ key: KEY, value: s }); return true; }
+      if (host) { await host.set(KEY, s); return true; }
+      if (ls) { ls.setItem(KEY, s); return true; }
+      return true;
+    } catch (e) { console.warn('écriture impossible', e); return false; }
   }
+
 
   const CLE_SESSION = 'assmat-session';
   async function lireSession() {
@@ -3597,15 +3625,27 @@ const Store = (() => {
     majSession: ecrireSession,
     async all() {
       if (cache) return cache;
-      let d = null;
-      try { d = JSON.parse(await readRaw() || 'null'); } catch (e) {}
-      cache = (d && typeof d === 'object') ? d : {};
-      if (!cache.fiches) cache.fiches = {};
-      if (!cache.profil) cache.profil = {};
-      return cache;
+      // Une seule lecture, meme si dix appels arrivent en meme temps : sans
+      // cela chacun relancait la sienne, et une reponse tardive pouvait faire
+      // croire que la lecture avait reussi alors qu'on avait deja repris sur
+      // du vide.
+      if (!lectureEnCours) {
+        lectureEnCours = (async () => {
+          let d = null;
+          try { d = JSON.parse(await readRaw() || 'null'); } catch (e) {}
+          cache = (d && typeof d === 'object') ? d : {};
+          if (!cache.fiches) cache.fiches = {};
+          if (!cache.profil) cache.profil = {};
+          return cache;
+        })();
+      }
+      return lectureEnCours;
     },
-    async flush() { if (cache) await writeRaw(JSON.stringify(cache)); },
-    async replaceAll(d) { cache = d; await writeRaw(JSON.stringify(cache)); }
+    // Dit si l'on sait ce que contenait le stockage. Faux = il ne faut rien
+    // ecrire, et il faut le signaler.
+    lue() { return lectureSure; },
+    async flush() { if (cache) return writeRaw(JSON.stringify(cache)); return false; },
+    async replaceAll(d) { cache = d; return writeRaw(JSON.stringify(cache)); }
   };
 })();
 
@@ -6072,6 +6112,16 @@ async function ouvrirPorte() {
 
 async function fermerPorte() {
   $('#porte').hidden = true;
+  // Si le stockage n'a pas repondu, le dossier parait vide alors qu'il ne
+  // l'est pas. Mieux vaut le dire que de laisser croire a une perte — et
+  // surtout, rien ne sera ecrit par-dessus.
+  await Store.all();
+  if (!Store.lue()) {
+    await confirmer('Vos données n\u2019ont pas pu être lues',
+      { detail: 'Le stockage du téléphone n\u2019a pas répondu. Rien n\u2019est perdu et rien ne sera écrit par-dessus. Fermez et rouvrez l\u2019application.',
+        oui: 'J\u2019ai compris', non: 'Fermer' });
+    return;
+  }
   // le role d'abord : sinon le tour guide demarre pour quelqu'un qu'on va
   // renvoyer vers l'autre application
   if (!await verifierRole('employeur', 'Cocon Nounou')) return;
@@ -6241,7 +6291,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.14.0';
+const VERSION = '1.14.2';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
