@@ -3191,3 +3191,46 @@ premiere fois, profil complet — tout sous 600 ms de latence.
 Quatre controles ajoutes, C7 a C10 : ecriture verifiee, sauvegarde qui refuse
 d'appauvrir, pas d'ecriture sur lecture ratee, delai de garde sur chaque
 lecture. Le premier passage en a attrape trois de plus.
+
+## 1.15.1 — deux crafts qui ne tenaient pas
+
+### Le jardin du mois etait invisible
+
+`.jardin-mois g` s'animait avec `pousse`, mais `@keyframes pousse` n'existait
+que cote parent. Cote nounou, avec le mode `both`, chaque pousse restait figee
+a son etat de depart : opacite nulle, echelle 0,4. Le jardin s'affichait vide
+alors que les donnees etaient la. Zero sur huit pousses visibles, huit sur huit
+apres.
+
+Un controle systematique le confirme : chaque animation referencee a sa
+definition, chaque variable employee est definie, chaque dessin a sa viewBox.
+
+### L'etiquette de l'age debordait
+
+Sur la tuile du journal, le portrait fait trente-huit pixels : l'anneau y tient,
+mais l'etiquette « 1 an 5 m » etait illisible et sortait de la tuile.
+L'etiquette n'apparait qu'a partir de soixante pixels ; en dessous, l'anneau
+seul, avec un trait plus fin.
+
+### Passage en revue
+
+Chaque craft mesure a l'ecran, sur les deux applications : splash, ciel,
+anniversaire, doudou, anneau, jardin, fete, dessins des etats vides. Tous
+visibles, sans erreur.
+
+## 1.15.2 — les deux portraits
+
+### L'anneau de l'enfant etait rogne
+
+`.portrait-grand` a `overflow:hidden` et une regle `svg{width:100%}` : l'anneau
+que j'avais pose dedans — qui deborde de six pixels par construction — etait
+coupe aux bords et ecrase a la taille du portrait. Le conteneur ne rogne plus ;
+c'est le portrait lui-meme qui est arrondi. Les regles generiques excluent
+l'anneau. Mesure : 84 pixels d'anneau autour de 72 de portrait, sans coupe.
+
+### Le portrait de la nounou n'etait pas un craft
+
+Un rond gris avec un arc, la ou l'enfant a une frimousse. Sans photo, elle a
+maintenant un visage dessine dans le meme style — cheveux, joues, sourire — et
+un halo qui respire lentement autour. Coupe si la personne a demande moins de
+mouvement.

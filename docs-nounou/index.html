@@ -189,7 +189,10 @@ input:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--
 .portrait-grand{width:72px;height:72px;border-radius:36px;flex:0 0 auto;overflow:hidden;
   background:var(--zebre);display:flex;align-items:center;justify-content:center;
   box-shadow:0 4px 12px -6px rgba(60,25,35,.4)}
-.portrait-grand svg,.portrait-grand img{width:100%;height:100%;object-fit:cover;border-radius:36px}
+.portrait-grand svg:not(.anneau),.portrait-grand img{width:100%;height:100%;object-fit:cover;border-radius:36px}
+/* L'anneau depasse du portrait de six pixels : le conteneur ne doit pas le
+   rogner. C'est le portrait lui-meme qui est arrondi, pas la boite. */
+.portrait-grand.porte-anneau{overflow:visible}
 .frimousses{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .frimousses[hidden]{display:none}
 .frimousses button{border:2px solid transparent;background:var(--zebre);border-radius:14px;
@@ -464,7 +467,14 @@ html[data-theme="sombre"] #porte{background:linear-gradient(170deg,#31202a 0%,va
 .profil-portrait{width:92px;height:92px;border-radius:46px;flex:0 0 auto;overflow:hidden;
   background:var(--card);display:flex;align-items:center;justify-content:center;
   box-shadow:0 6px 18px -8px rgba(60,25,35,.4);border:3px solid var(--card)}
-.profil-portrait svg,.profil-portrait img{width:100%;height:100%;object-fit:cover}
+.profil-portrait svg:not(.anneau),.profil-portrait img{width:100%;height:100%;object-fit:cover;border-radius:46px}
+.profil-portrait{overflow:visible;position:relative}
+/* Un halo qui respire derriere le portrait : leger, lent, et coupe si la
+   personne a demande moins de mouvement. */
+.porte-halo::before{content:'';position:absolute;inset:-8px;border-radius:50%;
+  border:2px solid var(--acc);opacity:.25;animation:halo 3.6s ease-in-out infinite;pointer-events:none}
+@keyframes halo{0%,100%{transform:scale(1);opacity:.25}50%{transform:scale(1.06);opacity:.45}}
+@media (prefers-reduced-motion:reduce){.porte-halo::before{animation:none}}
 .profil-btns{flex:1;min-width:0}
 .profil-btns .btn{width:100%;margin:0}
 
@@ -759,7 +769,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 
 /* Les frimousses se posent en tournant tres legerement. */
 @keyframes pose{from{opacity:0;transform:scale(.7) rotate(-8deg)}to{opacity:1;transform:none}}
-.portrait svg,.portrait-img,.portrait-grand svg,.portrait-grand img{animation:pose .4s cubic-bezier(.3,1.3,.5,1) both}
+.portrait svg,.portrait-img,.portrait-grand svg:not(.anneau),.portrait-grand img{animation:pose .4s cubic-bezier(.3,1.3,.5,1) both}
 
 /* Un enregistrement reussi se confirme par un bref acquiescement. */
 @keyframes acquiesce{0%,100%{transform:scale(1)}40%{transform:scale(1.06)}}
@@ -768,7 +778,7 @@ input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--ac
 @media (prefers-reduced-motion:reduce){
   .secoue,.nav-plus span,.nav-pastille,.pastille,.compteur,
   #hero,.bulle-l.moi .bulle,#visionneuse.part,
-  .portrait svg,.portrait-img,.portrait-grand svg,.portrait-grand img{animation:none}
+  .portrait svg,.portrait-img,.portrait-grand svg:not(.anneau),.portrait-grand img{animation:none}
 }
 
 
@@ -1389,6 +1399,7 @@ input:focus,textarea:focus,select:focus,
 @media (prefers-reduced-motion:reduce){.cal-jour.vient-de-remplir{animation:none}}
 
 
+@keyframes pousse{from{opacity:0;transform:translateY(4px) scale(.4)}to{opacity:1;transform:none}
 .jardin-mois{width:100%;height:auto;margin:6px 0 4px}
 .jardin-mois g{animation:pousse .5s cubic-bezier(.3,1.3,.5,1) both;animation-delay:var(--i)}
 .jardin-tete{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
@@ -2214,7 +2225,7 @@ input:focus,textarea:focus,select:focus,
     <div class="card">
       <div class="tete"><svg><use href="#i-ok"/></svg>À propos</div>
       <div class="corps">
-        <div class="ds"><span>Version</span><b id="versionApp">1.15.0</b></div>
+        <div class="ds"><span>Version</span><b id="versionApp">1.15.2</b></div>
         <p class="hint">Cocon Nounou ne reçoit que le planning des familles qui t'ont invitée. Aucun montant, aucune coordonnée bancaire ne transite par cette application.</p>
       </div>
     </div>
@@ -4573,11 +4584,19 @@ function renderProfilPro() {
   // le portrait
   const box = $('#proPortrait');
   if (portraitPro) box.innerHTML = `<img src="${portraitPro}" alt="">`;
-  else box.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true">
-      <circle cx="32" cy="25" r="12" fill="var(--acc-doux)"/>
-      <path d="M11 56c0-11 9-19 21-19s21 8 21 19z" fill="var(--acc-doux)"/>
-      <path d="M26 24a6 6 0 0 1 12 0" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round"/>
+  // Sans photo, un visage dessine dans le style des frimousses — pas une
+  // silhouette grise. Le halo respire doucement autour.
+  else box.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true" class="portrait-craft">
+      <circle cx="32" cy="32" r="31" fill="var(--acc-doux)"/>
+      <path d="M12 60c2-14 10-21 20-21s18 7 20 21" fill="#fff" opacity=".9"/>
+      <path d="M17 30c0-11 7-18 15-18s15 7 15 18" fill="#8a5a3a"/>
+      <ellipse cx="32" cy="31" rx="11" ry="12.5" fill="#f6dcc8"/>
+      <path d="M21 26c2-6 6-9 11-9s9 3 11 9c-2-2-6-3-11-3s-9 1-11 3z" fill="#8a5a3a"/>
+      <circle cx="27.5" cy="31" r="1.5" fill="#3d2b23"/><circle cx="36.5" cy="31" r="1.5" fill="#3d2b23"/>
+      <path d="M28 37c2 2 6 2 8 0" stroke="#c0605f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <circle cx="24" cy="35" r="1.8" fill="#f0a7a2" opacity=".6"/><circle cx="40" cy="35" r="1.8" fill="#f0a7a2" opacity=".6"/>
     </svg>`;
+  box.classList.add('porte-halo');
 
   renderQualifs('diplomes', '#listeDiplomes', '#cptDiplomes');
   renderQualifs('formations', '#listeFormations', '#cptFormations');
@@ -7421,13 +7440,17 @@ function anneauAge(naissanceISO, taille) {
   const libelle = ans < 1 ? (mois || 1) + ' mois'
     : ans + ' an' + (ans > 1 ? 's' : '') + (mois ? ' ' + mois + ' m' : '');
 
+  // En petit, l'anneau seul suffit : l'etiquette de l'age serait illisible et
+  // deborderait de la tuile. Elle n'apparait qu'a partir de soixante pixels.
+  const ep = t >= 60 ? 3 : 2;
+  const etiquette = t >= 60 ? `<span class="anneau-age">${esc(libelle)}</span>` : '';
   return `<svg class="anneau" viewBox="0 0 ${t} ${t}" aria-hidden="true">
-    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="3"/>
-    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="3"
+    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${ep}"/>
+    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="${ep}"
       stroke-linecap="round" transform="rotate(-90 ${t/2} ${t/2})"
       stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${c.toFixed(1)}"
       style="--fin:${(c * (1 - part)).toFixed(1)}"/>
-  </svg><span class="anneau-age">${esc(libelle)}</span>`;
+  </svg>${etiquette}`;
 }
 
 

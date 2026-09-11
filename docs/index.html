@@ -2730,7 +2730,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.15.0</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.15.2</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -6316,7 +6316,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.15.0';
+const VERSION = '1.15.2';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -11545,13 +11545,17 @@ function anneauAge(naissanceISO, taille) {
   const libelle = ans < 1 ? (mois || 1) + ' mois'
     : ans + ' an' + (ans > 1 ? 's' : '') + (mois ? ' ' + mois + ' m' : '');
 
+  // En petit, l'anneau seul suffit : l'etiquette de l'age serait illisible et
+  // deborderait de la tuile. Elle n'apparait qu'a partir de soixante pixels.
+  const ep = t >= 60 ? 3 : 2;
+  const etiquette = t >= 60 ? `<span class="anneau-age">${esc(libelle)}</span>` : '';
   return `<svg class="anneau" viewBox="0 0 ${t} ${t}" aria-hidden="true">
-    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="3"/>
-    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="3"
+    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${ep}"/>
+    <circle cx="${t/2}" cy="${t/2}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="${ep}"
       stroke-linecap="round" transform="rotate(-90 ${t/2} ${t/2})"
       stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${c.toFixed(1)}"
       style="--fin:${(c * (1 - part)).toFixed(1)}"/>
-  </svg><span class="anneau-age">${esc(libelle)}</span>`;
+  </svg>${etiquette}`;
 }
 
 
