@@ -2585,6 +2585,13 @@ input:focus,textarea:focus,select:focus,
       <button id="btnRestaurer" class="btn btn-ghost btn-block">Restaurer une sauvegarde</button>
       <p class="hint">La sauvegarde reprend ton dossier, tes contrats, ton planning type et tes fiches. <b>Ni le numéro de sécurité sociale, ni l'IBAN, ni l'adresse précise</b> : ceux-là ne quittent jamais ce téléphone, et seront à ressaisir après une réinstallation.</p>
       <button id="btnArchiveDonnees" class="btn btn-ghost btn-block">Télécharger mes données</button>
+      <div class="rub">Diagnostic</div>
+      <p class="hint" style="margin-top:0">Ce que contiennent vraiment ce téléphone et la sauvegarde en ligne.</p>
+      <button id="btnDiag" class="btn btn-ghost btn-block">Afficher le diagnostic</button>
+      <div id="zoneDiag"></div>
+      <button id="btnForcerSauve" class="btn btn-ghost btn-block">Forcer l'envoi de ce téléphone vers le serveur</button>
+      <p class="hint">À n'utiliser que si ce téléphone contient le dossier le plus complet : l'envoi remplace la sauvegarde en ligne.</p>
+
       <div id="etatSuppression"></div>
       <button id="btnSupprCompte" class="btn btn-danger btn-block">Supprimer mon compte</button>
       <p class="hint">Quinze jours de délai avant l'effacement, pour changer d'avis. Passé ce délai, plus rien n'est récupérable.</p>
@@ -2722,7 +2729,7 @@ input:focus,textarea:focus,select:focus,
   <details class="card">
     <summary><svg class="ico"><use href="#i-ok"/></svg><span class="ttl">À propos</span></summary>
     <div class="body">
-      <div class="ds"><span>Version</span><b id="versionApp">1.14.3</b></div>
+      <div class="ds"><span>Version</span><b id="versionApp">1.14.4</b></div>
       <button id="btnRevoirTour" class="btn btn-ghost btn-block" style="margin-top:10px">Revoir la présentation</button>
       <div class="ds"><span>Calculs</span><b>Modèle Pajemploi</b></div>
       <p class="hint">Les règles de calcul et la fiche A4 sont reprises de la version Windows, sans modification. Toutes les données restent sur le téléphone.</p>
@@ -6300,7 +6307,7 @@ async function testerBase() {
 /* ---------------- Mises à jour ----------------
    Interroge les versions publiées du dépôt. L'application ne télécharge ni
    n'installe rien : elle ouvre la page, l'installation reste un geste manuel. */
-const VERSION = '1.14.3';
+const VERSION = '1.14.4';
 const DEPOT_DEFAUT = 'lucastoudicpro-boop/ASSMAT-Mobile';
 
 function comparerVersions(a, b) {
@@ -9239,6 +9246,13 @@ $('#mpRetour').onclick = async () => {
 };
 $('#btnSauvegarder').onclick = () => sauvegarderDossier(false);
 $('#btnRestaurer').onclick = restaurerDossier;
+$('#btnDiag').onclick = () => avecAttente('#btnDiag', ouvrirDiagnostic);
+$('#btnForcerSauve').onclick = async () => {
+  if (!await confirmer('Remplacer la sauvegarde en ligne ?',
+    { detail: 'Le dossier de ce téléphone écrasera celle qui existe. À ne faire que si ce téléphone est le plus complet.',
+      danger: true, oui: 'Remplacer' })) return;
+  await avecAttente('#btnForcerSauve', () => sauvegarderDossier(false, true));
+};
 $('#btnSupprCompte').onclick = () => avecAttente('#btnSupprCompte', supprimerMonCompte);
 $('#btnArchiveDonnees').onclick = () => avecAttente('#btnArchiveDonnees', preparerArchive);
 $('#bvSuiv').onclick = () => avecAttente('#bvSuiv', bvSuivant);
@@ -10707,12 +10721,40 @@ function planifierSauvegarde() {
   minuteurSauvegarde = setTimeout(() => sauvegarderDossier(true), 4000);
 }
 
-async function sauvegarderDossier(silencieux) {
+function tailleDossier(d) {
+  const f = Object.keys((d && d.fiches) || {}).length;
+  const e = (((d && d.profil) || {}).enfants || []).length;
+  return { fiches: f, enfants: e, total: f + e };
+}
+
+async function sauvegarderDossier(silencieux, force) {
   if (!Supa.connecte()) { if (!silencieux) toast('Connecte-toi pour sauvegarder'); return; }
   try {
     // Store.all() renvoie l'ensemble { profil, fiches } tel qu'il est ecrit
     // sur l'appareil : c'est exactement ce qu'il faut pouvoir retrouver.
     const tout = await Store.all();
+
+    // Une sauvegarde ne doit jamais appauvrir celle qui existe. Si le dossier
+    // local est vide — stockage qui n'a pas repondu, application qui vient de
+    // se reinstaller — l'envoyer effacerait le seul exemplaire restant.
+    if (!force) {
+      if (!Store.lue()) { console.warn('sauvegarde ignoree : dossier local non lu'); return; }
+      const dejaLa = await etatSauvegarde();
+      if (dejaLa && dejaLa.contenu && dejaLa.contenu.donnees) {
+        const avant = tailleDossier(dejaLa.contenu.donnees);
+        const apres = tailleDossier(tout);
+        if (avant.total > 0 && apres.total < avant.total) {
+          console.warn('sauvegarde ignoree : ' + apres.total + ' < ' + avant.total);
+          if (!silencieux) {
+            await confirmer('Sauvegarde suspendue',
+              { detail: 'Le dossier de ce téléphone (' + apres.fiches + ' fiche(s)) est plus pauvre que la sauvegarde en ligne (' +
+                  avant.fiches + '). Rien n\u2019a été envoyé, pour ne pas l\u2019appauvrir. Reprenez d\u2019abord la sauvegarde.',
+                oui: 'J\u2019ai compris', non: 'Fermer' });
+          }
+          return;
+        }
+      }
+    }
     const contenu = sansSecrets({ version: VERSION, donnees: tout, le: new Date().toISOString() });
     await Supa.ecrire('sauvegardes',
       [{ id: Supa.moi().id, contenu, version: VERSION, appareil: navigator.platform || null }],
@@ -11526,6 +11568,54 @@ function renderDoudou(selecteur, oublie, prenom) {
     <span class="doudou-txt"><b>Le doudou est resté ici</b>
       <small>${esc(prenom || 'Votre enfant')} est parti sans lui. Passez le récupérer si besoin.</small></span>
   </div>`;
+}
+
+
+/* ---------------- Diagnostic ----------------
+   Quand une reprise echoue, deviner coute cher. Cet ecran montre ce qu'il y a
+   vraiment : ici et sur le serveur. */
+async function diagnostic() {
+  const l = [];
+  const ok = v => v ? '✓' : '✗';
+
+  let local = null, lue = false;
+  try { local = await Store.all(); lue = Store.lue(); } catch (e) {}
+  const t = tailleDossier(local);
+  l.push(['Stockage lu', ok(lue) + (lue ? '' : ' — le téléphone n\u2019a pas répondu')]);
+  l.push(['Fiches ici', String(t.fiches)]);
+  l.push(['Enfants ici', String(t.enfants)]);
+  l.push(['Planning ici', String(Object.keys(((local || {}).profil || {}).horaires || {}).length) + ' jour(s)']);
+
+  if (!Supa.connecte()) { l.push(['Compte', 'hors ligne']); }
+  else {
+    let s = null;
+    try { s = await etatSauvegarde(); } catch (e) { l.push(['Sauvegarde', 'illisible : ' + enClair(e)]); }
+    if (!s) l.push(['Sauvegarde en ligne', 'aucune']);
+    else {
+      const d = (s.contenu || {}).donnees;
+      const ts = tailleDossier(d);
+      l.push(['Sauvegarde du', new Date(s.maj_le).toLocaleString('fr-FR')]);
+      l.push(['Version', (s.contenu || {}).version || '?']);
+      l.push(['Fiches en ligne', String(ts.fiches)]);
+      l.push(['Enfants en ligne', String(ts.enfants)]);
+      l.push(['Mois en ligne', Object.keys((d || {}).fiches || {}).sort().join(', ') || '—']);
+    }
+  }
+  return l;
+}
+
+async function ouvrirDiagnostic() {
+  const box = document.getElementById('zoneDiag');
+  box.innerHTML = miroiter(4);
+  const l = await diagnostic();
+  box.innerHTML = l.map(([k, v]) =>
+    `<div class="ds"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('') +
+    `<button id="btnCopierDiag" class="btn btn-ghost btn-block">Copier ce rapport</button>`;
+  document.getElementById('btnCopierDiag').onclick = async () => {
+    const txt = 'Cocon ' + VERSION + '\n' + l.map(([k, v]) => k + ' : ' + v).join('\n');
+    try { await navigator.clipboard.writeText(txt); toast('Rapport copié'); }
+    catch (e) { toast('Copie impossible'); }
+  };
 }
 
 async function activerPush() {

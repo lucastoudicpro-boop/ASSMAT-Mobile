@@ -3115,3 +3115,40 @@ reste de place.
 Verifie sur deux stockages : rapide — trois fiches restaurees, l'enfant, le
 planning ; bloque a quarante secondes — la porte s'ouvre quand meme apres le
 delai, et l'echec est annonce clairement.
+
+## 1.14.4 — la sauvegarde s'appauvrissait elle-meme
+
+Trois versions a chercher du mauvais cote. Le defaut n'etait pas dans la
+reprise : il etait dans l'envoi.
+
+`sauvegarderDossier` ecrivait le dossier local vers le serveur **sans jamais
+regarder ce qu'elle remplacait**. Le dossier local ayant ete vide par le defaut
+des trois secondes, le premier enregistrement a envoye ce vide — et **ecrase la
+sauvegarde en ligne**.
+
+La reprise fonctionnait donc parfaitement : elle restituait fidelement un
+dossier vide.
+
+### Le garde-fou
+
+Une sauvegarde qui appauvrit celle qui existe est refusee : moins de fiches,
+moins d'enfants, rien ne part. Et rien ne part non plus si le stockage local
+n'a pas pu etre lu.
+
+Un envoi peut toujours etre force depuis les reglages, quand on sait que ce
+telephone est le plus complet.
+
+### Le diagnostic
+
+Reglages → Mes donnees → **Afficher le diagnostic**. Il montre, cote a cote :
+ce que contient ce telephone, ce que contient la sauvegarde en ligne, sa date,
+sa version, et la liste des mois. Un bouton copie le rapport.
+
+Deviner coute cher : trois versions passees a proposer des correctifs
+plausibles. Cet ecran remplace la devinette par un constat.
+
+### Ce qui reste a faire
+
+Si le diagnostic annonce zero fiche en ligne, la sauvegarde a bien ete ecrasee
+et ce qui n'est plus sur aucun telephone est perdu. C'est la consequence du
+defaut d'origine, et aucune version ne la repare.
