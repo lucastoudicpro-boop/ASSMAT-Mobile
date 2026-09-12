@@ -3234,3 +3234,55 @@ Un rond gris avec un arc, la ou l'enfant a une frimousse. Sans photo, elle a
 maintenant un visage dessine dans le meme style — cheveux, joues, sourire — et
 un halo qui respire lentement autour. Coupe si la personne a demande moins de
 mouvement.
+
+## 1.16.0 — le mois en deux boutons
+
+Neuf mois sur douze ressemblent au precedent : memes jours, memes heures, meme
+montant. Les faire passer par l'ecran complet, c'est demander de verifier
+douze champs pour n'en changer aucun. C'est la ou la friction coute le plus,
+puisque ca revient douze fois par an.
+
+### Sur l'accueil, quand le mois est a faire
+
+**« Comme le mois dernier »** : le mois est cree s'il manque, le contrat et les
+tarifs sont repris du dernier mois rempli, les jours se cochent depuis le
+planning type, les indemnites au jour suivent le nombre de jours. Une feuille
+montre le resultat — jours, heures normales, majorees, indemnites, net a
+verser — et pose une seule question : « C'est bon, marquer transmise » ou
+« Verifier avant ».
+
+**« Ce mois est different »** : l'ecran complet, comme avant.
+
+Quand le mois est fait, un seul bouton : « Voir la fiche ».
+
+### Un piege evite
+
+Le mois courant existe souvent deja, cree vide au demarrage. La premiere
+version ouvrait cette coquille vide : vingt-deux jours, zero heure, zero euro.
+« Comme le mois dernier » prend maintenant le contrat du dernier mois rempli
+— le premier qui a un tarif horaire — et un avenant en vigueur prime.
+
+Verifie : 22 jours, 176,25 h normales, 9,79 h majorees, 165 € d'indemnites,
+fiche marquee transmise, le mois d'aout intact.
+
+## 1.16.1 — le retard se rattrape dans l'ordre
+
+« Comme le mois dernier » visait le mois courant. Si aout n'avait pas ete
+fait, il sautait directement a septembre — et aout restait un trou.
+
+Le mois a faire n'est plus le mois courant : c'est **le plus ancien non
+transmis**, en partant du dernier transmis et en avancant jusqu'a aujourd'hui.
+Le heros le dit : « 3 mois a faire — on commence par juillet ». Chaque
+validation propose le suivant.
+
+Un mois saute au milieu ne pouvait pas etre cree — `nouveauMois` ne sait
+creer que le suivant du dernier. Il se cree directement maintenant.
+
+« Ce mois est different » ouvre aussi le bon mois, avec le contrat repris.
+
+Le calcul se fait avant le premier rendu de l'accueil : sinon le heros montrait
+l'ancien etat, puis les boutons sautaient.
+
+Verifie : juin transmis, juillet et aout jamais faits, on est en septembre.
+Trois pressions sur « Comme le mois dernier » : juillet 22 jours, aout 21,
+septembre 22, dans l'ordre. Les quatre mois transmis, un seul bouton restant.
